@@ -1,21 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using dikubot.discord.Command;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace dikubot.discord
 {
     public class DiscordBot
     {
 
+		public static DiscordSocketClient client;
+		public static CommandHandler commandHandler;
+
 		public void run()
 		{
-			MainAsync().GetAwaiter().GetResult();
+			Main().GetAwaiter().GetResult();
 		}
-
-		public static DiscordSocketClient client;
 
 		private Task Log(LogMessage msg)
 		{
@@ -25,31 +27,47 @@ namespace dikubot.discord
 
 		private async Task MessageReceived(SocketMessage message)
 		{
-
 			Console.WriteLine($"({message.Timestamp.ToString()}) {message.Author.ToString()} > {message.ToString()}");
 		}
 
-		public async Task MainAsync()
+		public async Task Main()
 		{
-
-			var config = new DiscordSocketConfig
+			using (var services = ConfigureServices())
 			{
-				AlwaysDownloadUsers = true,
-				MessageCacheSize = 1000
-			};
+				var config = new DiscordSocketConfig
+				{
+					AlwaysDownloadUsers = true,
+					MessageCacheSize = 1000
+				};
+				var client = services.GetRequiredService<DiscordSocketClient>();
+
+				client.Log += Log;
+
+				if (Program.IS_DEV)
+				{
+					client.MessageReceived += MessageReceived;
+				}
+
+				services.GetRequiredService<CommandService>().Log += Log;
+
+				await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
+				await client.StartAsync();
+
+				await services.GetRequiredService<CommandHandler>().init();
+
+				await Task.Delay(-1);
+			}
+
+		}
 
 
-			client = new DiscordSocketClient(config);
-			string token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
-
-			client.Log += Log;
-			client.MessageReceived += MessageReceived;
-
-			await client.LoginAsync(TokenType.Bot, token);
-			await client.StartAsync();
-
-			// Block this task until the program is closed.
-			await Task.Delay(-1);
+		private ServiceProvider ConfigureServices()
+		{
+			return new ServiceCollection()
+				.AddSingleton<DiscordSocketClient>()
+				.AddSingleton<CommandService>()
+				.AddSingleton<CommandHandler>()
+				.BuildServiceProvider();
 		}
 	}
 }

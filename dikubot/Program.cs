@@ -14,6 +14,7 @@ namespace dikubot
     public class Program
     {
         public static Thread discordThread;
+        public static bool IS_DEV = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").Equals("DEVELOPMENT");
         public static void Main(string[] args)
         {
             DiscordBot discordBot = new DiscordBot();
