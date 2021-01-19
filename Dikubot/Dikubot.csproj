@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\launchSettings.json" />
+    <Content Include="Webapp\wwwroot\css\bootstrap\bootstrap.min.css" />
+    <Content Include="Webapp\wwwroot\css\bootstrap\bootstrap.min.css.map" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\FONT-LICENSE" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\font\fonts\open-iconic.eot" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\font\fonts\open-iconic.otf" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\font\fonts\open-iconic.ttf" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\font\fonts\open-iconic.woff" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\ICON-LICENSE" />
+    <Content Include="Webapp\wwwroot\css\open-iconic\README.md" />
+    <Content Include="Webapp\wwwroot\css\site.css" />
+    <Content Include="Webapp\wwwroot\favicon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Database\Models" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="2.2.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
+  </ItemGroup>
+
+</Project>
