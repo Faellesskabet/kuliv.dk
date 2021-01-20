@@ -1,21 +1,17 @@
-using Dikubot.Discord;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Dikubot.Webapp;
 using MongoDB.Driver;
+using Dikubot.Discord;
 
 namespace Dikubot
 {
     public class main
     {
         public static Thread discordThread;
+        public static bool IS_DEV = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").Equals("DEVELOPMENT");
         public static void Main(string[] args)
         {
             Database.Database.GetInstance.GetDatabase("test");
