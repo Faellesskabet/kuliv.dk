@@ -1,6 +1,6 @@
 using System;
 
-namespace dikubot.webapp.Data
+namespace Dikubot.Webapp.Data
 {
     public class WeatherForecast
     {

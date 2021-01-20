@@ -6,7 +6,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace dikubot.discord.Command
+namespace Dikubot.Discord.Command
 {
     public class CommandHandler
     {

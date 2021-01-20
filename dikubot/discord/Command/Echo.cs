@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace dikubot.discord.Command
+namespace Dikubot.Discord.Command
 {
     public class Echo : ModuleBase<SocketCommandContext>
     {
