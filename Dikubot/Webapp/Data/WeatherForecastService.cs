@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace dikubot.webapp.Data
+namespace Dikubot.Webapp.Data
 {
     public class WeatherForecastService
     {

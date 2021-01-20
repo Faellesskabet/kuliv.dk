@@ -1,26 +1,26 @@
-using dikubot.discord;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
+using Dikubot.Webapp;
+using MongoDB.Driver;
+using Dikubot.Discord;
 
-namespace dikubot
+namespace Dikubot
 {
-    public class Program
+    public class main
     {
         public static Thread discordThread;
         public static bool IS_DEV = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").Equals("DEVELOPMENT");
         public static void Main(string[] args)
         {
+            Database.Database.GetInstance.GetDatabase("test");
+            MongoClient MongoClient = new MongoClient("mongodb://localhost:27017");
             DiscordBot discordBot = new DiscordBot();
             discordThread = new Thread(new ThreadStart(discordBot.run));
             discordThread.Start();
-
+            
+            
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -29,7 +29,7 @@ namespace dikubot
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     var p = System.Reflection.Assembly.GetEntryAssembly().Location;
-                    p = p.Substring(0, p.IndexOf("bin")) + "webapp";
+                    p = p.Substring(0, p.IndexOf("bin")) + "Webapp";
 
                     webBuilder.UseContentRoot(p);
                     webBuilder.UseStartup<Startup>();

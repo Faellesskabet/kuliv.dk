@@ -1,4 +1,4 @@
-using dikubot.webapp.Data;
+using Dikubot.Webapp.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace dikubot
+namespace Dikubot.Webapp
 {
     public class Startup
     {

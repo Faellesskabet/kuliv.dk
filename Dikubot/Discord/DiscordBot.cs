@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using dikubot.discord.Command;
+using Dikubot.Discord.Command;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace dikubot.discord
+namespace Dikubot.Discord
 {
-    public class DiscordBot
-    {
+	public class DiscordBot
+	{
 
 		public static DiscordSocketClient client;
 		public static CommandHandler commandHandler;
@@ -43,7 +43,7 @@ namespace dikubot.discord
 
 				client.Log += Log;
 
-				if (Program.IS_DEV)
+				if (main.IS_DEV)
 				{
 					client.MessageReceived += MessageReceived;
 				}
