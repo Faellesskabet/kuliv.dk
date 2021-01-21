@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
+using System.Threading.Channels;
+using Dikubot.Database.Models;
 using Dikubot.Webapp;
-using MongoDB.Driver;
 using Dikubot.Discord;
 
 namespace Dikubot
@@ -14,11 +15,14 @@ namespace Dikubot
         public static bool IS_DEV = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").Equals("DEVELOPMENT");
         public static void Main(string[] args)
         {
-            Database.Database.GetInstance.GetDatabase("test");
-            MongoClient MongoClient = new MongoClient("mongodb://localhost:27017");
             DiscordBot discordBot = new DiscordBot();
             discordThread = new Thread(new ThreadStart(discordBot.run));
             discordThread.Start();
+
+            UserModel x = new UserModel();
+            x.Email = "test";
+            x.Major = "test";
+            new UserServices().Create(x);
             
             
             CreateHostBuilder(args).Build().Run();
