@@ -1,8 +1,11 @@
 using MongoDB.Driver;
-using MongoDB.Bson;
 
 namespace Dikubot.Database
 {
+    /// <summary>
+    /// Class for safely communicating with a database by using a Double-Checked locking singleton
+    /// pattern.
+    /// </summary>
     public sealed class Database
     {
         private static readonly MongoClient MongoClient = new MongoClient("mongodb://localhost:27017");
@@ -15,11 +18,14 @@ namespace Dikubot.Database
                 {
                     instance = new Database();
                 }
-                    
                 return instance;
             }
         }
 
+        /// <Summary>Method for retrieving a database from the client through the singleton pattern.</Summary>
+        /// <param name="Name">The name of the database.</param>
+        /// <param name="settings">The database settings.</param>
+        /// <return>An implementation of a database.</return>
         public IMongoDatabase GetDatabase(string name, MongoDatabaseSettings settings = null)
         {
             return MongoClient.GetDatabase(name, settings);
