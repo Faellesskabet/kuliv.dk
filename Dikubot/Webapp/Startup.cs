@@ -1,3 +1,4 @@
+using BlazorFluentUI;
 using Dikubot.Webapp.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
@@ -28,6 +29,7 @@ namespace Dikubot.Webapp
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
+            services.AddBlazorFluentUI();
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
