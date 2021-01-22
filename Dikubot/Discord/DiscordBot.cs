@@ -25,9 +25,10 @@ namespace Dikubot.Discord
 			return Task.CompletedTask;
 		}
 
-		private async Task MessageReceived(SocketMessage message)
+		private Task MessageReceived(SocketMessage message)
 		{
 			Console.WriteLine($"({message.Timestamp.ToString()}) {message.Author.ToString()} > {message.ToString()}");
+			return Task.CompletedTask;
 		}
 
 		public async Task Main()
