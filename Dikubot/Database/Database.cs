@@ -23,7 +23,7 @@ namespace Dikubot.Database
         }
 
         /// <Summary>Method for retrieving a database from the client through the singleton pattern.</Summary>
-        /// <param name="Name">The name of the database.</param>
+        /// <param name="name">The name of the database.</param>
         /// <param name="settings">The database settings.</param>
         /// <return>An implementation of a database.</return>
         public IMongoDatabase GetDatabase(string name, MongoDatabaseSettings settings = null)

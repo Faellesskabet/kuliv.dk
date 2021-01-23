@@ -1,3 +1,5 @@
+using System;
+using Discord.WebSocket;
 using System.Collections.Generic;
 using MongoDB.Driver;
 
@@ -9,5 +11,16 @@ namespace Dikubot.Database.Models
     public class UserServices : Services<UserModel>
     {
         public UserServices() : base("Main", "Users") { }
+        public UserModel Get(SocketUser user)
+        {
+            UserModel model = this.Get(inmodel => inmodel.DiscordId == user.Id.ToString());
+            if (model == null)
+            {
+                model = new UserModel();
+                model.DiscordUser = user;
+            }
+            return model;
+        }
     }
 }
+
