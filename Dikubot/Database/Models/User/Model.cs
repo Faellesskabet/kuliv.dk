@@ -1,3 +1,6 @@
+using System;
+using Dikubot.Discord;
+using Discord.WebSocket;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -8,16 +11,16 @@ namespace Dikubot.Database.Models
     /// </summary>
     public class UserModel : Model
     {
-        [BsonElement("Email")]
-        public string Email { get; set; }
-    
-        [BsonElement("Verified")]
-        public string Verified { get; set; }
-        
-        [BsonElement("Major")]
-        public string Major { get; set; }
+        [BsonElement("Email")] public string Email { get; set; }
+        [BsonElement("Name")] public string Name { get; set; }
+        [BsonElement("DiscordId")] public string DiscordId { get; set; }
+        [BsonIgnore] public SocketUser DiscordUser
+        {
+            get => DiscordBot.client.GetUser(Convert.ToUInt64(DiscordId));
+            set => DiscordId = value.Id.ToString();
+        }
+        [BsonElement("Verified")] public bool Verified { get; set; } = false;
+        [BsonElement("LastMessage")] public string LastMessage { get; set; }
 
-        [BsonElement("ProdigyPercentile")]
-        public string ProdigyPercentile { get; set; }
     }
 }
