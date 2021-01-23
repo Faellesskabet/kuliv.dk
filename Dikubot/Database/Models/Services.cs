@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Dikubot.Database.Models
@@ -20,7 +23,7 @@ namespace Dikubot.Database.Models
                         MongoCollectionSettings collectionSettings = null)
         {
             // The database to retrieve from.
-            var database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
+            IMongoDatabase database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
             // The collection to retrieve from.
             _models = database.GetCollection<TModel>(collectionName, collectionSettings);
         }
@@ -36,27 +39,56 @@ namespace Dikubot.Database.Models
         public TModel Get(string id) =>
             _models.Find<TModel>(model => model.Id == id).FirstOrDefault();
 
-        /// <Summary>Inserts a Model in the collection.</Summary>
+        /// <Summary>Retrieves a element in the collection based on a custom filter</Summary>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model => model.Id == id)</param>
+        /// <return>A Model.</return>
+        public TModel Get(Expression<Func<TModel, bool>> filter) =>
+            _models.Find<TModel>(filter).FirstOrDefault();
+
+        /// <Summary>Retrieves a list of elements in the collection based on a custom filter</Summary>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model => model.Id == id)</param>
+        /// <return>A list of some Model type.</return>
+        public List<TModel> GetAll(Expression<Func<TModel, bool>> filter) =>
+            _models.Find<TModel>(filter).ToList();
+        
+        /// <Summary>Returns whether there exists an element with a matching id</Summary>
+        /// <param name="id">The ID of the searched for model.</param>
+        /// <return>A Boolean.</return>
+        /// 
+        public bool Contains(string id) =>
+            Get(id) != null;
+        
+        /// <Summary>Inserts a Model in the collection. If a model with the same ID already exists, then we imply invoke Update() on the model instead.</Summary>
         /// <param name="model">The Model one wishes to be inserted.</param>
         /// <return>A Model.</return>
-        public Model Create(TModel model)
+        public Model Insert(TModel model)
         {
-            _models.InsertOne(model);
+            if (Contains(model.Id))
+                Update(model);
+            else
+                _models.InsertOne(model);
+            
             return model;
         }
 
-        /// <Summary>Inserts a Model in the collection.</Summary>
+        /// <Summary>Updates a Model in the collection.</Summary>
         /// <param name="id">The ID of the Model to be updated.</param>
-        /// <param name="model">The Model one wishes to Update with.</param>
+        /// <param name="modelIn">The Model one wishes to Update with.</param>
         /// <return>Void.</return>
         public void Update(string id, TModel modelIn) =>
-            _models.ReplaceOne(model => modelIn.Id == id, modelIn);
+            _models.ReplaceOne(model => model.Id == id, modelIn);
 
+        /// <Summary>Updates a Model in the collection.</Summary>
+        /// <param name="model">The Model one wishes to Update with.</param>
+        /// <return>Void.</return>
+        public void Update(TModel model) =>
+            Update(model.Id, model);
+        
         /// <Summary>Removes a element from the collection.</Summary>
-        /// <param name="model">The Model one wishes to remove.</param>
+        /// <param name="modelIn">The Model one wishes to remove.</param>
         /// <return>Void.</return>
         public void Remove(TModel modelIn) =>
-            _models.DeleteOne(user => user.Id == modelIn.Id);
+            Remove(modelIn.Id);
 
         /// <Summary>Removes a element from the collection by ID.</Summary>
         /// <param name="id">The ID of the Model to be removed.</param>

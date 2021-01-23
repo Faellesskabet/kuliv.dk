@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Dikubot.Database.Models;
 using Dikubot.Discord.Command;
 using Discord;
 using Discord.Commands;
@@ -28,6 +29,8 @@ namespace Dikubot.Discord
 		private Task MessageReceived(SocketMessage message)
 		{
 			Console.WriteLine($"({message.Timestamp.ToString()}) {message.Author.ToString()} > {message.ToString()}");
+			UserModel userModel = new UserServices().Get(message.Author);
+			Console.WriteLine($"Context > Discord ID: {userModel.DiscordId} MongoDB ID: {userModel.Id}");
 			return Task.CompletedTask;
 		}
 
