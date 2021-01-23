@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using MongoDB.Bson;
+using System.Collections.Generic;
 using MongoDB.Driver;
 
 namespace Dikubot.Database.Models
@@ -24,6 +25,9 @@ namespace Dikubot.Database.Models
         {
             // The database to retrieve from.
             IMongoDatabase database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
+
+            var database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
+
             // The collection to retrieve from.
             _models = database.GetCollection<TModel>(collectionName, collectionSettings);
         }

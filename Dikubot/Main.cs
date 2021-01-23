@@ -19,10 +19,10 @@ namespace Dikubot
         {
             DiscordThread.Start();
             
-            //UserModel x = new UserModel();
-            //x.Email = "test";
-            //x.Name = "test";
-            //new UserServices().Create(x);
+            DiscordBot discordBot = new DiscordBot();
+            discordThread = new Thread(new ThreadStart(discordBot.run));
+            discordThread.Start();
+
             
             
             CreateHostBuilder(args).Build().Run();

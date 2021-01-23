@@ -1,5 +1,7 @@
 using System;
 using Discord.WebSocket;
+using System.Collections.Generic;
+using MongoDB.Driver;
 
 namespace Dikubot.Database.Models
 {
