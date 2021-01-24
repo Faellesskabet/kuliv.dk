@@ -18,13 +18,6 @@ namespace Dikubot
         public static void Main(string[] args)
         {
             DiscordThread.Start();
-            
-            DiscordBot discordBot = new DiscordBot();
-            discordThread = new Thread(new ThreadStart(discordBot.run));
-            discordThread.Start();
-
-            
-            
             CreateHostBuilder(args).Build().Run();
         }
 
