@@ -22,10 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Database\Models" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="BlazorFluentUI.AllComponents" Version="4.0.2" />
     <PackageReference Include="Discord.Net" Version="2.2.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
