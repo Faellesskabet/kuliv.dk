@@ -16,16 +16,16 @@ namespace Dikubot.Database.Models
     /// </summary>
     public abstract class Services<TModel> where TModel : Model
     {
-        
+
         private readonly IMongoCollection<TModel> _models;
 
         /// <summary>
         /// Constructor for the services.
         /// </summary>
         protected Services(string databaseName,
-                        string collectionName, 
-                        MongoDatabaseSettings databaseSettings = null,
-                        MongoCollectionSettings collectionSettings = null)
+            string collectionName,
+            MongoDatabaseSettings databaseSettings = null,
+            MongoCollectionSettings collectionSettings = null)
         {
             // The database to retrieve from.
             IMongoDatabase database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
@@ -46,24 +46,27 @@ namespace Dikubot.Database.Models
             _models.Find<TModel>(model => model.Id == id).FirstOrDefault();
 
         /// <Summary>Retrieves a element in the collection based on a custom filter</Summary>
-        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model => model.Id == id)</param>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
+        /// model.Id == id)</param>
         /// <return>A Model.</return>
         public TModel Get(Expression<Func<TModel, bool>> filter) =>
             _models.Find<TModel>(filter).FirstOrDefault();
 
         /// <Summary>Retrieves a list of elements in the collection based on a custom filter</Summary>
-        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model => model.Id == id)</param>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
+        /// model.Id == id)</param>
         /// <return>A list of some Model type.</return>
         public List<TModel> GetAll(Expression<Func<TModel, bool>> filter) =>
             _models.Find<TModel>(filter).ToList();
 
         /// <Summary>Returns whether there exists which fits the filter</Summary>
-        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model => model.Id == id)</param>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
+        /// model.Id == id)</param>
         /// <return>A Boolean.</return>
         /// 
         public bool Exists(Expression<Func<TModel, bool>> filter) =>
             Get(filter) != null;
-        
+
         /// <Summary>Returns whether there exists an element with a matching id</Summary>
         /// <param name="id">The ID of the searched for model.</param>
         /// <return>A Boolean.</return>
@@ -71,18 +74,26 @@ namespace Dikubot.Database.Models
         public bool Exists(string id) =>
             Get(id) != null;
 
-        /// <Summary>Inserts a Model in the collection. If a model with the same ID already exists, then we imply invoke Update() on the model instead.</Summary>
+        /// <Summary>Inserts a Model in the collection. If a model with the same ID already exists, then we imply
+        /// invoke Update() on the model instead.</Summary>
         /// <param name="model">The Model one wishes to be inserted.</param>
         /// <return>A Model.</return>
-        public Model Insert(TModel model)
+        public TModel Upsert(TModel model)
         {
-            
             if (Exists(model.Id))
             {
-                Update(model);
+                Update(model, new ReplaceOptions() {IsUpsert = true});
                 return model;
             }
-            
+            Insert(model);
+            return model;
+        }
+
+        /// <Summary>Inserts a Model in the collection. If there is a collision it will write an error.</Summary>
+        /// <param name="model">The model which will be inserted.</param>
+        /// <return>Void.</return>
+        public TModel Insert(TModel model) 
+        { 
             try
             {
                 _models.InsertOne(model);
@@ -95,16 +106,16 @@ namespace Dikubot.Database.Models
         }
 
         /// <Summary>Updates a Model in the collection.</Summary>
-        /// <param name="id">The ID of the Model to be updated.</param>
+        /// <param name="predicate">The predicate used to replace with.</param>
         /// <param name="modelIn">The Model one wishes to Update with.</param>
         /// <return>Void.</return>
-        public void Update(string id, TModel modelIn)
+        public void Update(Expression<Func<TModel, bool>> predicate, TModel modelIn, ReplaceOptions options = null)
         {
             try
             {
-                _models.ReplaceOne(model => model.Id == id, modelIn);
+                _models.ReplaceOne(predicate, modelIn, options);
             }
-            catch (MongoDB.Driver.MongoWriteException e)
+            catch (MongoWriteException e)
             {
                 Console.WriteLine("ILLEGAL INSERT OPERATION " + modelIn + " WAS NOT INSERTED");
             }
@@ -113,8 +124,8 @@ namespace Dikubot.Database.Models
         /// <Summary>Updates a Model in the collection.</Summary>
         /// <param name="model">The Model one wishes to Update with.</param>
         /// <return>Void.</return>
-        public void Update(TModel model) =>
-            Update(model.Id, model);
+        public void Update(TModel model, ReplaceOptions options = null) =>
+            Update(m => m.Id == model.Id, model, options);
         
         /// <Summary>Removes a element from the collection.</Summary>
         /// <param name="modelIn">The Model one wishes to remove.</param>
@@ -136,12 +147,13 @@ namespace Dikubot.Database.Models
             // It's time for some fun reflection!
             Type type = typeof(TModel); // Get the type of our model, an example could be UserModel
             IEnumerable<PropertyInfo> uniques = type.GetProperties().Where(
-                prop => Attribute.IsDefined(prop, typeof(BsonUniqueAttribute))); // We retrieve all the functions/properties which have the BsonUnique attribute
+                // We retrieve all the functions/properties which have the BsonUnique attribute
+                prop => Attribute.IsDefined(prop, typeof(BsonUniqueAttribute)));
             
             foreach (PropertyInfo property in uniques) //We loop over our properties
             {
-                BsonElementAttribute bsonElementAttribute =
-                    (BsonElementAttribute) Attribute.GetCustomAttribute(property, typeof(BsonElementAttribute)); //We get the BsonElement attribute
+                BsonElementAttribute bsonElementAttribute = //We get the BsonElement attribute
+                    (BsonElementAttribute) Attribute.GetCustomAttribute(property, typeof(BsonElementAttribute));
                 if (bsonElementAttribute == null) //Continue if the function doesn't have a BsonElement attribute
                     continue;
                 
@@ -149,7 +161,8 @@ namespace Dikubot.Database.Models
                  * We create a unique and sparse index for the element name found in our BsonElement attribute.
                  */
                 collection.Indexes.CreateOne(
-                    new CreateIndexModel<TModel>(new IndexKeysDefinitionBuilder<TModel>().Ascending(bsonElementAttribute.ElementName), 
+                    new CreateIndexModel<TModel>(new IndexKeysDefinitionBuilder<TModel>()
+                            .Ascending(bsonElementAttribute.ElementName), 
                         new CreateIndexOptions<TModel> 
                             {   Unique = true, 
                                 Sparse = true

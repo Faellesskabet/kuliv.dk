@@ -34,10 +34,8 @@ namespace Dikubot.Discord.Command
             // Don't process the command if it was a system message
             var message = messageParam as SocketUserMessage;
             if (message == null) return;
-
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
-
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
             if (!(message.HasCharPrefix('!', ref argPos) ||
                 message.HasMentionPrefix(client.CurrentUser, ref argPos)) ||
@@ -46,7 +44,7 @@ namespace Dikubot.Discord.Command
 
             // Create a WebSocket-based command context based on the message
             var context = new SocketCommandContext(client, message);
-
+            
             // Execute the command
             await commands.ExecuteAsync(context, argPos, services);
         }
@@ -54,11 +52,13 @@ namespace Dikubot.Discord.Command
 
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            // command is unspecified when there was a search failure (command not found); we don't care about these errors
+            // command is unspecified when there was a search failure (command not found); we don't care about these
+            // errors
             if (!command.IsSpecified)
                 return;
 
-            // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
+            // the command was successful, we don't care about this result, unless we want to log that a command
+            // succeeded.
             if (result.IsSuccess)
                 return;
 
