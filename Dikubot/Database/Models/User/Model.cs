@@ -11,9 +11,12 @@ namespace Dikubot.Database.Models
     /// </summary>
     public class UserModel : Model
     {
-
+        private string _email;
         [BsonElement("Email")] [BsonUnique]
-        public string Email { get; set; }
+        public string Email { 
+            get => _email;
+            set => _email = value.ToLower();
+        }
         [BsonElement("Name")] public string Name { get; set; }
         
         [BsonElement("DiscordId")] [BsonUnique]
