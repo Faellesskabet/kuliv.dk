@@ -12,9 +12,12 @@ namespace Dikubot.Database.Models
     public class UserModel : Model
     {
 
-        [BsonElement("Email")] public string Email { get; set; }
+        [BsonElement("Email")] [BsonUnique]
+        public string Email { get; set; }
         [BsonElement("Name")] public string Name { get; set; }
-        [BsonElement("DiscordId")] public string DiscordId { get; set; }
+        
+        [BsonElement("DiscordId")] [BsonUnique]
+        public string DiscordId { get; set; }
         [BsonIgnore] public SocketUser DiscordUser
         {
             get => DiscordBot.client.GetUser(Convert.ToUInt64(DiscordId));
