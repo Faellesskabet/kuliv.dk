@@ -8,10 +8,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dikubot.Webapp.Logic;
 
 namespace Dikubot.Webapp
 {
@@ -29,6 +31,7 @@ namespace Dikubot.Webapp
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
+            services.AddScoped<AuthenticationStateProvider, Authenticator>();
             services.AddBlazorFluentUI();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -51,12 +54,14 @@ namespace Dikubot.Webapp
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-
+            
             app.UseRouting();
-
+            app.UseAuthentication();
+            app.UseAuthentication();
+            
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
