@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using MongoDB.Bson;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace Dikubot.Database.Models
@@ -25,11 +29,9 @@ namespace Dikubot.Database.Models
         {
             // The database to retrieve from.
             IMongoDatabase database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
-
-            var database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
-
             // The collection to retrieve from.
             _models = database.GetCollection<TModel>(collectionName, collectionSettings);
+            SetUniqueIndexes(_models);
         }
 
         /// <Summary>Retrieves all the elements in the collection.</Summary>
@@ -54,24 +56,41 @@ namespace Dikubot.Database.Models
         /// <return>A list of some Model type.</return>
         public List<TModel> GetAll(Expression<Func<TModel, bool>> filter) =>
             _models.Find<TModel>(filter).ToList();
+
+        /// <Summary>Returns whether there exists which fits the filter</Summary>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model => model.Id == id)</param>
+        /// <return>A Boolean.</return>
+        /// 
+        public bool Exists(Expression<Func<TModel, bool>> filter) =>
+            Get(filter) != null;
         
         /// <Summary>Returns whether there exists an element with a matching id</Summary>
         /// <param name="id">The ID of the searched for model.</param>
         /// <return>A Boolean.</return>
         /// 
-        public bool Contains(string id) =>
+        public bool Exists(string id) =>
             Get(id) != null;
-        
+
         /// <Summary>Inserts a Model in the collection. If a model with the same ID already exists, then we imply invoke Update() on the model instead.</Summary>
         /// <param name="model">The Model one wishes to be inserted.</param>
         /// <return>A Model.</return>
         public Model Insert(TModel model)
         {
-            if (Contains(model.Id))
-                Update(model);
-            else
-                _models.InsertOne(model);
             
+            if (Exists(model.Id))
+            {
+                Update(model);
+                return model;
+            }
+            
+            try
+            {
+                _models.InsertOne(model);
+            }
+            catch (MongoDB.Driver.MongoWriteException e)
+            {
+                Console.WriteLine("ILLEGAL INSERT OPERATION " + model.Id + " WAS NOT INSERTED");
+            }
             return model;
         }
 
@@ -79,8 +98,17 @@ namespace Dikubot.Database.Models
         /// <param name="id">The ID of the Model to be updated.</param>
         /// <param name="modelIn">The Model one wishes to Update with.</param>
         /// <return>Void.</return>
-        public void Update(string id, TModel modelIn) =>
-            _models.ReplaceOne(model => model.Id == id, modelIn);
+        public void Update(string id, TModel modelIn)
+        {
+            try
+            {
+                _models.ReplaceOne(model => model.Id == id, modelIn);
+            }
+            catch (MongoDB.Driver.MongoWriteException e)
+            {
+                Console.WriteLine("ILLEGAL INSERT OPERATION " + modelIn + " WAS NOT INSERTED");
+            }
+        }
 
         /// <Summary>Updates a Model in the collection.</Summary>
         /// <param name="model">The Model one wishes to Update with.</param>
@@ -99,5 +127,35 @@ namespace Dikubot.Database.Models
         /// <return>Void.</return>
         public void Remove(string id) => 
             _models.DeleteOne(model => model.Id == id);
+        
+        /// <Summary>Sets up the unique indexes for the current collection and service.</Summary>
+        /// <param name="collection">The collection where we setup the Unique indexes.</param>
+        /// <return>Void.</return>
+        private void SetUniqueIndexes(IMongoCollection<TModel> collection)
+        {
+            // It's time for some fun reflection!
+            Type type = typeof(TModel); // Get the type of our model, an example could be UserModel
+            IEnumerable<PropertyInfo> uniques = type.GetProperties().Where(
+                prop => Attribute.IsDefined(prop, typeof(BsonUniqueAttribute))); // We retrieve all the functions/properties which have the BsonUnique attribute
+            
+            foreach (PropertyInfo property in uniques) //We loop over our properties
+            {
+                BsonElementAttribute bsonElementAttribute =
+                    (BsonElementAttribute) Attribute.GetCustomAttribute(property, typeof(BsonElementAttribute)); //We get the BsonElement attribute
+                if (bsonElementAttribute == null) //Continue if the function doesn't have a BsonElement attribute
+                    continue;
+                
+                /*
+                 * We create a unique and sparse index for the element name found in our BsonElement attribute.
+                 */
+                collection.Indexes.CreateOne(
+                    new CreateIndexModel<TModel>(new IndexKeysDefinitionBuilder<TModel>().Ascending(bsonElementAttribute.ElementName), 
+                        new CreateIndexOptions<TModel> 
+                            {   Unique = true, 
+                                Sparse = true
+                            }));
+            }
+
+        }
     }
 }
