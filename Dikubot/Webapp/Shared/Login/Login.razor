@@ -1,0 +1,61 @@
+@page "/login"
+@using System.Security.Claims
+@using Dikubot.Discord.Command
+@using Dikubot.Webapp.Logic
+@using global::Discord.WebSocket
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager;
+
+<div class="page">
+    <link href="css/diku/login.css" rel="stylesheet" />
+    <div class="blur"></div>
+    <div class="login">
+        @if (_state == State.ConnectDiscord)
+        {
+            <ConnectDiscord parent="@this"/>
+        }
+        @if (_state == State.ConnectEmail)
+        {
+            <ConnectEmail/>
+        }
+    </div>
+</div>
+
+
+
+@code {
+    
+    private enum State
+    {
+        ConnectDiscord, ConnectEmail, ConnectName
+    }
+    
+    private State _state;
+    private AuthenticationState authState;
+    protected override async Task OnInitializedAsync()
+    {
+        _state = await getState();
+    }
+
+    private async Task<State> getState()
+    {
+        authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+
+        if (user?.SessionModel == null || user.UserModel == null)
+        {
+            return State.ConnectDiscord;
+        }
+
+        return !user.UserModel.Verified ? State.ConnectEmail : State.ConnectName;
+    }
+    
+
+    public async void Update()
+    {
+        _state = await getState();
+        //NavigationManager.NavigateTo("/", forceLoad: true);
+        await InvokeAsync(() => {StateHasChanged();});
+    }
+
+}

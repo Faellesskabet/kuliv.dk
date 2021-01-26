@@ -1,9 +1,7 @@
 ﻿@page "/"
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Components.Authorization
+@using Dikubot.Webapp.Logic
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
-
 
 <h3>ClaimsPrincipal Data</h3>
 
@@ -30,7 +28,7 @@
 
     private async Task GetClaimsPrincipalData()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
         var user = authState.User;
         
         if (user.Identity.IsAuthenticated)
