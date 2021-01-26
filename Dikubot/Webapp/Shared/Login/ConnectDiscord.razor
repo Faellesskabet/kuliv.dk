@@ -1,0 +1,63 @@
+@using Dikubot.Webapp.Logic
+@using global::Discord.WebSocket
+@using Dikubot.Discord.Command
+@using Dikubot.Database.Models
+@using Dikubot.Database.Models.Session
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h1>Velkommen til DIKU's Discord Server</h1>
+<div class="card w-25 shadow">
+    <div class="card-body">
+        <h5 class="card-title">Login med Discord</h5>
+        <div class="textFieldDiv">
+            <BFUTextField Label="Send den følgende kommando til DIKU botten (DIKU#7676)." Prefix="!connect" ReadOnly="true" Value="@password"/>
+        </div>
+        <a href="https://dnur.dk/" class="text-decoration-none" target="_blank">
+            <p class="text-xl-left">Klik her for hjælp</p></a>
+    </div>
+</div>
+
+        
+
+@code {
+    [Parameter]
+    public Login parent { get; set; }
+    
+    private string password;
+    private Authenticator authenticator;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+        
+        password = RandomString(8);
+        Connect.pending_passwords.Add(password, this);
+        Console.WriteLine(password);
+    }
+
+    public async void DiscordConnected(SocketUser user)
+    {
+        UserServices userServices = new UserServices();
+        if (!userServices.Exists(user))
+        {
+            UserModel userModel = new UserModel();
+            userModel.DiscordUser = user;
+            new UserServices().Upsert(userModel);
+        }
+
+        SessionModel sessionModel = new SessionModel(userServices.Get((user)));
+        await authenticator.UpdateSession(sessionModel);
+        parent.Update();
+    }
+
+    private static string RandomString(int length)
+    {
+        Random random = new Random();
+        const string chars = "ABCDEFGHJKMNPQRSTWXYZ23456789";
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+}

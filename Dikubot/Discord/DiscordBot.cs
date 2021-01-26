@@ -43,7 +43,7 @@ namespace Dikubot.Discord
 					AlwaysDownloadUsers = true,
 					MessageCacheSize = 1000
 				};
-				var client = services.GetRequiredService<DiscordSocketClient>();
+				client = services.GetRequiredService<DiscordSocketClient>();
 
 				client.Log += Log;
 

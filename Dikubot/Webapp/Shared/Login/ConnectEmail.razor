@@ -1,0 +1,36 @@
+@using Dikubot.Webapp.Logic
+@using global::Discord.WebSocket
+@using Dikubot.Discord.Command
+@using Dikubot.Database.Models
+@using Dikubot.Database.Models.Session
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h1>Velkommen til DIKU's Discord Server</h1>
+<div class="card w-25 shadow">
+    <div class="card-body">
+        <h5 class="card-title">Bekræft din email</h5>
+        <div class="textFieldDiv">
+            <BFUTextField Label="Vi skal bruge din email, for at bekræfte du går på KU" Placeholder="xyz123@alumni.ku.dk" ReadOnly="true"
+                          Style="padding-bottom: 5px"/>
+            <BFUPrimaryButton Text="Send Email"></BFUPrimaryButton>
+        </div>
+    </div>
+</div>
+
+        
+
+@code {
+    [Parameter]
+    public Login parent { get; set; }
+    
+    private Authenticator authenticator;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+    }
+    
+
+}
