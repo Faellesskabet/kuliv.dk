@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Dikubot.Database.Models;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace Dikubot.Database
@@ -31,6 +35,12 @@ namespace Dikubot.Database
                     ConventionRegistry.Register("IgnoreIfNull", 
                         new ConventionPack { new IgnoreIfDefaultConvention(true) }, 
                         t => true);
+                    
+                    //This is used to tell mongodb to store our IDs as GUIDs
+                    BsonSerializer.RegisterIdGenerator(
+                        typeof(Guid),
+                        GuidGenerator.Instance
+                    );
                 }
                 return instance;
             }
