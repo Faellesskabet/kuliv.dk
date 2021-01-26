@@ -1,6 +1,7 @@
 using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace Dikubot.Database.Models.Session
 {
@@ -8,15 +9,15 @@ namespace Dikubot.Database.Models.Session
     {
         public SessionModel(UserModel userModel) : this(userModel, DateTime.Now.AddMonths(1)) {}
         public SessionModel(UserModel userModel, DateTime expires) : this(userModel.Id, expires) { }
-        public SessionModel(string userId, DateTime expires)
+        public SessionModel(Guid userId, DateTime expires)
         {
             _userId = userId;
             _expires = expires;
         }
-        
-        private string _userId;
-        [BsonElement("UserId")][BsonRepresentation(BsonType.ObjectId)] [BsonRequired]
-        public string UserId { get => _userId; set => _userId = value; }
+
+        private Guid _userId;
+        [BsonElement("UserId")] [BsonRequired]
+        public Guid UserId { get => _userId; set => _userId = value; }
         
         [BsonIgnore]
         public UserModel UserModel
