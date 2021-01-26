@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using MongoDB.Bson;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Discord;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace Dikubot.Database.Models
@@ -117,7 +115,7 @@ namespace Dikubot.Database.Models
             {
                 _models.InsertOne(model);
             }
-            catch (MongoDB.Driver.MongoWriteException e)
+            catch (MongoWriteException e)
             {
                 Console.WriteLine("ILLEGAL INSERT OPERATION " + model.Id + " WAS NOT INSERTED");
             }
@@ -136,7 +134,7 @@ namespace Dikubot.Database.Models
             }
             catch (MongoWriteException e)
             {
-                Console.WriteLine("ILLEGAL INSERT OPERATION " + modelIn + " WAS NOT INSERTED");
+                Console.WriteLine("ILLEGAL INSERT OPERATION " + modelIn.Id + " WAS NOT INSERTED");
             }
         }
 
@@ -157,6 +155,18 @@ namespace Dikubot.Database.Models
         /// <return>Void.</return>
         public void Remove(string id) => 
             _models.DeleteOne(model => model.Id == id);
+        
+        /// <Summary>Removes a element from the collection by a predicate.</Summary>
+        /// <param name="predicate">The predicate which is used to delete with.</param>
+        /// <return>Void.</return>
+        public void Remove(Expression<Func<TModel,bool>> predicate) => 
+            _models.DeleteOne(predicate);
+        
+        /// <Summary>Removes all elements for which the predicate is true.</Summary>
+        /// <param name="predicate">The predicate which is used to delete with.</param>
+        /// <return>Void.</return>
+        public void RemoveAll(Expression<Func<TModel,bool>> predicate) => 
+            _models.DeleteMany(predicate);
         
         /// <Summary>Sets up the unique indexes for the current collection and service.</Summary>
         /// <param name="collection">The collection where we setup the Unique indexes.</param>
