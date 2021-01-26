@@ -29,12 +29,12 @@ namespace Dikubot.Webapp.Logic
         /// <summary>
         /// isAuthenticated gets the user specified in the session, if the user exists. A user is authenticated if the following holds true:
         /// The user must have a DiscordId
-        /// The user must have an Email
+        /// The user must be verified by email
         /// The session may not be expired
         /// </summary>
         public bool IsAuthenticated
         {
-            get => _userModel?.DiscordId != null && _userModel.Email != null && !_sessionModel.IsExpired;
+            get => _userModel?.DiscordId != null && _userModel.Verified && !_sessionModel.IsExpired;
         }
         public string Name { get => _userModel == null? "Intet navn" : _userModel.Name; }
 
