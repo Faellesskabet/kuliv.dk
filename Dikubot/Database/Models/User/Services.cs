@@ -21,6 +21,11 @@ namespace Dikubot.Database.Models
             }
             return model;
         }
+
+        public bool Exists(SocketUser user)
+        {
+            return Exists(model => model.DiscordId == user.Id.ToString());
+        }
     }
 }
 
