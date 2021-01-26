@@ -17,7 +17,15 @@ namespace Dikubot.Webapp.Logic
         }
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            string sessionKey = await _localStorageService.GetItemAsStringAsync("session");
+            string sessionStringKey = await _localStorageService.GetItemAsStringAsync("session");
+            if (!Guid.TryParse(sessionStringKey, out Guid sessionKey))
+            {
+                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity())));
+            }
+            
+            Console.WriteLine(sessionStringKey);
+            Console.WriteLine(sessionKey);
+
             SessionServices sessionServices = new SessionServices();
             if (!sessionServices.Exists(sessionKey))
             {
@@ -36,7 +44,7 @@ namespace Dikubot.Webapp.Logic
         public async Task UpdateSession(SessionModel sessionModel)
         {
             _sessionServices.Upsert(sessionModel);
-            await _localStorageService.SetItemAsync("session", sessionModel.Id);
+            await _localStorageService.SetItemAsync("session", sessionModel.Id.ToString());
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel)))));
         }
     }

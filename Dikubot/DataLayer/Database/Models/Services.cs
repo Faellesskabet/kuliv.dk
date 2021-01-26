@@ -48,7 +48,7 @@ namespace Dikubot.Database.Models
         /// <Summary>Retrieves a element in the collection with the specified ID.</Summary>
         /// <param name="id">The ID of the searched for model.</param>
         /// <return>A Model.</return>
-        public TModel Get(string id) =>
+        public TModel Get(Guid id) =>
             Get(model => model.Id == id);
 
         /// <Summary>Retrieves a element in the collection based on a custom filter</Summary>
@@ -88,7 +88,7 @@ namespace Dikubot.Database.Models
         /// <param name="id">The ID of the searched for model.</param>
         /// <return>A Boolean.</return>
         /// 
-        public bool Exists(string id) =>
+        public bool Exists(Guid id) =>
             Get(id) != null;
 
         /// <Summary>Inserts a Model in the collection. If a model with the same ID already exists, then we imply
@@ -153,7 +153,7 @@ namespace Dikubot.Database.Models
         /// <Summary>Removes a element from the collection by ID.</Summary>
         /// <param name="id">The ID of the Model to be removed.</param>
         /// <return>Void.</return>
-        public void Remove(string id) => 
+        public void Remove(Guid id) => 
             _models.DeleteOne(model => model.Id == id);
         
         /// <Summary>Removes a element from the collection by a predicate.</Summary>

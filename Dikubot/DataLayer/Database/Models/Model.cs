@@ -1,6 +1,8 @@
+using System;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace Dikubot.Database.Models
 {
@@ -9,9 +11,8 @@ namespace Dikubot.Database.Models
     /// </summary>
     public abstract class Model
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        [BsonId(IdGenerator = typeof(GuidGenerator))]
+        public Guid Id { get; set; }
         
     }
 }
