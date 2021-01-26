@@ -8,10 +8,15 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blazored.LocalStorage;
+using Dikubot.Webapp.Logic;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.Http;
 
 namespace Dikubot.Webapp
 {
@@ -33,6 +38,10 @@ namespace Dikubot.Webapp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+            services.AddResponseCaching();
+            services.AddBlazoredLocalStorage(config =>
+                config.JsonSerializerOptions.WriteIndented = true);
+            services.AddScoped<AuthenticationStateProvider, Authenticator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,12 +60,33 @@ namespace Dikubot.Webapp
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-
+            
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseResponseCaching();
 
+            //Cache life span set to 1 second if it's a dev build.
+            TimeSpan maxAge = main.IS_DEV ? TimeSpan.FromSeconds(1) : TimeSpan.FromDays(2);
+            
+            //We do a bunch of caching here
+            app.Use(async (context, next) =>
+            {
+                context.Response.GetTypedHeaders().CacheControl = 
+                    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+                    {
+                        Public = true,
+                        MaxAge = maxAge
+                    };
+                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = 
+                    new string[] { "Accept-Encoding" };
+
+                await next();
+            });
+            
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });

@@ -1,14 +1,21 @@
 <BFUTheme>
     <BFULayerHost Style="width:100vw">
-        <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
-            <Found Context="routeData">
-                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-            </Found>
-            <NotFound>
-                <LayoutView Layout="@typeof(MainLayout)">
-                    <p>Sorry, there's nothing at this address.</p>
-                </LayoutView>
-            </NotFound>
-        </Router>
+        <CascadingAuthenticationState>
+            <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
+                <Found Context="routeData">
+                    <AuthorizeView>
+                        <Authorized>
+                            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                        </Authorized>
+                        <NotAuthorized>
+                            <Login/>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </Found>
+                <NotFound>
+                    <RedirectToBase/>
+                </NotFound>
+            </Router>
+        </CascadingAuthenticationState>
     </BFULayerHost>
 </BFUTheme>

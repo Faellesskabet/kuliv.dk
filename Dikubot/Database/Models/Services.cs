@@ -16,6 +16,7 @@ namespace Dikubot.Database.Models
     {
 
         private readonly IMongoCollection<TModel> _models;
+        private readonly Dictionary<string, bool> indexed = new Dictionary<string, bool>();
 
         /// <summary>
         /// Constructor for the services.
@@ -29,7 +30,14 @@ namespace Dikubot.Database.Models
             IMongoDatabase database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
             // The collection to retrieve from.
             _models = database.GetCollection<TModel>(collectionName, collectionSettings);
-            SetUniqueIndexes(_models);
+            
+            //No reason to index the collection every single time
+            string indexKey = databaseName + ";" + collectionName;
+            if (!indexed.ContainsKey(indexKey))
+            {
+                SetUniqueIndexes(_models);
+                indexed[indexKey] = true;
+            }
         }
 
         /// <Summary>Retrieves all the elements in the collection.</Summary>
@@ -41,14 +49,25 @@ namespace Dikubot.Database.Models
         /// <param name="id">The ID of the searched for model.</param>
         /// <return>A Model.</return>
         public TModel Get(string id) =>
-            _models.Find<TModel>(model => model.Id == id).FirstOrDefault();
+            Get(model => model.Id == id);
 
         /// <Summary>Retrieves a element in the collection based on a custom filter</Summary>
         /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
         /// model.Id == id)</param>
         /// <return>A Model.</return>
-        public TModel Get(Expression<Func<TModel, bool>> filter) =>
-            _models.Find<TModel>(filter).FirstOrDefault();
+        public TModel Get(Expression<Func<TModel, bool>> filter)
+        {
+            try
+            {
+                return _models.Find<TModel>(filter).FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            return null;
+        }
 
         /// <Summary>Retrieves a list of elements in the collection based on a custom filter</Summary>
         /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
