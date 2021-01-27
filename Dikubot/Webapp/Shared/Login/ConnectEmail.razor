@@ -3,6 +3,7 @@
 @using Dikubot.Discord.Command
 @using Dikubot.Database.Models
 @using Dikubot.Database.Models.Session
+@using Dikubot.DataLayer.Static
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h1>Velkommen til DIKU's Discord Server</h1>
@@ -10,8 +11,9 @@
     <div class="card-body">
         <h5 class="card-title">Bekræft din email</h5>
         <div class="textFieldDiv">
-            <BFUTextField Label="Vi skal bruge din email, for at bekræfte du går på KU" Placeholder="xyz123@alumni.ku.dk" ReadOnly="true"
-                          Style="padding-bottom: 5px" ClassName="text-field"/>
+            <BFUTextField Label="Vi skal bruge din email, for at bekræfte du går på KU" Placeholder="xyz123@alumni.ku.dk" 
+                          Style="padding-bottom: 5px" ClassName="text-field"
+                          Required="true" OnInput="@(OnEmailChange)" ErrorMessage="@errorMessage"/>
             <BFUPrimaryButton Text="Send Email"></BFUPrimaryButton>
         </div>
     </div>
@@ -24,12 +26,25 @@
     public Login parent { get; set; }
     
     private Authenticator authenticator;
+    private string email = "";
+    private string errorMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
+    }
+
+    private void OnEmailChange(string value)
+    {
+        email = value;
+        if (email != "" && !Util.IsKUEmail(email))
+        {
+            errorMessage = "Dette er ikke en godkendt KU email";
+            return;
+        }
+        errorMessage = "";
     }
     
 

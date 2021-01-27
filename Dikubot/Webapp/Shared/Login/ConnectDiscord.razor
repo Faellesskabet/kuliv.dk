@@ -4,19 +4,41 @@
 @using Dikubot.Database.Models
 @using Dikubot.Database.Models.Session
 @using Dikubot.DataLayer.Logic.User
+@using global::Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h1>Velkommen til DIKU's Discord Server</h1>
-<div class="card w-auto h-auto shadow">
-    <div class="card-body">
-        <h5 class="card-title">Login med Discord</h5>
-        <div class="textFieldDiv">
-            <BFUTextField Label="Send den følgende kommando til DIKU botten (DIKU#7676)." Prefix="!connect" ReadOnly="true" Value="@password" ClassName="text-field"/>
+@if (discordUser == null)
+{
+    <div class="card w-auto h-auto shadow">
+        <div class="card-body">
+            <h5 class="card-title">Login med Discord</h5>
+            <div class="textFieldDiv">
+                <BFUTextField Label="Send den følgende kommando til DIKU botten (DIKU#7676)." Prefix="!connect" ReadOnly="true" Value="@password" ClassName="text-field"/>
+            </div>
+            <a href="https://dnur.dk/" class="text-decoration-none" target="_blank">
+                <p class="text-xl-left">Klik her for hjælp</p></a>
         </div>
-        <a href="https://dnur.dk/" class="text-decoration-none" target="_blank">
-            <p class="text-xl-left">Klik her for hjælp</p></a>
     </div>
-</div>
+}
+else
+{
+    <div class="card w-auto h-auto shadow">
+        <div class="card-body">
+            <h5 class="card-title">Er dette dig?</h5>
+            <BFUPersona Size="120" CoinSize="120" Text="@DiscordNameMentionCombo(discordUser)" Presence="GetPresenceStatus(discordUser)" 
+                         ImageUrl="@discordUser.GetAvatarUrl()" ImageAlt="@discordUser.GetDefaultAvatarUrl()"
+                        Style="padding-bottom: 5px"/>
+            <div class="line"></div>
+            <BFUStack Horizontal="true" HorizontalAlign="Alignment.Center" Tokens=@(new BFUStackTokens() { ChildrenGap = new[] { 10.0 } })>
+                <BFUPrimaryButton Text="Ja, godkend" OnClick=@(ApproveDiscord) />
+                <BFUDefaultButton Text="Nej, afvis" OnClick=@(RejectDiscord) Style="background-color: lightcoral"/>
+            </BFUStack>
+
+        </div>
+    </div>
+}
+
 
         
 
@@ -26,6 +48,7 @@
     
     private string password;
     private Authenticator authenticator;
+    private SocketUser discordUser;
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,15 +62,53 @@
 
     public async void DiscordConnected(SocketUser user)
     {
+        discordUser = user;
+        await InvokeAsync(() => {StateHasChanged();});
+    }
+
+    private string DiscordNameMentionCombo(SocketUser user)
+    {
+        return $"{user.Username}#{user.Discriminator}";
+    }
+    
+    private PersonaPresenceStatus GetPresenceStatus(SocketUser user)
+    {
+        switch (user.Status)
+        {
+            case UserStatus.Offline:
+                return PersonaPresenceStatus.Offline;
+            case UserStatus.Online:
+                return PersonaPresenceStatus.Online;
+            case UserStatus.Idle:
+                return PersonaPresenceStatus.Away;
+            case UserStatus.AFK:
+                return PersonaPresenceStatus.Away;
+            case UserStatus.DoNotDisturb:
+                return PersonaPresenceStatus.DND;
+            case UserStatus.Invisible:
+                return PersonaPresenceStatus.Offline;
+        }
+        return PersonaPresenceStatus.None;
+    }
+
+    private async void RejectDiscord()
+    {
+        discordUser = null;
+        await OnInitializedAsync();
+        await InvokeAsync(() => {StateHasChanged();});
+    }
+
+    private async void ApproveDiscord()
+    {
         UserServices userServices = new UserServices();
-        if (!userServices.Exists(user))
+        if (!userServices.Exists(discordUser))
         {
             UserModel userModel = new UserModel();
-            userModel.DiscordUser = user;
+            userModel.DiscordUser = discordUser;
             new UserServices().Upsert(userModel);
         }
         
-        SessionModel sessionModel = new SessionModel(userServices.Get((user)));
+        SessionModel sessionModel = new SessionModel(userServices.Get((discordUser)));
         await authenticator.UpdateSession(sessionModel);
         parent.Update();
     }
