@@ -33,6 +33,10 @@ namespace Dikubot.Permissions
                 _voiceChannelServices.Upsert(_voiceChannelServices.SocketToModel(model)));
         }
 
+        /// <Summary>Will add the overwrite permissions to the discords channel given.</Summary>
+        /// <param name="voiceChannelId">The id of the voice channel.</param>
+        /// <param name="voiceChannelModel">The voiceChannelModel retrieved from Database.</param>
+        /// <return>void.</return>
         public async void AddOverwritePermissions(ulong voiceChannelId, VoiceChannelModel voiceChannelModel)
         {
             var socketChannel = context.Guild.GetVoiceChannel(voiceChannelId);
@@ -66,7 +70,7 @@ namespace Dikubot.Permissions
             }
         }
         
-        /// <Summary>Will sync all the roles on the database to the discord server.</Summary>
+        /// <Summary>Will sync all the voice channels on the database to the discord server.</Summary>
         /// <return>void.</return>
         public async void DownloadVoiceChannels()
         {
@@ -98,6 +102,7 @@ namespace Dikubot.Permissions
                         voiceChannelModel.Name,
                         channelProperties =>
                         {
+                            channelProperties.Name = properties.Name;
                             channelProperties.Bitrate = properties.Bitrate;
                             channelProperties.UserLimit = properties.UserLimit;
                             channelProperties.Position = properties.Position;
@@ -120,6 +125,7 @@ namespace Dikubot.Permissions
                         channelProperties.CategoryId = properties.CategoryId;
                     });
 
+                    // Removes all the overwrite Permissions.
                     foreach (var overwrite in socketVoiceChannel.PermissionOverwrites)
                     {
                         if (overwrite.TargetType == PermissionTarget.Role)
@@ -130,6 +136,7 @@ namespace Dikubot.Permissions
                                 context.Guild.GetUser(overwrite.TargetId));
                     }
                     
+                    // Adds all the overwrite Permissions from the DB.
                     AddOverwritePermissions(socketVoiceChannel.Id, voiceChannelModel);
                 }
             }
