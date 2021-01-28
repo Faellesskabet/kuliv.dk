@@ -12,14 +12,14 @@ using MongoDB.Driver;
 namespace Dikubot.Database.Models.VoiceChannel
 {
     /// <summary>
-    /// Class for for retrieving information from the Channel collection.
+    /// Class for for retrieving information from the VoiceChannel collection.
     /// </summary>
     public class VoiceChannelServices : Services<VoiceChannelModel>
     {
         public VoiceChannelServices() : base("Main", "VoiceChannels") { }
 
-        /// <Summary>Inserts a Model in the collection. If a RoleModel with the same ID or discordID already
-        /// exists, then we imply invoke Update() on the model instead.</Summary>
+        /// <Summary>Inserts a TextChannelModel in the collection. If a VoiceChannelModel with the same ID or discordID
+        /// already exists, then we imply invoke Update() on the model instead.</Summary>
         /// <param name="modelIn">The Model one wishes to be inserted.</param>
         /// <return>A Model.</return>
         public new VoiceChannelModel Upsert(VoiceChannelModel modelIn)
@@ -41,7 +41,7 @@ namespace Dikubot.Database.Models.VoiceChannel
             return modelIn;
         }
 
-        /// <Summary>Removes a element from the collection by it's unique elements.</Summary>
+        /// <Summary>Removes a VoiceChannelModel from the collection by it's unique elements.</Summary>
         /// <param name="modelIn">The Model one wishes to remove.</param>
         /// <return>Void.</return>
         public new void Remove(VoiceChannelModel modelIn)
@@ -50,6 +50,9 @@ namespace Dikubot.Database.Models.VoiceChannel
             Remove(model => model.DiscordId == modelIn.DiscordId);
         }
         
+        /// <Summary>Converts a SocketVoiceChannel to a VoiceChannelModel.</Summary>
+        /// <param name="voiceChannel">The SocketVoiceChannel to be converted.</param>
+        /// <return>Returns a VoiceChannelModel.</return>
         public VoiceChannelModel SocketToModel(SocketVoiceChannel voiceChannel)
         {
             var _voiceChannel = new VoiceChannelModel();
@@ -60,7 +63,8 @@ namespace Dikubot.Database.Models.VoiceChannel
             _voiceChannel.Name = voiceChannel.Name;
             _voiceChannel.UserLimit = voiceChannel.UserLimit;
             _voiceChannel.DiscordCategoryId = voiceChannel.CategoryId.ToString();
-            _voiceChannel.PermissionsOverwrites = new Dictionary<string, Dictionary<string, Dictionary<string, string?>>>();
+            _voiceChannel.PermissionsOverwrites = 
+                    new Dictionary<string, Dictionary<string, Dictionary<string, string?>>>();
             foreach (var overwrite in voiceChannel.PermissionOverwrites)
             {
                 var id = overwrite.TargetId.ToString();
@@ -123,6 +127,9 @@ namespace Dikubot.Database.Models.VoiceChannel
             return _voiceChannel;
         }
 
+        /// <Summary>Converts a VoiceChannelModel to a VoiceChannelProperties.</Summary>
+        /// <param name="voiceChannelModel">The VoiceChannelModel to be converted.</param>
+        /// <return>Returns a VoiceChannelProperties.</return>
         public VoiceChannelProperties ModelToVoiceChannelProperties(VoiceChannelModel voiceChannelModel)
         {
                 var voiceChannelProperties = new VoiceChannelProperties();
@@ -134,6 +141,11 @@ namespace Dikubot.Database.Models.VoiceChannel
                 return voiceChannelProperties;
         }
         
+        /// <Summary>Converts the VoiceChannelModel property OverwritePermissions to a OverwritePermissions.</Summary>
+        /// <param name="voiceChannelModel">The VoiceChannelModel to be converted.</param>
+        /// <param name="type">The type so either role or user.</param>
+        /// <param name="id">The id of the role or user.</param>
+        /// <return>Returns a OverwritePermissions.</return>
         public OverwritePermissions ModelToOverwritePermissions(VoiceChannelModel voiceChannelModel, 
                 string type, 
                 string id)
@@ -158,27 +170,48 @@ namespace Dikubot.Database.Models.VoiceChannel
                         throw new Exception($"Can't convert {permValue} to a PermValue");
                 }
 
+                // Converts the dictionary to overwritePermissions
                 var overwritePermissions = new OverwritePermissions(
-                        connect: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["Connect"]),
-                        speak: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["Speak"]),
-                        createInstantInvite: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["CreateInstantInvite"]),
-                        manageChannel: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["ManageChannel"]),
-                        addReactions: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["AddReactions"]),
-                        viewChannel: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["ViewChannel"]),
-                        sendTTSMessages: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["SendTTSMessages"]),
-                        manageMessages: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["ManageMessages"]),
-                        embedLinks: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["EmbedLinks"]),
-                        attachFiles: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["AttachFiles"]),
-                        sendMessages: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["SendMessages"]),
-                        readMessageHistory: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["ReadMessageHistory"]),
-                        mentionEveryone: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["MentionEveryone"]),
-                        useExternalEmojis: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["UseExternalEmojis"]),
-                        muteMembers: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["MuteMembers"]),
-                        deafenMembers: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["DeafenMembers"]),
-                        moveMembers: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["MoveMembers"]),
-                        useVoiceActivation: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["UseVAD"]),
-                        manageRoles: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["ManageRoles"]),
-                        manageWebhooks: StringToPermValue(voiceChannelModel.PermissionsOverwrites[type][id]["ManageWebhooks"]));
+                        connect: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["Connect"]),
+                        speak: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["Speak"]),
+                        createInstantInvite: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["CreateInstantInvite"]),
+                        manageChannel: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["ManageChannel"]),
+                        addReactions: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["AddReactions"]),
+                        viewChannel: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["ViewChannel"]),
+                        sendTTSMessages: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["SendTTSMessages"]),
+                        manageMessages: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["ManageMessages"]),
+                        embedLinks: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["EmbedLinks"]),
+                        attachFiles: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["AttachFiles"]),
+                        sendMessages: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["SendMessages"]),
+                        readMessageHistory: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["ReadMessageHistory"]),
+                        mentionEveryone: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["MentionEveryone"]),
+                        useExternalEmojis: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["UseExternalEmojis"]),
+                        muteMembers: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["MuteMembers"]),
+                        deafenMembers: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["DeafenMembers"]),
+                        moveMembers: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["MoveMembers"]),
+                        useVoiceActivation: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["UseVAD"]),
+                        manageRoles: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["ManageRoles"]),
+                        manageWebhooks: StringToPermValue(
+                                voiceChannelModel.PermissionsOverwrites[type][id]["ManageWebhooks"]));
                 
                 return overwritePermissions;
         }
