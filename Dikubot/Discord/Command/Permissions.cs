@@ -1,4 +1,5 @@
 ﻿using Discord.Commands;
+using Dikubot.Permissions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,7 @@ namespace Dikubot.Discord.Command
             if (args[0] == "save" && args.Length == 1)
             {
                 permissionsService.UploadRoles();
+                permissionsService.UploadVoiceChannels();
                 await ReplyAsync("Rolle permissions er blevet skrevet til database.");
                 return;
             }
@@ -32,6 +34,7 @@ namespace Dikubot.Discord.Command
             if (args[0] == "overwrite" && args.Length == 1)
             {
                 permissionsService.DownloadRoles();
+                permissionsService.DownloadVoiceChannels();
                 await ReplyAsync("Rolle permissions er blevet overskrevet.");
                 return;
             }
