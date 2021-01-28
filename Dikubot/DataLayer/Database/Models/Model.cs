@@ -7,7 +7,7 @@ using MongoDB.Bson.Serialization.IdGenerators;
 namespace Dikubot.Database.Models
 {
     /// <summary>
-    /// Class for elements in the User collection.
+    /// Class for elements in collection.
     /// </summary>
     public abstract class Model
     {

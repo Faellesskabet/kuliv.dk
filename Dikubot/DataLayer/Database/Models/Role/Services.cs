@@ -7,7 +7,7 @@ using Dikubot.Discord;
 using Discord;
 using MongoDB.Driver;
 
-namespace Dikubot.Database.Models
+namespace Dikubot.Database.Models.Role
 {
     /// <summary>
     /// Class for for retrieving information from the User collection.
@@ -62,7 +62,6 @@ namespace Dikubot.Database.Models
         /// <return>Void.</return>
         public new void Remove(RoleModel modelIn)
         {
-            Console.WriteLine("removing");
             Remove(model => model.Id == modelIn.Id);
             Remove(model => model.DiscordId == modelIn.DiscordId);
             Remove(model => model.Name == modelIn.Name);
