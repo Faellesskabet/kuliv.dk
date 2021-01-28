@@ -26,15 +26,17 @@ namespace Dikubot.Discord.Command
             {
                 permissionsService.UploadRoles();
                 permissionsService.UploadVoiceChannels();
+                permissionsService.UploadTextChannels();
                 await ReplyAsync("Rolle permissions er blevet skrevet til database.");
                 return;
             }
-            
+
             // Changes Permissions on the server.
             if (args[0] == "overwrite" && args.Length == 1)
             {
                 permissionsService.DownloadRoles();
                 permissionsService.DownloadVoiceChannels();
+                permissionsService.DownloadTextChannels();
                 await ReplyAsync("Rolle permissions er blevet overskrevet.");
                 return;
             }
