@@ -7,7 +7,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Serializers;
 
-namespace Dikubot.Database.Models
+namespace Dikubot.Database.Models.Role
 {
     /// <summary>
     /// Class for elements in the User collection.
