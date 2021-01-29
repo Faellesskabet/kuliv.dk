@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Dikubot.DataLayer.Static
@@ -21,6 +23,20 @@ namespace Dikubot.DataLayer.Static
         {
             email = email.ToLower();
             return isEmail(email) && (email.EndsWith(".ku.dk") || email.EndsWith("@ku.dk"));
+        }
+
+
+        private static Random random = new Random();
+        /// <summary>
+        /// SimpleRandomString returns a random string with the specified length. It's called simple because it has removed look-alike characters like O and 0.
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static string SimpleRandomString(int length)
+        {
+            const string chars = "ABCDEFGHJKMNPQRSTWXYZ23456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

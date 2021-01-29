@@ -3,37 +3,62 @@
 @using Dikubot.Discord.Command
 @using Dikubot.Database.Models
 @using Dikubot.Database.Models.Session
+@using Dikubot.DataLayer.Logic.Email
+@using Dikubot.DataLayer.Logic.Email.Emails
 @using Dikubot.DataLayer.Static
+@using SendGrid.Helpers.Mail
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h1>Velkommen til DIKU's Discord Server</h1>
+}
 <div class="card w-auto h-auto shadow">
     <div class="card-body">
-        <h5 class="card-title">Bekræft din email</h5>
-        <div class="textFieldDiv">
-            <BFUTextField Label="Vi skal bruge din email, for at bekræfte du går på KU" Placeholder="xyz123@alumni.ku.dk" 
-                          Style="padding-bottom: 5px" ClassName="text-field"
-                          Required="true" OnInput="@(OnEmailChange)" ErrorMessage="@errorMessage"/>
-            <BFUPrimaryButton Text="Send Email"></BFUPrimaryButton>
-        </div>
+        @if (String.IsNullOrEmpty(secretPassword) && incorrectPassword)
+        {
+            <BFUMessageBar MessageBarType="MessageBarType.Error">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</BFUMessageBar>
+        }
+        @if (String.IsNullOrEmpty(secretPassword))
+        {
+            <h5 class="card-title">Bekræft din email</h5>
+            <div class="textFieldDiv">
+                <BFUTextField Label="Vi skal bruge din email, for at bekræfte du går på KU" Placeholder="xyz123@alumni.ku.dk"
+                              Style="padding-bottom: 5px" ClassName="text-field"
+                              Required="true" OnInput="@(OnEmailChange)" ErrorMessage="@errorInputMessage"/>
+                <BFUPrimaryButton Text="Send Email" OnClick="SendEmail"></BFUPrimaryButton>
+            </div>
+        }
+        else
+        {
+            <h5 class="card-title">Vi har sendt en kode til din email: @(email)</h5>
+            <div class="textFieldDiv">
+                <BFUTextField Label="Indtast koden her:" Placeholder="Hemmeligt kodeord"
+                              Style="padding-bottom: 5px" ClassName="text-field"
+                              Required="true" Value="@passwordInput"/>
+                <BFUPrimaryButton Text="Bekræft kode" OnClick="(value) => cofirmEmailPassword(passwordInput)"></BFUPrimaryButton>
+            </div>
+        }
     </div>
 </div>
 
-        
+
 
 @code {
     [Parameter]
     public Login parent { get; set; }
     
     private Authenticator authenticator;
+    private UserIdentity user;
     private string email = "";
-    private string errorMessage = "";
+    private string errorInputMessage = "";
+    private string secretPassword = "";
+    private string passwordInput = "";
+    bool incorrectPassword = false;
 
     protected override async Task OnInitializedAsync()
     {
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity) authState.User.Identity;
+        user = (UserIdentity) authState.User.Identity;
     }
 
     private void OnEmailChange(string value)
@@ -41,10 +66,37 @@
         email = value;
         if (email != "" && !Util.IsKUEmail(email))
         {
-            errorMessage = "Dette er ikke en godkendt KU email";
+            errorInputMessage = "Dette er ikke en godkendt KU email";
             return;
         }
-        errorMessage = "";
+        errorInputMessage = "";
+    }
+
+    private async void SendEmail()
+    {
+        if (!String.IsNullOrEmpty(errorInputMessage))
+        {
+            return;
+        }
+
+        secretPassword = Util.SimpleRandomString(12);
+        VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
+        await EmailService.SendEmail(verification);
+        await InvokeAsync(() => {StateHasChanged();});
+
+    }
+
+    private async void cofirmEmailPassword(String password)
+    {
+        if (!password.Equals(secretPassword))
+        {
+            password = "";
+            email = "";
+            incorrectPassword = true;
+            return;
+        }
+
+        user.UserModel.Email = email.ToLower();
     }
     
 

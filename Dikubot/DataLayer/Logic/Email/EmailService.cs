@@ -11,14 +11,14 @@ namespace Dikubot.DataLayer.Logic.Email
     public class EmailService
     {
         private static readonly SendGridClient client = new SendGridClient(Environment.GetEnvironmentVariable("SENDGRID_API"));
-        private static readonly EmailAddress from = new EmailAddress(Environment.GetEnvironmentVariable("SENDGRID_EMAIL"), "Discord Bot'");
+        private static readonly EmailAddress from = new EmailAddress(Environment.GetEnvironmentVariable("SENDGRID_EMAIL"), "Discord Bot");
 
         /// <summary>
         /// Send Email
         /// </summary>
         /// <param name="email">The email to be sent</param>
         /// <returns>Task</returns>
-        public async Task SendEmail(Email email)
+        public static async Task SendEmail(Email email)
         {
             await client.SendEmailAsync(MailHelper.CreateSingleEmail(from, email.GetTo(), email.GetSubject(),
                 email.GetTextContent(), email.GetHtmlContent()));
