@@ -26,6 +26,18 @@ namespace Dikubot.Database.Models
         {
             return Exists(model => model.DiscordId == user.Id.ToString());
         }
+
+        public bool EmailExists(string email)
+        {
+            email = email.ToLower();
+            return Exists(model => model.Email == email);
+        }
+
+        public UserModel GetFromEmail(string email)
+        {
+            email = email.ToLower();
+            return Get(model => model.Email == email);
+        }
     }
 }
 

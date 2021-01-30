@@ -16,7 +16,11 @@
         }
         @if (_state == State.ConnectEmail)
         {
-            <ConnectEmail/>
+            <ConnectEmail parent="@this"/>
+        }
+        @if (_state == State.ConnectName)
+        {
+            <ConnectName parent="@this"/>
         }
     </div>
 </div>
@@ -53,8 +57,15 @@
 
     public async void Update()
     {
+        authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+        if (user != null && user.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        
         _state = await getState();
-        //NavigationManager.NavigateTo("/", forceLoad: true);
         await InvokeAsync(() => {StateHasChanged();});
     }
 
