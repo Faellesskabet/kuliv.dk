@@ -32,9 +32,9 @@ namespace Dikubot.Webapp.Logic
         /// The user must be verified by email
         /// The session may not be expired
         /// </summary>
-        public bool IsAuthenticated
+        public override bool IsAuthenticated
         {
-            get => _userModel?.DiscordId != null && _userModel.Verified && !_sessionModel.IsExpired;
+            get => _userModel?.DiscordId != null && _userModel.Verified && _userModel.Name != null && !_sessionModel.IsExpired;
         }
         public string Name { get => _userModel == null? "Intet navn" : _userModel.Name; }
 
@@ -44,6 +44,7 @@ namespace Dikubot.Webapp.Logic
         public UserModel UserModel
         {
             get => _userModel;
+            set => _userModel = value;
         }
 
         /// <summary>

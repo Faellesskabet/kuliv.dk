@@ -1,0 +1,47 @@
+@using Dikubot.Webapp.Logic
+@using Dikubot.Database.Models
+@using Dikubot.Database.Models.Session
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h1>Velkommen til DIKU's Discord Server</h1>
+}
+<div class="card w-auto h-auto shadow">
+    <div class="card-body">
+        <h5 class="card-title">Hvad er dit fulde navn?</h5>
+        <div class="textFieldDiv">
+            <BFUTextField Label="Fulde navn" Placeholder="Fornavn Efternavn"
+                          Style="padding-bottom: 5px" ClassName="text-field"
+                          Required="true" OnInput="s => name = s"/>
+            <BFUPrimaryButton Text="Bekræft Navn" OnClick="ConfirmName"></BFUPrimaryButton>
+        </div>
+        
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public Login parent { get; set; }
+    
+    private Authenticator authenticator;
+    private UserIdentity user;
+    private string name = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity) authState.User.Identity;
+    }
+    
+    private async void ConfirmName()
+    {
+        user.UserModel.Name = name;
+        new UserServices().Upsert(user.UserModel);
+        SessionModel sessionModel = new SessionModel(user.UserModel);
+        await authenticator.UpdateSession(sessionModel);
+        parent.Update();
+    }
+
+}
