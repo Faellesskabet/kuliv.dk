@@ -1,4 +1,5 @@
 using System;
+using Dikubot.Database.Models.Role;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 

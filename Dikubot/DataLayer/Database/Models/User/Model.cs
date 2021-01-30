@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.SubModels;
 using Dikubot.Discord;
 using Discord.WebSocket;
