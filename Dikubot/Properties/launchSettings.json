@@ -20,6 +20,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DISCORD_TOKEN": "ODAxMTIyMzUwMDg2MzU2OTky.YAcFVA.dWHdLjpjSmFXI2NvhyPB6gReBSE",
+        "DIKU_DISCORD_ID": "589752263791083541",
         "SENDGRID_API": "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",
         "SENDGRID_EMAIL": "noreply@lukire.tech"
       }
