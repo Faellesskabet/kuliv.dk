@@ -14,6 +14,7 @@ namespace Dikubot.Discord
 
 		public static DiscordSocketClient client;
 		public static CommandHandler commandHandler;
+		public static SocketGuild DIKU;
 
 		public void run()
 		{
@@ -57,6 +58,7 @@ namespace Dikubot.Discord
 				await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
 				await client.StartAsync();
 
+				DIKU = client.GetGuild(Convert.ToUInt64(Environment.GetEnvironmentVariable("DIKU_DISCORD_ID")));
 				await services.GetRequiredService<CommandHandler>().init();
 
 				await Task.Delay(-1);

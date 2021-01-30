@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Dikubot.DataLayer.Static
 {
-    public class Util
+    public static class Util
     {
         
         /// <summary>
