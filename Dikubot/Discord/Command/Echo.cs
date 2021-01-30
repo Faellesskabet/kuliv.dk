@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dikubot.Database.Models;
+using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.SubModels;
+using Dikubot.Permissions;
 
 namespace Dikubot.Discord.Command
 {
