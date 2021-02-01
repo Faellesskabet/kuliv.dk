@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Dikubot.Database.Models;
+using Dikubot.Database.Models.VoiceChannel;
 using Dikubot.Discord.Command;
 using Dikubot.Permissions;
 using Discord;
@@ -53,6 +55,7 @@ namespace Dikubot.Discord
 				client.ChannelCreated += ChannelCreated;
 				client.ChannelDestroyed += ChannelDestroyed;
 				client.ChannelUpdated += ChannelUpdated;
+				client.UserVoiceStateUpdated += VoiceChannelExpand;
 
 				if (main.IS_DEV)
 				{
@@ -80,79 +83,182 @@ namespace Dikubot.Discord
 				.AddSingleton<CommandHandler>()
 				.BuildServiceProvider();
 		}
-		
-		private Task RoleCreated(SocketRole role)
+
+		private async Task<bool> IsBotFirstEntryInAuditLog(SocketGuild guild)
 		{
+			await foreach (var auditLogEntryCollection in guild.GetAuditLogsAsync(1))
+				foreach (var auditLogEntry in auditLogEntryCollection)
+					return auditLogEntry.User.IsBot;
+			return false;
+		}
+
+		/// <Summary>When a role gets created it will be added to the database.</Summary>
+		/// <param name="role">The role that has been created.</param>
+		/// <return>void.</return>
+		private async Task RoleCreated(SocketRole role)
+		{
+			if (await IsBotFirstEntryInAuditLog(role.Guild))
+				return; 
+			
 			var permissionsServices = new PermissionsService(role.Guild);
 			permissionsServices.AddOrUpdateDatabaseRole(role);
-			return Task.CompletedTask;
 		}
 		
-		private Task RoleDeleted(SocketRole role)
+		/// <Summary>When a role gets destroyed it will be removed to the database.</Summary>
+		/// <param name="role">The role which will be destroyed.</param>
+		/// <return>void.</return>
+		private async Task RoleDeleted(SocketRole role)
 		{
+			if (await IsBotFirstEntryInAuditLog(role.Guild))
+				return; 
+			
 			var permissionsServices = new PermissionsService(role.Guild);
 			permissionsServices.RemoveDatabaseRole(role);
-			return Task.CompletedTask;
 		}
 		
-		private Task RoleUpdated(SocketRole roleBefore, SocketRole roleAfter)
+		/// <Summary>When a role gets edited it will be updated in the database.</Summary>
+		/// <param name="roleBefore">The role before it got edited.</param>
+		/// <param name="roleAfter">The role after it got edited.</param>
+		/// <return>void.</return>
+		private async Task RoleUpdated(SocketRole roleBefore, SocketRole roleAfter)
 		{
+			if (await IsBotFirstEntryInAuditLog(roleAfter.Guild))
+				return; 
+			
 			var permissionsServices = new PermissionsService(roleAfter.Guild);
 			permissionsServices.AddOrUpdateDatabaseRole(roleAfter);
-			return Task.CompletedTask;
 		}
 		
-		private Task ChannelCreated(SocketChannel channel)
+		/// <Summary>When a channel gets created it will be added to the database.</Summary>
+		/// <param name="channel">The channel that has been created.</param>
+		/// <return>void.</return>
+		private async Task ChannelCreated(SocketChannel channel)
 		{
 			PermissionsService permissionsService;
-			if (channel is SocketVoiceChannel)
+			if (channel is SocketVoiceChannel) // Determines which type of channel has bee created.
 			{
 				var voiceChannel = channel as SocketVoiceChannel;
+				
+				if (await IsBotFirstEntryInAuditLog(voiceChannel.Guild))
+					return; 
+				
 				permissionsService = new PermissionsService(voiceChannel.Guild);
 				permissionsService.AddOrUpdateDatabaseVoiceChannel(voiceChannel);
 			}
 			else if (channel is SocketTextChannel)
 			{
 				var textChannel = channel as SocketTextChannel;
+
+				if (await IsBotFirstEntryInAuditLog(textChannel.Guild))
+					return;
+
 				permissionsService = new PermissionsService(textChannel.Guild);
 				permissionsService.AddOrUpdateDatabaseTextChannel(textChannel);
 			}
-			return Task.CompletedTask;
 		}
 		
-		private Task ChannelDestroyed(SocketChannel channel)
+		/// <Summary>When a channel gets destroyed it will be removed to the database.</Summary>
+		/// <param name="channel">The channel which will be destroyed.</param>
+		/// <return>void.</return>
+		private async Task ChannelDestroyed(SocketChannel channel)
 		{
 			PermissionsService permissionsService;
 			if (channel is SocketVoiceChannel)
 			{
 				var voiceChannel = channel as SocketVoiceChannel;
+				
+				if (await IsBotFirstEntryInAuditLog(voiceChannel.Guild))
+					return; 
+				
 				permissionsService = new PermissionsService(voiceChannel.Guild);
 				permissionsService.RemoveDatabaseVoiceChannel(voiceChannel);
 			}
 			else if (channel is SocketTextChannel)
 			{
 				var textChannel = channel as SocketTextChannel;
+				
+				if (await IsBotFirstEntryInAuditLog(textChannel.Guild))
+					return; 
+				
 				permissionsService = new PermissionsService(textChannel.Guild);
 				permissionsService.RemoveDatabaseTextChannel(textChannel);
 			}
-			return Task.CompletedTask;
 		}
-		private Task ChannelUpdated(SocketChannel channelBefore, SocketChannel channelAfter)
+		
+		/// <Summary>When a channel gets edited it will be updated in the database.</Summary>
+		/// <param name="channelBefore">The channel before it got edited.</param>
+		/// <param name="channelAfter">The channel after it got edited.</param>
+		/// <return>void.</return>
+		private async Task ChannelUpdated(SocketChannel channelBefore, SocketChannel channelAfter)
 		{
 			PermissionsService permissionsService;
 			if (channelAfter is SocketVoiceChannel)
 			{
 				var voiceChannel = channelAfter as SocketVoiceChannel;
+				
+				if (await IsBotFirstEntryInAuditLog(voiceChannel.Guild))
+					return; 
+				
 				permissionsService = new PermissionsService(voiceChannel.Guild);
 				permissionsService.AddOrUpdateDatabaseVoiceChannel(voiceChannel);
 			}
 			else if (channelAfter is SocketTextChannel)
 			{
 				var textChannel = channelAfter as SocketTextChannel;
+				
+				if (await IsBotFirstEntryInAuditLog(textChannel.Guild))
+					return; 
+				
 				permissionsService = new PermissionsService(textChannel.Guild);
 				permissionsService.AddOrUpdateDatabaseTextChannel(textChannel);
 			}
-			return Task.CompletedTask;
+		}
+
+		private async Task VoiceChannelExpand(SocketUser user, SocketVoiceState leaveState, SocketVoiceState joinState)
+		{
+			
+			var voiceChannelServices = new VoiceChannelServices();
+			if (leaveState.VoiceChannel != null)
+			{
+				var channel = leaveState.VoiceChannel;
+				var guild = channel.Guild;
+				var model = voiceChannelServices.Get(model => model.DiscordId == channel.Id.ToString());
+
+				var childModel = voiceChannelServices.Get(m => m.DiscordId == model.Child);
+				var childSocket = guild.GetVoiceChannel(Convert.ToUInt64(model.Child));
+				if (childModel.DeleteOnLeave && childSocket.Users.Count == 0)
+				{
+					await childSocket.DeleteAsync();
+				}
+			}
+
+			if (joinState.VoiceChannel != null)
+			{
+				var channel = joinState.VoiceChannel;
+				var guild = channel.Guild;
+				var model = voiceChannelServices.Get(model => model.DiscordId == channel.Id.ToString());
+				if (model.ExpandOnJoin && channel.Users.Count == 1)
+				{
+					var restVoiceChannel = await guild.CreateVoiceChannelAsync("temp",
+						properties =>
+						{
+							properties.CategoryId = channel.CategoryId;
+						});
+					
+					var permissionsService = new PermissionsService(guild);
+					permissionsService.AddOrUpdateDatabaseVoiceChannel(guild.GetVoiceChannel(restVoiceChannel.Id));
+					
+					var newModel = new VoiceChannelModel();
+					newModel.DiscordId = restVoiceChannel.Id.ToString();
+					newModel.ExpandOnJoin = true;
+					newModel.DeleteOnLeave = true;
+					
+					voiceChannelServices.Upsert(newModel);
+
+					model.Child = newModel.DiscordId;
+					voiceChannelServices.Upsert(model);
+				}
+			}
 		}
 	}
 }
