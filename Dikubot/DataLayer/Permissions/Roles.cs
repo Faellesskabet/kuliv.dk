@@ -20,8 +20,7 @@ namespace Dikubot.Permissions
         /// <return>A list of all the roles which should be removed from the database.</return>
         private List<RoleModel> ToBeRemovedFromDatabase(List<RoleModel> roleModels, List<SocketRole> socketRoles)
         {
-            Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id ||
-                                                                m0.Name == m1.Name;
+            Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
             roleModels.RemoveAll(m => socketRoles.Exists(n => inDB(m, n)));
             return roleModels;
         }
@@ -33,11 +32,10 @@ namespace Dikubot.Permissions
             var roleModels = _roleServices.Get();
             var socketRoles = guild.Roles.ToList();
             var toBeRemoved = new List<RoleModel>(roleModels);
-            
-            Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id ||
-                                                                 m0.Name == m1.Name;
 
-        // Remove all the roles from the database if they are not on the discord server.
+            Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
+
+            // Remove all the roles from the database if they are not on the discord server.
             roleModels.RemoveAll(m => socketRoles.Exists(n => inDB(m, n)));
 
             // Remove the roles from the database that is not on the discord server.
@@ -55,9 +53,8 @@ namespace Dikubot.Permissions
             var socketRoles = guild.Roles.ToList();
             
             var toBeRemoved = new List<SocketRole>(socketRoles);
-            
-            Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id ||
-                                                                 m0.Name == m1.Name;
+
+            Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
             
 
             // Remove all the roles from the discord server if they are not in the database.
