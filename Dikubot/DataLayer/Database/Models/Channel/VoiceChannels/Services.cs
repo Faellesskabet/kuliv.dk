@@ -29,12 +29,12 @@ namespace Dikubot.Database.Models.VoiceChannel
 
             if (idCollision)
             {
-                Update(modelIn);
+                Update(modelIn, new ReplaceOptions() {IsUpsert = true});
                 return modelIn;
             }
             if (discordIdCollision)
             {
-                Update(m => m.DiscordId == modelIn.DiscordId, modelIn);
+                Update(m => m.DiscordId == modelIn.DiscordId, modelIn, new ReplaceOptions() {IsUpsert = true});
                 return modelIn;
             }
             Insert(modelIn);
