@@ -1,0 +1,42 @@
+
+.header {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    color: black;
+}
+
+.button {
+    margin: 10px 10px 10px 10px;
+}
+
+@media only screen and (min-width: 587px) {
+    .info-dump {
+        margin-left: auto;
+        margin-right: auto;
+        width: 60%;
+    }
+    .button {
+        width: 250px;
+        height: 200px;
+    }
+}
+
+@media only screen and (max-width: 587px) {
+    .info-dump {
+        margin-left: auto;
+        margin-right: auto;
+        width: 90%;
+    }
+    
+    .button {
+        width: 90%;
+        height: 200px;
+    }
+}
+
+.page-body {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}

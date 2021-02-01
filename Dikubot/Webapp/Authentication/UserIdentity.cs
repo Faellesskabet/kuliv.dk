@@ -1,11 +1,15 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using Dikubot.Database.Models;
+using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.Session;
 
 namespace Dikubot.Webapp.Logic
 {
-    public class UserIdentity : ClaimsIdentity
+    public sealed class UserIdentity : ClaimsIdentity
     {
         private UserModel _userModel;
         private SessionModel _sessionModel;
@@ -17,6 +21,12 @@ namespace Dikubot.Webapp.Logic
         {
             _sessionModel = sessionModel;
             _userModel = new UserServices().Get(sessionModel.UserId);
+            if (_userModel != null)
+            {
+                IEnumerable<Claim> roleClaims =
+                    _userModel.Roles.Where(model => model.IsActive()).Select(model => new Claim(ClaimTypes.Role, model.RoleModel.Name.ToUpper()));
+                AddClaims(roleClaims);
+            }
         }
         
         /// <Summary>This is simply just a name and it has no purposes except for us to differentiate between AuthenticationTypes / reasons for authentication</Summary>

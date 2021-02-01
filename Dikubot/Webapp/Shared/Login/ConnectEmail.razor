@@ -100,6 +100,7 @@
         }
         
         UserServices userServices = new UserServices();
+        PermissionsService permissionsService = new PermissionsService(DiscordBot.DIKU);
         
         //In case the email already exists, then we simply override the old user with the new user, while removing the old user's roles on the Discord server
         if (userServices.EmailExists(email))
@@ -116,10 +117,10 @@
             user.UserModel = oldUser;
 
             //We now update all the Discord roles of our users. The old discord user will have all their roles removed, while the new user will get all the old user's roles.
-            PermissionsService permissionsService = new PermissionsService(DiscordBot.DIKU);
-            permissionsService.SetDiscordUserRoles(user.UserModel);
             permissionsService.SetDiscordUserRoles(oldUser);
         }
+        permissionsService.SetDiscordUserRoles(user.UserModel);
+        
         user.UserModel.Email = email;
         user.UserModel.Verified = true;
         userServices.Upsert(user.UserModel);
