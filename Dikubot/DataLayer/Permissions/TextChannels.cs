@@ -12,23 +12,23 @@ namespace Dikubot.Permissions
         
         /// <Summary>Will sync all the textChannels on the discord server to the database.</Summary>
         /// <return>void.</return>
-        public void UploadTextChannels()
+        public void SetDatabaseTextChannels()
         {
             var textChannelModels = _textChannelServices.Get();
-            var socketRoles = context.Guild.TextChannels.ToList();
+            var socketRoles = guild.TextChannels.ToList();
             var toBeRemoved = new List<TextChannelModel>(textChannelModels);
 
             Func<TextChannelModel, SocketTextChannel, bool> inDB = (m0, m1) => 
                 Convert.ToUInt64(m0.DiscordId) == m1.Id;
             
-            // Remove all the roles from the database if they are not on the discord server.
+            // Remove all the text channels from the database if they are not on the discord server.
             toBeRemoved.RemoveAll(m => 
                 socketRoles.Exists(n => inDB(m, n)));
 
-            // Remove the roles from the database that is not on the discord server.
+            // Remove the text channels from the database that is not on the discord server.
             toBeRemoved.ForEach(m => _textChannelServices.Remove(m));
             
-            // Makes an upsert of the roles on the server so they match the ones in the database.
+            // Makes an upsert of the text channels on the server so they match the ones in the database.
             socketRoles.ForEach(model => 
                 _textChannelServices.Upsert(_textChannelServices.SocketToModel(model)));
         }
@@ -39,7 +39,7 @@ namespace Dikubot.Permissions
         /// <return>void.</return>
         public async void AddOverwritePermissions(ulong textChannelId, TextChannelModel textChannelModel)
         {
-            var socketChannel = context.Guild.GetTextChannel(textChannelId);
+            var socketChannel = guild.GetTextChannel(textChannelId);
             foreach (var type in textChannelModel.PermissionsOverwrites.Keys)
             {
                 foreach (var id in textChannelModel.PermissionsOverwrites[type].Keys)
@@ -52,7 +52,7 @@ namespace Dikubot.Permissions
                                 "Role",
                                 id);
                         await socketChannel.AddPermissionOverwriteAsync(
-                            context.Guild.GetRole(Convert.ToUInt64(id)),
+                            guild.GetRole(Convert.ToUInt64(id)),
                             overwritePermissions);
                     }
                     else
@@ -63,7 +63,7 @@ namespace Dikubot.Permissions
                                 "User",
                                 id);
                         await socketChannel.AddPermissionOverwriteAsync(
-                            context.Guild.GetUser(Convert.ToUInt64(id)),
+                            guild.GetUser(Convert.ToUInt64(id)),
                             overwritePermissions);
                     }
                 }
@@ -72,16 +72,16 @@ namespace Dikubot.Permissions
         
         /// <Summary>Will sync all the text channels on the database to the discord server.</Summary>
         /// <return>void.</return>
-        public async void DownloadTextChannels()
+        public async void SetDiscordTextChannels()
         {
             var textChannelModels = _textChannelServices.Get();
-            var socketTextChannels = context.Guild.TextChannels.ToList();
+            var socketTextChannels = guild.TextChannels.ToList();
             var toBeRemoved = new List<SocketTextChannel>(socketTextChannels);
 
             Func<TextChannelModel, SocketTextChannel, bool> inDB = 
                 (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
             
-            // Remove all the roles from the discord server if they are not in the database.
+            // Remove all the text channels from the discord server if they are not in the database.
             toBeRemoved.RemoveAll(m => textChannelModels.Exists(n => inDB(n, m)));
 
             foreach (var socketTextChannel in toBeRemoved)
@@ -90,15 +90,15 @@ namespace Dikubot.Permissions
             foreach(var textChannelModel in textChannelModels)
             {
 
-                // Finds the role discord server role that match the role in the database.
+                // Finds the text channel discord server text channel that match the text channel in the database.
                 var socketTextChannel = socketTextChannels.Find(socket => 
                     Convert.ToUInt64(textChannelModel.DiscordId) == socket.Id);
                 
                 if (socketTextChannel == null)
                 {
-                    // If the role could not be found create it.
+                    // If the text channel could not be found create it.
                     var properties = _textChannelServices.ModelToTextChannelProperties(textChannelModel);
-                    var temp = await context.Guild.CreateTextChannelAsync(
+                    var temp = await guild.CreateTextChannelAsync(
                         textChannelModel.Name,
                         channelProperties =>
                         {
@@ -115,7 +115,7 @@ namespace Dikubot.Permissions
                 }
                 else
                 {
-                    // If the role could be found modify it so it matches the database.
+                    // If the text channel could be found modify it so it matches the database.
                     var properties = _textChannelServices.ModelToTextChannelProperties(textChannelModel);
                     await socketTextChannel.ModifyAsync(channelProperties =>
                     {
@@ -132,10 +132,10 @@ namespace Dikubot.Permissions
                     {
                         if (overwrite.TargetType == PermissionTarget.Role)
                             await socketTextChannel.RemovePermissionOverwriteAsync(
-                                context.Guild.GetRole(overwrite.TargetId));
+                                guild.GetRole(overwrite.TargetId));
                         else
                             await socketTextChannel.RemovePermissionOverwriteAsync(
-                                context.Guild.GetUser(overwrite.TargetId));
+                                guild.GetUser(overwrite.TargetId));
                     }
                     
                     // Adds all the overwrite Permissions from the DB.
@@ -143,5 +143,15 @@ namespace Dikubot.Permissions
                 }
             }
         }
+        
+        /// <Summary>Add a text channel on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseTextChannel(SocketTextChannel textChannel) =>
+            _textChannelServices.Upsert(_textChannelServices.SocketToModel(textChannel));
+        
+        /// <Summary>Removes a text channel on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseTextChannel(SocketTextChannel textChannel) =>
+            _textChannelServices.Remove(_textChannelServices.SocketToModel(textChannel));
     }
 }

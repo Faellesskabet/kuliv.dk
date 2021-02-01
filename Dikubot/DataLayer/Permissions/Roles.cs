@@ -13,17 +13,6 @@ namespace Dikubot.Permissions
 {
     public partial class PermissionsService
     {
-        /// <Summary>The constructor of PermissionServices.</Summary>
-        /// <param name="modelIn">The context for which the PermissionService is being executed in.</param>
-        
-        SocketGuild guild; // This can not be made private.
-        private readonly RoleServices _services;
-        public PermissionsService(SocketGuild guild)
-        {
-            this.guild = guild;
-            _services = new RoleServices();
-        }
-
         /// <Summary>Finds all the RoleModels which should be removed from the database since it is not a role on the
         /// discord server.</Summary>
         /// <param name="roleModels">List of all the roles in the database.</param>
@@ -39,9 +28,9 @@ namespace Dikubot.Permissions
 
         /// <Summary>Will sync all the roles on the discord server to the database.</Summary>
         /// <return>void.</return>
-        public void UploadRoles()
+        public void SetDatabaseRoles()
         {
-            var roleModels = _services.Get();
+            var roleModels = _roleServices.Get();
             var socketRoles = guild.Roles.ToList();
             var toBeRemoved = new List<RoleModel>(roleModels);
             
@@ -60,9 +49,9 @@ namespace Dikubot.Permissions
         
         /// <Summary>Will sync all the roles on the database to the discord server.</Summary>
         /// <return>void.</return>
-        public async void DownloadRoles()
+        public async void SetDiscordRoles()
         {
-            var roleModels = _services.Get();
+            var roleModels = _roleServices.Get();
             var socketRoles = guild.Roles.ToList();
             
             var toBeRemoved = new List<SocketRole>(socketRoles);
@@ -93,7 +82,7 @@ namespace Dikubot.Permissions
                 if (socketRole == null)
                 {
                     // If the role could not be found create it.
-                    var properties = _services.ModelToRoleProperties(roleModel);
+                    var properties = _roleServices.ModelToRoleProperties(roleModel);
                     await guild.CreateRoleAsync(properties.Name.Value, 
 
                         properties.Permissions.Value, 
@@ -147,8 +136,8 @@ namespace Dikubot.Permissions
             // We also remove the role if it has expired
             IReadOnlyCollection<SocketRole> discordRoles = guildUser.Roles;
             IEnumerable<IRole> removeRoles = discordRoles.Where((role, i) => 
-                !userRoleModels.Contains(new UserRoleModel(_services.SocketToModel(role))) 
-                || !userModel.IsRoleActive(_services.SocketToModel(role)));
+                !userRoleModels.Contains(new UserRoleModel(_roleServices.SocketToModel(role))) 
+                || !userModel.IsRoleActive(_roleServices.SocketToModel(role)));
             foreach (IRole role in removeRoles)
             {
                 try
@@ -186,5 +175,14 @@ namespace Dikubot.Permissions
             SetDiscordUserRoles(new UserServices().Get(user));
         }
         
+        /// <Summary>Add a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseRole(SocketRole role) =>
+            _roleServices.Upsert(_roleServices.SocketToModel(role));
+        
+        /// <Summary>Removes a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseRole(SocketRole role) =>
+            _roleServices.Remove(_roleServices.SocketToModel(role));
     }
 }
