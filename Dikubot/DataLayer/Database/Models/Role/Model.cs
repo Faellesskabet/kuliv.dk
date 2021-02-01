@@ -16,8 +16,7 @@ namespace Dikubot.Database.Models.Role
     {
         [BsonElement("DiscordId")] [BsonUnique] 
         public string DiscordId { get; set; }
-        [BsonElement("Name")] [BsonUnique] 
-        public string Name { get; set; }
+        [BsonElement("Name")] public string Name { get; set; }
         [BsonElement("Color")] public Dictionary<string, int> Color { get; set; }
         [BsonElement("CreatedAt")] public DateTime CreatedAt { get; set; }
         [BsonElement("IsEveryone")] public bool IsEveryone { get; set; }

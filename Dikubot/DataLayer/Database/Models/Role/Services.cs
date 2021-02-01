@@ -23,17 +23,11 @@ namespace Dikubot.Database.Models.Role
         public new RoleModel Upsert(RoleModel modelIn)
         {
             bool idCollision = Exists(model => model.Id == modelIn.Id);
-            bool nameCollision = Exists(model => model.Name == modelIn.Name);
             bool discordIdCollision = Exists(model => model.DiscordId == modelIn.DiscordId);
 
             if (idCollision)
             {
                 Update(modelIn, new ReplaceOptions() {IsUpsert = true});
-                return modelIn;
-            }
-            if (nameCollision)
-            {
-                Update(m => m.Name == modelIn.Name, modelIn, new ReplaceOptions() {IsUpsert = true});
                 return modelIn;
             }
             if (discordIdCollision)
@@ -52,9 +46,8 @@ namespace Dikubot.Database.Models.Role
         public new bool Exists(RoleModel modelIn)
         {
             bool idCollision = Exists(model => model.Id == modelIn.Id);
-            bool nameCollision = Exists(model => model.Name == modelIn.Name);
             bool discordIdCollision = Exists(model => model.DiscordId == modelIn.DiscordId);
-            return idCollision || nameCollision || discordIdCollision;
+            return idCollision || discordIdCollision;
         }
         
         /// <Summary>Removes a element from the collection by it's unique elements.</Summary>

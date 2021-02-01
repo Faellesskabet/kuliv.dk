@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Dikubot.Database.Models;
 using Dikubot.Discord.Command;
+using Dikubot.Permissions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -11,7 +12,6 @@ namespace Dikubot.Discord
 {
 	public class DiscordBot
 	{
-
 		public static DiscordSocketClient client;
 		public static CommandHandler commandHandler;
 		public static SocketGuild DIKU;
@@ -47,6 +47,12 @@ namespace Dikubot.Discord
 				client = services.GetRequiredService<DiscordSocketClient>();
 
 				client.Log += Log;
+				client.RoleCreated += RoleCreated;
+				client.RoleDeleted += RoleDeleted;
+				client.RoleUpdated += RoleUpdated;
+				client.ChannelCreated += ChannelCreated;
+				client.ChannelDestroyed += ChannelDestroyed;
+				client.ChannelUpdated += ChannelUpdated;
 
 				if (main.IS_DEV)
 				{
@@ -66,7 +72,6 @@ namespace Dikubot.Discord
 
 		}
 
-
 		private ServiceProvider ConfigureServices()
 		{
 			return new ServiceCollection()
@@ -74,6 +79,80 @@ namespace Dikubot.Discord
 				.AddSingleton<CommandService>()
 				.AddSingleton<CommandHandler>()
 				.BuildServiceProvider();
+		}
+		
+		private Task RoleCreated(SocketRole role)
+		{
+			var permissionsServices = new PermissionsService(role.Guild);
+			permissionsServices.AddOrUpdateDatabaseRole(role);
+			return Task.CompletedTask;
+		}
+		
+		private Task RoleDeleted(SocketRole role)
+		{
+			var permissionsServices = new PermissionsService(role.Guild);
+			permissionsServices.RemoveDatabaseRole(role);
+			return Task.CompletedTask;
+		}
+		
+		private Task RoleUpdated(SocketRole roleBefore, SocketRole roleAfter)
+		{
+			var permissionsServices = new PermissionsService(roleAfter.Guild);
+			permissionsServices.AddOrUpdateDatabaseRole(roleAfter);
+			return Task.CompletedTask;
+		}
+		
+		private Task ChannelCreated(SocketChannel channel)
+		{
+			PermissionsService permissionsService;
+			if (channel is SocketVoiceChannel)
+			{
+				var voiceChannel = channel as SocketVoiceChannel;
+				permissionsService = new PermissionsService(voiceChannel.Guild);
+				permissionsService.AddOrUpdateDatabaseVoiceChannel(voiceChannel);
+			}
+			else if (channel is SocketTextChannel)
+			{
+				var textChannel = channel as SocketTextChannel;
+				permissionsService = new PermissionsService(textChannel.Guild);
+				permissionsService.AddOrUpdateDatabaseTextChannel(textChannel);
+			}
+			return Task.CompletedTask;
+		}
+		
+		private Task ChannelDestroyed(SocketChannel channel)
+		{
+			PermissionsService permissionsService;
+			if (channel is SocketVoiceChannel)
+			{
+				var voiceChannel = channel as SocketVoiceChannel;
+				permissionsService = new PermissionsService(voiceChannel.Guild);
+				permissionsService.RemoveDatabaseVoiceChannel(voiceChannel);
+			}
+			else if (channel is SocketTextChannel)
+			{
+				var textChannel = channel as SocketTextChannel;
+				permissionsService = new PermissionsService(textChannel.Guild);
+				permissionsService.RemoveDatabaseTextChannel(textChannel);
+			}
+			return Task.CompletedTask;
+		}
+		private Task ChannelUpdated(SocketChannel channelBefore, SocketChannel channelAfter)
+		{
+			PermissionsService permissionsService;
+			if (channelAfter is SocketVoiceChannel)
+			{
+				var voiceChannel = channelAfter as SocketVoiceChannel;
+				permissionsService = new PermissionsService(voiceChannel.Guild);
+				permissionsService.AddOrUpdateDatabaseVoiceChannel(voiceChannel);
+			}
+			else if (channelAfter is SocketTextChannel)
+			{
+				var textChannel = channelAfter as SocketTextChannel;
+				permissionsService = new PermissionsService(textChannel.Guild);
+				permissionsService.AddOrUpdateDatabaseTextChannel(textChannel);
+			}
+			return Task.CompletedTask;
 		}
 	}
 }

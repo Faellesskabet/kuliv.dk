@@ -24,9 +24,7 @@ namespace Dikubot.Discord.Command
             // Uploads Permissions from the server to the database.
             if (args[0] == "save" && args.Length == 1)
             {
-                permissionsService.UploadRoles();
-                permissionsService.UploadVoiceChannels();
-                permissionsService.UploadTextChannels();
+                permissionsService.SetDatabase();
                 await ReplyAsync("Rolle permissions er blevet skrevet til database.");
                 return;
             }
@@ -34,9 +32,7 @@ namespace Dikubot.Discord.Command
             // Changes Permissions on the server.
             if (args[0] == "overwrite" && args.Length == 1)
             {
-                permissionsService.DownloadRoles();
-                permissionsService.DownloadVoiceChannels();
-                permissionsService.DownloadTextChannels();
+                permissionsService.SetDiscord();
                 await ReplyAsync("Rolle permissions er blevet overskrevet.");
                 return;
             }
