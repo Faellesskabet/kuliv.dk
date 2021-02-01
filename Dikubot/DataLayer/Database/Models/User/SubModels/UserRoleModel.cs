@@ -24,6 +24,9 @@ namespace Dikubot.Database.Models.SubModels
         [BsonIgnore]
         public RoleModel RoleModel { get => _roleServices.Get(_roleId); }
 
+        /*
+        * NOTE: DateTime.MinValue is the default value for a DateTime
+        */
         [BsonElement("StartDate")][BsonRepresentation(BsonType.DateTime)]
         public DateTime StartDate { get; set; }
         
@@ -45,7 +48,10 @@ namespace Dikubot.Database.Models.SubModels
         /// <returns>Returns whether the current time is past the role's enddate</returns>
         public bool HasEnded()
         {
-            return DateTime.Now > EndDate;
+            /*
+             * NOTE: DateTime.MinValue is the default value for a DateTime
+             */
+            return DateTime.Now > EndDate && EndDate != DateTime.MinValue;
         }
         /// <summary>
         /// Tells us whether the current time is in between the startdate and enddate

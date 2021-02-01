@@ -1,46 +1,30 @@
-﻿@page "/"
-@using System.Security.Claims
-@using Dikubot.Webapp.Logic
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@page "/"
 
-<h3>ClaimsPrincipal Data</h3>
-
-<button @onclick="GetClaimsPrincipalData">Get ClaimsPrincipal Data</button>
-
-<p>@_authMessage</p>
-
-@if (_claims.Count() > 0)
-{
-    <ul>
-        @foreach (var claim in _claims)
-        {
-            <li>@claim.Type: @claim.Value</li>
-        }
-    </ul>
-}
-
-<p>@_surnameMessage</p>
+<link href="css/diku/index.css" rel="stylesheet" />
+<div>
+    <div class="header">
+        <h1>Bland selv roller</h1>
+        <p class="info-dump">
+            På DIKU Discord hjemmesiden kan du selv vælge hvilke kursus kanaler du vil se på Discord.
+            For at gøre dette, kan du vælge imellem at følge en kursus pakke, som automatisk til- og framelder dig en række kursuser udfra på normeret tid, 
+            eller du kan selv vælge hvilke kursus kanaler du vil se - og hvornår du vil se dem.
+        </p>
+    </div>
+    <div class="line"></div>
+    <div class="page-body">
+        <BFUCompoundButton ClassName="button" Text="Kursus Pakker" Primary="true" SecondaryText="Er du ny på DIKU? Klik her!"/>
+        <BFUCompoundButton ClassName="button" Text="Kursus Oversigt" SecondaryText="Vælg individuelle kurser"/>
+        <BFUCompoundButton ClassName="button" Text="Event Oversigt" Disabled="true" SecondaryText="Kommer snart!"/>
+        <BFUCompoundButton ClassName="button" Text="Anmod Rolle" SecondaryText="Er du VIP, TA, RKG eller mentor? Klik her!"/>
+        <AuthorizeView Roles="TA, MOD">
+            <BFUCompoundButton ClassName="button" Text="TA Kontrolpanel" Disabled="true" SecondaryText="Kommer snart!"/>
+        </AuthorizeView>
+        <AuthorizeView Roles="MOD">
+            <BFUCompoundButton ClassName="button" Text="Mod Kontrolpanel" Disabled="true" SecondaryText="Kommer snart!"/>
+        </AuthorizeView>
+    </div>
+</div>
 
 @code {
-    private string _authMessage;
-    private string _surnameMessage;
-    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
-
-    private async Task GetClaimsPrincipalData()
-    {
-        var authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
-        var user = authState.User;
-        
-        if (user.Identity.IsAuthenticated)
-        {
-            _authMessage = $"{user.Identity.Name} is authenticated.";
-            _claims = user.Claims;
-            _surnameMessage = 
-                $"Surname: {user.FindFirst(c => c.Type == ClaimTypes.Surname)?.Value}";
-        }
-        else
-        {
-            _authMessage = "The user is NOT authenticated.";
-        }
-    }
+    
 }

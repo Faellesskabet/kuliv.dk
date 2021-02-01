@@ -35,8 +35,13 @@ namespace Dikubot.Database.Models
         [BsonElement("LastMessage")] public string LastMessage { get; set; }
 
         private HashSet<UserRoleModel> _roles = new HashSet<UserRoleModel>();
+
         [BsonElement("Roles")]
-        public UserRoleModel[] Roles { get => _roles.ToArray(); set => _roles = new HashSet<UserRoleModel>(value); }
+        public UserRoleModel[] Roles
+        {
+            get => _roles.ToArray(); 
+            set => _roles = new HashSet<UserRoleModel>(value);
+        }
         
         /// <summary>
         /// AddRole adds the role to a HashSet of roles. This means no duplicates are allowed. If the role is already present, then it is overwritten by the new role
@@ -47,14 +52,34 @@ namespace Dikubot.Database.Models
             AddRole(new UserRoleModel(roleModel));
         }
         
+        /// <summary>
+        /// Remove an existing role from the user
+        /// </summary>
+        /// <param name="roleModel">Removes an element with the same role ID</param>
+        /// <returns>Whether any elements were removed</returns>
         public bool RemoveRole(RoleModel roleModel)
         {
             return RemoveRole(new UserRoleModel(roleModel));
         }
         
+        /// <summary>
+        /// Tells whether or not a user has a role with the same role ID
+        /// </summary>
+        /// <param name="roleModel">Will check if there is a roleModel with the same ID</param>
+        /// <returns>Whether the user has the role</returns>
         public bool HasRole(RoleModel roleModel)
         {
             return HasRole(new UserRoleModel(roleModel));
+        }
+
+        /// <summary>
+        /// Tells us whether or not a UserRoleModel is active. By active, it means that has started and not expired. This is only relevant for UserRoles which has specified an end- and or startdate
+        /// </summary>
+        /// <param name="roleModel">It will check if there exists a roleModel with the same ID and that its active</param>
+        /// <returns>Returns whether the role is active</returns>
+        public bool IsRoleActive(RoleModel roleModel)
+        {
+            return IsRoleActive(new UserRoleModel(roleModel));
         }
         
         /// <summary>
@@ -70,7 +95,12 @@ namespace Dikubot.Database.Models
             }
             return _roles.Add(userRoleModel);
         }
-        
+
+        public bool IsRoleActive(UserRoleModel userRoleModel)
+        {
+            return _roles.TryGetValue(userRoleModel, out userRoleModel) && userRoleModel.IsActive();
+        }
+
         public bool RemoveRole(UserRoleModel userRoleModel)
         {
             return _roles.Remove(userRoleModel);

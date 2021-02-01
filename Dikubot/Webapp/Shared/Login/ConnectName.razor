@@ -1,6 +1,7 @@
 @using Dikubot.Webapp.Logic
 @using Dikubot.Database.Models
 @using Dikubot.Database.Models.Session
+@using Dikubot.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h1>Velkommen til DIKU's Discord Server</h1>
@@ -37,6 +38,14 @@
     
     private async void ConfirmName()
     {
+        
+        /*  Might wanna do this at some point dunno (will need some input validation first)
+        await DiscordBot.DIKU.GetUser(Convert.ToUInt64(user.UserModel.DiscordId)).ModifyAsync(guildUser =>
+        {
+            guildUser.Nickname = name;
+        });
+        */
+        
         user.UserModel.Name = name;
         new UserServices().Upsert(user.UserModel);
         SessionModel sessionModel = new SessionModel(user.UserModel);

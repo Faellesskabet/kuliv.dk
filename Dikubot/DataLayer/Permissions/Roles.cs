@@ -122,7 +122,7 @@ namespace Dikubot.Permissions
 
         /// <summary>
         /// This functions downloads a user's roles from the Database and adds them to their Discord profile. The user's roles will match exactly what is in the database,
-        /// which means roles not specified in the database will be removed from the user. 
+        /// which means roles not specified in the database will be removed from the user. Expired roles will also be removed from the user
         /// </summary>
         /// <param name="userModel"></param>
         public async void SetDiscordUserRoles(UserModel userModel)
@@ -148,7 +148,7 @@ namespace Dikubot.Permissions
             IReadOnlyCollection<SocketRole> discordRoles = guildUser.Roles;
             IEnumerable<IRole> removeRoles = discordRoles.Where((role, i) => 
                 !userRoleModels.Contains(new UserRoleModel(_services.SocketToModel(role))) 
-                || !new UserRoleModel(_services.SocketToModel(role)).IsActive());
+                || !userModel.IsRoleActive(_services.SocketToModel(role)));
             foreach (IRole role in removeRoles)
             {
                 try
