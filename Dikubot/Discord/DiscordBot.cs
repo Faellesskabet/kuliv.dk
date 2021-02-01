@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Dikubot.Database.Models;
 using Dikubot.Discord.Command;
@@ -44,8 +45,8 @@ namespace Dikubot.Discord
 					AlwaysDownloadUsers = true,
 					MessageCacheSize = 1000
 				};
+				
 				client = services.GetRequiredService<DiscordSocketClient>();
-
 				client.Log += Log;
 				client.RoleCreated += RoleCreated;
 				client.RoleDeleted += RoleDeleted;
@@ -100,6 +101,15 @@ namespace Dikubot.Discord
 			var permissionsServices = new PermissionsService(roleAfter.Guild);
 			permissionsServices.AddOrUpdateDatabaseRole(roleAfter);
 			return Task.CompletedTask;
+		}
+		
+		private async Task<bool> IsBotFirstEntryInAuditLog(SocketGuild guild)
+		{
+			var t = await guild.GetAuditLogsAsync(1).ToListAsync();
+			var y  = t.GetEnumerator().Current;
+
+			var x = y?.GetEnumerator().Current;
+			return x != null && x.User.IsBot;
 		}
 		
 		private Task ChannelCreated(SocketChannel channel)
