@@ -3,6 +3,7 @@ using Dikubot.Permissions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dikubot.Database.Models.VoiceChannel;
 using System.Threading.Tasks;
 
 namespace Dikubot.Discord.Command
@@ -34,6 +35,16 @@ namespace Dikubot.Discord.Command
             {
                 permissionsService.SetDiscord();
                 await ReplyAsync("Rolle permissions er blevet overskrevet.");
+                return;
+            }
+            
+            if (args[0] == "makeExpandable" && args.Length == 2)
+            {
+                var voiceChannelServices = new VoiceChannelServices();
+                var newModel = voiceChannelServices.Get(model => model.DiscordId == args[1]);
+                newModel.ExpandOnJoin = true;
+                voiceChannelServices.Upsert(newModel);
+                await ReplyAsync("Har opdateret voice chat til af være expandable.");
                 return;
             }
         }
