@@ -1,4 +1,4 @@
-using Discord.Commands;
+using Dikubot.Database.Models.CategoryChannel;
 using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.VoiceChannel;
 using Dikubot.Database.Models.TextChannel;
@@ -10,17 +10,19 @@ namespace Dikubot.Permissions
     public partial class PermissionsService
     {
         /// <Summary>The constructor of PermissionServices.</Summary>
-        /// <param name="guild">The context for which the PermissionService is being executed in.</param
-        private readonly SocketGuild guild; // This can not be made private.
-        private readonly RoleServices _roleServices;
-        private readonly VoiceChannelServices _voiceChannelServices;
-        private readonly TextChannelServices _textChannelServices;
+        /// <param name="guild">The guild for which the PermissionService is being executed in.</param
+        SocketGuild guild; // This can not be made private.
+        RoleServices _roleServices;
+        VoiceChannelServices _voiceChannelServices;
+        TextChannelServices _textChannelServices;
+        CategoryChannelServices _categoryChannelServices;
         public PermissionsService(SocketGuild guild)
         {
             this.guild = guild;
             _roleServices = new RoleServices();
             _voiceChannelServices = new VoiceChannelServices();
             _textChannelServices = new TextChannelServices();
+            _categoryChannelServices = new CategoryChannelServices();
         }
 
         public void SetDatabase()
@@ -28,6 +30,7 @@ namespace Dikubot.Permissions
             SetDatabaseRoles();
             SetDatabaseVoiceChannels();
             SetDatabaseTextChannels();
+            SetDatabaseCategoryChannels();
         }
 
         public void SetDiscord()
@@ -35,6 +38,7 @@ namespace Dikubot.Permissions
             SetDiscordRoles();
             SetDiscordVoiceChannels();
             SetDiscordTextChannels();
+            SetDiscordCategoryChannels();
         }
     }
 }

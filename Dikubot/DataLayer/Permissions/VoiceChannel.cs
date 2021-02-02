@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dikubot.Database.Models.VoiceChannel;
 using Discord;
 using Discord.Rest;
@@ -66,7 +67,6 @@ namespace Dikubot.Permissions
                         voiceChannelModel.Name,
                         channelProperties =>
                         {
-                            channelProperties.Name = properties.Name;
                             channelProperties.Bitrate = properties.Bitrate;
                             channelProperties.UserLimit = properties.UserLimit;
                             channelProperties.Position = properties.Position;
@@ -137,9 +137,58 @@ namespace Dikubot.Permissions
         public void AddOrUpdateDatabaseVoiceChannel(RestVoiceChannel voiceChannel) =>
             _voiceChannelServices.Upsert(_voiceChannelServices.RestToModel(voiceChannel));
         
-        /// <Summary>Removes a voice channel on the discord server to the database.</Summary>
+        /// <Summary>Add a voice channel on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseVoiceChannel(VoiceChannelModel voiceChannel) =>
+            _voiceChannelServices.Upsert(voiceChannel);
+        
+        /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseVoiceChannel(SocketVoiceChannel voiceChannel) =>
             _voiceChannelServices.Remove(_voiceChannelServices.SocketToModel(voiceChannel));
+        
+        /// <Summary>Removes a voice channel from the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseVoiceChannel(RestVoiceChannel voiceChannel) =>
+            _voiceChannelServices.Remove(_voiceChannelServices.RestToModel(voiceChannel));
+        
+        /// <Summary>Removes a voice channel from the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseVoiceChannel(VoiceChannelModel voiceChannel) =>
+            _voiceChannelServices.Remove(voiceChannel);
+        
+        /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task RemoveVoiceChannel(SocketVoiceChannel voiceChannel)
+        {
+            RemoveDatabaseVoiceChannel(voiceChannel);
+            await voiceChannel.DeleteAsync();
+        }
+        /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task RemoveVoiceChannel(RestVoiceChannel voiceChannel)
+        {
+            RemoveDatabaseVoiceChannel(voiceChannel);
+            await voiceChannel.DeleteAsync();
+        }
+        
+        /// <Summary>Adds a voice channel to the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task<VoiceChannelModel> AddVoiceChannel(VoiceChannelModel voiceChannel)
+        {
+            var properties = _voiceChannelServices.ModelToVoiceChannelProperties(voiceChannel);
+            var restVoiceChannel = await guild.CreateVoiceChannelAsync(
+                voiceChannel.Name,
+                channelProperties =>
+                {
+                    channelProperties.Bitrate = properties.Bitrate;
+                    channelProperties.UserLimit = properties.UserLimit;
+                    channelProperties.Position = properties.Position;
+                    channelProperties.CategoryId = properties.CategoryId;
+                });
+            voiceChannel.DiscordId = restVoiceChannel.Id.ToString();
+            AddOrUpdateDatabaseVoiceChannel(voiceChannel);
+            return voiceChannel;
+        }
     }
 }

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dikubot.Database.Models.TextChannel;
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 
 namespace Dikubot.Permissions
@@ -122,9 +124,64 @@ namespace Dikubot.Permissions
         public void AddOrUpdateDatabaseTextChannel(SocketTextChannel textChannel) =>
             _textChannelServices.Upsert(_textChannelServices.SocketToModel(textChannel));
         
-        /// <Summary>Removes a text channel on the discord server to the database.</Summary>
+        /// <Summary>Add a text channel on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseTextChannel(RestTextChannel textChannel) =>
+            _textChannelServices.Upsert(_textChannelServices.RestToModel(textChannel));
+        
+        /// <Summary>Add a text channel on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseTextChannel(TextChannelModel textChannel) =>
+            _textChannelServices.Upsert(textChannel);
+        
+        /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseTextChannel(SocketTextChannel textChannel) =>
             _textChannelServices.Remove(_textChannelServices.SocketToModel(textChannel));
+        
+        /// <Summary>Removes a text channel from the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseTextChannel(RestTextChannel textChannel) =>
+            _textChannelServices.Remove(_textChannelServices.RestToModel(textChannel));
+        
+        /// <Summary>Removes a text channel from the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseTextChannel(TextChannelModel textChannel) =>
+            _textChannelServices.Remove(textChannel);
+        
+        /// <Summary>Removes a text channel from the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task RemoveTextChannel(SocketTextChannel textChannel)
+        {
+            RemoveDatabaseTextChannel(textChannel);
+            await textChannel.DeleteAsync();
+        }
+        /// <Summary>Removes a text channel from the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task RemoveTextChannel(RestTextChannel textChannel)
+        {
+            RemoveDatabaseTextChannel(textChannel);
+            await textChannel.DeleteAsync();
+        }
+        
+        /// <Summary>Adds a text channel to the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task<TextChannelModel> AddTextChannel(TextChannelModel textChannel)
+        {
+            var properties = _textChannelServices.ModelToTextChannelProperties(textChannel);
+            var restTextChannel = await guild.CreateTextChannelAsync(
+                textChannel.Name,
+                channelProperties =>
+                {
+                    channelProperties.Position = properties.Position;
+                    channelProperties.CategoryId = properties.CategoryId;
+                    channelProperties.Topic = properties.Topic;
+                    channelProperties.IsNsfw = properties.IsNsfw;
+                    channelProperties.SlowModeInterval = properties.SlowModeInterval;
+                });
+            textChannel.DiscordId = restTextChannel.Id.ToString();
+            AddOrUpdateDatabaseTextChannel(textChannel);
+            return textChannel;
+        }
     }
 }
