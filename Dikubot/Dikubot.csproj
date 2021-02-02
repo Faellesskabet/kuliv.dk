@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DataLayer\Database\Models\Channel\CategoryChannel" />
     <Folder Include="DataLayer\Logic" />
   </ItemGroup>
 
