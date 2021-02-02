@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Discord.Commands;
 using Dikubot.Database.Models;
 using Dikubot.Database.Models.SubModels;
 using Dikubot.DataLayer.Static;
@@ -13,18 +12,6 @@ namespace Dikubot.Permissions
 {
     public partial class PermissionsService
     {
-        /// <Summary>Finds all the RoleModels which should be removed from the database since it is not a role on the
-        /// discord server.</Summary>
-        /// <param name="roleModels">List of all the roles in the database.</param>
-        /// <param name="socketRoles">List of all the roles on the discord server.</param>
-        /// <return>A list of all the roles which should be removed from the database.</return>
-        private List<RoleModel> ToBeRemovedFromDatabase(List<RoleModel> roleModels, List<SocketRole> socketRoles)
-        {
-            Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
-            roleModels.RemoveAll(m => socketRoles.Exists(n => inDB(m, n)));
-            return roleModels;
-        }
-
         /// <Summary>Will sync all the roles on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void SetDatabaseRoles()
