@@ -34,43 +34,6 @@ namespace Dikubot.Permissions
                 _voiceChannelServices.Upsert(_voiceChannelServices.SocketToModel(model)));
         }
 
-        /// <Summary>Will add the overwrite permissions to the discords channel given.</Summary>
-        /// <param name="voiceChannelId">The id of the voice channel.</param>
-        /// <param name="voiceChannelModel">The voiceChannelModel retrieved from Database.</param>
-        /// <return>void.</return>
-        public async void AddOverwritePermissions(ulong voiceChannelId, VoiceChannelModel voiceChannelModel)
-        {
-            var socketChannel = guild.GetVoiceChannel(voiceChannelId);
-            foreach (var type in voiceChannelModel.PermissionsOverwrites.Keys)
-            {
-                foreach (var id in voiceChannelModel.PermissionsOverwrites[type].Keys)
-                {
-                    if (type == "Role")
-                    {
-                        var overwritePermissions =
-                            _voiceChannelServices.ModelToOverwritePermissions(
-                                voiceChannelModel,
-                                "Role",
-                                id);
-                        await socketChannel.AddPermissionOverwriteAsync(
-                            guild.GetRole(Convert.ToUInt64(id)),
-                            overwritePermissions);
-                    }
-                    else
-                    {
-                        var overwritePermissions =
-                            _voiceChannelServices.ModelToOverwritePermissions(
-                                voiceChannelModel,
-                                "User",
-                                id);
-                        await socketChannel.AddPermissionOverwriteAsync(
-                            guild.GetUser(Convert.ToUInt64(id)),
-                            overwritePermissions);
-                    }
-                }
-            }
-        }
-        
         /// <Summary>Will sync all the voice channels on the database to the discord server.</Summary>
         /// <return>void.</return>
         public async void SetDiscordVoiceChannels()
@@ -99,7 +62,7 @@ namespace Dikubot.Permissions
                 {
                     // If the role could not be found create it.
                     var properties = _voiceChannelServices.ModelToVoiceChannelProperties(voiceChannelModel);
-                    var temp = await guild.CreateVoiceChannelAsync(
+                    var restVoiceChannel = await guild.CreateVoiceChannelAsync(
                         voiceChannelModel.Name,
                         channelProperties =>
                         {
@@ -110,8 +73,19 @@ namespace Dikubot.Permissions
                             channelProperties.CategoryId = properties.CategoryId;
                         });
                     
-                    AddOverwritePermissions(temp.Id, voiceChannelModel);
-
+                    // Adds all the overwrite Permissions from the DB.
+                    foreach (var overwriteModel in voiceChannelModel.PermissionOverwrites)
+                    {
+                        var overwrite = overwriteModel.ToOverwrite();
+                        if (overwrite.TargetType == PermissionTarget.Role)
+                            await restVoiceChannel.AddPermissionOverwriteAsync(
+                                guild.GetRole(overwrite.TargetId),
+                                overwrite.Permissions);
+                        else
+                            await restVoiceChannel.AddPermissionOverwriteAsync(
+                                guild.GetUser(overwrite.TargetId),
+                                overwrite.Permissions);
+                    }
                 }
                 else
                 {
@@ -138,7 +112,18 @@ namespace Dikubot.Permissions
                     }
                     
                     // Adds all the overwrite Permissions from the DB.
-                    AddOverwritePermissions(socketVoiceChannel.Id, voiceChannelModel);
+                    foreach (var overwriteModel in voiceChannelModel.PermissionOverwrites)
+                    {
+                        var overwrite = overwriteModel.ToOverwrite();
+                        if (overwrite.TargetType == PermissionTarget.Role)
+                            await socketVoiceChannel.AddPermissionOverwriteAsync(
+                                guild.GetRole(overwrite.TargetId),
+                                overwrite.Permissions);
+                        else
+                            await socketVoiceChannel.AddPermissionOverwriteAsync(
+                                guild.GetUser(overwrite.TargetId),
+                                overwrite.Permissions);
+                    }
                 }
             }
         }

@@ -33,43 +33,6 @@ namespace Dikubot.Permissions
                 _textChannelServices.Upsert(_textChannelServices.SocketToModel(model)));
         }
 
-        /// <Summary>Will add the overwrite permissions to the discords channel given.</Summary>
-        /// <param name="textChannelId">The id of the text channel.</param>
-        /// <param name="textChannelModel">The textChannelModel retrieved from Database.</param>
-        /// <return>void.</return>
-        public async void AddOverwritePermissions(ulong textChannelId, TextChannelModel textChannelModel)
-        {
-            var socketChannel = guild.GetTextChannel(textChannelId);
-            foreach (var type in textChannelModel.PermissionsOverwrites.Keys)
-            {
-                foreach (var id in textChannelModel.PermissionsOverwrites[type].Keys)
-                {
-                    if (type == "Role")
-                    {
-                        var overwritePermissions =
-                            _textChannelServices.ModelToOverwritePermissions(
-                                textChannelModel,
-                                "Role",
-                                id);
-                        await socketChannel.AddPermissionOverwriteAsync(
-                            guild.GetRole(Convert.ToUInt64(id)),
-                            overwritePermissions);
-                    }
-                    else
-                    {
-                        var overwritePermissions =
-                            _textChannelServices.ModelToOverwritePermissions(
-                                textChannelModel,
-                                "User",
-                                id);
-                        await socketChannel.AddPermissionOverwriteAsync(
-                            guild.GetUser(Convert.ToUInt64(id)),
-                            overwritePermissions);
-                    }
-                }
-            }
-        }
-        
         /// <Summary>Will sync all the text channels on the database to the discord server.</Summary>
         /// <return>void.</return>
         public async void SetDiscordTextChannels()
@@ -89,7 +52,6 @@ namespace Dikubot.Permissions
             
             foreach(var textChannelModel in textChannelModels)
             {
-
                 // Finds the text channel discord server text channel that match the text channel in the database.
                 var socketTextChannel = socketTextChannels.Find(socket => 
                     Convert.ToUInt64(textChannelModel.DiscordId) == socket.Id);
@@ -98,7 +60,7 @@ namespace Dikubot.Permissions
                 {
                     // If the text channel could not be found create it.
                     var properties = _textChannelServices.ModelToTextChannelProperties(textChannelModel);
-                    var temp = await guild.CreateTextChannelAsync(
+                    var restTextChannel = await guild.CreateTextChannelAsync(
                         textChannelModel.Name,
                         channelProperties =>
                         {
@@ -110,8 +72,19 @@ namespace Dikubot.Permissions
                             channelProperties.Name = properties.Name;
                         });
                     
-                    AddOverwritePermissions(temp.Id, textChannelModel);
-
+                    // Adds all the overwrite Permissions from the DB.
+                    foreach (var overwriteModel in textChannelModel.PermissionOverwrites)
+                    {
+                        var overwrite = overwriteModel.ToOverwrite();
+                        if (overwrite.TargetType == PermissionTarget.Role)
+                            await restTextChannel.AddPermissionOverwriteAsync(
+                                guild.GetRole(overwrite.TargetId),
+                                overwrite.Permissions);
+                        else
+                            await restTextChannel.AddPermissionOverwriteAsync(
+                                guild.GetUser(overwrite.TargetId),
+                                overwrite.Permissions);
+                    }
                 }
                 else
                 {
@@ -126,20 +99,20 @@ namespace Dikubot.Permissions
                         channelProperties.SlowModeInterval = properties.SlowModeInterval;
                         channelProperties.Name = properties.Name;
                     });
-
-                    // Removes all the overwrite Permissions.
-                    foreach (var overwrite in socketTextChannel.PermissionOverwrites)
-                    {
-                        if (overwrite.TargetType == PermissionTarget.Role)
-                            await socketTextChannel.RemovePermissionOverwriteAsync(
-                                guild.GetRole(overwrite.TargetId));
-                        else
-                            await socketTextChannel.RemovePermissionOverwriteAsync(
-                                guild.GetUser(overwrite.TargetId));
-                    }
                     
                     // Adds all the overwrite Permissions from the DB.
-                    AddOverwritePermissions(socketTextChannel.Id, textChannelModel);
+                    foreach (var overwriteModel in textChannelModel.PermissionOverwrites)
+                    {
+                        var overwrite = overwriteModel.ToOverwrite();
+                        if (overwrite.TargetType == PermissionTarget.Role)
+                            await socketTextChannel.AddPermissionOverwriteAsync(
+                                guild.GetRole(overwrite.TargetId),
+                                overwrite.Permissions);
+                        else
+                            await socketTextChannel.AddPermissionOverwriteAsync(
+                                guild.GetUser(overwrite.TargetId),
+                                overwrite.Permissions);
+                    }
                 }
             }
         }
