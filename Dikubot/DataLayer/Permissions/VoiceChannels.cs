@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dikubot.Database.Models.VoiceChannel;
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 
 namespace Dikubot.Permissions
@@ -145,6 +146,11 @@ namespace Dikubot.Permissions
         /// <return>void.</return>
         public void AddOrUpdateDatabaseVoiceChannel(SocketVoiceChannel voiceChannel) =>
             _voiceChannelServices.Upsert(_voiceChannelServices.SocketToModel(voiceChannel));
+        
+        /// <Summary>Add a voice channel on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseVoiceChannel(RestVoiceChannel voiceChannel) =>
+            _voiceChannelServices.Upsert(_voiceChannelServices.RestToModel(voiceChannel));
         
         /// <Summary>Removes a voice channel on the discord server to the database.</Summary>
         /// <return>void.</return>

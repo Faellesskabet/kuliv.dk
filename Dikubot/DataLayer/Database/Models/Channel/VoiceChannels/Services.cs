@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Net.Sockets;
 using Dikubot.Discord;
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using MongoDB.Driver;
 
@@ -54,6 +55,83 @@ namespace Dikubot.Database.Models.VoiceChannel
         /// <param name="voiceChannel">The SocketVoiceChannel to be converted.</param>
         /// <return>Returns a VoiceChannelModel.</return>
         public VoiceChannelModel SocketToModel(SocketVoiceChannel voiceChannel)
+        {
+            var _voiceChannel = new VoiceChannelModel();
+            _voiceChannel.DiscordId = voiceChannel.Id.ToString();
+            _voiceChannel.Bitrate = voiceChannel.Bitrate;
+            _voiceChannel.Position = voiceChannel.Position;
+            _voiceChannel.CreatedAt = voiceChannel.CreatedAt.DateTime;
+            _voiceChannel.Name = voiceChannel.Name;
+            _voiceChannel.UserLimit = voiceChannel.UserLimit;
+            _voiceChannel.DiscordCategoryId = voiceChannel.CategoryId.ToString();
+            _voiceChannel.PermissionsOverwrites = 
+                    new Dictionary<string, Dictionary<string, Dictionary<string, string?>>>();
+            foreach (var overwrite in voiceChannel.PermissionOverwrites)
+            {
+                var id = overwrite.TargetId.ToString();
+                string type;
+                if (overwrite.TargetType == PermissionTarget.Role)
+                    type = "Role";
+                else
+                    type = "User";
+
+                if (!_voiceChannel.PermissionsOverwrites.ContainsKey(type))
+                {
+                    _voiceChannel.PermissionsOverwrites[type] = new Dictionary<string, Dictionary<string, string?>>();
+                }
+
+                if (!_voiceChannel.PermissionsOverwrites[type].ContainsKey(id))
+                {
+                    _voiceChannel.PermissionsOverwrites[type][id] = new Dictionary<string, string?>();
+                }
+                _voiceChannel.PermissionsOverwrites[type][id]["Connect"] = 
+                        overwrite.Permissions.Connect.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["Speak"] = 
+                        overwrite.Permissions.Speak.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["AddReactions"] = 
+                        overwrite.Permissions.AddReactions.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["AttachFiles"] = 
+                        overwrite.Permissions.AttachFiles.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["DeafenMembers"] = 
+                        overwrite.Permissions.DeafenMembers.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["EmbedLinks"] = 
+                        overwrite.Permissions.EmbedLinks.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["ManageChannel"] = 
+                        overwrite.Permissions.ManageChannel.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["ManageMessages"] = 
+                        overwrite.Permissions.ManageMessages.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["ManageRoles"] = 
+                        overwrite.Permissions.ManageRoles.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["ManageWebhooks"] = 
+                        overwrite.Permissions.ManageWebhooks.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["MentionEveryone"] = 
+                        overwrite.Permissions.MentionEveryone.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["MoveMembers"] = 
+                        overwrite.Permissions.MoveMembers.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["MuteMembers"] = 
+                        overwrite.Permissions.MuteMembers.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["SendMessages"] = 
+                        overwrite.Permissions.SendMessages.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["ViewChannel"] = 
+                        overwrite.Permissions.ViewChannel.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["CreateInstantInvite"] = 
+                        overwrite.Permissions.CreateInstantInvite.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["ReadMessageHistory"] = 
+                        overwrite.Permissions.ReadMessageHistory.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["UseExternalEmojis"] = 
+                        overwrite.Permissions.UseExternalEmojis.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["UseVAD"] = 
+                        overwrite.Permissions.UseVAD.ToString();
+                _voiceChannel.PermissionsOverwrites[type][id]["SendTTSMessages"] = 
+                        overwrite.Permissions.SendTTSMessages.ToString();
+            }
+            return _voiceChannel;
+        }
+        
+        /// <Summary>Converts a RestVoiceChannel to a VoiceChannelModel.</Summary>
+        /// <param name="voiceChannel">The RestVoiceChannel to be converted.</param>
+        /// <return>Returns a VoiceChannelModel.</return>
+        public VoiceChannelModel RestToModel(RestVoiceChannel voiceChannel)
         {
             var _voiceChannel = new VoiceChannelModel();
             _voiceChannel.DiscordId = voiceChannel.Id.ToString();
