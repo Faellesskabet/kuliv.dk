@@ -61,3 +61,11 @@ a, .btn-link {
     border: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
+
+p {
+    font-family: 'Roboto', sans-serif;
+}
+
+h1 {
+    font-family: 'Roboto', sans-serif;
+}
