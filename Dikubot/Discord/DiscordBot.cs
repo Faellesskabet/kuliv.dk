@@ -84,6 +84,9 @@ namespace Dikubot.Discord
 				.BuildServiceProvider();
 		}
 
+		/// <Summary>Checks if the first entry in the audit log is a bot.</Summary>
+		/// <param name="guild">The guild that is being checked for.</param>
+		/// <return>Task<bool>.</return>
 		private async Task<bool> IsBotFirstEntryInAuditLog(SocketGuild guild)
 		{
 			await foreach (var auditLogEntryCollection in guild.GetAuditLogsAsync(1))
@@ -94,7 +97,7 @@ namespace Dikubot.Discord
 
 		/// <Summary>When a role gets created it will be added to the database.</Summary>
 		/// <param name="role">The role that has been created.</param>
-		/// <return>void.</return>
+		/// <return>Task.</return>
 		private async Task RoleCreated(SocketRole role)
 		{
 			if (await IsBotFirstEntryInAuditLog(role.Guild))
@@ -106,7 +109,7 @@ namespace Dikubot.Discord
 		
 		/// <Summary>When a role gets destroyed it will be removed to the database.</Summary>
 		/// <param name="role">The role which will be destroyed.</param>
-		/// <return>void.</return>
+		/// <return>Task.</return>
 		private async Task RoleDeleted(SocketRole role)
 		{
 			if (await IsBotFirstEntryInAuditLog(role.Guild))
@@ -119,7 +122,7 @@ namespace Dikubot.Discord
 		/// <Summary>When a role gets edited it will be updated in the database.</Summary>
 		/// <param name="roleBefore">The role before it got edited.</param>
 		/// <param name="roleAfter">The role after it got edited.</param>
-		/// <return>void.</return>
+		/// <return>Task.</return>
 		private async Task RoleUpdated(SocketRole roleBefore, SocketRole roleAfter)
 		{
 			if (await IsBotFirstEntryInAuditLog(roleAfter.Guild))
@@ -131,7 +134,7 @@ namespace Dikubot.Discord
 		
 		/// <Summary>When a channel gets created it will be added to the database.</Summary>
 		/// <param name="channel">The channel that has been created.</param>
-		/// <return>void.</return>
+		/// <return>Task.</return>
 		private async Task ChannelCreated(SocketChannel channel)
 		{
 			PermissionsService permissionsService;
@@ -159,7 +162,7 @@ namespace Dikubot.Discord
 		
 		/// <Summary>When a channel gets destroyed it will be removed to the database.</Summary>
 		/// <param name="channel">The channel which will be destroyed.</param>
-		/// <return>void.</return>
+		/// <return>Task.</return>
 		private async Task ChannelDestroyed(SocketChannel channel)
 		{
 			PermissionsService permissionsService;
@@ -188,7 +191,7 @@ namespace Dikubot.Discord
 		/// <Summary>When a channel gets edited it will be updated in the database.</Summary>
 		/// <param name="channelBefore">The channel before it got edited.</param>
 		/// <param name="channelAfter">The channel after it got edited.</param>
-		/// <return>void.</return>
+		/// <return>Task.</return>
 		private async Task ChannelUpdated(SocketChannel channelBefore, SocketChannel channelAfter)
 		{
 			PermissionsService permissionsService;
@@ -214,6 +217,11 @@ namespace Dikubot.Discord
 			}
 		}
 
+		/// <Summary>Makes a new voice chat when someone joins a expandable voice chat.</Summary>
+		/// <param name="user">The user who joined.</param>
+		/// <param name="leaveState">The state when the user leaves.</param>
+		/// <param name="joinState">The state when the user joins.</param>
+		/// <return>Task.</return>
 		private async Task VoiceChannelExpand(SocketUser user, SocketVoiceState leaveState, SocketVoiceState joinState)
 		{
 			
@@ -229,6 +237,10 @@ namespace Dikubot.Discord
 				if (childModel.DeleteOnLeave && childSocket.Users.Count == 0)
 				{
 					await childSocket.DeleteAsync();
+				}
+				if (model.DeleteOnLeave && channel.Users.Count == 0)
+				{
+					await channel.DeleteAsync();
 				}
 			}
 
@@ -246,13 +258,12 @@ namespace Dikubot.Discord
 						});
 					
 					var permissionsService = new PermissionsService(guild);
-					permissionsService.AddOrUpdateDatabaseVoiceChannel(guild.GetVoiceChannel(restVoiceChannel.Id));
+					permissionsService.AddOrUpdateDatabaseVoiceChannel(restVoiceChannel);
 					
 					var newModel = new VoiceChannelModel();
 					newModel.DiscordId = restVoiceChannel.Id.ToString();
 					newModel.ExpandOnJoin = true;
 					newModel.DeleteOnLeave = true;
-					
 					voiceChannelServices.Upsert(newModel);
 
 					model.Child = newModel.DiscordId;
