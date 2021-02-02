@@ -66,7 +66,8 @@ namespace Dikubot.Discord
 
 				await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
 				await client.StartAsync();
-
+				
+				//This is null for some reason? This is new?
 				DIKU = client.GetGuild(Convert.ToUInt64(Environment.GetEnvironmentVariable("DIKU_DISCORD_ID")));
 				await services.GetRequiredService<CommandHandler>().init();
 
