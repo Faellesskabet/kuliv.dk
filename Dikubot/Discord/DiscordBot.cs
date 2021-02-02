@@ -233,12 +233,16 @@ namespace Dikubot.Discord
 				var guild = channel.Guild;
 				var model = voiceChannelServices.Get(model => model.DiscordId == channel.Id.ToString());
 
+				// Retrieves child.
 				var childModel = voiceChannelServices.Get(m => m.DiscordId == model.Child);
 				var childSocket = guild.GetVoiceChannel(Convert.ToUInt64(model.Child));
+				
+				// Deletes it's child if it is empty and deletable
 				if (childModel.DeleteOnLeave && childSocket.Users.Count == 0)
 				{
 					await childSocket.DeleteAsync();
 				}
+				// Deletes it self if it is empty and deletable.
 				if (model.DeleteOnLeave && channel.Users.Count == 0)
 				{
 					await channel.DeleteAsync();
@@ -252,21 +256,25 @@ namespace Dikubot.Discord
 				var model = voiceChannelServices.Get(model => model.DiscordId == channel.Id.ToString());
 				if (model.ExpandOnJoin && channel.Users.Count == 1)
 				{
-					var restVoiceChannel = await guild.CreateVoiceChannelAsync("temp",
+					// Creates a voice channel.
+					var restVoiceChannel = await guild.CreateVoiceChannelAsync("Rum",
 						properties =>
 						{
 							properties.CategoryId = channel.CategoryId;
 						});
 					
+					// Uploads the new voice channel to the database.
 					var permissionsService = new PermissionsService(guild);
 					permissionsService.AddOrUpdateDatabaseVoiceChannel(restVoiceChannel);
 					
+					// Updates the channel in the database so it is expandable and deletes it self.
 					var newModel = new VoiceChannelModel();
 					newModel.DiscordId = restVoiceChannel.Id.ToString();
 					newModel.ExpandOnJoin = true;
 					newModel.DeleteOnLeave = true;
 					voiceChannelServices.Upsert(newModel);
 
+					// Makes it so the current voice chat joined has the id of it's child
 					model.Child = newModel.DiscordId;
 					voiceChannelServices.Upsert(model);
 				}
