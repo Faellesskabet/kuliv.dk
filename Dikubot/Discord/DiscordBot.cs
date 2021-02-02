@@ -46,8 +46,8 @@ namespace Dikubot.Discord
 					AlwaysDownloadUsers = true,
 					MessageCacheSize = 1000
 				};
+				
 				client = services.GetRequiredService<DiscordSocketClient>();
-
 				client.Log += Log;
 				client.RoleCreated += RoleCreated;
 				client.RoleDeleted += RoleDeleted;
