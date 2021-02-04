@@ -9,28 +9,39 @@ namespace Dikubot.Database.Models.SubModels
     {
         private Guid _roleId;
         private static readonly RoleServices _roleServices = new RoleServices();
-        public UserRoleModel(RoleModel roleModel) : this(roleModel.Id) { }
+
+        public UserRoleModel(RoleModel roleModel) : this(roleModel.Id)
+        {
+        }
 
         public UserRoleModel(Guid roleId)
         {
             _roleId = roleId;
         }
 
-        [BsonElement("RoleId")] [BsonRequired]
-        public Guid RoleId { get => _roleId;
+        [BsonElement("RoleId")]
+        [BsonRequired]
+        public Guid RoleId
+        {
+            get => _roleId;
             set => _roleId = value;
         }
 
         [BsonIgnore]
-        public RoleModel RoleModel { get => _roleServices.Get(_roleId); }
+        public RoleModel RoleModel
+        {
+            get => _roleServices.Get(_roleId);
+        }
 
         /*
         * NOTE: DateTime.MinValue is the default value for a DateTime
         */
-        [BsonElement("StartDate")][BsonRepresentation(BsonType.DateTime)]
+        [BsonElement("StartDate")]
+        [BsonRepresentation(BsonType.DateTime)]
         public DateTime StartDate { get; set; }
-        
-        [BsonElement("EndDate")][BsonRepresentation(BsonType.DateTime)]
+
+        [BsonElement("EndDate")]
+        [BsonRepresentation(BsonType.DateTime)]
         public DateTime EndDate { get; set; }
 
         /// <summary>
@@ -53,6 +64,7 @@ namespace Dikubot.Database.Models.SubModels
              */
             return DateTime.Now > EndDate && EndDate != DateTime.MinValue;
         }
+
         /// <summary>
         /// Tells us whether the current time is in between the startdate and enddate
         /// </summary>
@@ -61,7 +73,7 @@ namespace Dikubot.Database.Models.SubModels
         {
             return HasStarted() && !HasEnded();
         }
-        
+
         /// <summary>
         /// We override the Equals function to determine two UserRoleModels are only equal if their role Id is the same
         /// </summary>

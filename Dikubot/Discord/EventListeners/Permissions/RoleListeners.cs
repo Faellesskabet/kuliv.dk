@@ -12,28 +12,28 @@ namespace Dikubot.Discord.EventListeners.Permissions
         public async Task RoleCreated(SocketRole role)
         {
             var util = new Util();
-            
+
             if (await util.IsBotFirstEntryInAuditLog(role.Guild))
-                return; 
-			
+                return;
+
             var permissionsServices = new PermissionsService(role.Guild);
             permissionsServices.AddOrUpdateDatabaseRole(role);
         }
-		
+
         /// <Summary>When a role gets destroyed it will be removed to the database.</Summary>
         /// <param name="role">The role which will be destroyed.</param>
         /// <return>Task.</return>
         public async Task RoleDeleted(SocketRole role)
         {
             var util = new Util();
-            
+
             if (await util.IsBotFirstEntryInAuditLog(role.Guild))
-                return; 
-			
+                return;
+
             var permissionsServices = new PermissionsService(role.Guild);
             permissionsServices.RemoveDatabaseRole(role);
         }
-		
+
         /// <Summary>When a role gets edited it will be updated in the database.</Summary>
         /// <param name="roleBefore">The role before it got edited.</param>
         /// <param name="roleAfter">The role after it got edited.</param>
@@ -41,10 +41,10 @@ namespace Dikubot.Discord.EventListeners.Permissions
         public async Task RoleUpdated(SocketRole roleBefore, SocketRole roleAfter)
         {
             var util = new Util();
-            
+
             if (await util.IsBotFirstEntryInAuditLog(roleAfter.Guild))
-                return; 
-			
+                return;
+
             var permissionsServices = new PermissionsService(roleAfter.Guild);
             permissionsServices.AddOrUpdateDatabaseRole(roleAfter);
         }

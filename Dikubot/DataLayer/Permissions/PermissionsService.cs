@@ -13,11 +13,13 @@ namespace Dikubot.Permissions
         /// <Summary>The constructor of PermissionServices.</Summary>
         /// <param name="guild">The guild for which the PermissionService is being executed in.</param>
         SocketGuild guild; // This can not be made private.
+
         RoleServices _roleServices;
         VoiceChannelServices _voiceChannelServices;
         TextChannelServices _textChannelServices;
         CategoryChannelServices _categoryChannelServices;
         UserServices _userServices;
+
         public PermissionsService(SocketGuild guild)
         {
             this.guild = guild;

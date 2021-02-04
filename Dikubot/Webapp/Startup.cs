@@ -60,7 +60,7 @@ namespace Dikubot.Webapp
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            
+
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -68,22 +68,22 @@ namespace Dikubot.Webapp
 
             //Cache life span set to 1 second if it's a dev build.
             TimeSpan maxAge = main.IS_DEV ? TimeSpan.FromSeconds(1) : TimeSpan.FromDays(2);
-            
+
             //We do a bunch of caching here
             app.Use(async (context, next) =>
             {
-                context.Response.GetTypedHeaders().CacheControl = 
+                context.Response.GetTypedHeaders().CacheControl =
                     new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
                     {
                         Public = true,
                         MaxAge = maxAge
                     };
-                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = 
-                    new string[] { "Accept-Encoding" };
+                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
+                    new string[] {"Accept-Encoding"};
 
                 await next();
             });
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

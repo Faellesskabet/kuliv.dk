@@ -14,7 +14,10 @@ namespace Dikubot.Database.Models
     /// </summary>
     public class UserServices : Services<UserModel>
     {
-        public UserServices() : base("Main", "Users") { }
+        public UserServices() : base("Main", "Users")
+        {
+        }
+
         public UserModel Get(SocketUser user)
         {
             UserModel model = this.Get(inmodel => inmodel.DiscordId == user.Id.ToString());
@@ -23,6 +26,7 @@ namespace Dikubot.Database.Models
                 model = new UserModel();
                 model.DiscordUser = user;
             }
+
             return model;
         }
 
@@ -42,7 +46,7 @@ namespace Dikubot.Database.Models
             email = email.ToLower();
             return Get(model => model.Email == email);
         }
-        
+
         /// <Summary>Inserts a UserModel in the collection. If a UserModel with the same ID or discordID
         /// already exists, then we imply invoke Update() on the model instead.</Summary>
         /// <param name="modelIn">The Model one wishes to be inserted.</param>
@@ -57,11 +61,13 @@ namespace Dikubot.Database.Models
                 Update(modelIn, new ReplaceOptions() {IsUpsert = true});
                 return modelIn;
             }
+
             if (discordIdCollision)
             {
                 Update(m => m.DiscordId == modelIn.DiscordId, modelIn, new ReplaceOptions() {IsUpsert = true});
                 return modelIn;
             }
+
             Insert(modelIn);
             return modelIn;
         }
@@ -93,7 +99,7 @@ namespace Dikubot.Database.Models
             _user.Roles = roles.ToArray();
             return _user;
         }
-        
+
         /// <Summary>Converts a RestGuildUser to a UserModel.</Summary>
         /// <param name="role">The RestGuildUser model one wishes to be converted.</param>
         /// <return>A UserModel.</return>
@@ -112,7 +118,7 @@ namespace Dikubot.Database.Models
             _user.Roles = roles.ToArray();
             return _user;
         }
- 
+
         /// <Summary>Converts a UserModel to a GuildUserProperties.</Summary>
         /// <param name="role">The UserModel model one wishes to be converted.</param>
         /// <return>A GuildUserProperties.</return>
@@ -128,10 +134,10 @@ namespace Dikubot.Database.Models
                 roleIds.Add(id);
                 roles.Add(guild.GetRole(id));
             }
+
             properties.Roles = roles;
             properties.RoleIds = roleIds;
             return properties;
         }
     }
 }
-

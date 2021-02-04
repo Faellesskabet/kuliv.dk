@@ -15,8 +15,10 @@ namespace Dikubot.Database.Models.Role
     /// </summary>
     public class RoleModel : Model
     {
-        [BsonElement("DiscordId")] [BsonUnique] 
+        [BsonElement("DiscordId")]
+        [BsonUnique]
         public string DiscordId { get; set; }
+
         [BsonElement("Name")] public string Name { get; set; }
         [BsonElement("Color")] public ColorModel Color { get; set; }
         [BsonElement("CreatedAt")] public DateTime CreatedAt { get; set; }

@@ -12,7 +12,6 @@ namespace Dikubot.Permissions
 {
     public partial class PermissionsService
     {
-        
         /// <Summary>Will sync all the voiceChannels on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void SetDatabaseVoiceChannels()
@@ -21,18 +20,18 @@ namespace Dikubot.Permissions
             var socketRoles = guild.VoiceChannels.ToList();
             var toBeRemoved = new List<VoiceChannelModel>(voiceChannelModels);
 
-            Func<VoiceChannelModel, SocketVoiceChannel, bool> inDB = (m0, m1) => 
+            Func<VoiceChannelModel, SocketVoiceChannel, bool> inDB = (m0, m1) =>
                 Convert.ToUInt64(m0.DiscordId) == m1.Id;
-            
+
             // Remove all the roles from the database if they are not on the discord server.
-            toBeRemoved.RemoveAll(m => 
+            toBeRemoved.RemoveAll(m =>
                 socketRoles.Exists(n => inDB(m, n)));
 
             // Remove the roles from the database that is not on the discord server.
             toBeRemoved.ForEach(m => _voiceChannelServices.Remove(m));
-            
+
             // Makes an upsert of the roles on the server so they match the ones in the database.
-            socketRoles.ForEach(model => 
+            socketRoles.ForEach(model =>
                 _voiceChannelServices.Upsert(_voiceChannelServices.SocketToModel(model)));
         }
 
@@ -44,22 +43,21 @@ namespace Dikubot.Permissions
             var socketVoiceChannels = guild.VoiceChannels.ToList();
             var toBeRemoved = new List<SocketVoiceChannel>(socketVoiceChannels);
 
-            Func<VoiceChannelModel, SocketVoiceChannel, bool> inDB = 
+            Func<VoiceChannelModel, SocketVoiceChannel, bool> inDB =
                 (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
-            
+
             // Remove all the roles from the discord server if they are not in the database.
             toBeRemoved.RemoveAll(m => voiceChannelModels.Exists(n => inDB(n, m)));
 
             foreach (var socketVoiceChannel in toBeRemoved)
                 await socketVoiceChannel.DeleteAsync();
-            
-            foreach(var voiceChannelModel in voiceChannelModels)
-            {
 
+            foreach (var voiceChannelModel in voiceChannelModels)
+            {
                 // Finds the role discord server role that match the role in the database.
-                var socketVoiceChannel = socketVoiceChannels.Find(socket => 
+                var socketVoiceChannel = socketVoiceChannels.Find(socket =>
                     Convert.ToUInt64(voiceChannelModel.DiscordId) == socket.Id);
-                
+
                 if (socketVoiceChannel == null)
                 {
                     // If the role could not be found create it.
@@ -73,7 +71,7 @@ namespace Dikubot.Permissions
                             channelProperties.Position = properties.Position;
                             channelProperties.CategoryId = properties.CategoryId;
                         });
-                    
+
                     // Adds all the overwrite Permissions from the DB.
                     foreach (var overwriteModel in voiceChannelModel.PermissionOverwrites)
                     {
@@ -111,7 +109,7 @@ namespace Dikubot.Permissions
                             await socketVoiceChannel.RemovePermissionOverwriteAsync(
                                 guild.GetUser(overwrite.TargetId));
                     }
-                    
+
                     // Adds all the overwrite Permissions from the DB.
                     foreach (var overwriteModel in voiceChannelModel.PermissionOverwrites)
                     {
@@ -128,36 +126,37 @@ namespace Dikubot.Permissions
                 }
             }
         }
+
         /// <Summary>Add a voice channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseVoiceChannel(SocketVoiceChannel voiceChannel) =>
             _voiceChannelServices.Upsert(_voiceChannelServices.SocketToModel(voiceChannel));
-        
+
         /// <Summary>Add a voice channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseVoiceChannel(RestVoiceChannel voiceChannel) =>
             _voiceChannelServices.Upsert(_voiceChannelServices.RestToModel(voiceChannel));
-        
+
         /// <Summary>Add a voice channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseVoiceChannel(VoiceChannelModel voiceChannel) =>
             _voiceChannelServices.Upsert(voiceChannel);
-        
+
         /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseVoiceChannel(SocketVoiceChannel voiceChannel) =>
             _voiceChannelServices.Remove(_voiceChannelServices.SocketToModel(voiceChannel));
-        
+
         /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseVoiceChannel(RestVoiceChannel voiceChannel) =>
             _voiceChannelServices.Remove(_voiceChannelServices.RestToModel(voiceChannel));
-        
+
         /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseVoiceChannel(VoiceChannelModel voiceChannel) =>
             _voiceChannelServices.Remove(voiceChannel);
-        
+
         /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task RemoveVoiceChannel(SocketVoiceChannel voiceChannel)
@@ -165,6 +164,7 @@ namespace Dikubot.Permissions
             RemoveDatabaseVoiceChannel(voiceChannel);
             await voiceChannel.DeleteAsync();
         }
+
         /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task RemoveVoiceChannel(RestVoiceChannel voiceChannel)
@@ -172,7 +172,7 @@ namespace Dikubot.Permissions
             RemoveDatabaseVoiceChannel(voiceChannel);
             await voiceChannel.DeleteAsync();
         }
-        
+
         /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task RemoveVoiceChannel(VoiceChannelModel voiceChannel)
@@ -180,7 +180,7 @@ namespace Dikubot.Permissions
             RemoveDatabaseVoiceChannel(voiceChannel);
             await guild.GetVoiceChannel(Convert.ToUInt64(voiceChannel)).DeleteAsync();
         }
-        
+
         /// <Summary>Adds a voice channel to the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task<VoiceChannelModel> AddVoiceChannel(VoiceChannelModel voiceChannel)

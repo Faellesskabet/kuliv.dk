@@ -13,8 +13,10 @@ namespace Dikubot.Database.Models.TextChannel
     /// </summary>
     public class TextChannelServices : ChannelServices<TextChannelModel>
     {
-        public TextChannelServices() : base("Main", "TextChannels") { }
-        
+        public TextChannelServices() : base("Main", "TextChannels")
+        {
+        }
+
         /// <Summary>Converts a SocketTextChannel to a TextChannelModel.</Summary>
         /// <param name="textChannel">The SocketTextChannel to be converted.</param>
         /// <return>Returns a TextChannelModel.</return>
@@ -34,9 +36,10 @@ namespace Dikubot.Database.Models.TextChannel
             {
                 _textChannel.PermissionOverwrites.Add(new OverwriteModel(overwrite));
             }
+
             return _textChannel;
         }
-        
+
         /// <Summary>Converts a RestTextChannel to a TextChannelModel.</Summary>
         /// <param name="textChannel">The RestTextChannel to be converted.</param>
         /// <return>Returns a TextChannelModel.</return>
@@ -56,6 +59,7 @@ namespace Dikubot.Database.Models.TextChannel
             {
                 _textChannel.PermissionOverwrites.Add(new OverwriteModel(overwrite));
             }
+
             return _textChannel;
         }
 
@@ -64,15 +68,14 @@ namespace Dikubot.Database.Models.TextChannel
         /// <return>Returns a TextChannelProperties.</return>
         public TextChannelProperties ModelToTextChannelProperties(TextChannelModel textChannelModel)
         {
-                var textChannelProperties = new TextChannelProperties();
-                textChannelProperties.Name = textChannelModel.Name;
-                textChannelProperties.Position = textChannelModel.Position;
-                textChannelProperties.CategoryId = Convert.ToUInt64(textChannelModel.DiscordCategoryId);
-                textChannelProperties.Topic = textChannelModel.Topic;
-                textChannelProperties.IsNsfw = textChannelModel.IsNsfw;
-                textChannelProperties.SlowModeInterval = textChannelModel.SlowModeInterval;
-                return textChannelProperties;
+            var textChannelProperties = new TextChannelProperties();
+            textChannelProperties.Name = textChannelModel.Name;
+            textChannelProperties.Position = textChannelModel.Position;
+            textChannelProperties.CategoryId = Convert.ToUInt64(textChannelModel.DiscordCategoryId);
+            textChannelProperties.Topic = textChannelModel.Topic;
+            textChannelProperties.IsNsfw = textChannelModel.IsNsfw;
+            textChannelProperties.SlowModeInterval = textChannelModel.SlowModeInterval;
+            return textChannelProperties;
         }
     }
 }
-

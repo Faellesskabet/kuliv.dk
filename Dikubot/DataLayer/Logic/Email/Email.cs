@@ -10,7 +10,7 @@ namespace Dikubot.DataLayer.Logic.Email
         /// </summary>
         /// <returns>string</returns>
         string GetTextContent();
-        
+
         /// <summary>
         /// The content of the email, in text format, but with HTML tags to spice the email up
         /// </summary>

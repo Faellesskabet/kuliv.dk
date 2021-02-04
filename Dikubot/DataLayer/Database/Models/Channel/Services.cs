@@ -8,8 +8,10 @@ namespace Dikubot.Database.Models.Channel
         protected ChannelServices(string databaseName,
             string collectionName,
             MongoDatabaseSettings databaseSettings = null,
-            MongoCollectionSettings collectionSettings = null) 
-            : base(databaseName, collectionName, databaseSettings, collectionSettings) { }
+            MongoCollectionSettings collectionSettings = null)
+            : base(databaseName, collectionName, databaseSettings, collectionSettings)
+        {
+        }
 
         /// <Summary>Inserts a ChannelModel in the collection. If a ChannelModel with the same ID or discordID
         /// already exists, then we imply invoke Update() on the model instead.</Summary>
@@ -25,11 +27,13 @@ namespace Dikubot.Database.Models.Channel
                 Update(modelIn, new ReplaceOptions() {IsUpsert = true});
                 return modelIn;
             }
+
             if (discordIdCollision)
             {
                 Update(m => m.DiscordId == modelIn.DiscordId, modelIn, new ReplaceOptions() {IsUpsert = true});
                 return modelIn;
             }
+
             Insert(modelIn);
             return modelIn;
         }

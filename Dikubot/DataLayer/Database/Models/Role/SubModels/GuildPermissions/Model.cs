@@ -9,7 +9,7 @@ namespace Dikubot.Database.Models.Role.SubModels
         {
             ToModel(guildPermissions);
         }
-        
+
         [BsonElement("Administrator")] public bool Administrator { get; set; }
         [BsonElement("Connect")] public bool Connect { get; set; }
         [BsonElement("Speak")] public bool Speak { get; set; }

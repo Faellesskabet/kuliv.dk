@@ -14,7 +14,6 @@ namespace Dikubot.Database.Models
     /// </summary>
     public abstract class Services<TModel> where TModel : Model
     {
-
         private readonly IMongoCollection<TModel> _models;
         private readonly Dictionary<string, bool> indexed = new Dictionary<string, bool>();
 
@@ -30,7 +29,7 @@ namespace Dikubot.Database.Models
             IMongoDatabase database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
             // The collection to retrieve from.
             _models = database.GetCollection<TModel>(collectionName, collectionSettings);
-            
+
             //No reason to index the collection every single time
             string indexKey = databaseName + ";" + collectionName;
             if (!indexed.ContainsKey(indexKey))
@@ -102,6 +101,7 @@ namespace Dikubot.Database.Models
                 Update(model, new ReplaceOptions() {IsUpsert = true});
                 return model;
             }
+
             Insert(model);
             return model;
         }
@@ -109,8 +109,8 @@ namespace Dikubot.Database.Models
         /// <Summary>Inserts a Model in the collection. If there is a collision it will write an error.</Summary>
         /// <param name="model">The model which will be inserted.</param>
         /// <return>Void.</return>
-        public TModel Insert(TModel model) 
-        { 
+        public TModel Insert(TModel model)
+        {
             try
             {
                 _models.InsertOne(model);
@@ -119,6 +119,7 @@ namespace Dikubot.Database.Models
             {
                 Console.WriteLine("ILLEGAL INSERT OPERATION " + model.Id + " WAS NOT INSERTED");
             }
+
             return model;
         }
 
@@ -143,7 +144,7 @@ namespace Dikubot.Database.Models
         /// <return>Void.</return>
         public void Update(TModel model, ReplaceOptions options = null) =>
             Update(m => m.Id == model.Id, model, options);
-        
+
         /// <Summary>Removes a element from the collection.</Summary>
         /// <param name="modelIn">The Model one wishes to remove.</param>
         /// <return>Void.</return>
@@ -153,21 +154,21 @@ namespace Dikubot.Database.Models
         /// <Summary>Removes a element from the collection by ID.</Summary>
         /// <param name="id">The ID of the Model to be removed.</param>
         /// <return>Void.</return>
-        public void Remove(Guid id) => 
+        public void Remove(Guid id) =>
             _models.DeleteOne(model => model.Id == id);
-        
+
         /// <Summary>Removes a element from the collection by a predicate.</Summary>
         /// <param name="predicate">The predicate which is used to delete with.</param>
         /// <return>Void.</return>
-        public void Remove(Expression<Func<TModel,bool>> predicate) => 
+        public void Remove(Expression<Func<TModel, bool>> predicate) =>
             _models.DeleteOne(predicate);
-        
+
         /// <Summary>Removes all elements for which the predicate is true.</Summary>
         /// <param name="predicate">The predicate which is used to delete with.</param>
         /// <return>Void.</return>
-        public void RemoveAll(Expression<Func<TModel,bool>> predicate) => 
+        public void RemoveAll(Expression<Func<TModel, bool>> predicate) =>
             _models.DeleteMany(predicate);
-        
+
         /// <Summary>Sets up the unique indexes for the current collection and service.</Summary>
         /// <param name="collection">The collection where we setup the Unique indexes.</param>
         /// <return>Void.</return>
@@ -178,26 +179,26 @@ namespace Dikubot.Database.Models
             IEnumerable<PropertyInfo> uniques = type.GetProperties().Where(
                 // We retrieve all the functions/properties which have the BsonUnique attribute
                 prop => Attribute.IsDefined(prop, typeof(BsonUniqueAttribute)));
-            
+
             foreach (PropertyInfo property in uniques) //We loop over our properties
             {
                 BsonElementAttribute bsonElementAttribute = //We get the BsonElement attribute
                     (BsonElementAttribute) Attribute.GetCustomAttribute(property, typeof(BsonElementAttribute));
                 if (bsonElementAttribute == null) //Continue if the function doesn't have a BsonElement attribute
                     continue;
-                
+
                 /*
                  * We create a unique and sparse index for the element name found in our BsonElement attribute.
                  */
                 collection.Indexes.CreateOne(
                     new CreateIndexModel<TModel>(new IndexKeysDefinitionBuilder<TModel>()
-                            .Ascending(bsonElementAttribute.ElementName), 
-                        new CreateIndexOptions<TModel> 
-                            {   Unique = true, 
-                                Sparse = true
-                            }));
+                            .Ascending(bsonElementAttribute.ElementName),
+                        new CreateIndexOptions<TModel>
+                        {
+                            Unique = true,
+                            Sparse = true
+                        }));
             }
-
         }
     }
 }
