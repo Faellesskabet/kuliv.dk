@@ -16,6 +16,13 @@ namespace Dikubot.Discord.Command
         [Summary("Command for managing permissions.")]
         public async Task PermissionsAsync([Summary("The arguments")] params string[] args)
         {
+            /*
+            var mod = Context.Guild.Roles.ToList().Find(role => role.Name == "Mod");
+            if ( Context.Guild.GetUser(Context.User.Id).Roles.Contains(mod)))
+            {
+            }
+            */
+            
             var permissionsService = new PermissionsService(Context.Guild);
             if (args == null) {
                 await ReplyAsync("Invalid mængde argumenter.");

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dikubot.Database.Models.VoiceChannel;
@@ -17,7 +18,7 @@ namespace Dikubot.Discord.EventListeners
 	    {
 		    if (channel == null)
 			    return;
-
+		    
 		    var guild = channel.Guild;
 		    var voiceChannelServices = new VoiceChannelServices();
 		    var permissionsService = new PermissionsService(guild);
@@ -26,15 +27,27 @@ namespace Dikubot.Discord.EventListeners
 		    if (!channelModel.ExpandOnJoin)
 			    return;
 
+		    // Get's childrens and parent.
 		    var children = voiceChannelServices.GetAll(m => m.DeleteOnLeave && m.ExpandId == channelModel.ExpandId);
+		    var parent = voiceChannelServices.Get(m => !m.DeleteOnLeave && m.ExpandId == channelModel.ExpandId);
+		    var deleteChildren = new List<SocketVoiceChannel>();
+		    var socketParent = guild.GetVoiceChannel(Convert.ToUInt64(parent.DiscordId));
 
-		    var childrenArray = children.ToArray();
-		    for (int i = 1; i < childrenArray.Length; i++)
+		    // Gets all the children that should be deleted.s
+		    foreach (var child in children)
 		    {
-			    var voiceChannel = guild.GetVoiceChannel(Convert.ToUInt64(childrenArray[i].DiscordId));
+			    var voiceChannel = guild.GetVoiceChannel(Convert.ToUInt64(child.DiscordId));
 			    if (voiceChannel?.Users?.Count != null && voiceChannel.Users.Count == 0)
-				    await permissionsService.RemoveVoiceChannel(voiceChannel);
+				    deleteChildren.Add(voiceChannel);
 		    }
+
+		    // If the parent is empty it will delete all children else it will delete alle children but one.
+		    if (socketParent.Users.Count == 0)
+			    foreach (var child in deleteChildren)
+				    await permissionsService.RemoveVoiceChannel(child);
+		    else
+			    foreach (var child in deleteChildren.Skip(1))
+				    await permissionsService.RemoveVoiceChannel(child);
 	    }
     
 	    /// <Summary>Create a channel if no channel is availbe.</Summary>
@@ -84,10 +97,10 @@ namespace Dikubot.Discord.EventListeners
 	    {
 		    var leaveChannel = leaveState.VoiceChannel;
 		    var joinChannel = joinState.VoiceChannel;
-		    await AddChannelIfNonIsAvaiable(leaveChannel);
+		    await DeleteAllEmptyExpandMembers(joinChannel);
 		    await DeleteAllEmptyExpandMembers(leaveChannel);
 		    await AddChannelIfNonIsAvaiable(joinChannel);
-		    
+		    await AddChannelIfNonIsAvaiable(leaveChannel);
 	    }
     }
 }
