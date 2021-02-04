@@ -4,6 +4,8 @@ using System.Linq.Expressions;
 using System.Linq;
 using System.Reflection;
 using Discord;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 
@@ -131,7 +133,10 @@ namespace Dikubot.Database.Models
         {
             try
             {
-                _models.ReplaceOne(predicate, modelIn, options);
+                TModel merged =
+                    BsonSerializer.Deserialize<TModel>(Get(predicate).ToBsonDocument()
+                        .Merge((modelIn.ToBsonDocument()), true));
+                _models.ReplaceOne(predicate, merged, options);
             }
             catch (MongoWriteException e)
             {
