@@ -11,6 +11,7 @@ namespace Dikubot.DataLayer.Static
             {
                 return;
             }
+
             Console.WriteLine($"[DEBUG] {DateTime.Now.ToString(CultureInfo.CurrentCulture)} {log}");
         }
     }

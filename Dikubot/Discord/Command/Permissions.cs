@@ -23,8 +23,9 @@ namespace Dikubot.Discord.Command
                 return;
 
             var permissionsService = new PermissionsService(Context.Guild);
-            
-            if (args == null) {
+
+            if (args == null)
+            {
                 await ReplyAsync("Invalid mængde argumenter.");
                 return;
             }
@@ -54,6 +55,7 @@ namespace Dikubot.Discord.Command
                     await ReplyAsync("Invalid Voice Channel Id.");
                     return;
                 }
+
                 newModel.ExpandOnJoin = true;
                 newModel.ExpandId = newModel.DiscordId;
                 permissionsService.AddOrUpdateDatabaseVoiceChannel(newModel);

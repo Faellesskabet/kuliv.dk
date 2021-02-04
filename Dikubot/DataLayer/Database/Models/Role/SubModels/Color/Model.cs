@@ -10,14 +10,14 @@ namespace Dikubot.Database.Models.Role.SubModels
         {
             ToModel(color);
         }
-        
+
         [BsonElement("Red")] public int Red { get; set; }
         [BsonElement("Green")] public int Green { get; set; }
         [BsonElement("Blue")] public int Blue { get; set; }
 
         public Color ToColor() =>
             new(Red, Green, Blue);
-        
+
         public void ToModel(Color? color)
         {
             if (color == null)

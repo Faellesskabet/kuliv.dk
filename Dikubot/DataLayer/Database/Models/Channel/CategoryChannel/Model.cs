@@ -7,5 +7,7 @@ namespace Dikubot.Database.Models.VoiceChannel
     /// <summary>
     /// Class for elements in the CategoryChannel collection.
     /// </summary>
-    public class CategoryChannelModel : ChannelModel { }
+    public class CategoryChannelModel : ChannelModel
+    {
+    }
 }

@@ -15,7 +15,9 @@ namespace Dikubot.Database.Models.CategoryChannel
     /// </summary>
     public class CategoryChannelServices : ChannelServices<CategoryChannelModel>
     {
-        public CategoryChannelServices() : base("Main", "CategoryChannels") { }
+        public CategoryChannelServices() : base("Main", "CategoryChannels")
+        {
+        }
 
         /// <Summary>Converts a SocketCategoryChannel to a CategoryChannelModel.</Summary>
         /// <param name="categoryChannel">The SocketCategoryChannel to be converted.</param>
@@ -30,11 +32,12 @@ namespace Dikubot.Database.Models.CategoryChannel
             _categoryChannel.PermissionOverwrites = new List<OverwriteModel>();
             foreach (var overwrite in categoryChannel.PermissionOverwrites)
             {
-                    _categoryChannel.PermissionOverwrites.Add(new OverwriteModel(overwrite));
+                _categoryChannel.PermissionOverwrites.Add(new OverwriteModel(overwrite));
             }
+
             return _categoryChannel;
         }
-        
+
         /// <Summary>Converts a RestCategoryChannel to a CategoryChannelModel.</Summary>
         /// <param name="categoryChannel">The RestCategoryChannel to be converted.</param>
         /// <return>Returns a CategoryChannelModel.</return>
@@ -48,24 +51,22 @@ namespace Dikubot.Database.Models.CategoryChannel
             _categoryChannel.PermissionOverwrites = new List<OverwriteModel>();
             foreach (var overwrite in categoryChannel.PermissionOverwrites)
             {
-                    _categoryChannel.PermissionOverwrites.Add(new OverwriteModel(overwrite));
+                _categoryChannel.PermissionOverwrites.Add(new OverwriteModel(overwrite));
             }
+
             return _categoryChannel;
         }
-        
+
         /// <Summary>Converts a CategoryChannelModel to GuildChannelProperties.</Summary>
         /// <param name="categoryChannelModel">The CategoryChannelModel to be converted.</param>
         /// <return>Returns a GuildChannelProperties.</return>
         public GuildChannelProperties ModelToCategoryChannelProperties(CategoryChannelModel categoryChannelModel)
         {
-                var categoryChannelProperties = new GuildChannelProperties();
-                categoryChannelProperties.Name = categoryChannelModel.Name;
-                categoryChannelProperties.Position = categoryChannelModel.Position;
-                categoryChannelProperties.CategoryId = Convert.ToUInt64(categoryChannelModel.DiscordId);
-                return categoryChannelProperties;
+            var categoryChannelProperties = new GuildChannelProperties();
+            categoryChannelProperties.Name = categoryChannelModel.Name;
+            categoryChannelProperties.Position = categoryChannelModel.Position;
+            categoryChannelProperties.CategoryId = Convert.ToUInt64(categoryChannelModel.DiscordId);
+            return categoryChannelProperties;
         }
-        
     }
 }
-
-

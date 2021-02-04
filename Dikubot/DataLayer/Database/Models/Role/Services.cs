@@ -16,7 +16,9 @@ namespace Dikubot.Database.Models.Role
     /// </summary>
     public class RoleServices : Services<RoleModel>
     {
-        public RoleServices() : base("Main", "Roles") { }
+        public RoleServices() : base("Main", "Roles")
+        {
+        }
 
         /// <Summary>Inserts a Model in the collection. If a RoleModel with the same ID, Name or discordID already
         /// exists, then we imply invoke Update() on the model instead.</Summary>
@@ -32,16 +34,18 @@ namespace Dikubot.Database.Models.Role
                 Update(modelIn, new ReplaceOptions() {IsUpsert = true});
                 return modelIn;
             }
+
             if (discordIdCollision)
             {
-                Update(m => m.DiscordId == modelIn.DiscordId, modelIn, new ReplaceOptions() 
+                Update(m => m.DiscordId == modelIn.DiscordId, modelIn, new ReplaceOptions()
                     {IsUpsert = true});
                 return modelIn;
             }
+
             Insert(modelIn);
             return modelIn;
         }
-        
+
         /// <Summary>Checks if a RoleModel is already in the database.</Summary>
         /// <param name="modelIn">A boolean which tells if the models is in the database.</param>
         /// <return>A bool, true if the value already exist false if not.</return>
@@ -51,7 +55,7 @@ namespace Dikubot.Database.Models.Role
             bool discordIdCollision = Exists(model => model.DiscordId == modelIn.DiscordId);
             return idCollision || discordIdCollision;
         }
-        
+
         /// <Summary>Removes a element from the collection by it's unique elements.</Summary>
         /// <param name="modelIn">The Model one wishes to remove.</param>
         /// <return>Void.</return>
@@ -66,7 +70,7 @@ namespace Dikubot.Database.Models.Role
         /// <return>A Model.</return>
         public new RoleModel Get(ulong discordId) =>
             Get(model => model.DiscordId == discordId.ToString());
-        
+
         /// <Summary>Converts a RoleSocket to a RoleModel.</Summary>
         /// <param name="role">The SocketRole model one wishes to be converted.</param>
         /// <return>A RoleModel.</return>
@@ -85,7 +89,7 @@ namespace Dikubot.Database.Models.Role
             _role.DiscordId = role.Id.ToString();
             return _role;
         }
-        
+
         /// <Summary>Converts a RoleSocket to a RoleModel.</Summary>
         /// <param name="role">The SocketRole model one wishes to be converted.</param>
         /// <return>A RoleModel.</return>
@@ -122,4 +126,3 @@ namespace Dikubot.Database.Models.Role
         }
     }
 }
-

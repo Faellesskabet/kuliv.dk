@@ -21,6 +21,7 @@ namespace Dikubot.Database
         private static readonly MongoClient MongoClient = new MongoClient("mongodb://localhost:27017");
         private static Database instance = null;
         private static readonly Dictionary<string, IMongoDatabase> Databases = new Dictionary<string, IMongoDatabase>();
+
         public static Database GetInstance
         {
             get
@@ -28,20 +29,21 @@ namespace Dikubot.Database
                 if (instance == null)
                 {
                     instance = new Database();
-                    
+
                     // This is very important for our "Unique" elements to work
                     // It ensures that unique empty elements won't collide and cause errors
                     // What is this is basically it doesn't add an element if it is equal to null
-                    ConventionRegistry.Register("IgnoreIfNull", 
-                        new ConventionPack { new IgnoreIfDefaultConvention(true) }, 
+                    ConventionRegistry.Register("IgnoreIfNull",
+                        new ConventionPack {new IgnoreIfDefaultConvention(true)},
                         t => true);
-                    
+
                     //This is used to tell mongodb to store our IDs as GUIDs
                     BsonSerializer.RegisterIdGenerator(
                         typeof(Guid),
                         GuidGenerator.Instance
                     );
                 }
+
                 return instance;
             }
         }
@@ -54,9 +56,8 @@ namespace Dikubot.Database
         {
             if (!Databases.ContainsKey(name))
                 Databases[name] = MongoClient.GetDatabase(name, settings);
-            
+
             return Databases[name];
         }
-        
     }
 }

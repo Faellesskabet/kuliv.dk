@@ -11,7 +11,6 @@ namespace Dikubot.Permissions
 {
     public partial class PermissionsService
     {
-        
         /// <Summary>Will sync all the textChannels on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void SetDatabaseTextChannels()
@@ -20,18 +19,18 @@ namespace Dikubot.Permissions
             var socketRoles = guild.TextChannels.ToList();
             var toBeRemoved = new List<TextChannelModel>(textChannelModels);
 
-            Func<TextChannelModel, SocketTextChannel, bool> inDB = (m0, m1) => 
+            Func<TextChannelModel, SocketTextChannel, bool> inDB = (m0, m1) =>
                 Convert.ToUInt64(m0.DiscordId) == m1.Id;
-            
+
             // Remove all the text channels from the database if they are not on the discord server.
-            toBeRemoved.RemoveAll(m => 
+            toBeRemoved.RemoveAll(m =>
                 socketRoles.Exists(n => inDB(m, n)));
 
             // Remove the text channels from the database that is not on the discord server.
             toBeRemoved.ForEach(m => _textChannelServices.Remove(m));
-            
+
             // Makes an upsert of the text channels on the server so they match the ones in the database.
-            socketRoles.ForEach(model => 
+            socketRoles.ForEach(model =>
                 _textChannelServices.Upsert(_textChannelServices.SocketToModel(model)));
         }
 
@@ -43,21 +42,21 @@ namespace Dikubot.Permissions
             var socketTextChannels = guild.TextChannels.ToList();
             var toBeRemoved = new List<SocketTextChannel>(socketTextChannels);
 
-            Func<TextChannelModel, SocketTextChannel, bool> inDB = 
+            Func<TextChannelModel, SocketTextChannel, bool> inDB =
                 (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
-            
+
             // Remove all the text channels from the discord server if they are not in the database.
             toBeRemoved.RemoveAll(m => textChannelModels.Exists(n => inDB(n, m)));
 
             foreach (var socketTextChannel in toBeRemoved)
                 await socketTextChannel.DeleteAsync();
-            
-            foreach(var textChannelModel in textChannelModels)
+
+            foreach (var textChannelModel in textChannelModels)
             {
                 // Finds the text channel discord server text channel that match the text channel in the database.
-                var socketTextChannel = socketTextChannels.Find(socket => 
+                var socketTextChannel = socketTextChannels.Find(socket =>
                     Convert.ToUInt64(textChannelModel.DiscordId) == socket.Id);
-                
+
                 if (socketTextChannel == null)
                 {
                     // If the text channel could not be found create it.
@@ -73,7 +72,7 @@ namespace Dikubot.Permissions
                             channelProperties.SlowModeInterval = properties.SlowModeInterval;
                             channelProperties.Name = properties.Name;
                         });
-                    
+
                     // Adds all the overwrite Permissions from the DB.
                     foreach (var overwriteModel in textChannelModel.PermissionOverwrites)
                     {
@@ -101,7 +100,7 @@ namespace Dikubot.Permissions
                         channelProperties.SlowModeInterval = properties.SlowModeInterval;
                         channelProperties.Name = properties.Name;
                     });
-                    
+
                     // Adds all the overwrite Permissions from the DB.
                     foreach (var overwriteModel in textChannelModel.PermissionOverwrites)
                     {
@@ -118,37 +117,37 @@ namespace Dikubot.Permissions
                 }
             }
         }
-        
+
         /// <Summary>Add a text channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseTextChannel(SocketTextChannel textChannel) =>
             _textChannelServices.Upsert(_textChannelServices.SocketToModel(textChannel));
-        
+
         /// <Summary>Add a text channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseTextChannel(RestTextChannel textChannel) =>
             _textChannelServices.Upsert(_textChannelServices.RestToModel(textChannel));
-        
+
         /// <Summary>Add a text channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseTextChannel(TextChannelModel textChannel) =>
             _textChannelServices.Upsert(textChannel);
-        
+
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseTextChannel(SocketTextChannel textChannel) =>
             _textChannelServices.Remove(_textChannelServices.SocketToModel(textChannel));
-        
+
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseTextChannel(RestTextChannel textChannel) =>
             _textChannelServices.Remove(_textChannelServices.RestToModel(textChannel));
-        
+
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseTextChannel(TextChannelModel textChannel) =>
             _textChannelServices.Remove(textChannel);
-        
+
         /// <Summary>Removes a text channel from the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task RemoveTextChannel(SocketTextChannel textChannel)
@@ -156,6 +155,7 @@ namespace Dikubot.Permissions
             RemoveDatabaseTextChannel(textChannel);
             await textChannel.DeleteAsync();
         }
+
         /// <Summary>Removes a text channel from the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task RemoveTextChannel(RestTextChannel textChannel)
@@ -163,7 +163,7 @@ namespace Dikubot.Permissions
             RemoveDatabaseTextChannel(textChannel);
             await textChannel.DeleteAsync();
         }
-        
+
         /// <Summary>Removes a text channel from the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task RemoveTextChannel(TextChannelModel textChannel)
@@ -171,7 +171,7 @@ namespace Dikubot.Permissions
             RemoveDatabaseTextChannel(textChannel);
             await guild.GetTextChannel(Convert.ToUInt64(textChannel)).DeleteAsync();
         }
-        
+
         /// <Summary>Adds a text channel to the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task<TextChannelModel> AddTextChannel(TextChannelModel textChannel)

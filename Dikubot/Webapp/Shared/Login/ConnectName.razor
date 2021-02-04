@@ -15,16 +15,16 @@
                           Required="true" OnInput="s => name = s"/>
             <BFUPrimaryButton Text="Bekræft Navn" OnClick="ConfirmName"></BFUPrimaryButton>
         </div>
-        
+
     </div>
 </div>
 
 
-
 @code {
+
     [Parameter]
     public Login parent { get; set; }
-    
+
     private Authenticator authenticator;
     private UserIdentity user;
     private string name = "";
@@ -35,17 +35,16 @@
         var authState = await authenticator.GetAuthenticationStateAsync();
         user = (UserIdentity) authState.User.Identity;
     }
-    
+
     private async void ConfirmName()
     {
-        
-        /*  Might wanna do this at some point dunno (will need some input validation first)
+    /*  Might wanna do this at some point dunno (will need some input validation first)
         await DiscordBot.DIKU.GetUser(Convert.ToUInt64(user.UserModel.DiscordId)).ModifyAsync(guildUser =>
         {
             guildUser.Nickname = name;
         });
         */
-        
+
         user.UserModel.Name = name;
         new UserServices().Upsert(user.UserModel);
         SessionModel sessionModel = new SessionModel(user.UserModel);
