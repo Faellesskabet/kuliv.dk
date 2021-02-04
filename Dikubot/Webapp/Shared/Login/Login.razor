@@ -7,7 +7,7 @@
 @inject NavigationManager NavigationManager;
 
 <div class="page">
-    <link href="css/diku/login.css" rel="stylesheet" />
+    <link href="css/diku/login.css" rel="stylesheet"/>
     <div class="blur"></div>
     <div class="login">
         @if (_state == State.ConnectDiscord)
@@ -26,16 +26,18 @@
 </div>
 
 
-
 @code {
-    
+
     private enum State
     {
-        ConnectDiscord, ConnectEmail, ConnectName
+        ConnectDiscord,
+        ConnectEmail,
+        ConnectName
     }
-    
+
     private State _state;
     private AuthenticationState authState;
+
     protected override async Task OnInitializedAsync()
     {
         _state = await getState();
@@ -53,7 +55,7 @@
 
         return !user.UserModel.Verified ? State.ConnectEmail : State.ConnectName;
     }
-    
+
 
     public async void Update()
     {
@@ -64,9 +66,9 @@
             NavigationManager.NavigateTo("/");
             return;
         }
-        
+
         _state = await getState();
-        await InvokeAsync(() => {StateHasChanged();});
+        await InvokeAsync(() => { StateHasChanged(); });
     }
 
 }

@@ -15,11 +15,12 @@ namespace Dikubot
         public readonly static DiscordBot DiscordBot = new DiscordBot();
         public readonly static Thread DiscordThread = new Thread(new ThreadStart(DiscordBot.run));
         public static bool IS_DEV = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
         public static void Main(string[] args)
         {
             //We initialise a new thread for our Discord bot to run in
             DiscordThread.Start();
-            
+
             //We start the webserver in this thread
             CreateHostBuilder(args).Build().Run();
         }

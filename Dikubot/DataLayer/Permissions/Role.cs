@@ -1,31 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Discord.Commands;
 using Dikubot.Database.Models;
 using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.SubModels;
 using Dikubot.DataLayer.Static;
 using Dikubot.Database.Models.Role;
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 
 namespace Dikubot.Permissions
 {
     public partial class PermissionsService
     {
-        /// <Summary>Finds all the RoleModels which should be removed from the database since it is not a role on the
-        /// discord server.</Summary>
-        /// <param name="roleModels">List of all the roles in the database.</param>
-        /// <param name="socketRoles">List of all the roles on the discord server.</param>
-        /// <return>A list of all the roles which should be removed from the database.</return>
-        private List<RoleModel> ToBeRemovedFromDatabase(List<RoleModel> roleModels, List<SocketRole> socketRoles)
-        {
-            Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
-            roleModels.RemoveAll(m => socketRoles.Exists(n => inDB(m, n)));
-            return roleModels;
-        }
-
         /// <Summary>Will sync all the roles on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void SetDatabaseRoles()
@@ -41,52 +29,50 @@ namespace Dikubot.Permissions
 
             // Remove the roles from the database that is not on the discord server.
             toBeRemoved.ForEach(m => _roleServices.Remove(m));
-            
+
             // Makes an upsert of the roles on the server so they match the ones in the database.
             socketRoles.ForEach(model => _roleServices.Upsert(_roleServices.SocketToModel(model)));
         }
-        
+
         /// <Summary>Will sync all the roles on the database to the discord server.</Summary>
         /// <return>void.</return>
         public async void SetDiscordRoles()
         {
             var roleModels = _roleServices.Get();
             var socketRoles = guild.Roles.ToList();
-            
+
             var toBeRemoved = new List<SocketRole>(socketRoles);
 
             Func<RoleModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
-            
+
 
             // Remove all the roles from the discord server if they are not in the database.
             toBeRemoved.RemoveAll(m => roleModels.Exists(n => inDB(n, m)));
-            
+
             foreach (var socketRole in toBeRemoved)
                 await socketRole.DeleteAsync();
 
             // Roles which will not be be changed.
-            var unchangeableRoles = new List<String> { "Admin" };
-            
-            foreach(var roleModel in roleModels)
+            var unchangeableRoles = new List<String> {"Admin"};
+
+            foreach (var roleModel in roleModels)
             {
                 // Skip this role if is in unchangeableRoles.
                 if (unchangeableRoles.Contains(roleModel.Name))
                     continue;
-                
+
                 // Finds the role discord server role that match the role in the database.
-                var socketRole = socketRoles.Find(socket => Convert.ToUInt64(roleModel.DiscordId) == socket.Id ||
-                                                            roleModel.Name == socket.Name);
-                
+                var socketRole = socketRoles.Find(socket => Convert.ToUInt64(roleModel.DiscordId) == socket.Id);
+
                 if (socketRole == null)
                 {
                     // If the role could not be found create it.
                     var properties = _roleServices.ModelToRoleProperties(roleModel);
-                    await guild.CreateRoleAsync(properties.Name.Value, 
-
-                        properties.Permissions.Value, 
-                        properties.Color.Value, 
-                        properties.Hoist.Value, 
-                        properties.Mentionable.Value, 
+                    await guild.CreateRoleAsync(properties.Name.Value,
+                        properties.Permissions.Value,
+                        properties.Color.Value,
+                        properties.Hoist.Value,
+                        properties.Mentionable.Value,
                         RequestOptions.Default);
                 }
                 else
@@ -114,7 +100,6 @@ namespace Dikubot.Permissions
         /// <param name="userModel"></param>
         public async void SetDiscordUserRoles(UserModel userModel)
         {
-            
             //We get all the user's roles in the database
             HashSet<UserRoleModel> userRoleModels = new HashSet<UserRoleModel>(userModel.Roles);
             SocketUser discordUser = userModel.DiscordUser;
@@ -133,8 +118,8 @@ namespace Dikubot.Permissions
             // We get the user's roles and remove all the roles not in the database.
             // We also remove the role if it has expired
             IReadOnlyCollection<SocketRole> discordRoles = guildUser.Roles;
-            IEnumerable<IRole> removeRoles = discordRoles.Where((role, i) => 
-                !userRoleModels.Contains(new UserRoleModel(_roleServices.SocketToModel(role))) 
+            IEnumerable<IRole> removeRoles = discordRoles.Where((role, i) =>
+                !userRoleModels.Contains(new UserRoleModel(_roleServices.SocketToModel(role)))
                 || !userModel.IsRoleActive(_roleServices.SocketToModel(role)));
             foreach (IRole role in removeRoles)
             {
@@ -153,6 +138,7 @@ namespace Dikubot.Permissions
             IEnumerable<IRole> addRoles =
                 userRoleModels.Where(model => ((IActiveTimeFrame)model).IsActive())
                     .Select((model) => guild.GetRole(Convert.ToUInt64(model.RoleModel.DiscordId))).Where(role => role != null);
+
             foreach (IRole role in addRoles)
             {
                 try
@@ -161,26 +147,45 @@ namespace Dikubot.Permissions
                     await guildUser.AddRoleAsync(role, RequestOptions.Default);
                 }
                 catch (Exception)
-                { 
+                {
                     Logger.Debug($"Could not add {role.Name} to {guildUser.Username}");
                 }
             }
-
         }
 
         public void SetDiscordUserRoles(SocketUser user)
         {
             SetDiscordUserRoles(new UserServices().Get(user));
         }
-        
+
         /// <Summary>Add a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseRole(SocketRole role) =>
             _roleServices.Upsert(_roleServices.SocketToModel(role));
-        
+
+        /// <Summary>Add a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseRole(RestRole role) =>
+            _roleServices.Upsert(_roleServices.RestToModel(role));
+
+        /// <Summary>Add a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseRole(RoleModel role) =>
+            _roleServices.Upsert(role);
+
         /// <Summary>Removes a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseRole(SocketRole role) =>
             _roleServices.Remove(_roleServices.SocketToModel(role));
+
+        /// <Summary>Removes a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseRole(RestRole role) =>
+            _roleServices.Remove(_roleServices.RestToModel(role));
+
+        /// <Summary>Removes a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseRole(RoleModel role) =>
+            _roleServices.Remove(role);
     }
 }

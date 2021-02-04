@@ -4,6 +4,8 @@ namespace Dikubot.Database.Models.Course
 {
     public class CourseServices : Services<UserModel>
     {
-        public CourseServices() : base("Main", "Courses") { }
+        public CourseServices() : base("Main", "Courses")
+        {
+        }
     }
 }

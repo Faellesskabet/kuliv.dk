@@ -7,6 +7,8 @@ namespace Dikubot.Database.Models.Session
 {
     public class SessionServices : Services<SessionModel>
     {
-        public SessionServices() :base("Main", "UserSessions") { }
+        public SessionServices() : base("Main", "UserSessions")
+        {
+        }
     }
 }

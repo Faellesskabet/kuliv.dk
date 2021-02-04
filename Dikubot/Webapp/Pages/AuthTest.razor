@@ -27,7 +27,7 @@
     {
         var authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
         var user = authState.User;
-        
+
         if (user.Identity.IsAuthenticated)
         {
             _authMessage = $"{user.Identity.Name} is authenticated.";
@@ -38,4 +38,5 @@
             _authMessage = "The user is NOT authenticated.";
         }
     }
+
 }
