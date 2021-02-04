@@ -16,8 +16,11 @@ namespace Dikubot.Webapp.Logic
     {
         private UserModel _userModel;
         private SessionModel _sessionModel;
-        public UserIdentity() { }
-        
+
+        public UserIdentity()
+        {
+        }
+
         /// <Summary>Creates a UserIdentity based on a session.</Summary>
         /// <param name="sessionModel">A session consists of a key and a user.</param>
         public UserIdentity(SessionModel sessionModel)
@@ -39,7 +42,7 @@ namespace Dikubot.Webapp.Logic
                 }
             }
         }
-        
+
         /// <Summary>This is simply just a name and it has no purposes except for us to differentiate between AuthenticationTypes / reasons for authentication</Summary>
         /// <return>"User" as a string</return>
         public string AuthenticationType
@@ -55,9 +58,14 @@ namespace Dikubot.Webapp.Logic
         /// </summary>
         public override bool IsAuthenticated
         {
-            get => _userModel?.DiscordId != null && _userModel.Verified && _userModel.Name != null && !_sessionModel.IsExpired;
+            get => _userModel?.DiscordId != null && _userModel.Verified && _userModel.Name != null &&
+                   !_sessionModel.IsExpired;
         }
-        public string Name { get => _userModel == null? "Intet navn" : _userModel.Name; }
+
+        public string Name
+        {
+            get => _userModel == null ? "Intet navn" : _userModel.Name;
+        }
 
         /// <summary>
         /// Get the UserModel

@@ -33,10 +33,10 @@ namespace Dikubot.DataLayer.Logic.User
             {
                 return false;
             }
+
             pending_passwords[password].DiscordConnected(user);
             pending_passwords.Remove(password);
             return true;
         }
-
     }
 }

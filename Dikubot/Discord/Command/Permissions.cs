@@ -16,8 +16,16 @@ namespace Dikubot.Discord.Command
         [Summary("Command for managing permissions.")]
         public async Task PermissionsAsync([Summary("The arguments")] params string[] args)
         {
+            var mod = Context.Guild.Roles.ToList().Find(role => role.Name == "Mod");
+            if (mod != null && !Context.Guild.GetUser(Context.User.Id).Roles.Contains(mod))
+                return;
+            if (mod == null)
+                return;
+
             var permissionsService = new PermissionsService(Context.Guild);
-            if (args == null) {
+
+            if (args == null)
+            {
                 await ReplyAsync("Invalid mængde argumenter.");
                 return;
             }
@@ -37,13 +45,20 @@ namespace Dikubot.Discord.Command
                 await ReplyAsync("Rolle permissions er blevet overskrevet.");
                 return;
             }
-            
+
             if (args[0] == "makeExpandable" && args.Length == 2)
             {
                 var voiceChannelServices = new VoiceChannelServices();
                 var newModel = voiceChannelServices.Get(model => model.DiscordId == args[1]);
+                if (newModel == null)
+                {
+                    await ReplyAsync("Invalid Voice Channel Id.");
+                    return;
+                }
+
                 newModel.ExpandOnJoin = true;
-                voiceChannelServices.Upsert(newModel);
+                newModel.ExpandId = newModel.DiscordId;
+                permissionsService.AddOrUpdateDatabaseVoiceChannel(newModel);
                 await ReplyAsync("Har opdateret voice chat til af være expandable.");
                 return;
             }

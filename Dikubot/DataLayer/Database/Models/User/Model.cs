@@ -18,20 +18,28 @@ namespace Dikubot.Database.Models
     public class UserModel : Model
     {
         private string _email;
-        [BsonElement("Email")] [BsonUnique]
-        public string Email { 
+
+        [BsonElement("Email")]
+        [BsonUnique]
+        public string Email
+        {
             get => _email;
             set => _email = value.ToLower();
         }
+
         [BsonElement("Name")] public string Name { get; set; }
-        
-        [BsonElement("DiscordId")] [BsonUnique]
+
+        [BsonElement("DiscordId")]
+        [BsonUnique]
         public string DiscordId { get; set; }
-        [BsonIgnore] public SocketUser DiscordUser
+
+        [BsonIgnore]
+        public SocketUser DiscordUser
         {
             get => DiscordBot.client.GetUser(Convert.ToUInt64(DiscordId));
             set => DiscordId = value.Id.ToString();
         }
+
         [BsonElement("Verified")] public bool Verified { get; set; } = false;
         [BsonElement("LastMessage")] public string LastMessage { get; set; }
 
@@ -43,7 +51,12 @@ namespace Dikubot.Database.Models
             get => _roles.Where(model => model.RoleModel != null).ToArray(); 
             set => _roles = new HashSet<UserRoleModel>(value);
         }
-         
+
+        [BsonElement("IsBot")] public bool IsBot { get; set; }
+        [BsonElement("Username")] public string Username { get; set; }
+
+        [BsonElement("JoinedAt")] public DateTime JoinedAt { get; set; }
+        
         /// <summary>
         /// AddRole adds the role to a HashSet of roles. This means no duplicates are allowed. If the role is already present, then it is overwritten by the new role
         /// </summary>
@@ -52,7 +65,7 @@ namespace Dikubot.Database.Models
         {
             AddRole(new UserRoleModel(roleModel));
         }
-        
+
         /// <summary>
         /// Remove an existing role from the user
         /// </summary>
@@ -62,7 +75,7 @@ namespace Dikubot.Database.Models
         {
             return RemoveRole(new UserRoleModel(roleModel));
         }
-        
+
         /// <summary>
         /// Tells whether or not a user has a role with the same role ID
         /// </summary>
@@ -82,7 +95,7 @@ namespace Dikubot.Database.Models
         {
             return IsRoleActive(new UserRoleModel(roleModel));
         }
-        
+
         /// <summary>
         /// AddRole adds the role to a HashSet of roles. This means no duplicates are allowed. If the role is already present, then it is overwritten by the new role
         /// </summary>
@@ -94,6 +107,7 @@ namespace Dikubot.Database.Models
             {
                 RemoveRole(userRoleModel);
             }
+
             return _roles.Add(userRoleModel);
         }
 
@@ -116,6 +130,5 @@ namespace Dikubot.Database.Models
         {
             _roles.Clear();
         }
-        
     }
 }

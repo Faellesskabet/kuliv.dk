@@ -10,7 +10,7 @@ namespace Dikubot.DataLayer.Logic.Email.Emails
     {
         private EmailAddress _to;
         private string _password;
-        
+
         /// <summary>
         /// Create a VerificationEmail used to send emails
         /// </summary>

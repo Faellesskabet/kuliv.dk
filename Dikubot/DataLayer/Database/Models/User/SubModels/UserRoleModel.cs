@@ -11,20 +11,30 @@ namespace Dikubot.Database.Models.SubModels
     {
         private Guid _roleId;
         private static readonly RoleServices _roleServices = new RoleServices();
-        public UserRoleModel(RoleModel roleModel) : this(roleModel.Id) { }
+
+        public UserRoleModel(RoleModel roleModel) : this(roleModel.Id)
+        {
+        }
 
         public UserRoleModel(Guid roleId)
         {
             _roleId = roleId;
         }
 
-        [BsonElement("RoleId")] [BsonRequired]
-        public Guid RoleId { get => _roleId;
+        [BsonElement("RoleId")]
+        [BsonRequired]
+        public Guid RoleId
+        {
+            get => _roleId;
             set => _roleId = value;
         }
 
         [BsonIgnore]
-        public RoleModel RoleModel { get => _roleServices.Get(_roleId); }
+        public RoleModel RoleModel
+        {
+            get => _roleServices.Get(_roleId);
+        }
+
 
         /// <summary>
         /// We override the Equals function to determine two UserRoleModels are only equal if their role Id is the same

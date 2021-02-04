@@ -18,7 +18,8 @@
                 <BFUTextField Label="Send den følgende kommando til DIKU botten (DIKU#7676)." Prefix="!connect" ReadOnly="true" Value="@password" ClassName="text-field"/>
             </div>
             <a href="https://dnur.dk/" class="text-decoration-none" target="_blank">
-                <p class="text-xl-left">Klik her for hjælp</p></a>
+                <p class="text-xl-left">Klik her for hjælp</p>
+            </a>
         </div>
     </div>
 }
@@ -27,12 +28,12 @@ else
     <div class="card w-auto h-auto shadow">
         <div class="card-body">
             <h5 class="card-title">Er dette dig?</h5>
-            <BFUPersona Size="120" CoinSize="120" Text="@DiscordNameMentionCombo(discordUser)" Presence="GetPresenceStatus(discordUser)" 
-                         ImageUrl="@discordUser.GetAvatarUrl()" ImageAlt="@discordUser.GetDefaultAvatarUrl()"
+            <BFUPersona Size="120" CoinSize="120" Text="@DiscordNameMentionCombo(discordUser)" Presence="GetPresenceStatus(discordUser)"
+                        ImageUrl="@discordUser.GetAvatarUrl()" ImageAlt="@discordUser.GetDefaultAvatarUrl()"
                         Style="padding-bottom: 5px"/>
             <div class="line"></div>
-            <BFUStack Horizontal="true" HorizontalAlign="Alignment.Center" Tokens=@(new BFUStackTokens() { ChildrenGap = new[] { 10.0 } })>
-                <BFUPrimaryButton Text="Ja, godkend" OnClick=@(ApproveDiscord) />
+            <BFUStack Horizontal="true" HorizontalAlign="Alignment.Center" Tokens=@(new BFUStackTokens() {ChildrenGap = new[] {10.0}})>
+                <BFUPrimaryButton Text="Ja, godkend" OnClick=@(ApproveDiscord)/>
                 <BFUDefaultButton Text="Nej, afvis" OnClick=@(RejectDiscord) Style="background-color: lightcoral"/>
             </BFUStack>
 
@@ -41,12 +42,13 @@ else
 }
 
 
-        
+
 
 @code {
+
     [Parameter]
     public Login parent { get; set; }
-    
+
     private string password;
     private Authenticator authenticator;
     private SocketUser discordUser;
@@ -56,7 +58,7 @@ else
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
-        
+
         password = Util.SimpleRandomString(8);
         DiscordWebConnector.Add(password, this);
     }
@@ -64,14 +66,14 @@ else
     public async void DiscordConnected(SocketUser user)
     {
         discordUser = user;
-        await InvokeAsync(() => {StateHasChanged();});
+        await InvokeAsync(() => { StateHasChanged(); });
     }
 
     private string DiscordNameMentionCombo(SocketUser user)
     {
         return $"{user.Username}#{user.Discriminator}";
     }
-    
+
     private PersonaPresenceStatus GetPresenceStatus(SocketUser user)
     {
         switch (user.Status)
@@ -96,7 +98,7 @@ else
     {
         discordUser = null;
         await OnInitializedAsync();
-        await InvokeAsync(() => {StateHasChanged();});
+        await InvokeAsync(() => { StateHasChanged(); });
     }
 
     private async void ApproveDiscord()
@@ -107,7 +109,7 @@ else
             UserModel userModel = new UserModel {DiscordUser = discordUser};
             new UserServices().Upsert(userModel);
         }
-        
+
         SessionModel sessionModel = new SessionModel(userServices.Get((discordUser)));
         await authenticator.UpdateSession(sessionModel);
         parent.Update();

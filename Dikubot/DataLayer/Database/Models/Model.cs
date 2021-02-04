@@ -13,6 +13,5 @@ namespace Dikubot.Database.Models
     {
         [BsonId(IdGenerator = typeof(GuidGenerator))]
         public Guid Id { get; set; }
-        
     }
 }

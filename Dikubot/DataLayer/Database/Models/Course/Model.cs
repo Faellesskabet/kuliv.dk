@@ -9,9 +9,7 @@ namespace Dikubot.Database.Models.Course
 {
     public class CourseModel : Model, IActiveTimeFrame
     {
-
         private static TextChannelServices _textChannelServices = new TextChannelServices();
-
         /// <summary>
         /// This is the name of the course
         /// </summary>
@@ -27,7 +25,7 @@ namespace Dikubot.Database.Models.Course
         /// <summary>
         /// This specifies the course's main channel - a channel which everyone enrolled in the course will have access to.
         /// </summary>
-        [BsonElement("MainTextChannelModelId")] 
+        [BsonElement("MainTextChannelModelId")]
         public Guid MainTextChannelModelId { get; set; }
 
         [BsonIgnore]
@@ -36,7 +34,7 @@ namespace Dikubot.Database.Models.Course
             get => _textChannelServices.Get(MainTextChannelModelId);
             set => MainTextChannelModelId = value.Id;
         }
-        
+
         /// <summary>
         /// This is the team category list. Each team in a course will have their own category. Only the Admin will be able to access all the categories
         /// </summary>
@@ -72,6 +70,5 @@ namespace Dikubot.Database.Models.Course
         /// </summary>
         [BsonElement("RepeatEveryNthYear")][BsonRepresentation(BsonType.DateTime)]
         public double RepeatEveryNthYear { get; set; }
-        
     }
 }
