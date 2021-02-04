@@ -1,0 +1,26 @@
+@page "/admin/courses"
+@using Dikubot.Database.Models.Course
+@attribute [Authorize(Roles = "MOD, ADMIN")]
+<div class="page-body">
+    @if (_editMode)
+    {
+        <h3>Kursus Editor</h3>
+        <Course CourseModel="@(new CourseModel())"></Course>
+    }
+    else
+    {
+        <h3>Kursus Admin Oversigt</h3>
+        <BFUCompoundButton ClassName="button" Text="Tilføj nyt kursus" Primary="true" OnClick="CreateCourseButton"/>
+    }
+</div>
+
+@code {
+    private bool _editMode = false;
+
+    private async void CreateCourseButton()
+    {
+        _editMode = true;
+        await InvokeAsync(() => {StateHasChanged();});
+    }
+
+}

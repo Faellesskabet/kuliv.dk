@@ -1,0 +1,13 @@
+@page "/admin"
+@attribute [Authorize(Roles = "MOD, ADMIN")]
+<h3>Mod Kontrolpanel</h3>
+
+<div class="page-body">
+    <BFUCompoundButton ClassName="button" Text="Rediger Kursus Liste" Href="/admin/courses" Primary="true" SecondaryText="Opret, fjern eller rediger et kursus"/>
+</div>
+
+
+
+@code {
+    
+}

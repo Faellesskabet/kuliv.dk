@@ -1,11 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using Dikubot.Database.Models;
+using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.Session;
+using Dikubot.DataLayer.Static;
 
 namespace Dikubot.Webapp.Logic
 {
@@ -23,9 +26,17 @@ namespace Dikubot.Webapp.Logic
             _userModel = new UserServices().Get(sessionModel.UserId);
             if (_userModel != null)
             {
-                IEnumerable<Claim> roleClaims =
-                    _userModel.Roles.Where(model => model.IsActive()).Select(model => new Claim(ClaimTypes.Role, model.RoleModel.Name.ToUpper()));
-                AddClaims(roleClaims);
+                try
+                {
+                    IEnumerable<Claim> roleClaims =
+                        _userModel.Roles.Where(model => ((IActiveTimeFrame)model).IsActive()).Select(model =>
+                            new Claim(ClaimTypes.Role, model.RoleModel.Name.ToUpper()));
+                    AddClaims(roleClaims);
+                }
+                catch (Exception e)
+                {
+                    Logger.Debug(e.Message);
+                }
             }
         }
         
