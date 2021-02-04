@@ -159,6 +159,14 @@ namespace Dikubot.Permissions
             await categoryChannel.DeleteAsync();
         }
         
+        /// <Summary>Removes a category channel from the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task RemoveCategoryChannel(CategoryChannelModel categoryChannel)
+        {
+            RemoveDatabaseCategoryChannel(categoryChannel);
+            await guild.GetCategoryChannel(Convert.ToUInt64(categoryChannel)).DeleteAsync();
+        }
+        
         /// <Summary>Adds a category channel to the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task<CategoryChannelModel> AddCategoryChannel(CategoryChannelModel categoryChannel)

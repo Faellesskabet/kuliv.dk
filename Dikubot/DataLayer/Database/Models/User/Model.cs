@@ -43,6 +43,11 @@ namespace Dikubot.Database.Models
             set => _roles = new HashSet<UserRoleModel>(value);
         }
         
+        [BsonElement("IsBot")] public bool IsBot { get; set; }
+        [BsonElement("Username")] public string Username { get; set; }
+        
+        [BsonElement("JoinedAt")] public DateTime JoinedAt { get; set; }
+        
         /// <summary>
         /// AddRole adds the role to a HashSet of roles. This means no duplicates are allowed. If the role is already present, then it is overwritten by the new role
         /// </summary>

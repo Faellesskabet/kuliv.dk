@@ -58,7 +58,10 @@ namespace Dikubot.Discord
 				client.ChannelDestroyed += permissionListeners.ChannelDestroyed;
 				client.ChannelUpdated += permissionListeners.ChannelUpdated;
 				client.UserVoiceStateUpdated += expandableVoiceChatListener.VoiceChannelExpand;
-
+				client.UserJoined += permissionListeners.UserJoined;
+				client.UserLeft += permissionListeners.UserLeft;
+				client.GuildMemberUpdated += permissionListeners.UserUpdated;
+				
 				if (main.IS_DEV)
 				{
 					client.MessageReceived += MessageReceived;

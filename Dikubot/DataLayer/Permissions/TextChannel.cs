@@ -164,6 +164,14 @@ namespace Dikubot.Permissions
             await textChannel.DeleteAsync();
         }
         
+        /// <Summary>Removes a text channel from the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task RemoveTextChannel(TextChannelModel textChannel)
+        {
+            RemoveDatabaseTextChannel(textChannel);
+            await guild.GetTextChannel(Convert.ToUInt64(textChannel)).DeleteAsync();
+        }
+        
         /// <Summary>Adds a text channel to the database and the discord server.</Summary>
         /// <return>void.</return>
         public async Task<TextChannelModel> AddTextChannel(TextChannelModel textChannel)
