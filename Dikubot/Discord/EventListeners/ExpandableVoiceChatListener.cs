@@ -33,7 +33,7 @@ namespace Dikubot.Discord.EventListeners
 		    var deleteChildren = new List<SocketVoiceChannel>();
 		    var socketParent = guild.GetVoiceChannel(Convert.ToUInt64(parent.DiscordId));
 
-		    // Gets all the children that should be deleted.s
+		    // Gets all the children that should be deleted.
 		    foreach (var child in children)
 		    {
 			    var voiceChannel = guild.GetVoiceChannel(Convert.ToUInt64(child.DiscordId));

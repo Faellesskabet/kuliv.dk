@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dikubot.Database.Models.VoiceChannel;
 using Discord;
@@ -170,6 +171,14 @@ namespace Dikubot.Permissions
         {
             RemoveDatabaseVoiceChannel(voiceChannel);
             await voiceChannel.DeleteAsync();
+        }
+        
+        /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
+        /// <return>void.</return>
+        public async Task RemoveVoiceChannel(VoiceChannelModel voiceChannel)
+        {
+            RemoveDatabaseVoiceChannel(voiceChannel);
+            await guild.GetVoiceChannel(Convert.ToUInt64(voiceChannel)).DeleteAsync();
         }
         
         /// <Summary>Adds a voice channel to the database and the discord server.</Summary>

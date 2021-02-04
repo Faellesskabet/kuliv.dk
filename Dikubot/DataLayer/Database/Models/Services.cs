@@ -59,7 +59,7 @@ namespace Dikubot.Database.Models
         {
             try
             {
-                return _models.Find<TModel>(filter).FirstOrDefault();
+                return _models.Find(filter).FirstOrDefault();
             }
             catch (Exception e)
             {

@@ -11,8 +11,8 @@ namespace Dikubot.Discord.EventListeners
         public async Task<bool> IsBotFirstEntryInAuditLog(SocketGuild guild)
         {
             await foreach (var auditLogEntryCollection in guild.GetAuditLogsAsync(1))
-            foreach (var auditLogEntry in auditLogEntryCollection)
-                return auditLogEntry.User.IsBot;
+                foreach (var auditLogEntry in auditLogEntryCollection)
+                    return auditLogEntry.User.IsBot;
             return false;
         }
     }

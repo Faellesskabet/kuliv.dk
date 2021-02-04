@@ -6,6 +6,7 @@ using Dikubot.Database.Models.SubModels;
 using Dikubot.DataLayer.Static;
 using Dikubot.Database.Models.Role;
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 
 namespace Dikubot.Permissions
@@ -60,8 +61,7 @@ namespace Dikubot.Permissions
                     continue;
                 
                 // Finds the role discord server role that match the role in the database.
-                var socketRole = socketRoles.Find(socket => Convert.ToUInt64(roleModel.DiscordId) == socket.Id ||
-                                                            roleModel.Name == socket.Name);
+                var socketRole = socketRoles.Find(socket => Convert.ToUInt64(roleModel.DiscordId) == socket.Id);
                 
                 if (socketRole == null)
                 {
@@ -151,7 +151,6 @@ namespace Dikubot.Permissions
                     Logger.Debug($"Could not add {role.Name} to {guildUser.Username}");
                 }
             }
-
         }
 
         public void SetDiscordUserRoles(SocketUser user)
@@ -164,9 +163,31 @@ namespace Dikubot.Permissions
         public void AddOrUpdateDatabaseRole(SocketRole role) =>
             _roleServices.Upsert(_roleServices.SocketToModel(role));
         
+        /// <Summary>Add a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseRole(RestRole role) =>
+            _roleServices.Upsert(_roleServices.RestToModel(role));
+        
+        /// <Summary>Add a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void AddOrUpdateDatabaseRole(RoleModel role) =>
+            _roleServices.Upsert(role);
+        
         /// <Summary>Removes a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseRole(SocketRole role) =>
             _roleServices.Remove(_roleServices.SocketToModel(role));
+        
+        /// <Summary>Removes a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseRole(RestRole role) =>
+            _roleServices.Remove(_roleServices.RestToModel(role));
+        
+        /// <Summary>Removes a role on the discord server to the database.</Summary>
+        /// <return>void.</return>
+        public void RemoveDatabaseRole(RoleModel role) =>
+            _roleServices.Remove(role);
+        
+        
     }
 }
