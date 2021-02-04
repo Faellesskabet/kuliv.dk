@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.SubModels;
 using Dikubot.Discord;
@@ -39,10 +40,10 @@ namespace Dikubot.Database.Models
         [BsonElement("Roles")]
         public UserRoleModel[] Roles
         {
-            get => _roles.ToArray(); 
+            get => _roles.Where(model => model.RoleModel != null).ToArray(); 
             set => _roles = new HashSet<UserRoleModel>(value);
         }
-        
+         
         /// <summary>
         /// AddRole adds the role to a HashSet of roles. This means no duplicates are allowed. If the role is already present, then it is overwritten by the new role
         /// </summary>
@@ -98,7 +99,7 @@ namespace Dikubot.Database.Models
 
         public bool IsRoleActive(UserRoleModel userRoleModel)
         {
-            return _roles.TryGetValue(userRoleModel, out userRoleModel) && userRoleModel.IsActive();
+            return _roles.TryGetValue(userRoleModel, out userRoleModel) && ((IActiveTimeFrame)userRoleModel).IsActive();
         }
 
         public bool RemoveRole(UserRoleModel userRoleModel)

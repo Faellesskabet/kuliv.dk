@@ -104,8 +104,7 @@ else
         UserServices userServices = new UserServices();
         if (!userServices.Exists(discordUser))
         {
-            UserModel userModel = new UserModel();
-            userModel.DiscordUser = discordUser;
+            UserModel userModel = new UserModel {DiscordUser = discordUser};
             new UserServices().Upsert(userModel);
         }
         

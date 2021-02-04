@@ -98,10 +98,9 @@
             await InvokeAsync(() => {StateHasChanged();});
             return;
         }
-        
+
         UserServices userServices = new UserServices();
-        // TEMPORARY SOLUTION <- CHANGE THIS ->
-        PermissionsService permissionsService = new PermissionsService(DiscordBot.client.Guilds.ToArray()[0]);
+        PermissionsService permissionsService = new PermissionsService(DiscordBot.DIKU);
         
         //In case the email already exists, then we simply override the old user with the new user, while removing the old user's roles on the Discord server
         if (userServices.EmailExists(email))

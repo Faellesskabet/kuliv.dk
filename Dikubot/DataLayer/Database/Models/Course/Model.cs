@@ -1,21 +1,32 @@
 using System;
+using Dikubot.Database.Models.Course.SubModels;
+using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.TextChannel;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dikubot.Database.Models.Course
 {
-    public class CourseModel : Model
+    public class CourseModel : Model, IActiveTimeFrame
     {
 
         private static TextChannelServices _textChannelServices = new TextChannelServices();
 
-        [BsonElement("Name")] [BsonUnique]
-        public string Name
-        {
-            get;
-            set;
-        }
+        /// <summary>
+        /// This is the name of the course
+        /// </summary>
+        [BsonElement("Name")]
+        public string Name { get; set; }
         
+        [BsonElement("Area")]
+        public string Area { get; set; }
+        
+        [BsonElement("CourseUrl")]
+        public string CourseUrl { get; set; }
+        
+        /// <summary>
+        /// This specifies the course's main channel - a channel which everyone enrolled in the course will have access to.
+        /// </summary>
         [BsonElement("MainTextChannelModelId")] 
         public Guid MainTextChannelModelId { get; set; }
 
@@ -26,16 +37,41 @@ namespace Dikubot.Database.Models.Course
             set => MainTextChannelModelId = value.Id;
         }
         
-        [BsonElement("TeamCategoryIdList")]
-        public string[] TeamCategoryIdList { get; set; }
-        
-        //MemberRoleModel is the role we will assign to the students enrolled in the course
+        /// <summary>
+        /// This is the team category list. Each team in a course will have their own category. Only the Admin will be able to access all the categories
+        /// </summary>
+        [BsonElement("TeamCategoryList")]
+        public TeamCategory[] TeamCategoryIdList { get; set; }
+
+        /// <summary>
+        /// MemberRoleModel is the role we will assign to the students enrolled in the course
+        /// </summary>
         [BsonElement("MemberRoleModelId")]
         public Guid MemberRoleModelId { get; set; }
 
-        //AdminRoleModel is the role we will assign to the TA
+        /// <summary>
+        /// AdminRoleModel is the role we will assign to the TA
+        /// </summary>
         [BsonElement("AdminRoleModelId")]
         public Guid AdminRoleModelId { get; set; }
+        
+        /// <summary>
+        /// The startdate of the course
+        /// </summary>
+        [BsonElement("StartDate")][BsonRepresentation(BsonType.DateTime)]
+        public DateTime StartDate { get; set; }
+        
+        /// <summary>
+        /// The enddate of the course
+        /// </summary>
+        [BsonElement("EndDate")][BsonRepresentation(BsonType.DateTime)]
+        public DateTime EndDate { get; set; }
+        
+        /// <summary>
+        /// How often does the course repeat
+        /// </summary>
+        [BsonElement("RepeatEveryNthYear")][BsonRepresentation(BsonType.DateTime)]
+        public double RepeatEveryNthYear { get; set; }
         
     }
 }

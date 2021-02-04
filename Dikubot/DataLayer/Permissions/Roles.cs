@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Discord.Commands;
 using Dikubot.Database.Models;
+using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.SubModels;
 using Dikubot.DataLayer.Static;
 using Dikubot.Database.Models.Role;
@@ -150,7 +151,7 @@ namespace Dikubot.Permissions
 
             //We add the roles in the database to the user, but only if the role is currently active
             IEnumerable<IRole> addRoles =
-                userRoleModels.Where(model => model.IsActive())
+                userRoleModels.Where(model => ((IActiveTimeFrame)model).IsActive())
                     .Select((model) => guild.GetRole(Convert.ToUInt64(model.RoleModel.DiscordId))).Where(role => role != null);
             foreach (IRole role in addRoles)
             {
