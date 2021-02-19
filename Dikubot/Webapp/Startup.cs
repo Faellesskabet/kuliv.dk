@@ -15,8 +15,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using Dikubot.Webapp.Logic;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 
 namespace Dikubot.Webapp
 {
@@ -33,6 +36,9 @@ namespace Dikubot.Webapp
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            
+            var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
+            
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
             services.AddBlazorFluentUI();
             services.AddRazorPages();
@@ -42,6 +48,26 @@ namespace Dikubot.Webapp
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
+           
+            /* MICROSOFT LOGIN DISABLED
+            services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"))
+                .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
+                .AddMicrosoftGraph(Configuration.GetSection("DownstreamApi"))
+                .AddInMemoryTokenCaches();
+            
+            services.AddControllersWithViews()
+                .AddMicrosoftIdentityUI();
+
+            services.AddAuthorization(options =>
+            {
+                // By default, all incoming requests will be authorized according to the default policy
+                options.FallbackPolicy = options.DefaultPolicy;
+            });
+            
+            services.AddServerSideBlazor()
+                .AddMicrosoftIdentityConsentHandler();*/
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

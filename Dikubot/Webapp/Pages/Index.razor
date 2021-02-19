@@ -12,14 +12,15 @@
     </div>
     <div class="line"></div>
     <div class="page-body">
+        <BFUCompoundButton ClassName="button" Text="Vælg Fag" Primary="true" SecondaryText="Matematik, biologi og mange flere! Vælg her!"/>
         <BFUCompoundButton ClassName="button" Text="Kursus Pakker" Primary="true" SecondaryText="Er du ny på DIKU? Klik her!"/>
         <BFUCompoundButton ClassName="button" Text="Kursus Oversigt" SecondaryText="Vælg individuelle kurser"/>
         <BFUCompoundButton ClassName="button" Text="Event Oversigt" Disabled="true" SecondaryText="Kommer snart!"/>
         <BFUCompoundButton ClassName="button" Text="Anmod Rolle" SecondaryText="Er du VIP, TA, RKG eller mentor? Klik her!"/>
-        <AuthorizeView Roles="TA, MOD">
+        <AuthorizeView Roles="TA, MOD, ADMIN">
             <BFUCompoundButton ClassName="button" Text="TA Kontrolpanel" Disabled="true" SecondaryText="Kommer snart!"/>
         </AuthorizeView>
-        <AuthorizeView Roles="MOD">
+        <AuthorizeView Roles="MOD, ADMIN">
             <BFUCompoundButton ClassName="button" Text="Mod Kontrolpanel" Href="/admin" SecondaryText="Tilføj og redigér kurser"/>
         </AuthorizeView>
     </div>

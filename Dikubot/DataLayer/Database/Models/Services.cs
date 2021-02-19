@@ -92,7 +92,7 @@ namespace Dikubot.Database.Models
         public bool Exists(Guid id) =>
             Get(id) != null;
 
-        /// <Summary>Inserts a Model in the collection. If a model with the same ID already exists, then we imply
+        /// <Summary>Inserts a Model in the collection. If a model with the same ID already exists, then we simply
         /// invoke Update() on the model instead.</Summary>
         /// <param name="model">The Model one wishes to be inserted.</param>
         /// <return>A Model.</return>

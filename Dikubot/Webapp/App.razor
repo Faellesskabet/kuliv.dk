@@ -1,21 +1,43 @@
+@using Dikubot.DataLayer.Logic.WebDiscordBridge
+@using Dikubot.Discord
+@using global::Discord.WebSocket
+@inject NavigationManager NavigationManager
+
 <BFUTheme>
     <BFULayerHost Style="width:100vw">
-        <CascadingAuthenticationState>
-            <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
-                <Found Context="routeData">
-                    <AuthorizeView>
-                        <Authorized>
-                            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-                        </Authorized>
-                        <NotAuthorized>
-                            <Login/>
-                        </NotAuthorized>
-                    </AuthorizeView>
-                </Found>
-                <NotFound>
-                    <RedirectToBase/>
-                </NotFound>
-            </Router>
-        </CascadingAuthenticationState>
+        @if (IsSubdomainValid())
+        {
+            <CascadingAuthenticationState>
+                <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
+                    <Found Context="routeData">
+                        <AuthorizeView>
+                            <Authorized>
+                                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                            </Authorized>
+                            <NotAuthorized>
+                                <Login/>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </Found>
+                    <NotFound>
+                        <RedirectToBase/>
+                    </NotFound>
+                </Router>
+            </CascadingAuthenticationState>   
+        }
+        else
+        {
+            <h1>Denne hjemmeside findes ikke</h1>
+        }
     </BFULayerHost>
 </BFUTheme>
+
+@code {
+
+    public bool IsSubdomainValid()
+    {
+        SocketGuild guild = SubDomainConnector.GetGuildFromDomain(NavigationManager.Uri);
+        return guild != null;
+    }
+
+}

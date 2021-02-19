@@ -17,7 +17,7 @@ namespace Dikubot.Database.Models.Course
         public string Name { get; set; }
         
         [BsonElement("Area")]
-        public string Area { get; set; }
+        public string FullName { get; set; }
         
         [BsonElement("CourseUrl")]
         public string CourseUrl { get; set; }
@@ -39,7 +39,13 @@ namespace Dikubot.Database.Models.Course
         /// This is the team category list. Each team in a course will have their own category. Only the Admin will be able to access all the categories
         /// </summary>
         [BsonElement("TeamCategoryList")]
-        public TeamCategory[] TeamCategoryIdList { get; set; }
+        public TeamCategory[] TeamCategoryList { get; set; }
+        
+        /// <summary>
+        /// This is used to store the amount of teams, and will be helpful to know whether or not TeamCategoryIdList is up to date
+        /// </summary>
+        [BsonElement("AmountOfTeams")]
+        public int TeamLength { get; set; }
 
         /// <summary>
         /// MemberRoleModel is the role we will assign to the students enrolled in the course
