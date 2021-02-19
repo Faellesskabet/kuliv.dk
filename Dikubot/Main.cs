@@ -6,6 +6,7 @@ using System.Threading.Channels;
 using Dikubot.Database.Models;
 using Dikubot.Webapp;
 using Dikubot.Discord;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Dikubot
@@ -31,6 +32,15 @@ namespace Dikubot
                 {
                     logging.ClearProviders();
                     logging.AddConsole();
+                }) 
+                .ConfigureAppConfiguration((hostContext, builder) =>
+                {
+                    // Add other providers for JSON, etc.
+
+                    if (hostContext.HostingEnvironment.IsDevelopment())
+                    {
+                        builder.AddUserSecrets<main>();
+                    }
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

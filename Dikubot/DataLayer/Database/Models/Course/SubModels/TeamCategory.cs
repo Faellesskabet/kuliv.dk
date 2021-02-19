@@ -5,6 +5,12 @@ namespace Dikubot.Database.Models.Course.SubModels
 {
     public class TeamCategory
     {
+        
+        /// <summary>
+        /// Name of the team
+        /// </summary>
+        public string Name { get; set; }
+        
         /// <summary>
         /// This is the team category. Each team in a course will have their own category. Only the Admin will be able to access all the categories
         /// </summary>

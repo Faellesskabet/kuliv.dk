@@ -1,0 +1,27 @@
+@page "/logout"
+@using Dikubot.Webapp.Logic
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager;
+
+<h3>Logger ud...</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+        try
+        {
+            user.SessionModel.Expires = DateTime.Now;
+            NavigationManager.NavigateTo("/");
+            await authenticator.UpdateSession(user.SessionModel);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        
+    }
+
+}
