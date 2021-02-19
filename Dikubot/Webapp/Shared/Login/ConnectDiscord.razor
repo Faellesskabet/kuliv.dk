@@ -33,7 +33,7 @@ else
                         Style="padding-bottom: 5px"/>
             <div class="line"></div>
             <BFUStack Horizontal="true" HorizontalAlign="Alignment.Center" Tokens=@(new BFUStackTokens() {ChildrenGap = new[] {10.0}})>
-                <BFUPrimaryButton Text="Ja, godkend" OnClick=@(ApproveDiscord)/>
+                <BFUPrimaryButton Text="Ja, godkend" OnClick=@(ApproveDiscord) />
                 <BFUDefaultButton Text="Nej, afvis" OnClick=@(RejectDiscord) Style="background-color: lightcoral"/>
             </BFUStack>
 
