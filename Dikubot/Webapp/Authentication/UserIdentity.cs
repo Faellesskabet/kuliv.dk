@@ -9,6 +9,7 @@ using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.Session;
 using Dikubot.DataLayer.Static;
+using Discord.WebSocket;
 
 namespace Dikubot.Webapp.Logic
 {
@@ -16,24 +17,26 @@ namespace Dikubot.Webapp.Logic
     {
         private UserModel _userModel;
         private SessionModel _sessionModel;
+        private SocketGuild _guild;
 
-        public UserIdentity()
+        public UserIdentity(SocketGuild guild)
         {
+            _guild = guild;
         }
 
         /// <Summary>Creates a UserIdentity based on a session.</Summary>
         /// <param name="sessionModel">A session consists of a key and a user.</param>
-        public UserIdentity(SessionModel sessionModel)
+        public UserIdentity(SessionModel sessionModel, SocketGuild guild)
         {
             _sessionModel = sessionModel;
-            _userModel = new UserServices().Get(sessionModel.UserId);
+            _userModel = sessionModel.GetUserModel(guild);
             if (_userModel != null)
             {
                 try
                 {
                     IEnumerable<Claim> roleClaims =
                         _userModel.Roles.Where(model => ((IActiveTimeFrame)model).IsActive()).Select(model =>
-                            new Claim(ClaimTypes.Role, model.RoleModel.Name.ToUpper()));
+                            new Claim(ClaimTypes.Role, model.GetRoleModel(guild)?.Name.ToUpper() ?? "DELETED_ROLE"));
                     AddClaims(roleClaims);
                 }
                 catch (Exception e)

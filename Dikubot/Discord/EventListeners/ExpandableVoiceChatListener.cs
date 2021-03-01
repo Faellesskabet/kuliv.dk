@@ -20,7 +20,7 @@ namespace Dikubot.Discord.EventListeners
                 return;
 
             var guild = channel.Guild;
-            var voiceChannelServices = new VoiceChannelServices();
+            var voiceChannelServices = new VoiceChannelServices(guild);
             var permissionsService = new PermissionsService(guild);
             var channelModel = voiceChannelServices.Get(m => m.DiscordId == channel.Id.ToString());
 
@@ -55,7 +55,7 @@ namespace Dikubot.Discord.EventListeners
         /// <return>Task.</return>
         private async Task AddChannelIfNonIsAvaiable(SocketVoiceChannel channel)
         {
-            var voiceChannelServices = new VoiceChannelServices();
+            var voiceChannelServices = new VoiceChannelServices(channel.Guild);
 
             // If channel is null return.
             if (channel == null)

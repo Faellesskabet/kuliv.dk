@@ -10,7 +10,7 @@ namespace Dikubot.Permissions
 
         public void CreateMissingDiscordRolesAndChannels(CourseModel courseModel)
         {
-            SocketTextChannel mainChannel = guild.GetTextChannel(Convert.ToUInt64(courseModel.MainTextChannelModel.DiscordId)) 
+            /*SocketTextChannel mainChannel = guild.GetTextChannel(Convert.ToUInt64(courseModel.MainTextChannelModel.DiscordId)) 
                                             ?? guild.TextChannels.First(channel => channel.Name == courseModel.Name);
 
             SocketRole memberRole = guild.GetRole(Convert.ToUInt64(_roleServices.Get(courseModel.MemberRoleModelId).DiscordId));
@@ -28,7 +28,7 @@ namespace Dikubot.Permissions
                     throw new MissingCourseChannel();
                 }
 
-            }
+            }*/
         }
         
     }

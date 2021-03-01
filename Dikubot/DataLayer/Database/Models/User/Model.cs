@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Dikubot.Database.Models.Education;
 using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.SubModels;
@@ -48,8 +49,16 @@ namespace Dikubot.Database.Models
         [BsonElement("Roles")]
         public UserRoleModel[] Roles
         {
-            get => _roles.Where(model => model.RoleModel != null).ToArray(); 
+            get => _roles.ToArray(); 
             set => _roles = new HashSet<UserRoleModel>(value);
+        }
+        
+        
+        [BsonElement("Education")]
+        public HashSet<EducationModel> Educations
+        {
+            get;
+            set;
         }
 
         [BsonElement("IsBot")] public bool IsBot { get; set; }
@@ -57,34 +66,6 @@ namespace Dikubot.Database.Models
 
         [BsonElement("JoinedAt")] public DateTime JoinedAt { get; set; }
         
-        /// <summary>
-        /// AddRole adds the role to a HashSet of roles. This means no duplicates are allowed. If the role is already present, then it is overwritten by the new role
-        /// </summary>
-        /// <param name="roleModel">The role to be added</param>
-        public void AddRole(RoleModel roleModel)
-        {
-            AddRole(new UserRoleModel(roleModel));
-        }
-
-        /// <summary>
-        /// Remove an existing role from the user
-        /// </summary>
-        /// <param name="roleModel">Removes an element with the same role ID</param>
-        /// <returns>Whether any elements were removed</returns>
-        public bool RemoveRole(RoleModel roleModel)
-        {
-            return RemoveRole(new UserRoleModel(roleModel));
-        }
-
-        /// <summary>
-        /// Tells whether or not a user has a role with the same role ID
-        /// </summary>
-        /// <param name="roleModel">Will check if there is a roleModel with the same ID</param>
-        /// <returns>Whether the user has the role</returns>
-        public bool HasRole(RoleModel roleModel)
-        {
-            return HasRole(new UserRoleModel(roleModel));
-        }
 
         /// <summary>
         /// Tells us whether or not a UserRoleModel is active. By active, it means that has started and not expired. This is only relevant for UserRoles which has specified an end- and or startdate

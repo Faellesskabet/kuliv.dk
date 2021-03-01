@@ -2,6 +2,8 @@ using System;
 using System.Transactions;
 using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.Role;
+using Dikubot.Discord;
+using Discord.WebSocket;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -10,10 +12,10 @@ namespace Dikubot.Database.Models.SubModels
     public class UserRoleModel : IActiveTimeFrame
     {
         private Guid _roleId;
-        private static readonly RoleServices _roleServices = new RoleServices();
-
+        
         public UserRoleModel(RoleModel roleModel) : this(roleModel.Id)
         {
+            
         }
 
         public UserRoleModel(Guid roleId)
@@ -28,11 +30,10 @@ namespace Dikubot.Database.Models.SubModels
             get => _roleId;
             set => _roleId = value;
         }
-
-        [BsonIgnore]
-        public RoleModel RoleModel
+        
+        public RoleModel GetRoleModel(SocketGuild guild)
         {
-            get => _roleServices.Get(_roleId);
+            return new RoleServices(guild).Get(_roleId);
         }
 
 

@@ -1,4 +1,5 @@
 using System;
+using Discord.WebSocket;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -30,12 +31,10 @@ namespace Dikubot.Database.Models.Session
             get => _userId;
             set => _userId = value;
         }
-
-        [BsonIgnore]
-        public UserModel UserModel
+        
+        public UserModel GetUserModel(SocketGuild guild)
         {
-            get => new UserServices().Get(this.UserId);
-            set => UserId = value.Id;
+            return new UserServices(guild).Get(this.UserId);
         }
 
         private DateTime _expires;

@@ -13,7 +13,7 @@ namespace Dikubot.Database.Models.VoiceChannel
     /// </summary>
     public class VoiceChannelServices : ChannelServices<VoiceChannelModel>
     {
-        public VoiceChannelServices() : base("Main", "VoiceChannels")
+        public VoiceChannelServices(SocketGuild guild) : base("Main", "VoiceChannels", guild)
         {
         }
 

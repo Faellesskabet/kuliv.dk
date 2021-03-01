@@ -13,7 +13,7 @@ namespace Dikubot.Database.Models.TextChannel
     /// </summary>
     public class TextChannelServices : ChannelServices<TextChannelModel>
     {
-        public TextChannelServices() : base("Main", "TextChannels")
+        public TextChannelServices(SocketGuild guild) : base("Main", "TextChannels", guild)
         {
         }
 

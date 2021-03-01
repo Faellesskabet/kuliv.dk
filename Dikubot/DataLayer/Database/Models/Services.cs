@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Linq;
 using System.Reflection;
 using Discord;
+using Discord.WebSocket;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
@@ -18,17 +19,19 @@ namespace Dikubot.Database.Models
     {
         private readonly IMongoCollection<TModel> _models;
         private readonly Dictionary<string, bool> indexed = new Dictionary<string, bool>();
-
+        public SocketGuild Guild { get; private set; }
+        
         /// <summary>
         /// Constructor for the services.
         /// </summary>
         protected Services(string databaseName,
-            string collectionName,
+            string collectionName, SocketGuild guild,
             MongoDatabaseSettings databaseSettings = null,
             MongoCollectionSettings collectionSettings = null)
         {
+            this.Guild = guild;
             // The database to retrieve from.
-            IMongoDatabase database = Database.GetInstance.GetDatabase(databaseName, databaseSettings);
+            IMongoDatabase database = Database.GetInstance.GetDatabase($"{guild?.Id.ToString() ?? "NULL"}:{databaseName}", databaseSettings);
             // The collection to retrieve from.
             _models = database.GetCollection<TModel>(collectionName, collectionSettings);
 
@@ -58,7 +61,7 @@ namespace Dikubot.Database.Models
         /// <return>A Model.</return>
         public TModel Get(Expression<Func<TModel, bool>> filter)
         {
-            try
+            try  
             {
                 return _models.Find(filter).FirstOrDefault();
             }

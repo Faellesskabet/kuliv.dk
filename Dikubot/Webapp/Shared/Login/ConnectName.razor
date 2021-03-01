@@ -2,6 +2,7 @@
 @using Dikubot.Database.Models
 @using Dikubot.Database.Models.Session
 @using Dikubot.Discord
+@using global::Discord.WebSocket
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h1>Velkommen til DIKU's Discord Server</h1>
@@ -38,15 +39,21 @@
 
     private async void ConfirmName()
     {
-    /*  Might wanna do this at some point dunno (will need some input validation first)
-        await DiscordBot.DIKU.GetUser(Convert.ToUInt64(user.UserModel.DiscordId)).ModifyAsync(guildUser =>
+        SocketGuild guild = authenticator.GetGuild();
+        try
         {
-            guildUser.Nickname = name;
-        });
-        */
+            await guild.GetUser(Convert.ToUInt64(user.UserModel.DiscordId)).ModifyAsync(guildUser =>
+            {
+                guildUser.Nickname = name;
+            });
+        }
+        catch (Exception e)
+        {
+            // ignored, this only happens when the bot doesn't have access to change the user's name
+        }
 
         user.UserModel.Name = name;
-        new UserServices().Upsert(user.UserModel);
+        new UserServices(guild).Upsert(user.UserModel);
         SessionModel sessionModel = new SessionModel(user.UserModel);
         await authenticator.UpdateSession(sessionModel);
         parent.Update();

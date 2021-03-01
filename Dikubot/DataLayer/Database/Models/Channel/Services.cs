@@ -1,3 +1,4 @@
+using Discord.WebSocket;
 using MongoDB.Driver;
 
 
@@ -6,10 +7,10 @@ namespace Dikubot.Database.Models.Channel
     public abstract class ChannelServices<TCModel> : Services<TCModel> where TCModel : ChannelModel
     {
         protected ChannelServices(string databaseName,
-            string collectionName,
+            string collectionName, SocketGuild guild,
             MongoDatabaseSettings databaseSettings = null,
             MongoCollectionSettings collectionSettings = null)
-            : base(databaseName, collectionName, databaseSettings, collectionSettings)
+            : base(databaseName, collectionName, guild, databaseSettings, collectionSettings)
         {
         }
 

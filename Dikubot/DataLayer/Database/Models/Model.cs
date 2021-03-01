@@ -13,7 +13,7 @@ namespace Dikubot.Database.Models
     {
         [BsonId(IdGenerator = typeof(GuidGenerator))]
         public Guid Id { get; set; }
-
+        
         public bool Equals(Model model)
         {
             return this.Equals(model) || this.Id.Equals(model?.Id);

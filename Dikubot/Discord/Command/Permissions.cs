@@ -48,7 +48,7 @@ namespace Dikubot.Discord.Command
 
             if (args[0] == "makeExpandable" && args.Length == 2)
             {
-                var voiceChannelServices = new VoiceChannelServices();
+                var voiceChannelServices = new VoiceChannelServices(Context.Guild);
                 var newModel = voiceChannelServices.Get(model => model.DiscordId == args[1]);
                 if (newModel == null)
                 {

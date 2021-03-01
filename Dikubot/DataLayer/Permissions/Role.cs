@@ -137,7 +137,7 @@ namespace Dikubot.Permissions
             //We add the roles in the database to the user, but only if the role is currently active
             IEnumerable<IRole> addRoles =
                 userRoleModels.Where(model => ((IActiveTimeFrame)model).IsActive())
-                    .Select((model) => guild.GetRole(Convert.ToUInt64(model.RoleModel.DiscordId))).Where(role => role != null);
+                    .Select((model) => guild.GetRole(Convert.ToUInt64(model.GetRoleModel(guild)?.DiscordId))).Where(role => role != null);
 
             foreach (IRole role in addRoles)
             {
@@ -155,7 +155,7 @@ namespace Dikubot.Permissions
 
         public void SetDiscordUserRoles(SocketUser user)
         {
-            SetDiscordUserRoles(new UserServices().Get(user));
+            SetDiscordUserRoles(new UserServices(guild).Get(user));
         }
 
         /// <Summary>Add a role on the discord server to the database.</Summary>

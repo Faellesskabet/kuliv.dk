@@ -5,6 +5,7 @@
 @using Dikubot.Database.Models.Session
 @using Dikubot.DataLayer.Logic.Email
 @using Dikubot.DataLayer.Logic.Email.Emails
+@using Dikubot.DataLayer.Logic.User
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Permissions
@@ -98,7 +99,7 @@
             return;
         }
 
-        UserServices userServices = new UserServices();
+        UserServices userServices = new UserServices(authenticator.GetGuild());
         PermissionsService permissionsService = new PermissionsService(DiscordBot.DIKU);
         
         //In case the email already exists, then we simply override the old user with the new user, while removing the old user's roles on the Discord server
@@ -124,6 +125,9 @@
         user.UserModel.Email = email;
         user.UserModel.Verified = true;
         userServices.Upsert(user.UserModel);
+
+        //new KUUser(email.Split("@")[0]);
+
         SessionModel sessionModel = new SessionModel(user.UserModel);
         await authenticator.UpdateSession(sessionModel);
         parent.Update();
