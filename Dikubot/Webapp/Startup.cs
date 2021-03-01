@@ -45,6 +45,7 @@ namespace Dikubot.Webapp
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
             services.AddResponseCaching();
+            services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();

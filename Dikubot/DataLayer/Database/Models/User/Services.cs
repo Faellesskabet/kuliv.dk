@@ -14,7 +14,7 @@ namespace Dikubot.Database.Models
     /// </summary>
     public class UserServices : Services<UserModel>
     {
-        public UserServices() : base("Main", "Users")
+        public UserServices(SocketGuild guild) : base("Main", "Users", guild)
         {
         }
 
@@ -86,7 +86,7 @@ namespace Dikubot.Database.Models
         /// <return>A UserModel.</return>
         public UserModel SocketToModel(SocketGuildUser user)
         {
-            var roleServices = new RoleServices();
+            var roleServices = new RoleServices(Guild);
             var _user = new UserModel();
             _user.DiscordId = user.Id.ToString();
             _user.IsBot = user.IsBot;
@@ -105,7 +105,7 @@ namespace Dikubot.Database.Models
         /// <return>A UserModel.</return>
         public UserModel RestToModel(RestGuildUser user)
         {
-            var roleServices = new RoleServices();
+            var roleServices = new RoleServices(Guild);
             var _user = new UserModel();
             _user.DiscordId = user.Id.ToString();
             _user.IsBot = user.IsBot;
@@ -130,7 +130,12 @@ namespace Dikubot.Database.Models
             var roleIds = new List<ulong>();
             foreach (var userRole in user.Roles)
             {
-                var id = Convert.ToUInt64(userRole.RoleModel.DiscordId);
+                RoleModel roleModel = userRole.GetRoleModel(guild);
+                if (roleModel == null)
+                {
+                    continue;
+                }
+                var id = Convert.ToUInt64(roleModel.DiscordId);
                 roleIds.Add(id);
                 roles.Add(guild.GetRole(id));
             }

@@ -15,7 +15,7 @@ namespace Dikubot.Database.Models.CategoryChannel
     /// </summary>
     public class CategoryChannelServices : ChannelServices<CategoryChannelModel>
     {
-        public CategoryChannelServices() : base("Main", "CategoryChannels")
+        public CategoryChannelServices(SocketGuild guild) : base("Main", "CategoryChannels", guild)
         {
         }
 

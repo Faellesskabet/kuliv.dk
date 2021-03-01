@@ -23,11 +23,11 @@ namespace Dikubot.Permissions
         public PermissionsService(SocketGuild guild)
         {
             this.guild = guild;
-            _roleServices = new RoleServices();
-            _voiceChannelServices = new VoiceChannelServices();
-            _textChannelServices = new TextChannelServices();
-            _categoryChannelServices = new CategoryChannelServices();
-            _userServices = new UserServices();
+            _roleServices = new RoleServices(guild);
+            _voiceChannelServices = new VoiceChannelServices(guild);
+            _textChannelServices = new TextChannelServices(guild);
+            _categoryChannelServices = new CategoryChannelServices(guild);
+            _userServices = new UserServices(guild);
         }
 
         /// <Summary>Takes channels, roles and users information from discord and saves it in the database.</Summary>

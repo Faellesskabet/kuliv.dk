@@ -16,7 +16,7 @@ namespace Dikubot.Database.Models.Role
     /// </summary>
     public class RoleServices : Services<RoleModel>
     {
-        public RoleServices() : base("Main", "Roles")
+        public RoleServices(SocketGuild guild) : base("Main", "Roles", guild)
         {
         }
 

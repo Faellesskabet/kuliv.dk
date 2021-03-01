@@ -103,11 +103,12 @@ else
 
     private async void ApproveDiscord()
     {
-        UserServices userServices = new UserServices();
+        SocketGuild guild = authenticator.GetGuild();
+        UserServices userServices = new UserServices(guild);
         if (!userServices.Exists(discordUser))
         {
             UserModel userModel = new UserModel {DiscordUser = discordUser};
-            new UserServices().Upsert(userModel);
+            new UserServices(guild).Upsert(userModel);
         }
 
         SessionModel sessionModel = new SessionModel(userServices.Get((discordUser)));

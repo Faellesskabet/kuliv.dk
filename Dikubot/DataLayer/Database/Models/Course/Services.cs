@@ -1,10 +1,11 @@
+using Discord.WebSocket;
 using MongoDB.Driver;
 
 namespace Dikubot.Database.Models.Course
 {
     public class CourseServices : Services<CourseModel>
     {
-        public CourseServices() : base("Main", "Courses")
+        public CourseServices(SocketGuild guild) : base("Main", "Courses", guild)
         {
         }
         public bool NameAlreadyTaken(CourseModel courseModel)

@@ -32,8 +32,6 @@ namespace Dikubot.Discord
         private Task MessageReceived(SocketMessage message)
         {
             Console.WriteLine($"({message.Timestamp.ToString()}) {message.Author.ToString()} > {message.ToString()}");
-            UserModel userModel = new UserServices().Get(message.Author);
-            Console.WriteLine($"Context > Discord ID: {userModel.DiscordId} MongoDB ID: {userModel.Id}");
             return Task.CompletedTask;
         }
 

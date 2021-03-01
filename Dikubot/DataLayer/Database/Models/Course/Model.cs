@@ -2,6 +2,7 @@ using System;
 using Dikubot.Database.Models.Course.SubModels;
 using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.TextChannel;
+using Discord.WebSocket;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -9,7 +10,6 @@ namespace Dikubot.Database.Models.Course
 {
     public class CourseModel : Model, IActiveTimeFrame
     {
-        private static TextChannelServices _textChannelServices = new TextChannelServices();
         /// <summary>
         /// This is the name of the course
         /// </summary>
@@ -28,11 +28,9 @@ namespace Dikubot.Database.Models.Course
         [BsonElement("MainTextChannelModelId")]
         public Guid MainTextChannelModelId { get; set; }
 
-        [BsonIgnore]
-        public TextChannelModel MainTextChannelModel
+        public TextChannelModel GetMainTextChannel(SocketGuild guild)
         {
-            get => _textChannelServices.Get(MainTextChannelModelId);
-            set => MainTextChannelModelId = value.Id;
+            return new TextChannelServices(guild).Get(MainTextChannelModelId);
         }
 
         /// <summary>

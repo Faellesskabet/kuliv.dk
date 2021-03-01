@@ -1,8 +1,12 @@
 using System;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using Dikubot.Database.Models.Session;
+using Dikubot.DataLayer.Logic.WebDiscordBridge;
+using Discord.WebSocket;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Dikubot.Webapp.Logic
@@ -10,11 +14,25 @@ namespace Dikubot.Webapp.Logic
     public class Authenticator : AuthenticationStateProvider
     {
         private ILocalStorageService _localStorageService;
-        private SessionServices _sessionServices = new SessionServices();
-
-        public Authenticator(ILocalStorageService localStorageService)
+        private SessionServices _sessionServices;
+        private NavigationManager _navigationManager;
+        private SocketGuild _guild;
+        
+        public Authenticator(ILocalStorageService localStorageService, NavigationManager navigationManager)
         {
+            _navigationManager = navigationManager;
+            _guild = SubDomainConnector.GetGuildFromDomain(navigationManager.Uri);
+            _sessionServices = new SessionServices(_guild);
             _localStorageService = localStorageService;
+        }
+
+        /// <summary>
+        /// Get the guild connectected to this authentication instance
+        /// </summary>
+        /// <returns>A Discord guild</returns>
+        public SocketGuild GetGuild()
+        {
+            return _guild;
         }
 
         /// <summary>
@@ -31,23 +49,23 @@ namespace Dikubot.Webapp.Logic
             if (!Guid.TryParse(sessionStringKey, out Guid sessionKey))
             {
                 //Returns an empty UserIdentity, meaning the user isn't authorized to do anything
-                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity())));
+                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(_guild))));
             }
 
             if (!_sessionServices.Exists(sessionKey))
             {
-                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity())));
+                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(_guild))));
             }
 
             SessionModel sessionModel = _sessionServices.Get(sessionKey);
             if (sessionModel.IsExpired)
             {
-                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity())));
+                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(_guild))));
             }
 
             //Here we return a UserIdentity with our sessionModel. The system will then check the user connected to the session,
             //to see what authorisation step the user is at.
-            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel))));
+            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel, _guild))));
         }
 
         /// <summary>
@@ -60,7 +78,7 @@ namespace Dikubot.Webapp.Logic
             _sessionServices.Upsert(sessionModel);
             await _localStorageService.SetItemAsync("session", sessionModel.Id.ToString());
             NotifyAuthenticationStateChanged(
-                Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel)))));
+                Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel, _guild)))));
         }
     }
 }
