@@ -124,9 +124,24 @@
 
         user.UserModel.Email = email;
         user.UserModel.Verified = true;
+        string name = new KUUser(email.Split("@")[0]).GetName();
+        if (name != "")
+        {
+            user.UserModel.Name = name;
+            SocketGuild guild = authenticator.GetGuild();
+            try
+            {
+                await guild.GetUser(Convert.ToUInt64(user.UserModel.DiscordId)).ModifyAsync(guildUser =>
+                {
+                    guildUser.Nickname = name;
+                });
+            }
+            catch (Exception e)
+            {
+                //ignored
+            }
+        }
         userServices.Upsert(user.UserModel);
-
-        //new KUUser(email.Split("@")[0]);
 
         SessionModel sessionModel = new SessionModel(user.UserModel);
         await authenticator.UpdateSession(sessionModel);
