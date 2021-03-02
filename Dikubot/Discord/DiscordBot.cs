@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Dikubot.Database.Models;
+using Dikubot.DataLayer.Cronjob;
+using Dikubot.DataLayer.Cronjob.Cronjobs;
 using Dikubot.Discord.Command;
 using Dikubot.Discord.EventListeners.Permissions;
 using Dikubot.Discord.EventListeners;
@@ -17,7 +19,6 @@ namespace Dikubot.Discord
     {
         public static DiscordSocketClient client;
         public static CommandHandler commandHandler;
-        public static SocketGuild DIKU;
 
         public void run()
         {
@@ -75,11 +76,15 @@ namespace Dikubot.Discord
                 
                 await services.GetRequiredService<CommandHandler>().init();
                 
-                client.Connected += () =>
+                Scheduler scheduler = new Scheduler();
+
+                client.Ready += () =>
                 {
-                    DIKU = client.GetGuild(Convert.ToUInt64(Environment.GetEnvironmentVariable("DIKU_DISCORD_ID")));
-                    int users = client.Guilds.Sum(guild => guild.MemberCount);
-                    client.SetGameAsync($"{users.ToString()} users");
+                    // minus 1 so it doesn't include itself
+                    int users = client.Guilds.Sum(guild => guild.MemberCount-1);
+                    client.SetGameAsync($"{users.ToString()} users", null, ActivityType.Watching);
+                    
+                    scheduler.ScheduleTask(new UpdateUserRoles());
                     return Task.CompletedTask;
                 };
 

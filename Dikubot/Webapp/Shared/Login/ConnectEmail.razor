@@ -100,7 +100,7 @@
         }
 
         UserServices userServices = new UserServices(authenticator.GetGuild());
-        PermissionsService permissionsService = new PermissionsService(DiscordBot.DIKU);
+        PermissionsService permissionsService = new PermissionsService(authenticator.GetGuild());
         
         //In case the email already exists, then we simply override the old user with the new user, while removing the old user's roles on the Discord server
 
