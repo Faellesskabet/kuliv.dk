@@ -59,7 +59,6 @@ namespace Dikubot.Webapp
             
             services.AddControllersWithViews()
                 .AddMicrosoftIdentityUI();
-
             services.AddAuthorization(options =>
             {
                 // By default, all incoming requests will be authorized according to the default policy

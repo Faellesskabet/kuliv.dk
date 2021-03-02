@@ -12,7 +12,7 @@
     <div class="login">
         @if (_state == State.ConnectDiscord)
         {
-            <ConnectDiscord parent="@this"/>
+            <ConnectDiscord parent="@this" AuthCode="@AuthCode"/>
         }
         @if (_state == State.ConnectEmail)
         {
@@ -27,7 +27,9 @@
 
 
 @code {
-
+    [Parameter]
+    public string AuthCode { get; set; }
+    
     private enum State
     {
         ConnectDiscord,
