@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Dikubot.Database.Models;
 using Dikubot.Discord.Command;
@@ -37,17 +38,17 @@ namespace Dikubot.Discord
 
         public async Task Main()
         {
+            var config = new DiscordSocketConfig
+            {
+                AlwaysDownloadUsers = true,
+                MessageCacheSize = 1000,
+            };
             using (var services = ConfigureServices())
             {
-                var config = new DiscordSocketConfig
-                {
-                    AlwaysDownloadUsers = true,
-                    MessageCacheSize = 1000
-                };
-
                 client = services.GetRequiredService<DiscordSocketClient>();
                 var permissionListeners = new PermissionListeners();
                 var expandableVoiceChatListener = new ExpandableVoiceChatListener();
+                var guildDownloadListeners = new GuildDownloadListeners();
                 client.Log += Log;
                 client.RoleCreated += permissionListeners.RoleCreated;
                 client.RoleDeleted += permissionListeners.RoleDeleted;
@@ -59,6 +60,8 @@ namespace Dikubot.Discord
                 client.UserJoined += permissionListeners.UserJoined;
                 client.UserLeft += permissionListeners.UserLeft;
                 client.GuildMemberUpdated += permissionListeners.UserUpdated;
+                client.Ready += guildDownloadListeners.DownloadGuildOnBoot;
+                client.JoinedGuild += guildDownloadListeners.DownloadGuildOnJoin;
 
                 if (main.IS_DEV)
                 {
@@ -75,6 +78,8 @@ namespace Dikubot.Discord
                 client.Connected += () =>
                 {
                     DIKU = client.GetGuild(Convert.ToUInt64(Environment.GetEnvironmentVariable("DIKU_DISCORD_ID")));
+                    int users = client.Guilds.Sum(guild => guild.MemberCount);
+                    client.SetGameAsync($"{users.ToString()} users");
                     return Task.CompletedTask;
                 };
 
