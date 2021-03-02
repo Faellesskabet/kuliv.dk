@@ -31,7 +31,7 @@ namespace Dikubot.Database.Models
         {
             this.Guild = guild;
             // The database to retrieve from.
-            IMongoDatabase database = Database.GetInstance.GetDatabase($"{guild?.Id.ToString() ?? "NULL"}:{databaseName}", databaseSettings);
+            IMongoDatabase database = Database.GetInstance.GetDatabase($"{guild?.Id.ToString() ?? "NULL"}_{databaseName}", databaseSettings);
             // The collection to retrieve from.
             _models = database.GetCollection<TModel>(collectionName, collectionSettings);
 
