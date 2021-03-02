@@ -16,7 +16,7 @@ You've now connected your own Discord Bot.
 You need to have Sendgrid account and a Sendgrid API token with access to send emails.
 1. Navigate to `Dikubot/Properties/launchSettings.json`
 2. Set `"SENDGRID_API":` to your Sendgrid API token
-3. Navigate to `Dikubot/DataLayer/Logic/WebDiscordBridge/SubDomainConnector.cs` and add the guilds your bot has access to, to the Subdomains enum. The name is will be the subdomain of the website, and the ulong is the ID of your Discord guild.
+3. Navigate to `Dikubot/DataLayer/Logic/WebDiscordBridge/SubDomainConnector.cs` and add the guilds your bot has access to, to the Subdomains enum. The name will be the subdomain of the website, and the ulong is the ID of your Discord guild.
 
 
 ### Setting up Datalayer
