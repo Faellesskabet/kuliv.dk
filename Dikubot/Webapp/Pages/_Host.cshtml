@@ -1,6 +1,9 @@
 ﻿@page "/"
 @namespace Dikubot.Webapp.Pages
+@model Dikubot.Pages._HostModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Webapp.Shared
+
 @{
     Layout = null;
 }
@@ -21,7 +24,9 @@
     <script src="_content/BlazorFluentUI.BFUBaseComponent/blazorFluentUi.min.js"></script>
 </head>
 <body>
-<component type="typeof(App)" render-mode="Server"/>
+
+@Model.AuthCode
+<component type="typeof(App)" render-mode="Server" param-AuthCode="@Model.AuthCode"/>
 
 <div id="blazor-error-ui">
     <environment include="Staging,Production">

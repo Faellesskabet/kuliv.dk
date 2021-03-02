@@ -6,9 +6,24 @@
 @using Dikubot.DataLayer.Logic.User
 @using Dikubot.DataLayer.Static
 @using global::Discord
+@using Azure.Core
+@using Microsoft.AspNetCore.Http
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.Net.Http
+@using Microsoft.AspNetCore.Mvc;
 
 <h1>Velkommen til DIKU's Discord Server</h1>
+
+
+
+@if (@AuthCode != null)
+{
+@code
+}
+discord 
+{
+}
+
 @if (discordUser == null)
 {
     <div class="card w-auto h-auto shadow">
@@ -45,10 +60,11 @@ else
 
 
 @code {
-
     [Parameter]
     public Login parent { get; set; }
-
+    [Parameter]
+    public string AuthCode { get; set; }
+    
     private string password;
     private Authenticator authenticator;
     private SocketUser discordUser;
@@ -116,4 +132,11 @@ else
         parent.Update();
     }
 
+    
+
+}
+
+
+    
+    
 }
