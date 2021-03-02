@@ -27,7 +27,6 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs
                     permissionsService.SetDiscordUserRoles(user);
                 }
             }
-            Logger.Debug("Successfully updated all user roles");
 
         }
     }
