@@ -1,7 +1,11 @@
 @using Dikubot.DataLayer.Logic.WebDiscordBridge
 @using Dikubot.Discord
 @using global::Discord.WebSocket
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Mvc
 @inject NavigationManager NavigationManager
+
+
 
 <BFUTheme>
     <BFULayerHost Style="width:100vw">
@@ -15,7 +19,7 @@
                                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
                             </Authorized>
                             <NotAuthorized>
-                                <Login/>
+                                <Login AuthCode="@AuthCode"/>
                             </NotAuthorized>
                         </AuthorizeView>
                     </Found>
@@ -33,7 +37,8 @@
 </BFUTheme>
 
 @code {
-
+    [Parameter]
+    public string AuthCode { get; set; }
     public bool IsSubdomainValid()
     {
         SocketGuild guild = SubDomainConnector.GetGuildFromDomain(NavigationManager.Uri);
