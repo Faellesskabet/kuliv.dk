@@ -5,6 +5,7 @@
 @using Dikubot.Database.Models.Session
 @using Dikubot.DataLayer.Logic.User
 @using Dikubot.DataLayer.Static
+@using Dikubot.Discord
 @using global::Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -15,7 +16,7 @@
         <div class="card-body">
             <h5 class="card-title">Login med Discord</h5>
             <div class="textFieldDiv">
-                <BFUTextField Label="Send den følgende kommando til DIKU botten (DIKU#7676)." Prefix="!connect" ReadOnly="true" Value="@password" ClassName="text-field"/>
+                <BFUTextField Label="@GetContactMessage()" Prefix="!connect" ReadOnly="true" Value="@password" ClassName="text-field"/>
             </div>
             <a href="https://dnur.dk/" class="text-decoration-none" target="_blank">
                 <p class="text-xl-left">Klik her for hjælp</p>
@@ -34,7 +35,7 @@ else
             <div class="line"></div>
             <BFUStack Horizontal="true" HorizontalAlign="Alignment.Center" Tokens=@(new BFUStackTokens() {ChildrenGap = new[] {10.0}})>
                 <BFUPrimaryButton Text="Ja, godkend" OnClick=@(ApproveDiscord) />
-                <BFUDefaultButton Text="Nej, afvis" OnClick=@(RejectDiscord) Style="background-color: lightcoral"/>
+                <BFUDefaultButton Text="Nej, afvis" OnClick=@(RejectDiscord) Style="background-color: #f08080"/>
             </BFUStack>
 
         </div>
@@ -93,6 +94,11 @@ else
         }
         return PersonaPresenceStatus.None;
     }
+
+    public string GetContactMessage()
+    {
+        return $"Send den følgende kommando til botten {DiscordBot.client.CurrentUser.Username}#{DiscordBot.client.CurrentUser.Discriminator}.";
+    } 
 
     private async void RejectDiscord()
     {
