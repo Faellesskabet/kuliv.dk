@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Dikubot.Database.Models;
+using Dikubot.DataLayer.Cronjob;
+using Dikubot.DataLayer.Cronjob.Cronjobs;
 using Dikubot.Discord.Command;
 using Dikubot.Discord.EventListeners.Permissions;
 using Dikubot.Discord.EventListeners;
@@ -16,7 +19,6 @@ namespace Dikubot.Discord
     {
         public static DiscordSocketClient client;
         public static CommandHandler commandHandler;
-        public static SocketGuild DIKU;
 
         public void run()
         {
@@ -37,17 +39,17 @@ namespace Dikubot.Discord
 
         public async Task Main()
         {
+            var config = new DiscordSocketConfig
+            {
+                AlwaysDownloadUsers = true,
+                MessageCacheSize = 1000,
+            };
             using (var services = ConfigureServices())
             {
-                var config = new DiscordSocketConfig
-                {
-                    AlwaysDownloadUsers = true,
-                    MessageCacheSize = 1000
-                };
-
                 client = services.GetRequiredService<DiscordSocketClient>();
                 var permissionListeners = new PermissionListeners();
                 var expandableVoiceChatListener = new ExpandableVoiceChatListener();
+                var guildDownloadListeners = new GuildDownloadListeners();
                 client.Log += Log;
                 client.RoleCreated += permissionListeners.RoleCreated;
                 client.RoleDeleted += permissionListeners.RoleDeleted;
@@ -59,6 +61,8 @@ namespace Dikubot.Discord
                 client.UserJoined += permissionListeners.UserJoined;
                 client.UserLeft += permissionListeners.UserLeft;
                 client.GuildMemberUpdated += permissionListeners.UserUpdated;
+                client.Ready += guildDownloadListeners.DownloadGuildOnBoot;
+                client.JoinedGuild += guildDownloadListeners.DownloadGuildOnJoin;
 
                 if (main.IS_DEV)
                 {
@@ -72,9 +76,15 @@ namespace Dikubot.Discord
                 
                 await services.GetRequiredService<CommandHandler>().init();
                 
-                client.Connected += () =>
+                Scheduler scheduler = new Scheduler();
+
+                client.Ready += () =>
                 {
-                    DIKU = client.GetGuild(Convert.ToUInt64(Environment.GetEnvironmentVariable("DIKU_DISCORD_ID")));
+                    // minus 1 so it doesn't include itself
+                    int users = client.Guilds.Sum(guild => guild.MemberCount-1);
+                    client.SetGameAsync($"{users.ToString()} users", null, ActivityType.Watching);
+                    
+                    scheduler.ScheduleTask(new UpdateUserRoles());
                     return Task.CompletedTask;
                 };
 

@@ -72,7 +72,7 @@ namespace Dikubot.Database.Models.Course
         /// <summary>
         /// How often does the course repeat
         /// </summary>
-        [BsonElement("RepeatEveryNthYear")][BsonRepresentation(BsonType.DateTime)]
+        [BsonElement("RepeatEveryNthYear")]
         public double RepeatEveryNthYear { get; set; }
     }
 }

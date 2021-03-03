@@ -1,29 +1,28 @@
-@page "/admin/courses"
+@page "/admin/groups"
 @using Dikubot.Database.Models.Course
 @attribute [Authorize(Roles = "MOD, ADMIN")]
 <div class="page-body">
     @if (EditMode)
     {
         <h3>Kursus Editor</h3>
-        <Course CourseModel="@(new CourseModel())" parent="@this"></Course>
+        <Course CourseModel="@(new CourseModel())"></Course>
     }
     else
     {
         <h3>Kursus Admin Oversigt</h3>
-        <BFUCompoundButton ClassName="button" Text="Tilføj nyt kursus" Primary="true" OnClick="CreateCourseButton"/>
-        <CourseList/>
+        <BFUCompoundButton ClassName="button" Text="Tilføj ny gruppe" Primary="true" OnClick="CreateGroupButton"/>
     }
 </div>
 
 @code {
     public bool EditMode = false;
 
-    private async void CreateCourseButton()
+    private async void CreateGroupButton()
     {
         EditMode = true;
         await InvokeAsync(() => {StateHasChanged();});
     }
-
+    
     public async void Update()
     {
         await InvokeAsync(() => { StateHasChanged(); });
