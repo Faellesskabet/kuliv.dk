@@ -1,6 +1,68 @@
+@using Dikubot.Database.Models.Course
+@using Dikubot.DataLayer.Logic.WebDiscordBridge
+@using global::Discord.WebSocket
+@inject NavigationManager NavigationManager
 
-<h1>Cool!</h1>
+
+<div style="height: 80vh; width: 80vw; overflow-y: auto">
+    <BFUDetailsList ItemsSource="InputList"
+                    Columns="Columns"
+                    GetKey=@(item=>item.Id)
+                    LayoutMode="DetailsListLayoutMode.Justified"
+                    TItem="CourseModel"
+                    OnItemInvoked="OnClick"
+                    Selection="selection"
+                    SelectionMode="SelectionMode.Multiple">
+    </BFUDetailsList>
+</div>
 
 @code {
-    
+    List<CourseModel> InputList = new List<CourseModel>();
+
+    Selection<CourseModel> selection = new Selection<CourseModel>();
+
+    public List<BFUDetailsRowColumn<CourseModel>> Columns = new List<BFUDetailsRowColumn<CourseModel>>();
+
+    protected override void OnInitialized()
+    {
+        selection.GetKey = (item => item.Id);
+        Columns.Add(new BFUDetailsRowColumn<CourseModel>("Navn", x => x.FullName) { Index = 0, IsResizable = true, OnColumnClick = this.ClickName, MaxWidth = 100});
+        Columns.Add(new BFUDetailsRowColumn<CourseModel>("Discord navn", x => x.Name) { Index = 1, IsResizable = true, MaxWidth = 100 });
+        Columns.Add(new BFUDetailsRowColumn<CourseModel>("Kursus Url", x => x.CourseUrl) { Index = 2, IsResizable = true, MaxWidth = 100 });
+        Columns.Add(new BFUDetailsRowColumn<CourseModel>("Antal hold", x => x.TeamLength) { Index = 3, IsResizable = true, MaxWidth = 100});
+        Columns.Add(new BFUDetailsRowColumn<CourseModel>("Startdato", x => x.StartDate) { Index = 4, IsResizable = true, MaxWidth = 130});
+        Columns.Add(new BFUDetailsRowColumn<CourseModel>("Slutdato", x => x.EndDate) { Index = 5, IsResizable = true, MaxWidth = 130});
+        Columns.Add(new BFUDetailsRowColumn<CourseModel>("Gentages", x => x.RepeatEveryNthYear) { Index = 6, IsResizable = true, MaxWidth = 100});
+        
+        SocketGuild guild = SubDomainConnector.GetGuildFromDomain(NavigationManager.Uri);
+
+        CourseServices courseServices = new CourseServices(guild);
+        //Implement pagination
+        foreach (var course in courseServices.Get())
+        {
+            InputList.Add(course);
+        }
+
+        base.OnInitialized();
+    }
+
+    private void ClickName(BFUDetailsRowColumn<CourseModel> column)
+    {
+    // since we're creating a new list, we need to make a copy of what was previously selected
+        var selected = selection.GetSelection();
+
+    //create new sorted list
+        InputList = new List<CourseModel>(column.IsSorted ? InputList.OrderBy(x => x.Name) : InputList.OrderByDescending(x => x.Name));
+
+    //clear old selection and create new selection
+    //selection.SetKeySelected(selected, true);
+
+        column.IsSorted = !column.IsSorted;
+        StateHasChanged();
+    }
+
+    private void OnClick(CourseModel item)
+    {
+        Console.WriteLine("Clicked!");
+    }
 }

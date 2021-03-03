@@ -6,17 +6,17 @@
 @inject NavigationManager NavigationManager;
 
 <div class="course-editor" style="width: 90%;">
-    <BFUTextField Label="Navn (Discord Rollen)" Value="@CourseModel.Name" OnInput="change => CourseModel.Name = change" Placeholder="Inter"></BFUTextField>
     <BFUTextField Label="Fulde navn" Value="@CourseModel.FullName" OnInput="change => CourseModel.FullName = change" Placeholder="Interaktions Design"></BFUTextField>
+    <BFUTextField Label="Discord Navn" Value="@CourseModel.Name" OnInput="change => CourseModel.Name = change" Placeholder="Inter"></BFUTextField>
     <BFUTextField Label="Kursus Url" Value="@CourseModel.CourseUrl" OnInput="change => CourseModel.CourseUrl = change" Placeholder="https://kurser.ku.dk/course/ndak15006u/2020-2021"></BFUTextField>
     <BFUSlider Label="Antal Hold" Min="0" Max="30" Step="1.0" DefaultValue="@(CourseModel?.TeamCategoryList?.Length ?? 0)" ValueChanged="length => CourseModel.TeamLength = (int) length"></BFUSlider>
     <BFUDatePicker Label="Start dato" Value="@CourseModel.StartDate" ValueChanged="change => CourseModel.StartDate = change" Placeholder="Start dato"></BFUDatePicker>
     <BFUDatePicker Label="Slut dato" Value="@CourseModel.EndDate" ValueChanged="change => CourseModel.EndDate = change" Placeholder="Slut dato"></BFUDatePicker>
     <BFUTextField Label="Gentages hvert n'ende år (f.eks. 1.0 for at ske en gang om året)" OnInput="ChangeRepeat" ErrorMessage="@RepeatErrorMessage" Placeholder="0.0"></BFUTextField>
-                <BFUStack Horizontal="true" Style="margin-top: 10px;" Tokens=@(new BFUStackTokens() { ChildrenGap = new[] { 10.0 } })>
-                    <BFUPrimaryButton Text="Bekræft Ændringer" OnClick="SubmitCourse"/>
-                    <BFUDefaultButton Text="Annuller" Style="background-color: lightcoral" OnClick="Exit"/>
-                </BFUStack>
+    <BFUStack Horizontal="true" Style="margin-top: 10px;" Tokens=@(new BFUStackTokens() {ChildrenGap = new[] {10.0}})>
+        <BFUPrimaryButton Text="Bekræft Ændringer" OnClick="SubmitCourse"/>
+        <BFUDefaultButton Text="Annuller" Style="background-color: lightcoral" OnClick="Exit"/>
+    </BFUStack>
 </div>
 
 @code {
