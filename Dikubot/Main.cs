@@ -4,6 +4,8 @@ using System;
 using System.Threading;
 using System.Threading.Channels;
 using Dikubot.Database.Models;
+using Dikubot.DataLayer.Cronjob;
+using Dikubot.DataLayer.Cronjob.Cronjobs;
 using Dikubot.Webapp;
 using Dikubot.Discord;
 using Microsoft.Extensions.Configuration;

@@ -5,6 +5,7 @@
 @using Dikubot.Database.Models.Session
 @using Dikubot.DataLayer.Logic.User
 @using Dikubot.DataLayer.Static
+@using Dikubot.Discord
 @using global::Discord
 @using Azure.Core
 @using Microsoft.AspNetCore.Authentication
@@ -57,7 +58,7 @@ else
             <div class="line"></div>
             <BFUStack Horizontal="true" HorizontalAlign="Alignment.Center" Tokens=@(new BFUStackTokens() {ChildrenGap = new[] {10.0}})>
                 <BFUPrimaryButton Text="Ja, godkend" OnClick=@(ApproveDiscord) />
-                <BFUDefaultButton Text="Nej, afvis" OnClick=@(RejectDiscord) Style="background-color: lightcoral"/>
+                <BFUDefaultButton Text="Nej, afvis" OnClick=@(RejectDiscord) Style="background-color: #f08080"/>
             </BFUStack>
 
         </div>
@@ -139,6 +140,11 @@ else
         }
         return PersonaPresenceStatus.None;
     }
+
+    public string GetContactMessage()
+    {
+        return $"Send den følgende kommando til botten {DiscordBot.client.CurrentUser.Username}#{DiscordBot.client.CurrentUser.Discriminator}.";
+    } 
 
     private async void RejectDiscord()
     {

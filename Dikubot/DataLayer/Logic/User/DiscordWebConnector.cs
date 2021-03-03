@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Dikubot.DataLayer.Caching;
 using Dikubot.Webapp.Shared.Login;
 using Discord.WebSocket;
 
@@ -9,7 +10,7 @@ namespace Dikubot.DataLayer.Logic.User
         /*
          * Implement auto-removal of pending_passwords to avoid filling memory
          */
-        private static Dictionary<string, ConnectDiscord> pending_passwords = new Dictionary<string, ConnectDiscord>();
+        private static Cache<string, ConnectDiscord> pending_passwords = new Cache<string, ConnectDiscord>(20);
 
         /// <summary>
         /// Adds a password to be typed into Discord, to make a connection between a webcircuit and Discord.
@@ -34,8 +35,8 @@ namespace Dikubot.DataLayer.Logic.User
                 return false;
             }
 
-            pending_passwords[password].DiscordConnected(user);
-            pending_passwords.Remove(password);
+            pending_passwords[password.ToUpper()].DiscordConnected(user);
+            pending_passwords.Remove(password.ToUpper());
             return true;
         }
     }

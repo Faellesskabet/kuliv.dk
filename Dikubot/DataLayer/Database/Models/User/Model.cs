@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Dikubot.Database.Models.Education;
+using Dikubot.Database.Models.Group;
 using Dikubot.Database.Models.Interfaces;
 using Dikubot.Database.Models.Role;
 using Dikubot.Database.Models.SubModels;
@@ -54,8 +55,8 @@ namespace Dikubot.Database.Models
         }
         
         
-        [BsonElement("Education")]
-        public HashSet<EducationModel> Educations
+        [BsonElement("GroupIds")]
+        public HashSet<Guid> GroupIds
         {
             get;
             set;
