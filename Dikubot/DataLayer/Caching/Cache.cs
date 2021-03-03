@@ -13,7 +13,6 @@ namespace Dikubot.DataLayer.Caching
     public class Cache<TKey, TValue>
     {
         private int _swap;
-        private CronExpression _cronExpression;
         private CronTask _cronTask;
         private Scheduler _scheduler = new Scheduler();
 
@@ -25,10 +24,10 @@ namespace Dikubot.DataLayer.Caching
         /// Initialize a cache. Cached items will be cached for at least swap minutes, and at most 2 times swap minutes
         /// </summary>
         /// <param name="swap">Cached items will be cached for at least swap minutes, and at most 2 times swap minutes</param>
-        public Cache(int swap)
+        public Cache(int minuteSwap)
         {
-            _swap = swap;
-            _cronTask = new CronTask(CronExpression.Parse($"*/{swap} * * * *"), Swap);
+            _swap = minuteSwap;
+            _cronTask = new CronTask(CronExpression.Parse($"*/{minuteSwap} * * * *"), Swap);
 
         }
         
@@ -49,11 +48,13 @@ namespace Dikubot.DataLayer.Caching
         /// <returns></returns>
         protected virtual TValue GetValue(TKey key)
         {
-            if (activeStorage.ContainsKey(key))
+            TValue value;
+            if (activeStorage.TryGetValue(key, out value))
             {
-                return activeStorage[key];
+                return value;
             }
-            return inactiveStorage[key];
+            
+            return inactiveStorage.TryGetValue(key, out value) ? value : default;
         }
 
         /// <summary>
@@ -98,7 +99,11 @@ namespace Dikubot.DataLayer.Caching
                 activeStorage.Remove(key);
                 return;
             }
-            inactiveStorage.Remove(key);
+
+            if (inactiveStorage.ContainsKey(key))
+            {
+                inactiveStorage.Remove(key);
+            }
         }
         
         public TValue this[TKey key]

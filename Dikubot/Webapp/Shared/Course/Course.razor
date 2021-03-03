@@ -1,6 +1,7 @@
 @using Dikubot.Database.Models.Course
 @using System.Globalization
 @using Dikubot.DataLayer.Logic.WebDiscordBridge
+@using Dikubot.Webapp.Pages.Admin
 @using Microsoft.AspNetCore.Mvc.Razor
 @inject NavigationManager NavigationManager;
 
@@ -14,11 +15,14 @@
     <BFUTextField Label="Gentages hvert n'ende år (f.eks. 1.0 for at ske en gang om året)" OnInput="ChangeRepeat" ErrorMessage="@RepeatErrorMessage" Placeholder="0.0"></BFUTextField>
                 <BFUStack Horizontal="true" Style="margin-top: 10px;" Tokens=@(new BFUStackTokens() { ChildrenGap = new[] { 10.0 } })>
                     <BFUPrimaryButton Text="Bekræft Ændringer" OnClick="SubmitCourse"/>
-                    <BFUDefaultButton Text="Annuller" Style="background-color: lightcoral"/>
+                    <BFUDefaultButton Text="Annuller" Style="background-color: lightcoral" OnClick="Exit"/>
                 </BFUStack>
 </div>
 
 @code {
+    [Parameter]
+    public Courses parent { get; set; }
+    
     [Parameter] 
     public CourseModel CourseModel { get; set; }
     
@@ -42,12 +46,19 @@
 
     public void SubmitCourse()
     {
-        if (string.IsNullOrEmpty(RepeatErrorMessage))
+        if (!string.IsNullOrEmpty(RepeatErrorMessage))
         {
             return;
         }
         CourseModel.RepeatEveryNthYear = RepeatEveryNthYear;
         CourseServices services = new CourseServices(SubDomainConnector.GetGuildFromDomain(NavigationManager.Uri));
         services.Upsert(CourseModel);
+        Exit();
+    }
+
+    public void Exit()
+    {
+        parent.EditMode = false;
+        parent.Update();
     }
 }
