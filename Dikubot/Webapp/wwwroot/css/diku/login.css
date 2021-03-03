@@ -56,6 +56,20 @@
     }
 }
 
+
+@media only screen and (min-width: 900px) {
+    .login-button {
+        width: 880px;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .login-button {
+        width: 80vw;
+    }
+}
+
+
 h1 {
     color: white;
     text-shadow: 2px 0 0 #000, 0 -2px 0 #000, 0 2px 0 #000, -2px 0 0 #000;
