@@ -33,7 +33,7 @@
 
 <h1>Velkommen til DIKU's Discord Server</h1>
 
-@if (discordUser == null)
+@if (discordUser == null && !loading)
 {
     <div class="card w-auto h-auto shadow">
         <div class="card-body">
@@ -47,7 +47,7 @@
         </div>
     </div>
 }
-else
+else if (discordUser != null)
 {
     <div class="card w-auto h-auto shadow">
         <div class="card-body">
@@ -80,9 +80,11 @@ else
     private Authenticator authenticator;
     private SocketUser discordUser;
     private string client_id, client_secret, redirect_url;
-
+    private bool loading;
+    
     protected override async Task OnInitializedAsync()
     {
+        loading = true;
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
@@ -91,22 +93,21 @@ else
         client_secret = Configuration.GetValue<string>("DiscordAuth:CLIENT_SECRET");
         redirect_url = NavigationManager.BaseUri;
         
-        if (AuthCode == null)
+        if (AuthCode != null)
         {
-            return;
-        }
-
-        try
-        {
-            JObject discordUserJson = GetUser(GetAuthtoken(AuthCode));
-            ulong discordUserId = Convert.ToUInt64(discordUserJson["id"]);
-            discordUser = DiscordBot.client.GetUser(discordUserId);
-            await InvokeAsync(() => { StateHasChanged(); });
-        }
-        catch (Exception e)
-        {
+            try
+            {
+                JObject discordUserJson = GetUser(GetAuthtoken(AuthCode));
+                ulong discordUserId = Convert.ToUInt64(discordUserJson["id"]);
+                discordUser = DiscordBot.client.GetUser(discordUserId);
+                await InvokeAsync(() => { StateHasChanged(); });
+            }
+            catch (Exception e)
+            {
             // ignored
+            }
         }
+        loading = false;
 
     }
 

@@ -46,6 +46,11 @@ namespace Dikubot.Database.Models.Role
             return modelIn;
         }
 
+        public bool Exists(string name)
+        {
+            return Exists(model => model.Name.ToLower() == name.ToLower());
+        }
+
         /// <Summary>Checks if a RoleModel is already in the database.</Summary>
         /// <param name="modelIn">A boolean which tells if the models is in the database.</param>
         /// <return>A bool, true if the value already exist false if not.</return>

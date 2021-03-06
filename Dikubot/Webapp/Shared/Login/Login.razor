@@ -22,6 +22,10 @@
         {
             <ConnectName parent="@this"/>
         }
+        @if (_state == State.NoAccess)
+        {
+            <h1>Du har ikke adgang til denne Discord server</h1>
+        }
     </div>
 </div>
 
@@ -34,7 +38,8 @@
     {
         ConnectDiscord,
         ConnectEmail,
-        ConnectName
+        ConnectName,
+        NoAccess
     }
 
     private State _state;
@@ -55,7 +60,11 @@
             return State.ConnectDiscord;
         }
 
-        return !user.UserModel.Verified ? State.ConnectEmail : State.ConnectName;
+        if (!user.UserModel.Verified)
+        {
+            return State.ConnectEmail;
+        }
+        return user.UserModel.IsBanned ? State.NoAccess : State.ConnectName;
     }
 
 

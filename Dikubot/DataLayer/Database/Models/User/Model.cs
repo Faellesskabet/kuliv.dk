@@ -53,6 +53,13 @@ namespace Dikubot.Database.Models
             get => _roles.ToArray(); 
             set => _roles = new HashSet<UserRoleModel>(value);
         }
+
+        public bool HasRole(string name, SocketGuild guild)
+        {
+            RoleServices services = new RoleServices(guild);
+            return _roles.Any(model =>
+                String.Equals(services.Get(model.RoleId)?.Name, name, StringComparison.CurrentCultureIgnoreCase));
+        }
         
         
         [BsonElement("GroupIds")]
@@ -64,8 +71,9 @@ namespace Dikubot.Database.Models
 
         [BsonElement("IsBot")] public bool IsBot { get; set; }
         [BsonElement("Username")] public string Username { get; set; }
-
         [BsonElement("JoinedAt")] public DateTime JoinedAt { get; set; }
+
+        [BsonElement("Banned")] public bool IsBanned { get; set; } = false;
         
 
         /// <summary>
