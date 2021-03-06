@@ -100,21 +100,42 @@ namespace Dikubot.Permissions
         /// <param name="userModel"></param>
         public async void SetDiscordUserRoles(UserModel userModel)
         {
-            //We get all the user's roles in the database
-            HashSet<UserRoleModel> userRoleModels = new HashSet<UserRoleModel>(userModel.Roles);
             SocketUser discordUser = userModel.DiscordUser;
             if (discordUser == null)
             {
                 return;
             }
-
+            
             //We get the user in the context of the current guilds
             SocketGuildUser guildUser = guild.GetUser(discordUser.Id);
             if (guildUser == null)
             {
                 return;
             }
+            
+            //If the user is verified, then we wanna make sure they get the "Verified" role!
+            if (userModel.Verified)
+            {
+                // If the server doesn't have a verified role, then we add one
+                if (!_roleServices.Exists("verified"))
+                {
+                    SocketRole everyoneRole = guild.EveryoneRole;
+                    RestRole role = await guild.CreateRoleAsync("Verified", everyoneRole.Permissions, everyoneRole.Color, 
+                        everyoneRole.IsHoisted, everyoneRole.IsMentionable, RequestOptions.Default);
+                    RoleModel roleModel = _roleServices.RestToModel(role);
+                    _roleServices.Upsert(roleModel);
+                }
 
+                if (!userModel.HasRole("verified", guild))
+                {
+                    RoleModel roleModel;
+                    userModel.AddRole(new UserRoleModel(_roleServices.Get(model => model.Name.ToLower() == "verified")));
+                }
+            }
+            
+            //We get all the user's roles in the database
+            HashSet<UserRoleModel> userRoleModels = new HashSet<UserRoleModel>(userModel.Roles);
+            
             // We get the user's roles and remove all the roles not in the database.
             // We also remove the role if it has expired
             IReadOnlyCollection<SocketRole> discordRoles = guildUser.Roles;
@@ -138,7 +159,7 @@ namespace Dikubot.Permissions
             IEnumerable<IRole> addRoles =
                 userRoleModels.Where(model => ((IActiveTimeFrame)model).IsActive())
                     .Select((model) => guild.GetRole(Convert.ToUInt64(model.GetRoleModel(guild)?.DiscordId))).Where(role => role != null);
-
+            
             foreach (IRole role in addRoles)
             {
                 try

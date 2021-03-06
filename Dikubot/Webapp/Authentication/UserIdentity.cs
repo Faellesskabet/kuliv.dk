@@ -62,7 +62,7 @@ namespace Dikubot.Webapp.Logic
         public override bool IsAuthenticated
         {
             get => _userModel?.DiscordId != null && _userModel.Verified && _userModel.Name != null &&
-                   !_sessionModel.IsExpired;
+                   !_sessionModel.IsExpired && !_userModel.IsBanned;
         }
 
         public string Name

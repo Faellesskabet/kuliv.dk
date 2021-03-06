@@ -11,6 +11,7 @@ namespace Dikubot.Discord.Command
 {
     public class Connect : ModuleBase<SocketCommandContext>
     {
+        [Obsolete("Is no longer used by the website")]
         [Command("connect")]
         [Summary("Connects you to the website")]
         public async Task ConnectAsync([Remainder] [Summary("The connection password")]
