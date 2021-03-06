@@ -2,7 +2,7 @@
 A complete rewrite of the DIKU discord bot in C#
 
 ## Getting started
-The application is split into 3 three main components, there's the Discord bot, the website and a datalayer, which is how the two mostly communicate.
+The application is split into 3 three main components, there's the Discord bot, the website and a datalayer.
 
 ### Prerequisites
 1. .NET 5.0
