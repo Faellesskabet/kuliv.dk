@@ -110,6 +110,38 @@ namespace Dikubot.Discord.Command
                 await ReplyAsync($"Added: {player}");
             }
             
+            [Command("removeplayer")]
+            [Summary("Remove player from game")]
+            public async Task RemovePlayerAsync(IUser player) {
+                var game = TerningGame.GetGame(Context.Channel);
+
+                if (game == null) {
+                    await ReplyAsync("No game is running in this channel!");
+                    return;
+                }
+
+                if (!game.players.Contains(player))
+                {
+                    await ReplyAsync($"{player} is not in the game");
+                    return;
+                }
+                
+                if (game.players.Count <= 1)
+                {
+                    await ReplyAsync("Can't remove the only player from the game");
+                    return;
+                }
+                
+                // We go to the next player before removing the current player, to avoid turnIndex reaching out of bounds
+                await ReplyAsync($"Removed: {player}");
+                if (game.GetPlayer() == player)
+                {
+                    await ReplyAsync($"{game.NextPlayer().Mention} it's your turn! Write `!terning roll` to play");
+                }
+                game.players.Remove(player);
+
+            }
+            
             [Command("join")]
             [Summary("Join running game")]
             public async Task JoinGameAsync() {
