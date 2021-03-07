@@ -9,6 +9,7 @@ using Dikubot.Discord.EventListeners.Permissions;
 using Dikubot.Discord.EventListeners;
 using Dikubot.Permissions;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -98,6 +99,7 @@ namespace Dikubot.Discord
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
+                .AddSingleton<InteractiveService>()
                 .BuildServiceProvider();
         }
     }
