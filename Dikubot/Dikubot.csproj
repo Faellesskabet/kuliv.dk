@@ -26,6 +26,7 @@
     <PackageReference Include="Azure.Core" Version="1.9.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
     <PackageReference Include="BlazorFluentUI.AllComponents" Version="4.0.2" />
+    <PackageReference Include="Discord.Addons.Interactive" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNet.WebApi.WebHost" Version="5.2.7" />
