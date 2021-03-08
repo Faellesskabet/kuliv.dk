@@ -12,7 +12,8 @@ namespace Dikubot.Discord.Command
         private readonly DiscordSocketClient client;
         private readonly CommandService commands;
         private readonly IServiceProvider services;
-
+        private readonly char CommandPrefix = '!';
+        
         public CommandHandler(IServiceProvider services)
         {
             this.commands = services.GetRequiredService<CommandService>();
@@ -28,6 +29,11 @@ namespace Dikubot.Discord.Command
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
         }
 
+        public CommandService GetCommandService()
+        {
+            return commands;
+        }
+
         private async Task HandleCommand(SocketMessage messageParam)
         {
             // Don't process the command if it was a system message
@@ -36,7 +42,7 @@ namespace Dikubot.Discord.Command
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-            if (!(message.HasCharPrefix('!', ref argPos) ||
+            if (!(message.HasCharPrefix(this.CommandPrefix, ref argPos) ||
                   message.HasMentionPrefix(client.CurrentUser, ref argPos)) ||
                 message.Author.IsBot)
                 return;
@@ -48,7 +54,10 @@ namespace Dikubot.Discord.Command
             await commands.ExecuteAsync(context, argPos, services);
         }
 
-
+        public Char GetCommandPrefix()
+        {
+            return CommandPrefix;
+        }
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
             // command is unspecified when there was a search failure (command not found); we don't care about these

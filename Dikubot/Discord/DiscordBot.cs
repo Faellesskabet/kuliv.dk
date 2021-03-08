@@ -75,7 +75,8 @@ namespace Dikubot.Discord
                 await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
                 await client.StartAsync();
                 
-                await services.GetRequiredService<CommandHandler>().init();
+                commandHandler = services.GetRequiredService<CommandHandler>();
+                await commandHandler.init();
                 
                 Scheduler scheduler = new Scheduler();
 
