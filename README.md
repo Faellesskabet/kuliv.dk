@@ -26,5 +26,10 @@ You need to have Sendgrid account and a Sendgrid API token with access to send e
 ### Setting up Datalayer
 1. All you need is to [install MongoDB](https://www.mongodb.com/try/download/community)
 
+### Setting up Lavalink (Music)
+1. Get newest release [here](https://github.com/Frederikam/Lavalink/releases)
+2. Create application.yaml from [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) and place it with Lavalink.jar
+3. Run Lavalink `java -jar Lavalink.jar`
+
 
 
