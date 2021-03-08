@@ -10,29 +10,44 @@ using Discord.Commands;
 
 namespace Dikubot.Discord.Command
 {
-    public class Help : InteractiveBase<SocketCommandContext>
+    public class Help : ModuleBase<SocketCommandContext>
     {
-        
-        [Command("paginator")]
-        public async Task Test_Paginator()
+
+
+        [Command("help")]
+        [Alias("hjælp", "man", "howto")]
+        [Summary("Get help with a specific command")]
+        public async Task HelpCommand([Summary("Search arguments")] params string[] search)
         {
-            var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
-            await PagedReplyAsync(pages);
+            await HelpCommand(1, search);
         }
         
         [Command("help")]
         [Alias("hjælp", "man", "howto")]
-        [Summary("Get help!")]
-        public async Task HelpCommand([Summary("The arguments")] params string[] args)
+        [Summary("Access other help pages")]
+        public async Task HelpCommand(int page = 1, [Summary("Search arguments")] params string[] search)
+        {
+
+            EmbedBuilder embedBuilder = GetHelpEmbed(search);
+            embedBuilder.WithFooter($"Page {page}/{Math.Ceiling(embedBuilder.Fields.Count / 25.0)}");
+            int pageIndex = (page - 1) * 25;
+            int pageCount = page * 25 + (page - 1) * 25 > embedBuilder.Fields.Count-1 ? embedBuilder.Fields.Count-1 - (page - 1) * 25 : page * 25;
+            embedBuilder.Fields = embedBuilder.Fields.GetRange(pageIndex, pageCount);
+            Embed embed = embedBuilder.Build();
+            await ReplyAsync("Her er en liste af kommandoer og beskrivelser: ", false, embed);
+
+        }
+
+        
+        private EmbedBuilder GetHelpEmbed(string[] args)
         {
             CommandService commandService = DiscordBot.commandHandler.GetCommandService();
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.WithTitle("Help commands");
             embedBuilder.WithColor(Color.Green);
-
-            //trick people into thinking I bothered doing pagination
-            embedBuilder.WithFooter("Page 1/1");
             embedBuilder.WithTimestamp(DateTimeOffset.Now);
+            embedBuilder.WithThumbnailUrl(
+                "https://cdn.discordapp.com/avatars/742743929459572766/db56c85ec14e14fb44d6c71e73661ce5.png?size=256");
 
             List<ModuleInfo> modules = commandService.Modules.ToList();
             if (args.Length >= 1)
@@ -47,16 +62,14 @@ namespace Dikubot.Discord.Command
                     embedBuilder.WithDescription("Ingen resultater");
                 }
             }
-            
+
             foreach (ModuleInfo module in modules)
             {
                 StringBuilder description = new StringBuilder();
+
                 // The title is an invisible character as embedBuilder doesn't allow fields with no values
-                embedBuilder.AddField("⠀", 
-                    $"__**{module.Name.First().ToString().ToUpper() + module.Name.Substring(1)} kommandoer**__");
-                
-                //if (embedBuilder.Fields.Count + module.Commands.Count > 25)
-                    
+                embedBuilder.Fields.Add(GetEmbedFieldBuilder("⠀", 
+                    $"__**{module.Name.First().ToString().ToUpper() + module.Name.Substring(1)} kommandoer**__"));
                 foreach (CommandInfo command in module.Commands)
                 {
                     string embedFieldText = command.Summary ?? "Ingen beskrivelse tilgængelig";
@@ -65,12 +78,16 @@ namespace Dikubot.Discord.Command
                     {
                         name += " " + string.Join(" ", command.Parameters.Select(info => $"[{info.Name}]"));
                     }
-                    embedBuilder.AddField($"```{DiscordBot.commandHandler.GetCommandPrefix()}{name.ToLower()}```", embedFieldText, true);
+                        
+                    embedBuilder.Fields.Add(GetEmbedFieldBuilder($"```{DiscordBot.commandHandler.GetCommandPrefix()}{name.ToLower()}```", embedFieldText, true));
                 }
             }
+            return embedBuilder;
+        }
 
-            await ReplyAsync("Her er en liste af kommandoer og beskrivelser: ", false, embedBuilder.Build());
-
+        private EmbedFieldBuilder GetEmbedFieldBuilder(string name, string value, bool inline = false)
+        {
+            return new EmbedFieldBuilder() {Name = name, Value = value, IsInline = inline};
         }
     }
 }
