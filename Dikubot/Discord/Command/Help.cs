@@ -5,12 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using BlazorFluentUI;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 
 namespace Dikubot.Discord.Command
 {
-    public class Help : ModuleBase<SocketCommandContext>
+    public class Help : InteractiveBase<SocketCommandContext>
     {
+        
+        [Command("paginator")]
+        public async Task Test_Paginator()
+        {
+            var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
+            await PagedReplyAsync(pages);
+        }
+        
         [Command("help")]
         [Alias("hjælp", "man", "howto")]
         [Summary("Get help!")]
@@ -20,7 +29,7 @@ namespace Dikubot.Discord.Command
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.WithTitle("Help commands");
             embedBuilder.WithColor(Color.Green);
-            
+
             //trick people into thinking I bothered doing pagination
             embedBuilder.WithFooter("Page 1/1");
             embedBuilder.WithTimestamp(DateTimeOffset.Now);
@@ -46,15 +55,17 @@ namespace Dikubot.Discord.Command
                 embedBuilder.AddField("⠀", 
                     $"__**{module.Name.First().ToString().ToUpper() + module.Name.Substring(1)} kommandoer**__");
                 
+                //if (embedBuilder.Fields.Count + module.Commands.Count > 25)
+                    
                 foreach (CommandInfo command in module.Commands)
                 {
                     string embedFieldText = command.Summary ?? "Ingen beskrivelse tilgængelig";
                     string name = string.Equals(command.Module.Name, command.Name, StringComparison.CurrentCultureIgnoreCase) ? command.Name : $"{command.Module.Name} {command.Name}";
                     if (command.Parameters.Count > 0)
                     {
-                        name += " *" + string.Join(" ", command.Parameters.Select(info => $"[{info.Name}]")) + "*";
+                        name += " " + string.Join(" ", command.Parameters.Select(info => $"[{info.Name}]"));
                     }
-                    embedBuilder.AddField($"{DiscordBot.commandHandler.GetCommandPrefix()}{name.ToLower()}", embedFieldText, true);
+                    embedBuilder.AddField($"```{DiscordBot.commandHandler.GetCommandPrefix()}{name.ToLower()}```", embedFieldText, true);
                 }
             }
 
