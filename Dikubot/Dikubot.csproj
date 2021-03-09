@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>3b501155-ebb3-4bc8-b4dd-fd2eeca102ba</UserSecretsId>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm;linux-x64;linux-arm</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +27,7 @@
     <PackageReference Include="Azure.Core" Version="1.9.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
     <PackageReference Include="BlazorFluentUI.AllComponents" Version="4.0.2" />
-    <PackageReference Include="Discord.Addons.Interactive" Version="2.0.0" />
+    <PackageReference Include="Discord.Extensions.Interactive" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNet.WebApi.WebHost" Version="5.2.7" />
@@ -44,6 +45,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Include="System.Console" Version="4.3.1" />
     <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
+    <PackageReference Include="Victoria" Version="5.1.11" />
   </ItemGroup>
 
   <ItemGroup>
