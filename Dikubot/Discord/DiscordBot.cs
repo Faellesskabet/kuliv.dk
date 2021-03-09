@@ -13,6 +13,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Victoria;
 
 namespace Dikubot.Discord
 {
@@ -82,6 +83,10 @@ namespace Dikubot.Discord
 
                 client.Ready += () =>
                 {
+                    if (!services.GetService<LavaNode>().IsConnected) {
+                        services.GetService<LavaNode>().ConnectAsync();
+                    }
+                    
                     // minus 1 so it doesn't include itself
                     int users = client.Guilds.Sum(guild => guild.MemberCount-1);
                     client.SetGameAsync($"{users.ToString()} users", null, ActivityType.Watching);
@@ -101,6 +106,9 @@ namespace Dikubot.Discord
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<InteractiveService>()
+                .AddLavaNode(x => {
+                    x.SelfDeaf = false;
+                })
                 .BuildServiceProvider();
         }
     }
