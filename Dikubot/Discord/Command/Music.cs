@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using System.Text;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Threading.Tasks;
+using DynamicData.Kernel;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
@@ -201,8 +203,22 @@ namespace Dikubot.Discord.Command {
             await lavaNode.LeaveAsync(player.VoiceChannel);
         }
         
+        [Command("clear", RunMode = RunMode.Async)]
+        public async Task ClearAsync()
+        {
+            var player = lavaNode.GetPlayer(Context.Guild);
+            var voiceState = Context.User as IVoiceState;
+            if (voiceState?.VoiceChannel == null || !lavaNode.HasPlayer(Context.Guild) || voiceState.VoiceChannel != player.VoiceChannel) {
+                await ReplyAsync("You are either not connected to a voice channel, I'm not connected to a voice channel, or we are not in the same voice channel...!");
+                return;
+            }
+
+            await ReplyAsync("Cleared the queue");
+            player.Queue.Clear();
+        }
+        
         [Command("queue")]
-        public async Task QueueAsync()
+        public async Task QueueAsync(int page = 1)
         {
             var player = lavaNode.GetPlayer(Context.Guild);
             var voiceState = Context.User as IVoiceState;
@@ -213,10 +229,17 @@ namespace Dikubot.Discord.Command {
 
             var builder = new EmbedBuilder();
             var stringBuilder = new StringBuilder();
-            if (player.Queue.Count >= 1) {
-                foreach (var item in player.Queue) {
+            if (player.Queue.Count >= 1)
+            {
+
+                LavaTrack[] tracks = player.Queue.AsArray();
+                int itemsPerPage = 20;
+                for (int i = itemsPerPage*(page-1); i < tracks.Length; i++) 
+                {
+                    LavaTrack item = tracks[i];
                     stringBuilder.AppendLine($"{item.Author} :: {item.Title} :: {item.Duration}\n");
                 }
+                builder.WithFooter($"Page ${page}/{(tracks.Length / itemsPerPage)}");
 
                 builder.AddField("------ Currently Playing ------\n",
                     $"{player.Track.Author} :: {player.Track.Title} :: {player.Track.Duration}");
