@@ -101,9 +101,8 @@
         }
 
         secretPassword = Util.SimpleRandomString(12);
-        secretPassword = "1";
-        //VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
-        //await EmailService.SendEmail(verification);
+        VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
+        await EmailService.SendEmail(verification);
         await InvokeAsync(() => { StateHasChanged(); });
     }
 
