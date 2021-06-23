@@ -9,7 +9,7 @@ namespace Dikubot.DataLayer.Logic.WebDiscordBridge
         public enum Subdomains : ulong
         { 
             lukitest = 786946524310929419,
-            diku = 589752263791083541,
+            discord = 589752263791083541,
             science = 808777327881224273
           
         }

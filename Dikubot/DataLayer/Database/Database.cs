@@ -34,7 +34,7 @@ namespace Dikubot.Database
                     // It ensures that unique empty elements won't collide and cause errors
                     // What is this is basically it doesn't add an element if it is equal to null
                     ConventionRegistry.Register("IgnoreIfNull",
-                        new ConventionPack {new IgnoreIfDefaultConvention(true)},
+                        new ConventionPack {new IgnoreIfNullConvention(true)},
                         t => true);
 
                     //This is used to tell mongodb to store our IDs as GUIDs

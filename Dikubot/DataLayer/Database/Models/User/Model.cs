@@ -42,7 +42,7 @@ namespace Dikubot.Database.Models
             set => DiscordId = value.Id.ToString();
         }
 
-        [BsonElement("Verified")] public bool Verified { get; set; } = false;
+        [BsonElement("Verified")] [BsonIgnoreIfDefault] public bool Verified { get; set; }
         [BsonElement("LastMessage")] public string LastMessage { get; set; }
 
         private HashSet<UserRoleModel> _roles = new HashSet<UserRoleModel>();

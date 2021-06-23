@@ -41,11 +41,6 @@ namespace Dikubot.Discord
 
         public async Task Main()
         {
-            var config = new DiscordSocketConfig
-            {
-                AlwaysDownloadUsers = true,
-                MessageCacheSize = 1000,
-            };
             using (var services = ConfigureServices())
             {
                 client = services.GetRequiredService<DiscordSocketClient>();

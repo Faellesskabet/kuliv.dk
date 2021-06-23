@@ -54,8 +54,4 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Webapp\Shared\Group" />
-  </ItemGroup>
-
 </Project>
