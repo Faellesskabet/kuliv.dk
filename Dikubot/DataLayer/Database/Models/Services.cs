@@ -122,7 +122,8 @@ namespace Dikubot.Database.Models
             }
             catch (MongoWriteException e)
             {
-                Console.WriteLine("ILLEGAL INSERT OPERATION " + model.Id + " WAS NOT INSERTED");
+                Console.WriteLine("ILLEGAL INSERT OPERATION " + model.ToJson() + " WAS NOT INSERTED");
+                Console.WriteLine(e.Message);
             }
 
             return model;
@@ -136,14 +137,18 @@ namespace Dikubot.Database.Models
         {
             try
             {
+                BsonDocument modelInBson = modelIn.ToBsonDocument();
+                // We don't want to update the id!
+                modelInBson.Remove("_id");
                 TModel merged =
                     BsonSerializer.Deserialize<TModel>(Get(predicate).ToBsonDocument()
-                        .Merge((modelIn.ToBsonDocument()), true));
+                        .Merge(modelInBson, true));
                 _models.ReplaceOne(predicate, merged, options);
             }
             catch (MongoWriteException e)
             {
-                Console.WriteLine("ILLEGAL INSERT OPERATION " + modelIn.Id + " WAS NOT INSERTED");
+                Console.WriteLine("ILLEGAL INSERT OPERATION " + modelIn.ToJson() + " WAS NOT INSERTED");
+                Console.WriteLine(e.Message);
             }
         }
 

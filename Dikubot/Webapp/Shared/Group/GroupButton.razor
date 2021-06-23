@@ -1,0 +1,46 @@
+@using Dikubot.Webapp.Logic
+@using global::Discord.WebSocket
+@using Dikubot.Database.Models
+@using Dikubot.Discord.EventListeners
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<BFUCompoundButton ClassName="button" OnClick="@OnClick" Text=@(HasRole ? $"{Role} (SLÅET TIL)" : $"{Role} (SLÅET FRA)") Primary="true" Style=@(HasRole ? "background-color: #1b6ec2" : "background-color: #80bdff")
+                  SecondaryText=@(HasRole ? $"Klik her for at komme af med {Role}" : $"Klik her for få rollen {Role}")></BFUCompoundButton>
+
+@code {
+    //Style=@(HasRole ? "color: #1b6ec2" : "color: #80bdff")
+    [Parameter]
+    public String Role { get; set; }
+    private Authenticator authenticator;
+    private SocketUser discordUser;
+    private SocketGuild guild;
+    SocketGuildUser guildUser;
+    
+    private bool HasRole;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+        guild = authenticator.GetGuild();
+        discordUser = guild.GetUser(Convert.ToUInt64(user.UserModel.DiscordId));
+        guildUser = guild.GetUser(discordUser.Id);
+
+        HasRole = Util.HasRole(discordUser, guild, Role);
+    }
+
+    private void OnClick()
+    {
+        if (HasRole)
+        {
+            Util.RemoveRole(guildUser, guild, Role);
+        }
+        else
+        {
+            Util.GrantRole(guildUser, guild, Role);
+        }
+        HasRole = !HasRole;
+    }
+
+}

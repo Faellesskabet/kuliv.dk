@@ -17,9 +17,10 @@
 }
 <div class="card w-auto h-auto shadow">
     <div class="card-body">
-        @if (String.IsNullOrEmpty(secretPassword) && incorrectPassword)
+        @if (incorrectPassword)
         {
             <BFUMessageBar MessageBarType="MessageBarType.Error">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</BFUMessageBar>
+            <br>
         }
         @if (String.IsNullOrEmpty(secretPassword))
         {
@@ -100,18 +101,20 @@
         }
 
         secretPassword = Util.SimpleRandomString(12);
-        VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
-        await EmailService.SendEmail(verification);
+        secretPassword = "1";
+        //VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
+        //await EmailService.SendEmail(verification);
         await InvokeAsync(() => { StateHasChanged(); });
     }
 
     private async void ConfirmEmailPassword()
     {
-        if (!passwordInput.Equals(secretPassword))
+        if (!passwordInput.Equals(secretPassword) || string.IsNullOrEmpty(secretPassword))
         {
             passwordInput = "";
             email = "";
             incorrectPassword = true;
+            secretPassword = "";
             await InvokeAsync(() => { StateHasChanged(); });
             return;
         }
@@ -123,26 +126,24 @@
         
         if (userServices.EmailExists(email))
         {
-    //We start by removing the current user from the database, as we move them to the other user
-            userServices.Remove(user.UserModel);
-
-    //We get the old user
+            //We get the old user
             UserModel oldUser = userServices.GetFromEmail(email);
 
-            if (oldUser.IsBanned)
+            if (oldUser.DiscordId != user.UserModel.DiscordId)
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Du er blevet banned fra denne Discord server");
-                return;
+                if (oldUser.IsBanned)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "Du er blevet banned fra denne Discord server");
+                    return;
+                }
+
+                //We override the old user's id and set our current user to old user
+                oldUser.DiscordId = user.UserModel.DiscordId;
+                user.UserModel = oldUser;
+
+                //We now update all the Discord roles of our users. The old discord user will have all their roles removed, while the new user will get all the old user's roles.
+                permissionsService.SetDiscordUserRoles(oldUser);   
             }
-            
-            SocketUser oldSocketUser = oldUser.DiscordUser;
-
-    //We override the old user's id and set our current user to old user
-            oldUser.DiscordId = user.UserModel.DiscordId;
-            user.UserModel = oldUser;
-
-    //We now update all the Discord roles of our users. The old discord user will have all their roles removed, while the new user will get all the old user's roles.
-            permissionsService.SetDiscordUserRoles(oldUser);
         }
         
         user.UserModel.Email = email;

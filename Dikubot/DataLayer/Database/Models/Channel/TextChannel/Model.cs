@@ -12,5 +12,6 @@ namespace Dikubot.Database.Models.TextChannel
         [BsonElement("IsNsfw")] public bool IsNsfw { get; set; }
         [BsonElement("SlowModeInterval")] public int SlowModeInterval { get; set; }
         [BsonElement("DiscordCategoryId")] public string DiscordCategoryId { get; set; }
+        [BsonElement("IsQuoteChannel")] public bool IsQuoteChannel { get; set; }
     }
 }
