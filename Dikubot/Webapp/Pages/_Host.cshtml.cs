@@ -1,9 +1,7 @@
-﻿using System.Threading.Tasks;
-using Azure.Core;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Dikubot.Pages
+namespace Dikubot.Webapp.Pages
 {
     public class _HostModel : PageModel
     {

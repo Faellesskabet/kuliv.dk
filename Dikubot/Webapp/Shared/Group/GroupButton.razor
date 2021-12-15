@@ -1,7 +1,6 @@
-@using Dikubot.Webapp.Logic
 @using global::Discord.WebSocket
-@using Dikubot.Database.Models
 @using Dikubot.Discord.EventListeners
+@using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <BFUCompoundButton ClassName="button" OnClick="@OnClick" Text=@(HasRole ? $"{Role} (SLÅET TIL)" : $"{Role} (SLÅET FRA)") Primary="true" Style=@(HasRole ? "background-color: #1b6ec2" : "background-color: #80bdff")
@@ -24,7 +23,7 @@
         var authState = await authenticator.GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
         guild = authenticator.GetGuild();
-        discordUser = guild.GetUser(Convert.ToUInt64(user.UserModel.DiscordId));
+        discordUser = guild.GetUser(Convert.ToUInt64(user.UserGlobalModel.DiscordId));
         guildUser = guild.GetUser(discordUser.Id);
 
         HasRole = Util.HasRole(discordUser, guild, Role);

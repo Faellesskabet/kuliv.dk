@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using BlazorFluentUI;
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
 
 namespace Dikubot.Discord.Command

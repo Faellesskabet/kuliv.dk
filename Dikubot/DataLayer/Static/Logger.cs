@@ -1,5 +1,7 @@
 using System;
 using System.Globalization;
+using Dikubot.DataLayer.Logic.Email;
+using Dikubot.DataLayer.Logic.Email.Emails;
 
 namespace Dikubot.DataLayer.Static
 {
@@ -7,12 +9,15 @@ namespace Dikubot.DataLayer.Static
     {
         public static void Debug(string log)
         {
-            if (!main.IS_DEV)
-            {
-                return;
-            }
-
+            #if DEBUG
             Console.WriteLine($"[DEBUG] {DateTime.Now.ToString(CultureInfo.CurrentCulture)} {log}");
+            #endif
+        }
+
+        public static async void DebugEmail(string message)
+        {
+            DebugEmail debug = new DebugEmail(message);
+            await EmailService.SendEmail(debug);
         }
     }
 }

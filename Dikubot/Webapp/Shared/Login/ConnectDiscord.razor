@@ -1,8 +1,6 @@
-@using Dikubot.Webapp.Logic
+
 @using global::Discord.WebSocket
 @using Dikubot.Discord.Command
-@using Dikubot.Database.Models
-@using Dikubot.Database.Models.Session
 @using Dikubot.DataLayer.Logic.User
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
@@ -22,14 +20,16 @@
 @using System.Net.Http.Headers
 @using System.Security.Claims
 @using global::Discord.Rest
-@using Microsoft.Graph
-@using UserIdentity = Dikubot.Webapp.Logic.UserIdentity
 @using System.Configuration
 @using System.IO
 @using System.Net
 @using System.Text
+@using Dikubot.DataLayer.Database.Global.Session
+@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Discord
+@using Dikubot.Webapp.Authentication
 @using Microsoft.Extensions.Configuration
+@using UserIdentity = Microsoft.Graph.UserIdentity
 
 <h1>Velkommen til DIKU's Discord Server</h1>
 
@@ -99,7 +99,7 @@ else if (discordUser != null)
             {
                 JObject discordUserJson = GetUser(GetAuthtoken(AuthCode));
                 ulong discordUserId = Convert.ToUInt64(discordUserJson["id"]);
-                discordUser = DiscordBot.client.GetUser(discordUserId);
+                discordUser = DiscordBot.Client.GetUser(discordUserId);
                 await InvokeAsync(() => { StateHasChanged(); });
             }
             catch (Exception e)
@@ -144,7 +144,7 @@ else if (discordUser != null)
 
     public string GetContactMessage()
     {
-        return $"Send den følgende kommando til botten {DiscordBot.client.CurrentUser.Username}#{DiscordBot.client.CurrentUser.Discriminator}.";
+        return $"Send den følgende kommando til botten {DiscordBot.Client.CurrentUser.Username}#{DiscordBot.Client.CurrentUser.Discriminator}.";
     } 
 
     private async void RejectDiscord()
@@ -156,12 +156,11 @@ else if (discordUser != null)
 
     private async void ApproveDiscord()
     {
-        SocketGuild guild = authenticator.GetGuild();
-        UserServices userServices = new UserServices(guild);
+        UserGlobalServices userServices = new UserGlobalServices();
         if (!userServices.Exists(discordUser))
         {
-            UserModel userModel = new UserModel {DiscordUser = discordUser};
-            new UserServices(guild).Upsert(userModel);
+            UserGlobalModel userModel = new UserGlobalModel {DiscordUser = discordUser};
+            userServices.Upsert(userModel);
         }
 
         SessionModel sessionModel = new SessionModel(userServices.Get((discordUser)));

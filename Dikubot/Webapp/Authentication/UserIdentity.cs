@@ -1,22 +1,20 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Principal;
-using Dikubot.Database.Models;
-using Dikubot.Database.Models.Interfaces;
-using Dikubot.Database.Models.Role;
-using Dikubot.Database.Models.Session;
+using Dikubot.DataLayer.Database.Global.Session;
+using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Interfaces;
 using Dikubot.DataLayer.Static;
 using Discord.WebSocket;
+using Microsoft.Graph.CallRecords;
 
-namespace Dikubot.Webapp.Logic
+namespace Dikubot.Webapp.Authentication
 {
     public sealed class UserIdentity : ClaimsIdentity
     {
-        private UserModel _userModel;
-        private SessionModel _sessionModel;
+        private UserGlobalModel _userGlobalModel;
+        private readonly SessionModel _sessionModel;
         private SocketGuild _guild;
 
         public UserIdentity(SocketGuild guild)
@@ -26,17 +24,16 @@ namespace Dikubot.Webapp.Logic
 
         /// <Summary>Creates a UserIdentity based on a session.</Summary>
         /// <param name="sessionModel">A session consists of a key and a user.</param>
-        public UserIdentity(SessionModel sessionModel, SocketGuild guild)
+        public UserIdentity(SessionModel sessionModel)
         {
             _sessionModel = sessionModel;
-            _userModel = sessionModel.GetUserModel(guild);
-            if (_userModel != null)
+            _userGlobalModel = sessionModel.GetUserModel();
+            if (_userGlobalModel != null)
             {
                 try
                 {
-                    IEnumerable<Claim> roleClaims =
-                        _userModel.Roles.Where(model => ((IActiveTimeFrame)model).IsActive()).Select(model =>
-                            new Claim(ClaimTypes.Role, model.GetRoleModel(guild)?.Name.ToUpper() ?? "DELETED_ROLE"));
+                    IEnumerable<Claim> roleClaims = _userGlobalModel.Permissions.Select(permission => 
+                        new Claim(ClaimTypes.Role, permission));
                     AddClaims(roleClaims);
                 }
                 catch (Exception e)
@@ -61,22 +58,22 @@ namespace Dikubot.Webapp.Logic
         /// </summary>
         public override bool IsAuthenticated
         {
-            get => _userModel?.DiscordId != null && _userModel.Verified && _userModel.Name != null &&
-                   !_sessionModel.IsExpired && !_userModel.IsBanned;
+            get => _userGlobalModel?.DiscordId != null && _userGlobalModel.Verified && _userGlobalModel.Name != null &&
+                   !_sessionModel.IsExpired && !_userGlobalModel.IsBanned;
         }
 
         public string Name
         {
-            get => _userModel == null ? "Intet navn" : _userModel.Name;
+            get => _userGlobalModel == null ? "Intet navn" : _userGlobalModel.Name;
         }
 
         /// <summary>
         /// Get the UserModel
         /// </summary>
-        public UserModel UserModel
+        public UserGlobalModel UserGlobalModel
         {
-            get => _userModel;
-            set => _userModel = value;
+            get => _userGlobalModel;
+            set => _userGlobalModel = value;
         }
 
         /// <summary>

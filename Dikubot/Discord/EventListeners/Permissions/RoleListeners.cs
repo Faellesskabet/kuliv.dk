@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Dikubot.Permissions;
+using Dikubot.DataLayer.Permissions;
 using Discord.WebSocket;
 
 namespace Dikubot.Discord.EventListeners.Permissions

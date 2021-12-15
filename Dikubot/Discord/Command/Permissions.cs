@@ -1,10 +1,8 @@
-﻿using Discord.Commands;
-using Dikubot.Permissions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Dikubot.Database.Models.VoiceChannel;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
+using Dikubot.DataLayer.Permissions;
+using Discord.Commands;
 
 namespace Dikubot.Discord.Command
 {

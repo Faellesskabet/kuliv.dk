@@ -1,25 +1,18 @@
-using BlazorFluentUI;
 using Dikubot.Webapp.Data;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Blazored.LocalStorage;
-using Dikubot.Webapp.Logic;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Blazorise;
+using Blazorise.Icons.Material;
+using Blazorise.Material;
+using Dikubot.Webapp.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
 
 namespace Dikubot.Webapp
 {
@@ -40,7 +33,10 @@ namespace Dikubot.Webapp
             var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
             
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
-            services.AddBlazorFluentUI();
+            services.AddBlazorise(options =>
+            {
+                options.ChangeTextOnKeyPress = true;
+            }).AddMaterialProviders().AddMaterialIcons();
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();

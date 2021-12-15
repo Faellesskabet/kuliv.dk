@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Dikubot.Permissions;
+using Dikubot.DataLayer.Permissions;
 using Discord.WebSocket;
 
 namespace Dikubot.Discord.EventListeners.Permissions
@@ -18,6 +18,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
 
             var permissionsServices = new PermissionsService(user.Guild);
             permissionsServices.AddOrUpdateDatabaseUser(user);
+            permissionsServices.SetDiscordUserRoles(user);
         }
 
         /// <Summary>When a user gets destroyed it will be removed to the database.</Summary>
@@ -42,8 +43,9 @@ namespace Dikubot.Discord.EventListeners.Permissions
         {
             var util = new Util();
 
-            if (await util.IsBotFirstEntryInAuditLog(userAfter.Guild))
-                return;
+            // Temporary solutions to an issue
+            //if (await util.IsBotFirstEntryInAuditLog(userAfter.Guild))
+            //    return;
 
             var permissionsServices = new PermissionsService(userAfter.Guild);
             permissionsServices.AddOrUpdateDatabaseUser(userAfter);

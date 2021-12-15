@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dikubot.Database.Models.VoiceChannel;
-using Discord.WebSocket;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.CategoryChannel;
 using Discord;
 using Discord.Rest;
+using Discord.WebSocket;
 
-namespace Dikubot.Permissions
+namespace Dikubot.DataLayer.Permissions
 {
     public partial class PermissionsService
     {
@@ -17,9 +17,9 @@ namespace Dikubot.Permissions
         {
             var categoryChannelModels = _categoryChannelServices.Get();
             var socketCategories = guild.CategoryChannels.ToList();
-            var toBeRemoved = new List<CategoryChannelModel>(categoryChannelModels);
+            var toBeRemoved = new List<CategoryChannelMainModel>(categoryChannelModels);
 
-            Func<CategoryChannelModel, SocketCategoryChannel, bool> inDB = (m0, m1) =>
+            Func<CategoryChannelMainModel, SocketCategoryChannel, bool> inDB = (m0, m1) =>
                 Convert.ToUInt64(m0.DiscordId) == m1.Id;
 
             // Remove all the category channels from the database if they are not on the discord server.
@@ -42,7 +42,7 @@ namespace Dikubot.Permissions
             var socketCategoryChannels = guild.CategoryChannels.ToList();
             var toBeRemoved = new List<SocketCategoryChannel>(socketCategoryChannels);
 
-            Func<CategoryChannelModel, SocketCategoryChannel, bool> inDB =
+            Func<CategoryChannelMainModel, SocketCategoryChannel, bool> inDB =
                 (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
 
             // Remove all the category channels from the discord server if they are not in the database.
@@ -126,8 +126,8 @@ namespace Dikubot.Permissions
 
         /// <Summary>Add a category channel on the discord server to the database.</Summary>
         /// <return>void.</return>
-        public void AddOrUpdateDatabaseCategoryChannel(CategoryChannelModel categoryChannel) =>
-            _categoryChannelServices.Remove(categoryChannel);
+        public void AddOrUpdateDatabaseCategoryChannel(CategoryChannelMainModel categoryChannelMain) =>
+            _categoryChannelServices.Remove(categoryChannelMain);
 
         /// <Summary>Removes a category channel from the database.</Summary>
         /// <return>void.</return>
@@ -141,8 +141,8 @@ namespace Dikubot.Permissions
 
         /// <Summary>Removes a category channel from the database.</Summary>
         /// <return>void.</return>
-        public void RemoveDatabaseCategoryChannel(CategoryChannelModel categoryChannel) =>
-            _categoryChannelServices.Remove(categoryChannel);
+        public void RemoveDatabaseCategoryChannel(CategoryChannelMainModel categoryChannelMain) =>
+            _categoryChannelServices.Remove(categoryChannelMain);
 
         /// <Summary>Removes a category channel from the database and the discord server.</Summary>
         /// <return>void.</return>
@@ -162,27 +162,27 @@ namespace Dikubot.Permissions
 
         /// <Summary>Removes a category channel from the database and the discord server.</Summary>
         /// <return>void.</return>
-        public async Task RemoveCategoryChannel(CategoryChannelModel categoryChannel)
+        public async Task RemoveCategoryChannel(CategoryChannelMainModel categoryChannelMain)
         {
-            RemoveDatabaseCategoryChannel(categoryChannel);
-            await guild.GetCategoryChannel(Convert.ToUInt64(categoryChannel)).DeleteAsync();
+            RemoveDatabaseCategoryChannel(categoryChannelMain);
+            await guild.GetCategoryChannel(Convert.ToUInt64(categoryChannelMain)).DeleteAsync();
         }
 
         /// <Summary>Adds a category channel to the database and the discord server.</Summary>
         /// <return>void.</return>
-        public async Task<CategoryChannelModel> AddCategoryChannel(CategoryChannelModel categoryChannel)
+        public async Task<CategoryChannelMainModel> AddCategoryChannel(CategoryChannelMainModel categoryChannelMain)
         {
-            var properties = _categoryChannelServices.ModelToCategoryChannelProperties(categoryChannel);
+            var properties = _categoryChannelServices.ModelToCategoryChannelProperties(categoryChannelMain);
             var restCategoryChannel = await guild.CreateCategoryChannelAsync(
-                categoryChannel.Name,
+                categoryChannelMain.Name,
                 channelProperties =>
                 {
                     channelProperties.CategoryId = properties.CategoryId;
                     channelProperties.Position = properties.Position;
                 });
-            categoryChannel.DiscordId = restCategoryChannel.Id.ToString();
-            AddOrUpdateDatabaseCategoryChannel(categoryChannel);
-            return categoryChannel;
+            categoryChannelMain.DiscordId = restCategoryChannel.Id.ToString();
+            AddOrUpdateDatabaseCategoryChannel(categoryChannelMain);
+            return categoryChannelMain;
         }
     }
 }

@@ -1,8 +1,6 @@
-using System;
-using Cronos;
+using Dikubot.DataLayer.Permissions;
 using Dikubot.DataLayer.Static;
 using Dikubot.Discord;
-using Dikubot.Permissions;
 
 namespace Dikubot.DataLayer.Cronjob.Cronjobs
 {
@@ -19,7 +17,7 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs
         private static void Update()
         {
             Logger.Debug("Updating all user roles");
-            foreach (var guild in DiscordBot.client.Guilds)
+            foreach (var guild in DiscordBot.Client.Guilds)
             {
                 PermissionsService permissionsService = new PermissionsService(guild);
                 foreach (var user in guild.Users)
@@ -27,6 +25,7 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs
                     permissionsService.SetDiscordUserRoles(user);
                 }
             }
+            Logger.Debug("All uses roles is updated");
 
         }
     }

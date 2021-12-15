@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Dikubot.Database.Models;
-using MongoDB.Bson;
+using System.Diagnostics;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.IdGenerators;
-using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
-namespace Dikubot.Database
+namespace Dikubot.DataLayer.Database
 {
     /// <summary>
     /// Class for safely communicating with a database by using a Double-Checked locking singleton
@@ -18,7 +14,8 @@ namespace Dikubot.Database
     /// </summary>
     public sealed class Database
     {
-        private static readonly MongoClient MongoClient = new MongoClient("mongodb://localhost:27017");
+        private const string ConnectionString = "mongodb://localhost:27017";
+        private static readonly MongoClient MongoClient = new MongoClient(ConnectionString);
         private static Database instance = null;
         private static readonly Dictionary<string, IMongoDatabase> Databases = new Dictionary<string, IMongoDatabase>();
 
@@ -52,12 +49,33 @@ namespace Dikubot.Database
         /// <param name="name">The name of the database.</param>
         /// <param name="settings">The database settings.</param>
         /// <return>An implementation of a database.</return>
+        public static Dictionary<string, IMongoDatabase> GetDatabaseDictionary()
+        {
+            return Databases;
+        }
+
+        /// <Summary>Method for retrieving a database from the client through the singleton pattern.</Summary>
+        /// <param name="name">The name of the database.</param>
+        /// <param name="settings">The database settings.</param>
+        /// <return>An implementation of a database.</return>
         public IMongoDatabase GetDatabase(string name, MongoDatabaseSettings settings = null)
         {
             if (!Databases.ContainsKey(name))
+            {
                 Databases[name] = MongoClient.GetDatabase(name, settings);
+                Backup(Databases[name]);
+            }
 
             return Databases[name];
+        }
+        // This is bad and will only work on linux, but I needed to get something out quickly
+        public static void Backup(IMongoDatabase database)
+        {
+            ProcessStartInfo procStartInfo = new ProcessStartInfo("mongodump",
+                $"--out=\"./Backups/{database.DatabaseNamespace.DatabaseName}/{DateTime.Now.ToUniversalTime():yyyy-MM-dd-HH-mm-ss}\" --db=\"{database.DatabaseNamespace.DatabaseName}\" --gzip");
+            Process process = new Process() {StartInfo = procStartInfo};
+            process.Start();
+            
         }
     }
 }

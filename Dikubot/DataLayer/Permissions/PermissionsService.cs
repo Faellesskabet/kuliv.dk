@@ -1,11 +1,12 @@
-using Dikubot.Database.Models;
-using Dikubot.Database.Models.CategoryChannel;
-using Dikubot.Database.Models.Role;
-using Dikubot.Database.Models.VoiceChannel;
-using Dikubot.Database.Models.TextChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.CategoryChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Guild;
+using Dikubot.DataLayer.Database.Guild.Models.Role;
+using Dikubot.DataLayer.Database.Guild.Models.User;
 using Discord.WebSocket;
 
-namespace Dikubot.Permissions
+namespace Dikubot.DataLayer.Permissions
 {
     /// <Summary>Class for talking between the database and Discord.</Summary>
     public partial class PermissionsService
@@ -18,7 +19,8 @@ namespace Dikubot.Permissions
         VoiceChannelServices _voiceChannelServices;
         TextChannelServices _textChannelServices;
         CategoryChannelServices _categoryChannelServices;
-        UserServices _userServices;
+        UserGuildServices _userServices;
+        GuildServices _guildServices;
 
         public PermissionsService(SocketGuild guild)
         {
@@ -27,7 +29,8 @@ namespace Dikubot.Permissions
             _voiceChannelServices = new VoiceChannelServices(guild);
             _textChannelServices = new TextChannelServices(guild);
             _categoryChannelServices = new CategoryChannelServices(guild);
-            _userServices = new UserServices(guild);
+            _userServices = new UserGuildServices(guild);
+            _guildServices = new GuildServices(guild);
         }
 
         /// <Summary>Takes channels, roles and users information from discord and saves it in the database.</Summary>
@@ -39,6 +42,7 @@ namespace Dikubot.Permissions
             SetDatabaseCategoryChannels();
             SetDatabaseVoiceChannels();
             SetDatabaseTextChannels();
+            SetDatabaseGuild();
         }
 
         /// <Summary>Takes channels, roles and users information from database and saves it in the discord.</Summary>

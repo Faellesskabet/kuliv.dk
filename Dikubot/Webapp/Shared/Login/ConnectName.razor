@@ -1,8 +1,8 @@
-@using Dikubot.Webapp.Logic
-@using Dikubot.Database.Models
-@using Dikubot.Database.Models.Session
 @using Dikubot.Discord
+@using Dikubot.Webapp.Authentication
 @using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.Session
+@using Dikubot.DataLayer.Database.Global.User
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h1>Velkommen til DIKU's Discord Server</h1>
@@ -40,21 +40,25 @@
     private async void ConfirmName()
     {
         SocketGuild guild = authenticator.GetGuild();
-        try
+        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong).MutualGuilds;
+        foreach (SocketGuild mutualGuild in mutualGuilds)
         {
-            await guild.GetUser(Convert.ToUInt64(user.UserModel.DiscordId)).ModifyAsync(guildUser =>
+            try
             {
-                guildUser.Nickname = name;
-            });
-        }
-        catch (Exception e)
-        {
-            // ignored, this only happens when the bot doesn't have access to change the user's name
-        }
+                await guild.GetUser(Convert.ToUInt64(user.UserGlobalModel.DiscordId)).ModifyAsync(guildUser =>
+                {
+                    guildUser.Nickname = name;
+                });
+            }
+            catch (Exception e)
+            {
+                // ignored, this only happens when the bot doesn't have access to change the user's name
+            }
 
-        user.UserModel.Name = name;
-        new UserServices(guild).Upsert(user.UserModel);
-        SessionModel sessionModel = new SessionModel(user.UserModel);
+        }
+        user.UserGlobalModel.Name = name;
+        new UserGlobalServices().Upsert(user.UserGlobalModel);
+        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
         await authenticator.UpdateSession(sessionModel);
         parent.Update();
     }

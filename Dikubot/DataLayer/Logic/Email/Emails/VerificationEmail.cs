@@ -1,5 +1,4 @@
 using SendGrid.Helpers.Mail;
-using SendGrid.Helpers.Mail.Model;
 
 namespace Dikubot.DataLayer.Logic.Email.Emails
 {

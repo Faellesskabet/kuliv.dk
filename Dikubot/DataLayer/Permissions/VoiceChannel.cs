@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Dikubot.Database.Models.VoiceChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
 
-namespace Dikubot.Permissions
+namespace Dikubot.DataLayer.Permissions
 {
     public partial class PermissionsService
     {
@@ -18,9 +17,9 @@ namespace Dikubot.Permissions
         {
             var voiceChannelModels = _voiceChannelServices.Get();
             var socketRoles = guild.VoiceChannels.ToList();
-            var toBeRemoved = new List<VoiceChannelModel>(voiceChannelModels);
+            var toBeRemoved = new List<VoiceChannelMainModel>(voiceChannelModels);
 
-            Func<VoiceChannelModel, SocketVoiceChannel, bool> inDB = (m0, m1) =>
+            Func<VoiceChannelMainModel, SocketVoiceChannel, bool> inDB = (m0, m1) =>
                 Convert.ToUInt64(m0.DiscordId) == m1.Id;
 
             // Remove all the roles from the database if they are not on the discord server.
@@ -43,7 +42,7 @@ namespace Dikubot.Permissions
             var socketVoiceChannels = guild.VoiceChannels.ToList();
             var toBeRemoved = new List<SocketVoiceChannel>(socketVoiceChannels);
 
-            Func<VoiceChannelModel, SocketVoiceChannel, bool> inDB =
+            Func<VoiceChannelMainModel, SocketVoiceChannel, bool> inDB =
                 (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
 
             // Remove all the roles from the discord server if they are not in the database.
@@ -139,8 +138,8 @@ namespace Dikubot.Permissions
 
         /// <Summary>Add a voice channel on the discord server to the database.</Summary>
         /// <return>void.</return>
-        public void AddOrUpdateDatabaseVoiceChannel(VoiceChannelModel voiceChannel) =>
-            _voiceChannelServices.Upsert(voiceChannel);
+        public void AddOrUpdateDatabaseVoiceChannel(VoiceChannelMainModel voiceChannelMain) =>
+            _voiceChannelServices.Upsert(voiceChannelMain);
 
         /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
@@ -154,8 +153,8 @@ namespace Dikubot.Permissions
 
         /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
-        public void RemoveDatabaseVoiceChannel(VoiceChannelModel voiceChannel) =>
-            _voiceChannelServices.Remove(voiceChannel);
+        public void RemoveDatabaseVoiceChannel(VoiceChannelMainModel voiceChannelMain) =>
+            _voiceChannelServices.Remove(voiceChannelMain);
 
         /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
         /// <return>void.</return>
@@ -175,19 +174,19 @@ namespace Dikubot.Permissions
 
         /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
         /// <return>void.</return>
-        public async Task RemoveVoiceChannel(VoiceChannelModel voiceChannel)
+        public async Task RemoveVoiceChannel(VoiceChannelMainModel voiceChannelMain)
         {
-            RemoveDatabaseVoiceChannel(voiceChannel);
-            await guild.GetVoiceChannel(Convert.ToUInt64(voiceChannel)).DeleteAsync();
+            RemoveDatabaseVoiceChannel(voiceChannelMain);
+            await guild.GetVoiceChannel(Convert.ToUInt64(voiceChannelMain)).DeleteAsync();
         }
 
         /// <Summary>Adds a voice channel to the database and the discord server.</Summary>
         /// <return>void.</return>
-        public async Task<VoiceChannelModel> AddVoiceChannel(VoiceChannelModel voiceChannel)
+        public async Task<VoiceChannelMainModel> AddVoiceChannel(VoiceChannelMainModel voiceChannelMain)
         {
-            var properties = _voiceChannelServices.ModelToVoiceChannelProperties(voiceChannel);
+            var properties = _voiceChannelServices.ModelToVoiceChannelProperties(voiceChannelMain);
             var restVoiceChannel = await guild.CreateVoiceChannelAsync(
-                voiceChannel.Name,
+                voiceChannelMain.Name,
                 channelProperties =>
                 {
                     channelProperties.Bitrate = properties.Bitrate;
@@ -195,9 +194,9 @@ namespace Dikubot.Permissions
                     channelProperties.Position = properties.Position;
                     channelProperties.CategoryId = properties.CategoryId;
                 });
-            voiceChannel.DiscordId = restVoiceChannel.Id.ToString();
-            AddOrUpdateDatabaseVoiceChannel(voiceChannel);
-            return voiceChannel;
+            voiceChannelMain.DiscordId = restVoiceChannel.Id.ToString();
+            AddOrUpdateDatabaseVoiceChannel(voiceChannelMain);
+            return voiceChannelMain;
         }
     }
 }
