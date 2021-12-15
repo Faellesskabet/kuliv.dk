@@ -6,6 +6,9 @@ namespace Dikubot.DataLayer.Static
 {
     public static class Util
     {
+        
+        public static readonly string INVISIBLE_CHARACTER = "‎";
+        
         /// <summary>
         /// Tells is whether an email is a valid email
         /// Email address: RFC 2822 Format
@@ -36,7 +39,7 @@ namespace Dikubot.DataLayer.Static
         /// <returns></returns>
         public static string SimpleRandomString(int length)
         {
-            const string chars = "ABCDEFGHJKMNPQRSTWXYZ23456789";
+            const string chars = "ABCDEFGHJKMNPRSTWXYZ23456789";
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }

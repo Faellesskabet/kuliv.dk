@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Dikubot.Permissions;
+using Dikubot.DataLayer.Permissions;
 using Discord.WebSocket;
 
 namespace Dikubot.Discord.EventListeners.Permissions
@@ -119,7 +119,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
             else if (channelAfter is SocketCategoryChannel)
             {
                 var categoryChannel = channelAfter as SocketCategoryChannel;
-                Console.WriteLine(categoryChannel.Name);
+                
                 if (await util.IsBotFirstEntryInAuditLog(categoryChannel.Guild))
                     return;
 

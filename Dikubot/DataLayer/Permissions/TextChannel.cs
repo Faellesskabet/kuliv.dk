@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dikubot.Database.Models.TextChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
 
-namespace Dikubot.Permissions
+namespace Dikubot.DataLayer.Permissions
 {
     public partial class PermissionsService
     {
@@ -17,9 +17,9 @@ namespace Dikubot.Permissions
         {
             var textChannelModels = _textChannelServices.Get();
             var socketRoles = guild.TextChannels.ToList();
-            var toBeRemoved = new List<TextChannelModel>(textChannelModels);
+            var toBeRemoved = new List<TextChannelMainModel>(textChannelModels);
 
-            Func<TextChannelModel, SocketTextChannel, bool> inDB = (m0, m1) =>
+            Func<TextChannelMainModel, SocketTextChannel, bool> inDB = (m0, m1) =>
                 Convert.ToUInt64(m0.DiscordId) == m1.Id;
 
             // Remove all the text channels from the database if they are not on the discord server.
@@ -42,7 +42,7 @@ namespace Dikubot.Permissions
             var socketTextChannels = guild.TextChannels.ToList();
             var toBeRemoved = new List<SocketTextChannel>(socketTextChannels);
 
-            Func<TextChannelModel, SocketTextChannel, bool> inDB =
+            Func<TextChannelMainModel, SocketTextChannel, bool> inDB =
                 (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
 
             // Remove all the text channels from the discord server if they are not in the database.
@@ -130,8 +130,8 @@ namespace Dikubot.Permissions
 
         /// <Summary>Add a text channel on the discord server to the database.</Summary>
         /// <return>void.</return>
-        public void AddOrUpdateDatabaseTextChannel(TextChannelModel textChannel) =>
-            _textChannelServices.Upsert(textChannel);
+        public void AddOrUpdateDatabaseTextChannel(TextChannelMainModel textChannelMain) =>
+            _textChannelServices.Upsert(textChannelMain);
 
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
@@ -145,8 +145,8 @@ namespace Dikubot.Permissions
 
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
-        public void RemoveDatabaseTextChannel(TextChannelModel textChannel) =>
-            _textChannelServices.Remove(textChannel);
+        public void RemoveDatabaseTextChannel(TextChannelMainModel textChannelMain) =>
+            _textChannelServices.Remove(textChannelMain);
 
         /// <Summary>Removes a text channel from the database and the discord server.</Summary>
         /// <return>void.</return>
@@ -166,19 +166,19 @@ namespace Dikubot.Permissions
 
         /// <Summary>Removes a text channel from the database and the discord server.</Summary>
         /// <return>void.</return>
-        public async Task RemoveTextChannel(TextChannelModel textChannel)
+        public async Task RemoveTextChannel(TextChannelMainModel textChannelMain)
         {
-            RemoveDatabaseTextChannel(textChannel);
-            await guild.GetTextChannel(Convert.ToUInt64(textChannel)).DeleteAsync();
+            RemoveDatabaseTextChannel(textChannelMain);
+            await guild.GetTextChannel(Convert.ToUInt64(textChannelMain)).DeleteAsync();
         }
 
         /// <Summary>Adds a text channel to the database and the discord server.</Summary>
         /// <return>void.</return>
-        public async Task<TextChannelModel> AddTextChannel(TextChannelModel textChannel)
+        public async Task<TextChannelMainModel> AddTextChannel(TextChannelMainModel textChannelMain)
         {
-            var properties = _textChannelServices.ModelToTextChannelProperties(textChannel);
+            var properties = _textChannelServices.ModelToTextChannelProperties(textChannelMain);
             var restTextChannel = await guild.CreateTextChannelAsync(
-                textChannel.Name,
+                textChannelMain.Name,
                 channelProperties =>
                 {
                     channelProperties.Position = properties.Position;
@@ -187,9 +187,9 @@ namespace Dikubot.Permissions
                     channelProperties.IsNsfw = properties.IsNsfw;
                     channelProperties.SlowModeInterval = properties.SlowModeInterval;
                 });
-            textChannel.DiscordId = restTextChannel.Id.ToString();
-            AddOrUpdateDatabaseTextChannel(textChannel);
-            return textChannel;
+            textChannelMain.DiscordId = restTextChannel.Id.ToString();
+            AddOrUpdateDatabaseTextChannel(textChannelMain);
+            return textChannelMain;
         }
     }
 }

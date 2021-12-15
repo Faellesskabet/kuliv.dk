@@ -2,7 +2,6 @@
 @namespace Dikubot.Webapp.Pages
 @model Dikubot.Pages._HostModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@using Webapp.Shared
 
 @{
     Layout = null;
@@ -11,18 +10,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- Material CSS -->
+    <link href="css/material/material.min.css" rel="stylesheet">
+    
+    <!-- Add Material font (Roboto) and Material icon as needed -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i|Roboto+Mono:300,400,700|Roboto+Slab:300,400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link href="_content/Blazorise/blazorise.css" rel="stylesheet" />
+    <link href="_content/Blazorise.Material/blazorise.material.css" rel="stylesheet" />
+    <link href="_content/Blazorise.Icons.Material/blazorise.icons.material.css" rel="stylesheet" />
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Material JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="js/material/material.min.js"></script>
+    
+    <script src="_content/Blazorise.Material/blazorise.material.js"></script>
     <title>Dikubot</title>
     <base href="~/"/>
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css"/>
     <link href="css/site.css" rel="stylesheet"/>
     <link href="Dikubot.styles.css" rel="stylesheet"/>
     <link rel="stylesheet" href="Dikubot.styles.css"/>
-    <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
-    <script src="_content/BlazorFluentUI.BFUBaseComponent/blazorFluentUi.min.js"></script>
 </head>
 <body>
 

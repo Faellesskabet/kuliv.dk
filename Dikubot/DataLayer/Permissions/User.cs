@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dikubot.Database.Models;
+using Dikubot.DataLayer.Database.Guild.Models.User;
 using Discord.Rest;
 using Discord.WebSocket;
 
-namespace Dikubot.Permissions
+namespace Dikubot.DataLayer.Permissions
 {
     public partial class PermissionsService
     {
@@ -16,9 +16,9 @@ namespace Dikubot.Permissions
         {
             var userModels = _userServices.Get();
             var socketUsers = guild.Users.ToList();
-            var toBeRemoved = new List<UserModel>(userModels);
+            var toBeRemoved = new List<UserGuildModel>(userModels);
 
-            Func<UserModel, SocketGuildUser, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
+            Func<UserGuildModel, SocketGuildUser, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
 
             // Remove all the users from the database if they are not on the discord server.
             toBeRemoved.RemoveAll(m =>
@@ -61,6 +61,19 @@ namespace Dikubot.Permissions
             }
         }
 
+        /// <summary>
+        /// Grants the verified role to all users that are verified, and removes it from the ones that aren't.
+        /// </summary>
+        public async void UpdateUserDiscordRoles()
+        {
+            var socketUsers = guild.Users.ToList();
+            foreach (var user in socketUsers)
+            {
+                SetDiscordUserRoles(user);
+            }
+            
+        }
+
         /// <Summary>Add a user on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseUser(SocketGuildUser user) =>
@@ -73,8 +86,8 @@ namespace Dikubot.Permissions
 
         /// <Summary>Add a user on the discord server to the database.</Summary>
         /// <return>void.</return>
-        public void AddOrUpdateDatabaseUser(UserModel user) =>
-            _userServices.Upsert(user);
+        public void AddOrUpdateDatabaseUser(UserGuildModel userMain) =>
+            _userServices.Upsert(userMain);
 
         /// <Summary>Removes a user from the database.</Summary>
         /// <return>void.</return>
@@ -88,22 +101,22 @@ namespace Dikubot.Permissions
 
         /// <Summary>Removes a user from the database.</Summary>
         /// <return>void.</return>
-        public void RemoveDatabaseUser(UserModel user) =>
-            _userServices.Remove(user);
+        public void RemoveDatabaseUser(UserGuildModel userMain) =>
+            _userServices.Remove(userMain);
 
         /// <Summary>Updates a users info on discord and database, specifically nickname and roles.</Summary>
         /// <return>void.</return>
-        public async Task UpdateUser(UserModel user)
+        public async Task UpdateUser(UserGuildModel userMain)
         {
-            var socketUser = guild.GetUser(Convert.ToUInt64(user.DiscordId));
-            var _properties = _userServices.ModelToProperties(guild, user);
+            var socketUser = guild.GetUser(Convert.ToUInt64(userMain.DiscordId));
+            var _properties = _userServices.ModelToProperties(guild, userMain);
             await socketUser.ModifyAsync(properties =>
             {
                 properties.Nickname = _properties.Nickname;
                 properties.Roles = _properties.Roles;
                 properties.RoleIds = _properties.RoleIds;
             });
-            AddOrUpdateDatabaseUser(user);
+            AddOrUpdateDatabaseUser(userMain);
         }
 
         /// <Summary>Updates a users info on discord and database, specifically nickname and roles.</Summary>

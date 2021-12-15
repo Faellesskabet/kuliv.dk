@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
 using Cronos;
 using Dikubot.DataLayer.Cronjob;
-using Microsoft.Graph;
 
 namespace Dikubot.DataLayer.Caching
 {

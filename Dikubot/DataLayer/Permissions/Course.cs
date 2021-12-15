@@ -1,14 +1,12 @@
 using System;
-using System.Linq;
-using Dikubot.Database.Models.Course;
-using Discord.WebSocket;
+using Dikubot.DataLayer.Database.Guild.Models.Course;
 
-namespace Dikubot.Permissions
+namespace Dikubot.DataLayer.Permissions
 {
     public partial class PermissionsService
     {
 
-        public void CreateMissingDiscordRolesAndChannels(CourseModel courseModel)
+        public void CreateMissingDiscordRolesAndChannels(CourseMainModel courseMainModel)
         {
             /*SocketTextChannel mainChannel = guild.GetTextChannel(Convert.ToUInt64(courseModel.MainTextChannelModel.DiscordId)) 
                                             ?? guild.TextChannels.First(channel => channel.Name == courseModel.Name);

@@ -1,14 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dikubot.Database.Models.TextChannel;
-using Dikubot.DataLayer.Static;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.Quote;
+using Dikubot.Discord.EventListeners;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Graph;
-using Util = Dikubot.Discord.EventListeners.Util;
 
 namespace Dikubot.Discord.Command
 {
@@ -22,44 +20,43 @@ namespace Dikubot.Discord.Command
         [Summary("Get a random quote from the quote channel")]
         public async Task GetQuote()
         {
-            TextChannelServices textChannelServices = new TextChannelServices(this.Context.Guild);
-            List<TextChannelModel> textChannelModels = textChannelServices.GetAll(model => model.IsQuoteChannel);
+            SocketGuild guild = Context.Guild;
+            QuoteModel quoteModel = new QuoteServices(Context.Guild).GetSamples(1).FirstOrDefault();
 
-            List<SocketTextChannel> textChannels = textChannelModels.Select(model => Context.Guild.GetTextChannel(Convert.ToUInt64(model.DiscordId))).ToList();
-            if (!textChannels.Any())
+            if (quoteModel == null)
             {
-                await ReplyAsync("There are no quote channels:(");
+                await ReplyAsync("I couldn't find any quotes! :(");
                 return;
             }
-            List<IMessage> messages = new List<IMessage>();
-            foreach (SocketTextChannel textChannel in textChannels)
-            {
-                var asyncEnumerator = textChannel.GetMessagesAsync(100).Flatten();
-                await foreach (var message in asyncEnumerator.WithCancellation(default).ConfigureAwait(false))
-                {
-                    messages.Add(message);
-                }
-            }
 
-            int index = new Random().Next(messages.Count - 1);
-            await ReplyAsync(messages[index].Content);
+            IMessage quote = guild.GetTextChannel(Convert.ToUInt64(quoteModel.ChannelId))
+                .GetMessageAsync(Convert.ToUInt64(quoteModel.MessageId)).Result;
+            await ReplyAsync(quote.Content);
         }
-        
+
+        [Command("test")]
+        public async Task GetQuotes()
+        {
+            await ReplyAsync("test " + new QuoteServices(Context.Guild).Get().FirstOrDefault()?.MessageId);
+        }
+
         [Command("connect")]
         [Summary("Connect a quote channel")]
-        public async Task ConnectChannel([Summary("Channel id")] long channelId = 0)
+        public async Task ConnectChannel([Summary("Channel id")] ulong channelId = 0)
         {
             if (!Util.IsMod(Context.User, Context.Guild))
             {
                 await ReplyAsync("Only users with role Mod may use this command");
                 return;
             }
+
+            await ReplyAsync("Loading all quotes... This may take a while!");
             await TryUpdateChannel(channelId, true);
         }
         
         [Command("disconnect")]
         [Summary("Disconnect a quote channel")]
-        public async Task DisconnectChannel([Summary("Channel id")] long channelId = 0)
+        public async Task DisconnectChannel([Summary("Channel id")] ulong channelId = 0)
         {
             if (!Util.IsMod(Context.User, Context.Guild))
             {
@@ -69,22 +66,32 @@ namespace Dikubot.Discord.Command
             await TryUpdateChannel(channelId, false);
         }
 
-        private async Task TryUpdateChannel(long channelId, bool connect)
+        private async Task TryUpdateChannel(ulong channelId, bool connect)
         {
             if (channelId == 0)
             {
-                channelId = (long) this.Context.Channel.Id;
+                channelId = (ulong) this.Context.Channel.Id;
             }
             TextChannelServices textChannelServices = new TextChannelServices(this.Context.Guild);
-            TextChannelModel textChannelModel = textChannelServices.Get(model => model.DiscordId == channelId.ToString());
+            TextChannelMainModel textChannelModel = textChannelServices.Get(model => model.DiscordId == channelId.ToString());
             if (textChannelModel == null)
             {
                 await ReplyAsync("The given channelId does not match any channels.");
                 return;
             }
             textChannelModel.IsQuoteChannel = connect;
-            textChannelModel.IsNsfw = false;
             textChannelServices.Update(textChannelModel);
+            
+            //We add all the quotes to the database
+            if (connect)
+            {
+                new QuoteServices(this.Context.Guild).DownloadQuotesFromChannel(Context.Guild.GetTextChannel(channelId));
+            }
+            //We remove all the quotes from the channel
+            else
+            {
+                new QuoteServices(this.Context.Guild).Remove(model => model.ChannelId == channelId.ToString());
+            }
             await ReplyAsync($"The channel named {textChannelModel.Name} has been {(connect?"connected":"disconnected")} from quotes!");
         } 
         

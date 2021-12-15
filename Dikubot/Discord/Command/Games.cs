@@ -1,15 +1,10 @@
-using Discord.Commands;
-using Discord;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Addons.Interactive;
-using Dikubot.Database.Models;
-using Dikubot.Database.Models.Role;
-using Dikubot.Database.Models.SubModels;
-using Dikubot.Permissions;
-using Discord.WebSocket;
+using Discord.Commands;
 
 namespace Dikubot.Discord.Command
 {

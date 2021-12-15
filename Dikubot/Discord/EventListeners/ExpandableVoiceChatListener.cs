@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dikubot.Database.Models.VoiceChannel;
-using Dikubot.Permissions;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
+using Dikubot.DataLayer.Permissions;
 using Discord.WebSocket;
 
 namespace Dikubot.Discord.EventListeners
@@ -28,7 +27,7 @@ namespace Dikubot.Discord.EventListeners
                 return;
 
             // Get's childrens and parent.
-            var children = voiceChannelServices.GetAll(m => m.DeleteOnLeave && m.ExpandId == channelModel.ExpandId);
+            var children = voiceChannelServices.GetWhere(m => m.DeleteOnLeave && m.ExpandId == channelModel.ExpandId);
             var parent = voiceChannelServices.Get(m => !m.DeleteOnLeave && m.ExpandId == channelModel.ExpandId);
             var deleteChildren = new List<SocketVoiceChannel>();
             var socketParent = guild.GetVoiceChannel(Convert.ToUInt64(parent.DiscordId));
@@ -55,19 +54,23 @@ namespace Dikubot.Discord.EventListeners
         /// <return>Task.</return>
         private async Task AddChannelIfNonIsAvaiable(SocketVoiceChannel channel)
         {
+            if (channel == null)
+            {
+                return;
+            }
+            
+            // ToDo: får en fejl System.NullReferenceException: Object reference not set to an instance of an object.
             var voiceChannelServices = new VoiceChannelServices(channel.Guild);
 
             // If channel is null return.
-            if (channel == null)
-                return;
+            
             var model = voiceChannelServices.Get(m => m.DiscordId == channel.Id.ToString());
 
-            // If channel isn't expandable return.
-            if (model?.ExpandOnJoin == null || !model.ExpandOnJoin)
-                return;
+            // If channel isn't expandable return. // || !model.ExpandOnJoin
+            if (!model?.ExpandOnJoin ?? false) return;
 
             // If a single voice channel is empty return.
-            var children = voiceChannelServices.GetAll(m => m.ExpandId == model.ExpandId);
+            var children = voiceChannelServices.GetWhere(m => m.ExpandId == model.ExpandId);
             foreach (var child in children)
             {
                 var gottenChannel = channel.Guild.GetVoiceChannel(Convert.ToUInt64(child.DiscordId));
@@ -76,13 +79,17 @@ namespace Dikubot.Discord.EventListeners
             }
 
             // Makes a new voice chanel model
-            var childModel = new VoiceChannelModel();
+            var childModel = new VoiceChannelMainModel();
             childModel.ExpandOnJoin = true;
             childModel.DeleteOnLeave = true;
-            childModel.Position = model.Position;
-            childModel.ExpandId = model.ExpandId;
-            childModel.Name = "Rum";
-            childModel.DiscordCategoryId = model.DiscordCategoryId;
+            if (model != null)
+            {
+                childModel.Position = model.Position;
+                childModel.ExpandId = model.ExpandId;
+                // todo : lav count rigtig da den lige nu hedder Channel navn 1 2 3... 
+                childModel.Name =  $"{model.Name} {children.Count}";
+                childModel.DiscordCategoryId = model.DiscordCategoryId;
+            }
 
             // Adds the voice channel to the database and server.
             var permissionsService = new PermissionsService(channel.Guild);

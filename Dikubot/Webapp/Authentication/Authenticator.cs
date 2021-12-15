@@ -1,15 +1,14 @@
 using System;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
-using Dikubot.Database.Models.Session;
+using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Logic.WebDiscordBridge;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace Dikubot.Webapp.Logic
+namespace Dikubot.Webapp.Authentication
 {
     public class Authenticator : AuthenticationStateProvider
     {
@@ -65,7 +64,7 @@ namespace Dikubot.Webapp.Logic
 
             //Here we return a UserIdentity with our sessionModel. The system will then check the user connected to the session,
             //to see what authorisation step the user is at.
-            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel, _guild))));
+            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel))));
         }
 
         /// <summary>
@@ -78,7 +77,7 @@ namespace Dikubot.Webapp.Logic
             _sessionServices.Upsert(sessionModel);
             await _localStorageService.SetItemAsync("session", sessionModel.Id.ToString());
             NotifyAuthenticationStateChanged(
-                Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel, _guild)))));
+                Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(sessionModel)))));
         }
     }
 }

@@ -17,7 +17,6 @@ namespace Dikubot.Discord.EventListeners
                 return auditLogEntry.User.IsBot;
             return false;
         }
-
         public static bool HasRole(SocketUser user, SocketGuild guild, String name)
         {
             if (guild == null)

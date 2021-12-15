@@ -1,7 +1,7 @@
 @page "/login"
 @using System.Security.Claims
 @using Dikubot.Discord.Command
-@using Dikubot.Webapp.Logic
+@using Dikubot.Webapp.Authentication
 @using global::Discord.WebSocket
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
@@ -55,16 +55,16 @@
         authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
 
-        if (user?.SessionModel == null || user.UserModel == null)
+        if (user?.SessionModel == null || user.UserGlobalModel == null)
         {
             return State.ConnectDiscord;
         }
 
-        if (!user.UserModel.Verified)
+        if (!user.UserGlobalModel.Verified)
         {
             return State.ConnectEmail;
         }
-        return user.UserModel.IsBanned ? State.NoAccess : State.ConnectName;
+        return user.UserGlobalModel.IsBanned ? State.NoAccess : State.ConnectName;
     }
 
 

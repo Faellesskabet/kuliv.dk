@@ -1,11 +1,9 @@
 @page "/admin/courses"
-@using Dikubot.Database.Models.Course
 @attribute [Authorize(Roles = "MOD, ADMIN")]
 <div class="page-body">
     @if (EditMode)
     {
         <h3>Kursus Editor</h3>
-        <Course CourseModel="@(new CourseModel())" parent="@this"></Course>
     }
     else
     {

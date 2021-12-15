@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BlazorFluentUI;
+using Dikubot.DataLayer.Static;
+using Dikubot.Discord.Interactive;
+using Dikubot.Discord.Interactive.Criterions;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.WebSocket;
 
 namespace Dikubot.Discord.Command
 {
-    public class Help : ModuleBase<SocketCommandContext>
+public class Help : InteractiveBase<SocketCommandContext>
     {
-
 
         [Command("help")]
         [Alias("hjælp", "man", "howto")]
@@ -22,26 +24,27 @@ namespace Dikubot.Discord.Command
             await HelpCommand(1, search);
         }
         
+        /// <summary>
+        /// ALT OPDATERING AF DENNE SKAL FOREGÅ I Discord/Interactive/HelpCallBack.cs
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="search"></param>
         [Command("help")]
         [Alias("hjælp", "man", "howto")]
         [Summary("Access other help pages")]
         public async Task HelpCommand(int page = 1, [Summary("Search arguments")] params string[] search)
         {
 
-            EmbedBuilder embedBuilder = GetHelpEmbed(search);
-            embedBuilder.WithFooter($"Page {page}/{Math.Ceiling(embedBuilder.Fields.Count / 25.0)}");
-            int pageIndex = (page - 1) * 25;
-            int pageCount = page * 25 + (page - 1) * 25 > embedBuilder.Fields.Count-1 ? embedBuilder.Fields.Count-1 - (page - 1) * 25 : page * 25;
-            embedBuilder.Fields = embedBuilder.Fields.GetRange(pageIndex, pageCount);
-            Embed embed = embedBuilder.Build();
-            await ReplyAsync("Her er en liste af kommandoer og beskrivelser: ", false, embed);
-
+            var criterion = new Criteria<SocketReaction>();
+            criterion.AddCriterion(new EnsureReactionFromSourceUserCriterion());
+            HelpCallBack callBack = new HelpCallBack(Interactive,Context, search, criterion);
+            await callBack.DisplayAsync().ConfigureAwait(false);
+            
         }
-
         
         private EmbedBuilder GetHelpEmbed(string[] args)
         {
-            CommandService commandService = DiscordBot.commandHandler.GetCommandService();
+            CommandService commandService = DiscordBot.CommandHandler.GetCommandService();
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.WithTitle("Help commands");
             embedBuilder.WithColor(Color.Green);
@@ -53,7 +56,6 @@ namespace Dikubot.Discord.Command
             if (args.Length >= 1)
             {
                 string command = string.Join(" ", args);
-                Console.WriteLine(command);
                 embedBuilder.WithTitle($"Help - {command}");
                 modules = modules.Where(info =>
                     info.Name.Contains(command) || info.Commands.Any(commandInfo => commandInfo.Name.Contains(command))).ToList();
@@ -68,8 +70,8 @@ namespace Dikubot.Discord.Command
                 StringBuilder description = new StringBuilder();
 
                 // The title is an invisible character as embedBuilder doesn't allow fields with no values
-                embedBuilder.Fields.Add(GetEmbedFieldBuilder("⠀", 
-                    $"__**{module.Name.First().ToString().ToUpper() + module.Name.Substring(1)} kommandoer**__"));
+                embedBuilder.Fields.Add(GetEmbedFieldBuilder(Util.INVISIBLE_CHARACTER, 
+                    $":arrow_forward: __**{module.Name.First().ToString().ToUpper() + module.Name.Substring(1)} kommandoer**__"));
                 foreach (CommandInfo command in module.Commands)
                 {
                     string embedFieldText = command.Summary ?? "Ingen beskrivelse tilgængelig";
@@ -78,8 +80,12 @@ namespace Dikubot.Discord.Command
                     {
                         name += " " + string.Join(" ", command.Parameters.Select(info => $"[{info.Name}]"));
                     }
-                        
-                    embedBuilder.Fields.Add(GetEmbedFieldBuilder($"```{DiscordBot.commandHandler.GetCommandPrefix()}{name.ToLower()}```", embedFieldText, true));
+
+                    if (string.IsNullOrWhiteSpace(embedFieldText))
+                    {
+                        continue;
+                    }
+                    embedBuilder.Fields.Add(GetEmbedFieldBuilder($"```{DiscordBot.CommandHandler.GetCommandPrefix()}{name.ToLower()}```", embedFieldText, true));
                 }
             }
             return embedBuilder;

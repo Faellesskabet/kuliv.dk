@@ -9,8 +9,9 @@ namespace Dikubot.DataLayer.Logic.WebDiscordBridge
         public enum Subdomains : ulong
         { 
             lukitest = 786946524310929419,
-            discord = 589752263791083541,
-            science = 808777327881224273
+            diku = 589752263791083541,
+            science = 808777327881224273,
+            satyr = 841743367288258560,
           
         }
         public static ulong DomainToDiscordId(string domain)
@@ -41,7 +42,7 @@ namespace Dikubot.DataLayer.Logic.WebDiscordBridge
 
         public static SocketGuild GetGuildFromDomain(string domain)
         {
-            return DiscordBot.client.GetGuild(DomainToDiscordId(domain));
+            return DiscordBot.Client.GetGuild(DomainToDiscordId(domain));
         }
         
     }

@@ -1,51 +1,50 @@
-@using Dikubot.Webapp.Logic
 @using global::Discord.WebSocket
 @using Dikubot.Discord.Command
-@using Dikubot.Database.Models
-@using Dikubot.Database.Models.Session
+@using Dikubot.DataLayer.Database.Global.Session
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.User
 @using Dikubot.DataLayer.Logic.Email
 @using Dikubot.DataLayer.Logic.Email.Emails
 @using Dikubot.DataLayer.Logic.User
+@using Dikubot.DataLayer.Permissions
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
-@using Dikubot.Permissions
+@using Dikubot.Webapp.Authentication
 @using SendGrid.Helpers.Mail
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject IJSRuntime JsRuntime;
+@inject IJSRuntime JsRuntime
 
 <h1>Velkommen til DIKU's Discord Server</h1>
-}
+
 <div class="card w-auto h-auto shadow">
-    <div class="card-body">
-        @if (incorrectPassword)
-        {
-            <BFUMessageBar MessageBarType="MessageBarType.Error">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</BFUMessageBar>
-            <br>
-        }
-        @if (String.IsNullOrEmpty(secretPassword))
-        {
-            <h5 class="card-title">Bekræft din email</h5>
-            <div class="textFieldDiv">
-                <BFUTextField Label="Vi skal bruge din email, for at bekræfte du går på KU" Placeholder="xyz123@alumni.ku.dk"
-                              Style="padding-bottom: 5px" ClassName="text-field"
-                              Required="true" OnInput="@(OnEmailChange)" ErrorMessage="@errorInputMessage" OnKeyDown=EmailOnEnter />
-                <BFUPrimaryButton Text="Send Email" OnClick="SendEmail"></BFUPrimaryButton>
-            </div>
-        }
-        else
-        {
-            <h5 class="card-title">Vi har sendt en kode til din email: @(email)</h5>
-            <div class="textFieldDiv">
-                <BFUTextField Label="Indtast koden her:" Placeholder="Hemmeligt kodeord"
-                              Style="padding-bottom: 5px" ClassName="text-field"
-                              Required="true" OnInput="s => passwordInput = s" OnKeyDown=PasswordOnEnter />
-                <BFUPrimaryButton Text="Bekræft kode" OnClick="ConfirmEmailPassword" ></BFUPrimaryButton>
-            </div>
-        }
-    </div>
+<div class="card-body">
+    @if (incorrectPassword)
+{
+        <BFUMessageBar MessageBarType="MessageBarType.Error">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</BFUMessageBar>
+    <br>
+    }
+    @if (String.IsNullOrEmpty(secretPassword))
+    {
+        <h5 class="card-title">Bekræft din email</h5>
+        <div class="textFieldDiv">
+            <BFUTextField Label="Vi skal bruge din email, for at bekræfte du går på KU" Placeholder="xyz123@alumni.ku.dk"
+                          Style="padding-bottom: 5px" ClassName="text-field"
+                          Required="true" OnInput="@(OnEmailChange)" ErrorMessage="@errorInputMessage" OnKeyDown=EmailOnEnter />
+            <BFUPrimaryButton Text="Send Email" OnClick="SendEmail"></BFUPrimaryButton>
+        </div>
+    }
+    else
+    {
+        <h5 class="card-title">Vi har sendt en kode til din email: @(email)</h5>
+        <div class="textFieldDiv">
+            <BFUTextField Label="Indtast koden her:" Placeholder="Hemmeligt kodeord"
+                          Style="padding-bottom: 5px" ClassName="text-field"
+                          Required="true" OnInput="s => passwordInput = s" OnKeyDown=PasswordOnEnter />
+            <BFUPrimaryButton Text="Bekræft kode" OnClick="ConfirmEmailPassword" ></BFUPrimaryButton>
+        </div>
+    }
 </div>
-
-
+</div>
 @code {
 
     [Parameter]
@@ -117,18 +116,32 @@
             await InvokeAsync(() => { StateHasChanged(); });
             return;
         }
-
-        UserServices userServices = new UserServices(authenticator.GetGuild());
-        PermissionsService permissionsService = new PermissionsService(authenticator.GetGuild());
-        
-        //In case the email already exists, then we simply override the old user with the new user, while removing the old user's roles on the Discord server
-        
-        if (userServices.EmailExists(email))
+        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong).MutualGuilds;
+        UserGlobalServices userGlobalServices = new UserGlobalServices();
+        foreach(SocketGuild mutualGuild in mutualGuilds)
         {
-            //We get the old user
-            UserModel oldUser = userServices.GetFromEmail(email);
+            UpdateUserInGuild(mutualGuild, userGlobalServices);
+        }
+        user.UserGlobalModel.Email = email;
+        user.UserGlobalModel.Verified = true;
+        userGlobalServices.Upsert(user.UserGlobalModel);
+        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
+        await authenticator.UpdateSession(sessionModel);
+        parent.Update();
+    }
+    public void UpdateUserInGuild(SocketGuild guild, UserGlobalServices userGlobalServices)
+    {
+        UserGuildServices userGuildServices = new UserGuildServices(guild);
+        PermissionsService permissionsService = new PermissionsService(guild);
+        UserGuildModel newUser = userGuildServices.Get(user.UserGlobalModel.DiscordId);
+        
+    //In case the email already exists, then we simply override the old user with the new user, while removing the old user's roles on the Discord server
+        if (userGlobalServices.EmailExists(email))
+        {
+        //We get the old user
+            UserGuildModel oldUser = userGuildServices.Get(userGlobalServices.GetFromEmail(email).DiscordId);
 
-            if (oldUser.DiscordId != user.UserModel.DiscordId)
+            if (oldUser.DiscordId != newUser.DiscordId)
             {
                 if (oldUser.IsBanned)
                 {
@@ -136,42 +149,34 @@
                     return;
                 }
 
-                //We override the old user's id and set our current user to old user
-                oldUser.DiscordId = user.UserModel.DiscordId;
-                user.UserModel = oldUser;
+        //We override the old user's id and set our current user to old user
+                string oldId = oldUser.DiscordId;
+                oldUser.DiscordId = newUser.DiscordId;
+                newUser = oldUser;
 
-                //We now update all the Discord roles of our users. The old discord user will have all their roles removed, while the new user will get all the old user's roles.
-                permissionsService.SetDiscordUserRoles(oldUser);   
+        //We now update all the Discord roles of our users. The old discord user will have all their roles removed, while the new user will get all the old user's roles.
+                permissionsService.SetDiscordUserRoles(new UserGuildModel() {DiscordId = oldId});   
             }
         }
         
-        user.UserModel.Email = email;
-        user.UserModel.Verified = true;
-        permissionsService.SetDiscordUserRoles(user.UserModel);
+        permissionsService.SetDiscordUserRoles(newUser);
         
         string name = new KUUser(email.Split("@")[0]).GetName();
         if (name != "")
         {
-            user.UserModel.Name = name;
-            SocketGuild guild = authenticator.GetGuild();
+            newUser.Name = name;
             try
             {
-                await guild.GetUser(Convert.ToUInt64(user.UserModel.DiscordId)).ModifyAsync(guildUser =>
+                await guild.GetUser(Convert.ToUInt64(newUser.DiscordId)).ModifyAsync(guildUser =>
                 {
                     guildUser.Nickname = name;
                 });
             }
             catch (Exception e)
             {
-                //ignored
+    //ignored
             }
         }
-        userServices.Upsert(user.UserModel);
-
-        SessionModel sessionModel = new SessionModel(user.UserModel);
-        await authenticator.UpdateSession(sessionModel);
-        parent.Update();
+        userGuildServices.Upsert(newUser);        
     }
-
-
 }
