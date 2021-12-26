@@ -3,8 +3,7 @@
 @using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<BFUCompoundButton ClassName="button" OnClick="@OnClick" Text=@(HasRole ? $"{Role} (SLÅET TIL)" : $"{Role} (SLÅET FRA)") Primary="true" Style=@(HasRole ? "background-color: #1b6ec2" : "background-color: #80bdff")
-                  SecondaryText=@(HasRole ? $"Klik her for at komme af med {Role}" : $"Klik her for få rollen {Role}")></BFUCompoundButton>
+<Button Class="button" Clicked="@OnClick" Style=@(HasRole ? "background-color: #1b6ec2" : "background-color: #80bdff")>@(HasRole ? $"{Role} (SLÅET TIL)" : $"{Role} (SLÅET FRA)")</Button>
 
 @code {
     //Style=@(HasRole ? "color: #1b6ec2" : "color: #80bdff")

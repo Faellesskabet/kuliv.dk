@@ -16,13 +16,13 @@
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:5001;http://localhost:5000",
+      "applicationUrl": "https://lukitest.localhost:5001;http://lukitest.localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DISCORD_TOKEN": "ODAxMTIyMzUwMDg2MzU2OTky.YAcFVA.dWHdLjpjSmFXI2NvhyPB6gReBSE",
+        "DISCORD_BOT_TOKEN": "ODAxMTIyMzUwMDg2MzU2OTky.YAcFVA.dWHdLjpjSmFXI2NvhyPB6gReBSE",
         "DIKU_DISCORD_ID": "786946524310929419",
-        "SENDGRID_API": "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",
-        "SENDGRID_EMAIL": "noreply@lukire.tech"
+        "SENDGRID_API_KEY":"ODQxNzUwODEzNTAzNTIwODY4.YJrTiA.LLhvvbFT3SE7doudRDwDJ8MJcUY",
+        "SENDGRID_EMAIL": "noreply@kuliv.dk"
       }
     }
   }

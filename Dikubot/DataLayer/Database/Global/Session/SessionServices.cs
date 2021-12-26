@@ -5,7 +5,7 @@ namespace Dikubot.DataLayer.Database.Global.Session
 {
     public class SessionServices : GlobalServices<SessionModel>
     {
-        public SessionServices(SocketGuild guild) : base("UserSessions")
+        public SessionServices() : base("UserSessions")
         {
         }
     }

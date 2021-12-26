@@ -29,17 +29,17 @@
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
 @using Microsoft.Extensions.Configuration
-@using UserIdentity = Microsoft.Graph.UserIdentity
+@using Color = Blazorise.Color
 
-<h1>Velkommen til DIKU's Discord Server</h1>
+<h1>Velkommen til KU-Liv</h1>
 
 @if (discordUser == null && !loading)
 {
     <div class="card w-auto h-auto shadow">
         <div class="card-body">
-            <h5 class="card-title">Login ind</h5>
+            <h5 class="card-title">Log-in</h5>
             <div class="discordConnect">
-                <BFUCompoundButton Href="@loginURL()" Primary="true" Text="Login med Discord" SecondaryText="Klik her for at logge ind med Discord" ClassName="login-button"></BFUCompoundButton>
+                <a href="@loginURL()"><Button Class="login-button" Color="Color.Dark" Size="Size.ExtraLarge">Login med Discord</Button></a>
             </div>
             <a href="https://dnur.dk/" class="text-decoration-none" target="_blank">
                 <p class="text-xl-left">Klik her for hjælp</p>
@@ -52,14 +52,12 @@ else if (discordUser != null)
     <div class="card w-auto h-auto shadow">
         <div class="card-body">
             <h5 class="card-title">Er dette dig?</h5>
-            <BFUPersona Size="120" CoinSize="120" Text="@DiscordNameMentionCombo(discordUser)" Presence="GetPresenceStatus(discordUser)"
-                        ImageUrl="@discordUser.GetAvatarUrl()" ImageAlt="@discordUser.GetDefaultAvatarUrl()"
-                        Style="padding-bottom: 5px"/>
+            <h2>@DiscordNameMentionCombo(discordUser)</h2>
             <div class="line"></div>
-            <BFUStack Horizontal="true" HorizontalAlign="Alignment.Center" Tokens=@(new BFUStackTokens() {ChildrenGap = new[] {10.0}})>
-                <BFUPrimaryButton Text="Ja, godkend" OnClick=@(ApproveDiscord) />
-                <BFUDefaultButton Text="Nej, afvis" OnClick=@(RejectDiscord) Style="background-color: #f08080"/>
-            </BFUStack>
+            <Buttons>
+                <Button Color="Color.Success" Clicked=@(ApproveDiscord)>Ja, godkend</Button>
+                <Button Color="Color.Danger" Clicked=@(RejectDiscord)>Nej, afvis</Button>
+            </Buttons>
 
         </div>
     </div>
@@ -121,40 +119,21 @@ else if (discordUser != null)
     {
         return $"{user.Username}#{user.Discriminator}";
     }
-
-    private PersonaPresenceStatus GetPresenceStatus(SocketUser user)
-    {
-        switch (user.Status)
-        {
-            case UserStatus.Offline:
-                return PersonaPresenceStatus.Offline;
-            case UserStatus.Online:
-                return PersonaPresenceStatus.Online;
-            case UserStatus.Idle:
-                return PersonaPresenceStatus.Away;
-            case UserStatus.AFK:
-                return PersonaPresenceStatus.Away;
-            case UserStatus.DoNotDisturb:
-                return PersonaPresenceStatus.DND;
-            case UserStatus.Invisible:
-                return PersonaPresenceStatus.Offline;
-        }
-        return PersonaPresenceStatus.None;
-    }
+    
 
     public string GetContactMessage()
     {
         return $"Send den følgende kommando til botten {DiscordBot.Client.CurrentUser.Username}#{DiscordBot.Client.CurrentUser.Discriminator}.";
     } 
 
-    private async void RejectDiscord()
+    private async Task RejectDiscord()
     {
         discordUser = null;
         await OnInitializedAsync();
         await InvokeAsync(() => { StateHasChanged(); });
     }
 
-    private async void ApproveDiscord()
+    private async Task ApproveDiscord()
     {
         UserGlobalServices userServices = new UserGlobalServices();
         if (!userServices.Exists(discordUser))
@@ -162,7 +141,7 @@ else if (discordUser != null)
             UserGlobalModel userModel = new UserGlobalModel {DiscordUser = discordUser};
             userServices.Upsert(userModel);
         }
-
+        
         SessionModel sessionModel = new SessionModel(userServices.Get((discordUser)));
         await authenticator.UpdateSession(sessionModel);
         parent.Update();
