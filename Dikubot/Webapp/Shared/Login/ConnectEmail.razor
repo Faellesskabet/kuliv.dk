@@ -14,40 +14,52 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
 
-<h1>Velkommen til DIKU's Discord Server</h1>
-
+<h1>Velkommen til KU-Liv</h1>
 <div class="card w-auto h-auto shadow">
-<div class="card-body">
-    @if (incorrectPassword)
-{
-        <BFUMessageBar MessageBarType="MessageBarType.Error">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</BFUMessageBar>
-    <br>
-    }
-    @if (String.IsNullOrEmpty(secretPassword))
-    {
-        <h5 class="card-title">Bekræft din email</h5>
-        <div class="textFieldDiv">
-            <BFUTextField Label="Vi skal bruge din email, for at bekræfte du går på KU" Placeholder="xyz123@alumni.ku.dk"
-                          Style="padding-bottom: 5px" ClassName="text-field"
-                          Required="true" OnInput="@(OnEmailChange)" ErrorMessage="@errorInputMessage" OnKeyDown=EmailOnEnter />
-            <BFUPrimaryButton Text="Send Email" OnClick="SendEmail"></BFUPrimaryButton>
-        </div>
-    }
-    else
-    {
-        <h5 class="card-title">Vi har sendt en kode til din email: @(email)</h5>
-        <div class="textFieldDiv">
-            <BFUTextField Label="Indtast koden her:" Placeholder="Hemmeligt kodeord"
-                          Style="padding-bottom: 5px" ClassName="text-field"
-                          Required="true" OnInput="s => passwordInput = s" OnKeyDown=PasswordOnEnter />
-            <BFUPrimaryButton Text="Bekræft kode" OnClick="ConfirmEmailPassword" ></BFUPrimaryButton>
-        </div>
-    }
+    <div class="card-body">
+            @if (incorrectPassword)
+            {
+                <Alert Color="Color.Danger">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</Alert>
+                <br/>
+            }
+            @if (String.IsNullOrEmpty(secretPassword))
+            {
+                <h5 class="card-title">Bekræft din email</h5>
+                <div class="textFieldDiv">
+                    <Validation Validator="@ValidateEmail">
+                        <Field>
+                            <Label>Vi skal bruge din email, for at bekræfte du går på KU</Label>
+                            <TextEdit Placeholder="xyz123@alumni.ku.dk"
+                                      Style="padding-bottom: 5px" Class="text-field"
+                                      @bind-Text="email">
+                                <Feedback>
+                                    <ValidationNone>Indtast din KU-mail</ValidationNone>
+                                    <ValidationError>Det er ikke en valid KU-mail</ValidationError>
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+                    <Button Clicked="@SendEmail">Send email</Button>
+                </div>
+            }
+            else
+            {
+                <h5 class="card-title">Vi har sendt en kode til din email: @(email)</h5>
+                <div class="textFieldDiv">
+                    <Field>
+                        <Label>Indtast koden her:</Label>
+                        <TextEdit Placeholder="Hemmeligt kodeord"
+                                  Style="padding-bottom: 5px" Class="text-field"
+                                  @bind-Text="passwordInput" KeyDown="@PasswordOnEnter"></TextEdit>
+                    </Field>
+                    <Button Clicked="ConfirmEmailPassword">Bekræft kode</Button>
+                </div>
+            }
+    </div>
 </div>
-</div>
-@code {
 
-    [Parameter]
+@code {
+     [Parameter]
     public Login parent { get; set; }
 
     private Authenticator authenticator;
@@ -81,15 +93,14 @@
         user = (UserIdentity) authState.User.Identity;
     }
 
-    private void OnEmailChange(string value)
+    private void ValidateEmail(ValidatorEventArgs e)
     {
-        email = value;
-        if (email != "" && !Util.IsKUEmail(email))
+        if (string.IsNullOrWhiteSpace(e.Value.ToString()) && !Util.IsKUEmail(e.Value.ToString()))
         {
-            errorInputMessage = "Dette er ikke en godkendt KU email";
+            e.Status = ValidationStatus.Error;
             return;
         }
-        errorInputMessage = "";
+        e.Status = ValidationStatus.Success;
     }
 
     private async void SendEmail()
@@ -129,7 +140,7 @@
         await authenticator.UpdateSession(sessionModel);
         parent.Update();
     }
-    public void UpdateUserInGuild(SocketGuild guild, UserGlobalServices userGlobalServices)
+    public async void UpdateUserInGuild(SocketGuild guild, UserGlobalServices userGlobalServices)
     {
         UserGuildServices userGuildServices = new UserGuildServices(guild);
         PermissionsService permissionsService = new PermissionsService(guild);

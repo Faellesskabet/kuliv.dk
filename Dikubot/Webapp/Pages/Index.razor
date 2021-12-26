@@ -12,16 +12,11 @@
     </div>
     <div class="line"></div>
     <div class="page-body">
-        <BFUCompoundButton ClassName="button" Text="Vælg Fag / Gruppe" Primary="true" Href="/group" SecondaryText="Matematik, biologi og mange flere! Vælg her!"/>
-        <BFUCompoundButton ClassName="button" Text="Kursus Pakker" Primary="true" Disabled="true" SecondaryText="Kommer snart"/>
-        <BFUCompoundButton ClassName="button" Text="Kursus Oversigt" Disabled="true" SecondaryText="Kommer snart" />
-        <BFUCompoundButton ClassName="button" Text="Event Oversigt" Disabled="true" SecondaryText="Kommer snart!"/>
-        <BFUCompoundButton ClassName="button" Text="Anmod Rolle" Disabled="true" SecondaryText="Kommer snart!"/>
+        <Button Class="button">Vælg Fag / Gruppe</Button>
         <AuthorizeView Roles="TA, MOD, ADMIN">
-            <BFUCompoundButton ClassName="button" Text="TA Kontrolpanel" Disabled="true" SecondaryText="Kommer snart!"/>
         </AuthorizeView>
         <AuthorizeView Roles="MOD, ADMIN">
-            <BFUCompoundButton ClassName="button" Text="Mod Kontrolpanel" Href="/admin" Disabled="true" SecondaryText="Kommer snart!"/>
+            <a href="/admin"><Button Class="button" Disabled="true">Mod Kontrolpanel</Button></a>
         </AuthorizeView>
     </div>
 </div>

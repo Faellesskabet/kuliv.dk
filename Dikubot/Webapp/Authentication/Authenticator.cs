@@ -21,7 +21,7 @@ namespace Dikubot.Webapp.Authentication
         {
             _navigationManager = navigationManager;
             _guild = SubDomainConnector.GetGuildFromDomain(navigationManager.Uri);
-            _sessionServices = new SessionServices(_guild);
+            _sessionServices = new SessionServices();
             _localStorageService = localStorageService;
         }
 
@@ -43,23 +43,26 @@ namespace Dikubot.Webapp.Authentication
         {
             //Get session key
             string sessionStringKey = await _localStorageService.GetItemAsStringAsync("session");
-
+            
+            // It includes the quotation marks from the cookie when loading, so we replace them.
+            sessionStringKey = sessionStringKey.Replace("\"", string.Empty);
+            
             //We convert the sessionKey to a Guid, as that's our universal Id format - But we only do so if the sessionStringKey is a valid guid
             if (!Guid.TryParse(sessionStringKey, out Guid sessionKey))
             {
                 //Returns an empty UserIdentity, meaning the user isn't authorized to do anything
-                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(_guild))));
+                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity())));
             }
 
             if (!_sessionServices.Exists(sessionKey))
             {
-                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(_guild))));
+                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity())));
             }
 
             SessionModel sessionModel = _sessionServices.Get(sessionKey);
             if (sessionModel.IsExpired)
             {
-                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(_guild))));
+                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity())));
             }
 
             //Here we return a UserIdentity with our sessionModel. The system will then check the user connected to the session,

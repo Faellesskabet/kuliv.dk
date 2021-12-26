@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Blazorise.Extensions;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
-using Dikubot.DataLayer.Database.Interfaces;
 using Dikubot.DataLayer.Static;
 using Discord.WebSocket;
-using Microsoft.Graph.CallRecords;
 
 namespace Dikubot.Webapp.Authentication
 {
@@ -15,11 +14,12 @@ namespace Dikubot.Webapp.Authentication
     {
         private UserGlobalModel _userGlobalModel;
         private readonly SessionModel _sessionModel;
-        private SocketGuild _guild;
 
-        public UserIdentity(SocketGuild guild)
+        /// <summary>
+        /// Empty UserIdentity
+        /// </summary>
+        public UserIdentity()
         {
-            _guild = guild;
         }
 
         /// <Summary>Creates a UserIdentity based on a session.</Summary>
@@ -32,6 +32,10 @@ namespace Dikubot.Webapp.Authentication
             {
                 try
                 {
+                    if (_userGlobalModel.Permissions.IsNullOrEmpty())
+                    {
+                        return;
+                    }
                     IEnumerable<Claim> roleClaims = _userGlobalModel.Permissions.Select(permission => 
                         new Claim(ClaimTypes.Role, permission));
                     AddClaims(roleClaims);

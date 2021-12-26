@@ -5,16 +5,18 @@
 @using Dikubot.DataLayer.Database.Global.User
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<h1>Velkommen til DIKU's Discord Server</h1>
-}
+<h1>Velkommen til KU-Liv</h1>
 <div class="card w-auto h-auto shadow">
     <div class="card-body">
         <h5 class="card-title">Hvad er dit fulde navn?</h5>
         <div class="textFieldDiv">
-            <BFUTextField Label="Fulde navn" Placeholder="Fornavn Efternavn"
-                          Style="padding-bottom: 5px" ClassName="text-field"
-                          Required="true" OnInput="s => name = s"/>
-            <BFUPrimaryButton Text="Bekræft Navn" OnClick="ConfirmName"></BFUPrimaryButton>
+            <Field>
+                <FieldLabel>Fulde navn</FieldLabel>
+                <TextEdit Placeholder="Fornavn Efternavn"
+                          Style="padding-bottom: 5px" Class="text-field"
+                          @bind-Text="name" Autofocus="true"/>
+            </Field>
+            <Button Clicked="@ConfirmName">Bekræft Navn</Button>
         </div>
 
     </div>
