@@ -31,6 +31,7 @@
 @using Microsoft.Extensions.Configuration
 @using Color = Blazorise.Color
 
+<link href="css/diku/login.css" rel="stylesheet"/>
 <h1>Velkommen til KU-Liv</h1>
 
 @if (discordUser == null && !loading)
@@ -54,10 +55,9 @@ else if (discordUser != null)
             <h5 class="card-title">Er dette dig?</h5>
             <h2>@DiscordNameMentionCombo(discordUser)</h2>
             <div class="line"></div>
-            <Buttons>
-                <Button Color="Color.Success" Clicked=@(ApproveDiscord)>Ja, godkend</Button>
-                <Button Color="Color.Danger" Clicked=@(RejectDiscord)>Nej, afvis</Button>
-            </Buttons>
+            <Button Color="Color.Success" Clicked=@(ApproveDiscord)>Ja, godkend</Button>
+            <Button Color="Color.Danger" Clicked=@(RejectDiscord)>Nej, afvis</Button>
+            
 
         </div>
     </div>
@@ -76,7 +76,7 @@ else if (discordUser != null)
     
     private string password;
     private Authenticator authenticator;
-    private SocketUser discordUser;
+    private IUser discordUser;
     private string client_id, client_secret, redirect_url;
     private bool loading;
     
@@ -97,7 +97,7 @@ else if (discordUser != null)
             {
                 JObject discordUserJson = GetUser(GetAuthtoken(AuthCode));
                 ulong discordUserId = Convert.ToUInt64(discordUserJson["id"]);
-                discordUser = DiscordBot.Client.GetUser(discordUserId);
+                discordUser = await DiscordBot.Client.GetUserAsync(discordUserId);
                 await InvokeAsync(() => { StateHasChanged(); });
             }
             catch (Exception e)
@@ -115,7 +115,7 @@ else if (discordUser != null)
         await InvokeAsync(() => { StateHasChanged(); });
     }
 
-    private string DiscordNameMentionCombo(SocketUser user)
+    private string DiscordNameMentionCombo(IUser user)
     {
         return $"{user.Username}#{user.Discriminator}";
     }
@@ -138,11 +138,11 @@ else if (discordUser != null)
         UserGlobalServices userServices = new UserGlobalServices();
         if (!userServices.Exists(discordUser))
         {
-            UserGlobalModel userModel = new UserGlobalModel {DiscordUser = discordUser};
+            UserGlobalModel userModel = new UserGlobalModel {DiscordId = discordUser.Id.ToString()};
             userServices.Upsert(userModel);
         }
         
-        SessionModel sessionModel = new SessionModel(userServices.Get((discordUser)));
+        SessionModel sessionModel = new SessionModel(userServices.Get((discordUser.Id.ToString())));
         await authenticator.UpdateSession(sessionModel);
         parent.Update();
     }

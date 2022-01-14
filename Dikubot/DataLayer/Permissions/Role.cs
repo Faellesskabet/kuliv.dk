@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Database.Guild.Models.Role;
 using Dikubot.DataLayer.Database.Guild.Models.User;
@@ -94,40 +95,41 @@ namespace Dikubot.DataLayer.Permissions
             }
         }
 
-        public async void UpdateVerifyRole(UserGuildModel userGuildModel)
+        public async void UpdateVerifyRole(UserGuildModel userGuildModel, ulong verificationRoleId)
         {
+            SocketRole role = guild.GetRole(verificationRoleId);
+            // If the role is not set or does not exist, we return
+            if (role == null)
+            {
+                return;
+            }
+            
             UserGlobalServices userGlobalServices = new UserGlobalServices();
             if (!userGlobalServices.Get(userGuildModel.DiscordId).Verified)
             {
-                if (userGuildModel.HasRole("verified", guild))
+                if (userGuildModel.HasRole(role.Id, guild))
                 {
-                    userGuildModel.RemoveRole(new UserRoleModel(_roleServices.Get(model => model.Name.ToLower() == "verified")));
+                    userGuildModel.RemoveRole(new UserRoleModel(_roleServices.Get(model => Convert.ToUInt64(model.DiscordId) == role.Id)));
                 }
                 return;
             }
-            // If the server doesn't have a verified role, then we add one
-            if (!_roleServices.Exists("verified"))
+            
+            if (userGuildModel.HasRole(role.Id, guild))
             {
-                SocketRole everyoneRole = guild.EveryoneRole;
-                RestRole role = await guild.CreateRoleAsync("Verified", everyoneRole.Permissions, everyoneRole.Color, 
-                    everyoneRole.IsHoisted, everyoneRole.IsMentionable, RequestOptions.Default);
-                RoleMainModel roleMainModel = _roleServices.RestToModel(role);
-                _roleServices.Upsert(roleMainModel);
-            }
-
-            if (!userGuildModel.HasRole("verified", guild))
-            {
-                RoleMainModel roleMainModel;
-                userGuildModel.AddRole(new UserRoleModel(_roleServices.Get(model => model.Name.ToLower() == "verified")));
+                userGuildModel.AddRole(new UserRoleModel(_roleServices.Get(model => Convert.ToUInt64(model.DiscordId) == role.Id)));
             }
         }
 
+        public async void SetDiscordUserRoles(UserGuildModel userMainModel)
+        {
+            SetDiscordUserRoles(userMainModel, _guildSettingsService.Get(guild));
+        }
         /// <summary>
         /// This functions downloads a user's roles from the Database and adds them to their Discord profile. The user's roles will match exactly what is in the database,
         /// which means roles not specified in the database will be removed from the user. Expired roles will also be removed from the user
         /// </summary>
         /// <param name="userMainModel"></param>
-        public async void SetDiscordUserRoles(UserGuildModel userMainModel)
+        public async void SetDiscordUserRoles(UserGuildModel userMainModel, GuildSettingsModel guildSettingsModel)
         {
             SocketUser discordUser = userMainModel.DiscordUser;
             if (discordUser == null)
@@ -141,9 +143,9 @@ namespace Dikubot.DataLayer.Permissions
             {
                 return;
             }
-
+            
             //Give the user the verified role if they're verified
-            UpdateVerifyRole(userMainModel);
+            UpdateVerifyRole(userMainModel, guildSettingsModel.VerifiedRole);
             
             //We get all the user's roles in the database
             HashSet<UserRoleModel> userRoleModels = new HashSet<UserRoleModel>(userMainModel.Roles);
@@ -154,14 +156,7 @@ namespace Dikubot.DataLayer.Permissions
             IReadOnlyCollection<SocketRole> discordRoles = guildUser.Roles;
             
             
-            //Gammel
-            /*
-            IEnumerable<IRole> removeRolesOld= discordRoles.Where((role, i) =>
-                !userRoleModels.Contains(new UserRoleModel(_roleServices.SocketToModel(role)))
-                || !userModel.IsRoleActive(_roleServices.SocketToModel(role)));
-             */
-            
-            //Fjerne roller hvis de ikke er aktive.
+            // Removes roles if they aren't active
             IEnumerable<IRole> removeRoles = discordRoles.Where((role) =>
                 userRoleModels
                     .FirstOrDefault(usr => new UserRoleModel(_roleServices.SocketToModel(role)).RoleId.Equals(usr.RoleId)) == null //Kigger på om brugeren har rollen med samme RoleID.
@@ -199,10 +194,13 @@ namespace Dikubot.DataLayer.Permissions
                 }
             }
         }
-
+        public void SetDiscordUserRoles(SocketUser user, GuildSettingsModel guildSettingsModel)
+        {
+            SetDiscordUserRoles(_userServices.Get(user), guildSettingsModel);
+        }
         public void SetDiscordUserRoles(SocketUser user)
         {
-            SetDiscordUserRoles(new UserGuildServices(guild).Get(user));
+            SetDiscordUserRoles(_userServices.Get(user));
         }
 
         /// <Summary>Add a role on the discord server to the database.</Summary>

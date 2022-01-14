@@ -14,6 +14,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
 
+<link href="css/diku/login.css" rel="stylesheet"/>
 <h1>Velkommen til KU-Liv</h1>
 <div class="card w-auto h-auto shadow">
     <div class="card-body">
@@ -31,7 +32,7 @@
                             <Label>Vi skal bruge din email, for at bekræfte du går på KU</Label>
                             <TextEdit Placeholder="xyz123@alumni.ku.dk"
                                       Style="padding-bottom: 5px" Class="text-field"
-                                      @bind-Text="email">
+                                      @bind-Text="email" KeyDown="@EmailOnEnter">
                                 <Feedback>
                                     <ValidationNone>Indtast din KU-mail</ValidationNone>
                                     <ValidationError>Det er ikke en valid KU-mail</ValidationError>
@@ -69,6 +70,7 @@
     private string secretPassword = "";
     private string passwordInput = "";
     bool incorrectPassword = false;
+    bool validEmail = false;
 
     public void EmailOnEnter(KeyboardEventArgs e)
     {
@@ -98,14 +100,16 @@
         if (string.IsNullOrWhiteSpace(e.Value.ToString()) && !Util.IsKUEmail(e.Value.ToString()))
         {
             e.Status = ValidationStatus.Error;
+            validEmail = false;
             return;
         }
         e.Status = ValidationStatus.Success;
+        validEmail = true;
     }
 
     private async void SendEmail()
     {
-        if (!String.IsNullOrEmpty(errorInputMessage))
+        if (!validEmail)
         {
             return;
         }
@@ -154,13 +158,7 @@
 
             if (oldUser.DiscordId != newUser.DiscordId)
             {
-                if (oldUser.IsBanned)
-                {
-                    await JsRuntime.InvokeVoidAsync("alert", "Du er blevet banned fra denne Discord server");
-                    return;
-                }
-
-        //We override the old user's id and set our current user to old user
+    //We override the old user's id and set our current user to old user
                 string oldId = oldUser.DiscordId;
                 oldUser.DiscordId = newUser.DiscordId;
                 newUser = oldUser;

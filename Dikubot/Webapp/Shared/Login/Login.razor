@@ -7,7 +7,6 @@
 @inject NavigationManager NavigationManager;
 
 <div class="page">
-    <link href="css/diku/login.css" rel="stylesheet"/>
     <div class="blur"></div>
     <div class="login">
         @if (_state == State.ConnectDiscord)
@@ -22,12 +21,17 @@
         {
             <ConnectName parent="@this"/>
         }
+        @if (_state == State.SelectGuild)
+        {
+            <SelectGuild parent="@this"/>
+        }
         @if (_state == State.NoAccess)
         {
             <h1>Du har ikke adgang til KU-Liv server</h1>
         }
     </div>
 </div>
+
 
 
 @code {
@@ -39,6 +43,7 @@
         ConnectDiscord,
         ConnectEmail,
         ConnectName,
+        SelectGuild,
         NoAccess
     }
 
@@ -64,7 +69,13 @@
         {
             return State.ConnectEmail;
         }
-        return user.UserGlobalModel.IsBanned ? State.NoAccess : State.ConnectName;
+
+        if (string.IsNullOrWhiteSpace(user.UserGlobalModel.Name))
+        {
+            return State.ConnectName;
+        }
+        
+        return user.UserGlobalModel.IsBanned ? State.NoAccess : State.SelectGuild;
     }
 
 

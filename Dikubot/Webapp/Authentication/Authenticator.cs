@@ -45,8 +45,11 @@ namespace Dikubot.Webapp.Authentication
             string sessionStringKey = await _localStorageService.GetItemAsStringAsync("session");
             
             // It includes the quotation marks from the cookie when loading, so we replace them.
-            sessionStringKey = sessionStringKey.Replace("\"", string.Empty);
-            
+            if (!string.IsNullOrWhiteSpace(sessionStringKey))
+            {
+                sessionStringKey = sessionStringKey.Replace("\"", string.Empty);   
+            }
+
             //We convert the sessionKey to a Guid, as that's our universal Id format - But we only do so if the sessionStringKey is a valid guid
             if (!Guid.TryParse(sessionStringKey, out Guid sessionKey))
             {

@@ -12,22 +12,19 @@ namespace Dikubot.Discord.Command
     {
         private readonly DiscordSocketClient client;
         private readonly CommandService commands;
-        private readonly IServiceProvider services;
-        private readonly char CommandPrefix = '!';
+        private const char CommandPrefix = '!';
         
-        public CommandHandler(IServiceProvider services)
+        public CommandHandler(CommandService commandService, DiscordSocketClient client)
         {
-            this.commands = services.GetRequiredService<CommandService>();
-            this.client = services.GetRequiredService<DiscordSocketClient>();
-            this.services = services;
-
+            this.commands = commandService;
+            this.client = client;
             client.MessageReceived += HandleCommand;
         }
 
         public async Task init()
         {
             // Register modules that are public and inherit ModuleBase<T>.
-            await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+            await commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
         }
 
         public CommandService GetCommandService()
@@ -43,7 +40,7 @@ namespace Dikubot.Discord.Command
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-            if (!(message.HasCharPrefix(this.CommandPrefix, ref argPos) ||
+            if (!(message.HasCharPrefix(CommandPrefix, ref argPos) ||
                   message.HasMentionPrefix(client.CurrentUser, ref argPos)) ||
                 message.Author.IsBot)
                 return;
@@ -52,7 +49,7 @@ namespace Dikubot.Discord.Command
             var context = new SocketCommandContext(client, message);
 
             // Execute the command
-            await commands.ExecuteAsync(context, argPos, services);
+            await commands.ExecuteAsync(context, argPos, null);
         }
 
         public Char GetCommandPrefix()

@@ -27,7 +27,7 @@ namespace Dikubot.Discord.EventListeners
                 return;
 
             // Get's childrens and parent.
-            var children = voiceChannelServices.GetWhere(m => m.DeleteOnLeave && m.ExpandId == channelModel.ExpandId);
+            var children = voiceChannelServices.GetAll(m => m.DeleteOnLeave && m.ExpandId == channelModel.ExpandId);
             var parent = voiceChannelServices.Get(m => !m.DeleteOnLeave && m.ExpandId == channelModel.ExpandId);
             var deleteChildren = new List<SocketVoiceChannel>();
             var socketParent = guild.GetVoiceChannel(Convert.ToUInt64(parent.DiscordId));
@@ -70,7 +70,7 @@ namespace Dikubot.Discord.EventListeners
             if (!model?.ExpandOnJoin ?? false) return;
 
             // If a single voice channel is empty return.
-            var children = voiceChannelServices.GetWhere(m => m.ExpandId == model.ExpandId);
+            var children = voiceChannelServices.GetAll(m => m.ExpandId == model.ExpandId);
             foreach (var child in children)
             {
                 var gottenChannel = channel.Guild.GetVoiceChannel(Convert.ToUInt64(child.DiscordId));

@@ -1,4 +1,5 @@
 @page "/"
+@using Dikubot.Webapp.Authentication
 
 <link href="css/diku/index.css" rel="stylesheet"/>
 <div>
@@ -15,7 +16,7 @@
         <Button Class="button">Vælg Fag / Gruppe</Button>
         <AuthorizeView Roles="TA, MOD, ADMIN">
         </AuthorizeView>
-        <AuthorizeView Roles="MOD, ADMIN">
+        <AuthorizeView Roles="@Permissions.GuildAdmin">
             <a href="/admin"><Button Class="button" Disabled="true">Mod Kontrolpanel</Button></a>
         </AuthorizeView>
     </div>

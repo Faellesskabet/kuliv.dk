@@ -2,17 +2,19 @@ using System;
 using System.Collections.Generic;
 using Dikubot.DataLayer.Database.Guild.Models.Role;
 using Dikubot.DataLayer.Database.Guild.Models.User.SubModels;
+using Dikubot.DataLayer.Database.Interfaces;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
 using MongoDB.Driver;
+using MongoDB.Libmongocrypt;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.User
 {
     /// <summary>
     /// Class for for retrieving information from the User collection.
     /// </summary>
-    public class UserGuildServices : GuildServices<UserGuildModel>
+    public class UserGuildServices : GuildServices<UserGuildModel>, IIndexed<UserGuildModel>
     {
         public UserGuildServices(SocketGuild guild) : base("Users", guild)
         {
@@ -136,6 +138,14 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
             properties.Roles = roles;
             properties.RoleIds = roleIds;
             return properties;
+        }
+
+        public IEnumerable<IndexKeysDefinition<UserGuildModel>> GetIndexes()
+        {
+            return new List<IndexKeysDefinition<UserGuildModel>>
+            {
+                Builders<UserGuildModel>.IndexKeys.Ascending(model => model.DiscordId)
+            };
         }
     }
 }

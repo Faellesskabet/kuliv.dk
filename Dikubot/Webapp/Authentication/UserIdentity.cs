@@ -6,6 +6,7 @@ using Blazorise.Extensions;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Static;
+using Dikubot.Discord;
 using Discord.WebSocket;
 
 namespace Dikubot.Webapp.Authentication
@@ -32,12 +33,16 @@ namespace Dikubot.Webapp.Authentication
             {
                 try
                 {
-                    if (_userGlobalModel.Permissions.IsNullOrEmpty())
+                    List<Claim> roleClaims = new List<Claim>();
+                    if (_userGlobalModel.IsAdmin)
                     {
-                        return;
+                        roleClaims.Add(new Claim(ClaimTypes.Role, Permissions.GlobalAdmin));
                     }
-                    IEnumerable<Claim> roleClaims = _userGlobalModel.Permissions.Select(permission => 
-                        new Claim(ClaimTypes.Role, permission));
+                    
+                    if (_userGlobalModel.IsAdmin || Util.IsGuildAdmin(_userGlobalModel.DiscordIdLong, _userGlobalModel.SelectedGuild))
+                    {
+                        roleClaims.Add(new Claim(ClaimTypes.Role, Permissions.GuildAdmin));
+                    }
                     AddClaims(roleClaims);
                 }
                 catch (Exception e)
@@ -46,7 +51,7 @@ namespace Dikubot.Webapp.Authentication
                 }
             }
         }
-
+        
         /// <Summary>This is simply just a name and it has no purposes except for us to differentiate between AuthenticationTypes / reasons for authentication</Summary>
         /// <return>"User" as a string</return>
         public string AuthenticationType
@@ -59,11 +64,13 @@ namespace Dikubot.Webapp.Authentication
         /// The user must have a DiscordId
         /// The user must be verified by email
         /// The session may not be expired
+        /// The user may not be banned
+        /// The user must have selected a guild
         /// </summary>
         public override bool IsAuthenticated
         {
             get => _userGlobalModel?.DiscordId != null && _userGlobalModel.Verified && _userGlobalModel.Name != null &&
-                   !_sessionModel.IsExpired && !_userGlobalModel.IsBanned;
+                   !_sessionModel.IsExpired && !_userGlobalModel.IsBanned && _userGlobalModel.SelectedGuild != 0;
         }
 
         public string Name

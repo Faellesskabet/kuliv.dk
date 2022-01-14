@@ -1,0 +1,76 @@
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.Session
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Discord
+@using Dikubot.Webapp.Authentication
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<link href="css/diku/guildwidget.css" rel="stylesheet"/>
+<Card>
+    <div class="widget">
+        <div class="info-box">
+            <div class="guild-logo-box">
+                <object data="@Guild.LogoUrl" type="image/jpeg">
+                    <img src="./images/default_logo_test.png" alt="Logo"/>
+                </object>
+            </div>
+            <p class="guild-name">@Guild.Name</p>
+            <div class="member-count">
+                <p>Medlemmere:<br>@DiscordBot.Client.GetGuild(Guild.GuildId).MemberCount</p>
+            </div>
+        </div>
+        <div class="description">
+            <Text TextColor="TextColor.Primary">Beskrivelse:</Text>
+            <Paragraph>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</Paragraph>
+            <!--<Paragraph>@Guild.Description</Paragraph> -->
+        </div>
+    </div>
+    @if (EnableJoin)
+    {
+        <Button class="join-button" Color="Color.Primary" Size="Size.Large" Clicked="@JoinGuild">Join fællesskab</Button>
+    }
+    else
+    {
+        <Button class="join-button" Color="Color.Primary" Size="Size.Large" Clicked="@GotoGuild">Gå til side</Button>
+    }
+</Card>
+
+@code {
+    [Inject] IMessageService MessageService { get; set; }
+    [Parameter] public GuildSettingsModel Guild { get; set; }
+    [Parameter] public bool EnableJoin { get; set; }
+
+    private async Task GotoGuild()
+    {
+        var authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+        UserGlobalModel userModel = user?.UserGlobalModel;
+
+        if (userModel == null)
+        {
+            await MessageService.Error("Der er sket en fejl. Prøv at clear dine cookies og refresh", "Fejl ???");
+            return;
+        }
+
+        userModel.SelectedGuild = Guild.GuildId;
+        new UserGlobalServices().Upsert(user.UserGlobalModel);
+        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
+        await authenticator.UpdateSession(sessionModel);
+        NavigationManager.NavigateTo("/");
+        
+    }
+    
+    private async Task JoinGuild()
+    {
+        if ( await MessageService.Confirm( "Du er ved at join et nyt fællesskab. Er du sikker?", "Bekræft" ) )
+        {
+            Console.WriteLine( "OK Clicked" );
+        }
+        else
+        {
+            Console.WriteLine( "Cancel Clicked" );
+        }
+    }
+}

@@ -1,5 +1,6 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">DIKU</a>
+﻿@using Dikubot.Webapp.Authentication
+<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">KULiv</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -12,15 +13,21 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="/courses" on>
-                <span class="oi oi-spreadsheet" aria-hidden="true"></span> Kursus Oversigt
-            </NavLink>
-        </li>
-
+        <AuthorizeView Roles="@Permissions.GuildAdmin">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="/admin" on>
+                    <span class="oi oi-command" aria-hidden="true"></span> Admin indstillinger
+                </NavLink>
+            </li>
+        </AuthorizeView>
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="/profile" on>
                 <span class="oi oi-person" aria-hidden="true"></span> Min Profil
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="/changeguild" on>
+                <span class="oi oi-cloud" aria-hidden="true"></span> Skift fællesskab
             </NavLink>
         </li>
         <li class="nav-item px-3">

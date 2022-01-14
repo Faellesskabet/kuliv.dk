@@ -1,0 +1,90 @@
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Discord
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using global::Discord
+@using Color = Blazorise.Color
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JsRuntime;
+
+<link href="css/diku/selectguild.css" rel="stylesheet"/>
+@if (!_loaded)
+{
+    <Loading/>
+}
+else
+{
+    <h1>Dine fællesskaber:</h1>
+    <Field class="search-bar">
+        <TextEdit Placeholder="Søg efter navn, beskrivelse eller tags"/>
+    </Field>
+    <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList()"></GuildWidgetCollection>
+    @if (_mutualGuilds.Count > 0)
+    {
+        <h1 class="other-communities">Udforsk andre fællesskaber:</h1>
+        <Field class="search-bar">
+            <TextEdit Placeholder="Søg efter navn, beskrivelse eller tags"/>
+        </Field>
+        <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList()" EnableJoin="true"></GuildWidgetCollection>
+    }
+    <br/>
+    <ul class="circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+}
+@code {
+    [Parameter]
+    public Login parent { get; set; }
+
+    private bool _loaded = false;
+    private Authenticator _authenticator;
+    private UserIdentity _user;
+    private HashSet<SocketGuild> _mutualGuilds; // we use a hashmap because it's faster:)
+    private List<GuildSettingsModel> _complementGuilds; // guilds that are not mutual
+    private IUser _discordUser;
+    private GuildSettingsService _guildSettingsService = new GuildSettingsService();
+    
+    // this code is terribly optimized
+    protected override async Task OnInitializedAsync()
+    {
+        _authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await _authenticator.GetAuthenticationStateAsync();
+        _user = (UserIdentity) authState.User.Identity;
+
+        _discordUser = _user?.UserGlobalModel.DiscordUser;
+        if (_discordUser == null)
+        {
+            // this shouldn't really happen but if it does alert the user: 
+            await JsRuntime.InvokeVoidAsync("alert", "Der er problemer med din bruger. Prøv at clear dine cookies og refresh, eller kontakt en Administrator");
+            return;
+        }
+        
+        SocketUser socketUser = DiscordBot.Client.GetUser(_discordUser.Id);
+        _mutualGuilds = new HashSet<SocketGuild>();
+        if (socketUser != null)
+        {
+            _mutualGuilds = socketUser.MutualGuilds.ToHashSet();   
+        }
+
+    // We sort the complementGuilds by member size
+        _complementGuilds = DiscordBot.Client.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => _guildSettingsService.Get(guild)).ToList();
+        _loaded = true;
+        this.StateHasChanged();
+    }
+
+    private GuildSettingsModel SocketToModelGuild(SocketGuild guild)
+    {
+        GuildSettingsService guildSettingsService = new GuildSettingsService();
+        GuildSettingsModel guildSettingsModel = guildSettingsService.Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
+        return guildSettingsModel;
+    }
+}

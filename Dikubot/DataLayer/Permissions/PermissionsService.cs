@@ -1,3 +1,4 @@
+using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.CategoryChannel;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
@@ -15,12 +16,13 @@ namespace Dikubot.DataLayer.Permissions
         /// <param name="guild">The guild for which the PermissionService is being executed in.</param>
         SocketGuild guild; // This can not be made private.
 
-        RoleServices _roleServices;
-        VoiceChannelServices _voiceChannelServices;
-        TextChannelServices _textChannelServices;
-        CategoryChannelServices _categoryChannelServices;
-        UserGuildServices _userServices;
-        GuildServices _guildServices;
+        private RoleServices _roleServices;
+        private VoiceChannelServices _voiceChannelServices;
+        private TextChannelServices _textChannelServices;
+        private CategoryChannelServices _categoryChannelServices;
+        private UserGuildServices _userServices;
+        private GuildServices _guildServices;
+        private readonly GuildSettingsService _guildSettingsService;
 
         public PermissionsService(SocketGuild guild)
         {
@@ -31,6 +33,7 @@ namespace Dikubot.DataLayer.Permissions
             _categoryChannelServices = new CategoryChannelServices(guild);
             _userServices = new UserGuildServices(guild);
             _guildServices = new GuildServices(guild);
+            _guildSettingsService = new GuildSettingsService();
         }
 
         /// <Summary>Takes channels, roles and users information from discord and saves it in the database.</Summary>
@@ -54,6 +57,11 @@ namespace Dikubot.DataLayer.Permissions
             SetDiscordCategoryChannels();
             SetDiscordVoiceChannels();
             SetDiscordTextChannels();
+        }
+
+        public GuildSettingsService GetGuildSettingsService()
+        {
+            return _guildSettingsService;
         }
     }
 }
