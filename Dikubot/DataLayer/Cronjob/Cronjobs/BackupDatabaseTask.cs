@@ -2,13 +2,13 @@ using Dikubot.DataLayer.Static;
 
 namespace Dikubot.DataLayer.Cronjob.Cronjobs
 {
-    public class BackupDatabase : CronTask
+    public class BackupDatabaseTask : CronTask
     {
         // 0 0 */1 * *
         /// <summary>
         /// Takes a backup at 00:00 on every day-of-month.
         /// </summary>
-        public BackupDatabase() : base(Cronos.CronExpression.Parse("0 0 */1 * *"), Update)
+        public BackupDatabaseTask() : base(Cronos.CronExpression.Parse("0 0 */1 * *"), Update)
         {
         }
 

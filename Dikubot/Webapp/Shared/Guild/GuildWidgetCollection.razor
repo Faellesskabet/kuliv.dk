@@ -1,0 +1,14 @@
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+
+<link href="css/diku/guildwidgetcollection.css" rel="stylesheet"/>
+<div class="guild-widget-collection">
+    @foreach (GuildSettingsModel guild in Guilds)
+    {
+        <GuildWidget Guild="guild" EnableJoin="@EnableJoin"></GuildWidget>
+    }
+</div>
+
+@code {
+    [Parameter] public List<GuildSettingsModel> Guilds { get; set; }
+    [Parameter] public bool EnableJoin { get; set; }
+}

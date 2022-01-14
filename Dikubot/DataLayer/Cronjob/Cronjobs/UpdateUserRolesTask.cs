@@ -1,16 +1,18 @@
+using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Permissions;
 using Dikubot.DataLayer.Static;
 using Dikubot.Discord;
+using Discord.WebSocket;
 
 namespace Dikubot.DataLayer.Cronjob.Cronjobs
 {
-    public class UpdateUserRoles : CronTask
+    public class UpdateUserRolesTask : CronTask
     {
         // 0 */2 * * *
         /// <summary>
         /// Updates user roles every other hour
         /// </summary>
-        public UpdateUserRoles() : base(Cronos.CronExpression.Parse("0 */2 * * *"), Update)
+        public UpdateUserRolesTask() : base(Cronos.CronExpression.Parse("0 */2 * * *"), Update)
         {
         }
 
@@ -20,12 +22,13 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs
             foreach (var guild in DiscordBot.Client.Guilds)
             {
                 PermissionsService permissionsService = new PermissionsService(guild);
-                foreach (var user in guild.Users)
+                GuildSettingsModel guildSettingsModel = permissionsService.GetGuildSettingsService().Get(guild);
+                foreach (SocketGuildUser user in guild.Users)
                 {
-                    permissionsService.SetDiscordUserRoles(user);
+                    permissionsService.SetDiscordUserRoles(user, guildSettingsModel);
                 }
             }
-            Logger.Debug("All uses roles is updated");
+            Logger.Debug("All user roles have been updated");
 
         }
     }

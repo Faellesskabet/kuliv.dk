@@ -1,0 +1,77 @@
+@media only screen and (min-width: 562px) {
+    .widget {
+        width: 450px;
+    }
+}
+
+@media only screen and (max-width: 562px) {
+    .widget {
+        width: 80vw;
+    }
+
+}
+
+
+@media only screen and (min-width: 900px) {
+    .widget {
+        width: 450px;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .widget {
+        width: 80vw;
+    }
+}
+
+.widget {
+    background-color: #f6f6f6;
+    height: 300px;
+    display: flex;
+    flex-direction: row;
+}
+
+.widget .info-box {
+    border-right: 1px solid #a6a6a6;
+    background-color: #e5e5e5;
+}
+
+.widget .description {
+    min-width: 200px;
+    margin-top: 10px;
+    margin-left: 10px;
+    overflow: scroll;
+}
+.widget .info-box .guild-logo-box {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.widget .info-box .guild-logo-box object {
+    width: 128px;
+    height: 128px;
+    object-fit: none;
+}
+
+.widget .info-box .guild-logo-box img {
+    width: 128px;
+    height: 128px;
+    object-fit: none;
+}
+
+.widget .info-box p {
+    text-align: center;
+}
+
+.widget .info-box .guild-name {
+    font-size: 24px;
+    overflow-wrap: break-word;
+    border-bottom: 1px solid #a6a6a6;
+}
+
+.widget .info-box .join-button {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}

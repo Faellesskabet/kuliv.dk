@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Guild.Models.Role;
-using Dikubot.Discord;
-using Dikubot.Discord.Interactive;
-using Discord.Addons.Interactive;
 using Discord.WebSocket;
 using MongoDB.Driver;
 
@@ -68,10 +64,6 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
                 mainModelIn.Listeners.TryAdd(VARIABLE.Key,VARIABLE.Value);
             }
             base.Update(predicate, mainModelIn, options);
-            foreach (var VARIABLE in Get(mainModelIn.Id).Listeners)
-            {
-                ReactiveCallBack(mainModelIn.Id,VARIABLE.Value,VARIABLE.Key,Guild.Id.ToString());
-            }
         }
 
         public override void Remove(Guid id)
@@ -106,75 +98,8 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
             }
             return dictionary;
         }
-
-        public async Task<Task> OnStart()
-        {
-            
-            var dictionary = this.GetAllAsDictionary();
-            try
-            {
-                foreach (var pair in dictionary)
-                {
-                    if (pair.Value?.Any() ?? false)
-                    {
-                        foreach (var model in pair.Value)
-                        {
-                            if (model.Listeners?.Any() ?? false)
-                            {
-                                foreach (var valuePair in model.Listeners)
-                                {
-                                    await ReactiveCallBack(model.Id, valuePair.Value, valuePair.Key, pair.Key);
-                                }
-                            }
-                        }
-                    }
-                
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            
-            return Task.CompletedTask;
-        }
         
-        private async Task ReactiveCallBack(Guid joinRoleId, string messengeId ,string textChannelId, string guildId)
-        {
-            
-            var currentGuild = DiscordBot.Client.Guilds.First(g => g.Id.ToString().Equals(guildId));
-            var joinChannelCategoryServices = new JoinChannelCategoryServices(currentGuild);
-            var jc = joinChannelCategoryServices.Get(t => t.Id == joinRoleId);
-            var criterion = new Criteria<SocketReaction>();
-            
-            InteractiveService interactive = DiscordBot.Interactive;
-            
-            var textChannel = currentGuild.TextChannels.FirstOrDefault(t => t.Id.ToString().Equals(textChannelId));
-            
-            var op = jc.TextRoles.ToList().FindAll(_ => true);
-            /// TODO: FIND UD AF OM DEN FUNGERE HVIS MAN HAR SLETTET KANALEN :O
-            List<JoinRoleMainModel> fields = new List<JoinRoleMainModel>();
-            
-            foreach (var variable in op)
-            {
-                fields.Add(variable);
-            }
-            
-            joinRolesCallBack callBack = new joinRolesCallBack(interactive,null,textChannel,currentGuild, fields, jc.Permission , criterion, 
-                title: jc.Name);
-            
-            callBack.StopEmoji = "";
-
-            await callBack.UpdateOrReactive(messengeId).ConfigureAwait(false);
-
-        }
-        
-        
-        
-        
+  
     }
-    
-    
-    
-    
+
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Dikubot.DataLayer.Static;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -25,6 +26,9 @@ namespace Dikubot.DataLayer.Logic.Email
         {
             await client.SendEmailAsync(MailHelper.CreateSingleEmail(from, email.GetTo(), email.GetSubject(),
                 email.GetTextContent(), email.GetHtmlContent()));
+            #if DEBUG
+            Logger.Debug(email.GetTextContent());
+            #endif
         }
     }
 }

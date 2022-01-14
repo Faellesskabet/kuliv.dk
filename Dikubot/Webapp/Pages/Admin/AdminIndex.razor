@@ -1,10 +1,10 @@
 @page "/admin"
-@attribute [Authorize(Roles = "MOD, ADMIN")]
-<h3>Mod Kontrolpanel</h3>
+@using Dikubot.Webapp.Authentication
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+<h3>Admin Kontrolpanel</h3>
 
 <div class="page-body">
-    <BFUCompoundButton ClassName="button" Text="Rediger Kursus Liste" Href="/admin/courses" Primary="true" SecondaryText="Opret, fjern eller rediger et kursus"/>
-    <BFUCompoundButton ClassName="button" Text="Rediger Gruppe Liste" Href="/admin/groups" Primary="true" SecondaryText="Opret, fjern eller rediger et fag"/>
+    
 </div>
 
 

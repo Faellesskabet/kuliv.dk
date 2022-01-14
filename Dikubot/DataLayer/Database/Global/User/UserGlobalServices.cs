@@ -1,10 +1,13 @@
+using System.Collections.Generic;
 using Dikubot.DataLayer.Database.Guild.Models.User;
+using Dikubot.DataLayer.Database.Interfaces;
+using Discord;
 using Discord.WebSocket;
 using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Global.User
 {
-    public class UserGlobalServices : GlobalServices<UserGlobalModel>
+    public class UserGlobalServices : GlobalServices<UserGlobalModel>, IIndexed<UserGlobalModel>
     {
         public UserGlobalServices() : base("Users")
         {
@@ -28,6 +31,11 @@ namespace Dikubot.DataLayer.Database.Global.User
         }
 
         public bool Exists(SocketUser user)
+        {
+            return Exists(model => model.DiscordId == user.Id.ToString());
+        }
+
+        public bool Exists(IUser user)
         {
             return Exists(model => model.DiscordId == user.Id.ToString());
         }
@@ -78,5 +86,13 @@ namespace Dikubot.DataLayer.Database.Global.User
             Remove(model => model.DiscordId == mainModelIn.DiscordId);
         }
 
+        public IEnumerable<IndexKeysDefinition<UserGlobalModel>> GetIndexes()
+        {
+            return new List<IndexKeysDefinition<UserGlobalModel>>
+            {
+                Builders<UserGlobalModel>.IndexKeys.Ascending(model => model.DiscordId),
+                Builders<UserGlobalModel>.IndexKeys.Ascending(model => model.Email),
+            };
+        }
     }
 }

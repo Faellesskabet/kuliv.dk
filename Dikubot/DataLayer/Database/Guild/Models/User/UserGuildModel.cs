@@ -45,6 +45,12 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
             return _roles.Any(model =>
                 String.Equals(services.Get(model.RoleId)?.Name, name, StringComparison.CurrentCultureIgnoreCase));
         }
+
+        public bool HasRole(ulong roleId, SocketGuild guild)
+        {
+            RoleServices services = new RoleServices(guild);
+            return _roles.Any(model => Convert.ToUInt64(model.GetRoleModel(guild).DiscordId) == roleId);
+        }
         
         
         [BsonElement("GroupIds")]

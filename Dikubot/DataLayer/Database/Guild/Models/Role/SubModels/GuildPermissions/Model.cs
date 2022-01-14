@@ -72,7 +72,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Role.SubModels.GuildPermission
                 manageNicknames: ManageNicknames,
                 manageRoles: ManageRoles,
                 manageWebhooks: ManageWebhooks,
-                manageEmojis: ManageEmojis);
+                manageEmojisAndStickers: ManageEmojis);
             return guildPermissions;
         }
 
@@ -93,7 +93,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Role.SubModels.GuildPermission
             EmbedLinks = guildPermissions.Value.EmbedLinks;
             KickMembers = guildPermissions.Value.KickMembers;
             ManageChannels = guildPermissions.Value.ManageChannels;
-            ManageEmojis = guildPermissions.Value.ManageEmojis;
+            ManageEmojis = guildPermissions.Value.ManageEmojisAndStickers;
             ManageGuild = guildPermissions.Value.ManageGuild;
             ManageMessages = guildPermissions.Value.ManageMessages;
             ManageNicknames = guildPermissions.Value.ManageNicknames;

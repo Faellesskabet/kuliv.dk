@@ -27,7 +27,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Guild
             CreatedAt = _guildImplementation.CreatedAt;
             Name =  (_guildImplementation.Name);
             AFKTimeout = _guildImplementation.AFKTimeout;
-            IsEmbeddable = _guildImplementation.IsEmbeddable;
+            //IsEmbeddable = _guildImplementation.IsEmbeddable;
             IsWidgetEnabled = _guildImplementation.IsWidgetEnabled;
             DefaultMessageNotifications = _guildImplementation.DefaultMessageNotifications;
             MfaLevel = _guildImplementation.MfaLevel;
@@ -42,8 +42,8 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Guild
             DiscoverySplashUrl = _guildImplementation.DiscoverySplashUrl;
             Available = _guildImplementation.Available;
             AFKChannelId = _guildImplementation.AFKChannelId;
-            DefaultChannelId = _guildImplementation.DefaultChannelId;
-            EmbedChannelId = _guildImplementation.EmbedChannelId;
+            DefaultChannelId = _guildImplementation.GetDefaultChannelAsync().Result.Id;
+            //EmbedChannelId = _guildImplementation.EmbedChannelId;
             WidgetChannelId = _guildImplementation.WidgetChannelId;
             SystemChannelId = _guildImplementation.SystemChannelId;
             RulesChannelId = _guildImplementation.RulesChannelId;

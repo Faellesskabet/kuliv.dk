@@ -1,9 +1,11 @@
+body {
+    background-color: white;
+}
 
 .header {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    color: black;
 }
 
 .button {
@@ -19,6 +21,7 @@
     .button {
         width: 250px;
         height: 200px;
+        background-color: white;
     }
 }
 

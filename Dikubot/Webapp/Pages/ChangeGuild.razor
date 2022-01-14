@@ -1,0 +1,36 @@
+@page "/changeguild"
+@using Dikubot.Webapp.Authentication
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Global.Session
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager;
+
+<h3>Logger ud...</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+        try
+        {
+            UserGlobalModel userModel = user?.UserGlobalModel;
+
+            if (userModel != null) userModel.SelectedGuild = 0;
+            if (user != null)
+            {
+                new UserGlobalServices().Upsert(user.UserGlobalModel);
+                SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
+                await authenticator.UpdateSession(sessionModel);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        NavigationManager.NavigateTo("/");
+        
+    }
+
+}

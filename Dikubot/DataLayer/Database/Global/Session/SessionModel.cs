@@ -9,7 +9,7 @@ namespace Dikubot.DataLayer.Database.Global.Session
 {
     public class SessionModel : MainModel
     {
-        public SessionModel(UserGlobalModel userMainModel) : this(userMainModel, DateTime.Now.AddMonths(1))
+        public SessionModel(UserGlobalModel userMainModel) : this(userMainModel, DateTime.Now.AddDays(7))
         {
         }
 

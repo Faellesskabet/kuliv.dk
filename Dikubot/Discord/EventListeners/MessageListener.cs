@@ -12,6 +12,10 @@ namespace Dikubot.Discord.EventListeners
         public async Task OnMessageReceived(SocketMessage message)
         {
             ProcessQuote(message);
+            
+            #if DEBUG
+            DebugMessage(message);    
+            #endif
         }
         private void DebugMessage(SocketMessage message)
         {

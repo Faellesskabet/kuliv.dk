@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Dikubot.DataLayer.Database.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
@@ -44,9 +45,13 @@ namespace Dikubot.DataLayer.Database
 
             //No reason to index the collection every single time
             string indexKey = databaseName + ";" + collectionName;
-            if (!indexed.ContainsKey(indexKey))
+            if (this is IIndexed<TModel> && !indexed.ContainsKey(indexKey))
             {
-                SetUniqueIndexes(_models);
+                // this dropall is temporary. It is inefficient that we drop all the indexes, just to set them again
+                // but because of some breaking indexes in the past, we have to do this until the database has been updated
+                _models.Indexes.DropAll();
+                // MongoDB is smart enough to not duplicate indexes (i think ...) 
+                _models.Indexes.CreateMany(((IIndexed<TModel>)this).GetIndexes().Select(definition => new CreateIndexModel<TModel>(definition)));
                 indexed[indexKey] = true;
             }
         }
@@ -92,16 +97,15 @@ namespace Dikubot.DataLayer.Database
         /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
         /// model.Id == id)</param>
         /// <return>A list of some Model type.</return>
-        public virtual List<TModel> GetWhere(Expression<Func<TModel, bool>> filter) =>
-            _models.Find<TModel>(filter).ToList();
-        
-        /// <Summary>Retrieves a Dictionary of a list of elements in the collection based on a custom filter</Summary>
-        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
-        /// model.Id == id)</param>
-        /// <return>A of a list list of some Model type.</return>
         public List<TModel> GetAll(Expression<Func<TModel, bool>> filter) =>
             _models.Find<TModel>(filter).ToList();
 
+        /// THIS DOES NOT BELONG HERE AT ALL
+        /// <Summary>Don't use this. Retrieves a Dictionary of a list of elements in the collection based on a custom filter</Summary>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
+        /// model.Id == id)</param>
+        /// <return>A of a list list of some Model type.</return>
+        [Obsolete]
         public virtual Dictionary<string, List<TModel>> GetAllAsDictionary(Expression<Func<TModel, bool>> filter = null)
         {
             var res = new Dictionary<string, List<TModel>>();
@@ -119,13 +123,6 @@ namespace Dikubot.DataLayer.Database
                 }
             }
             return res;
-        }
-
-        public virtual KeyValuePair<string, TModel> FindAny(Guid id)
-        {
-            return GetAllAsDictionary(t => t.Id.Equals(id)).Where(t => t.Value.Count> 0)
-                .Select(t => new KeyValuePair<string,TModel>(t.Key, t.Value.FirstOrDefault()))
-                .FirstOrDefault();
         }
         
         /// <Summary>Retrieves a Dictionary of a list of elements in the collection based on a custom filter</Summary>
@@ -274,6 +271,7 @@ namespace Dikubot.DataLayer.Database
         /// <Summary>Sets up the unique indexes for the current collection and service.</Summary>
         /// <param name="collection">The collection where we setup the Unique indexes.</param>
         /// <return>Void.</return>
+        [Obsolete]
         private void SetUniqueIndexes(IMongoCollection<TModel> collection)
         {
             // It's time for some fun reflection!
@@ -301,11 +299,6 @@ namespace Dikubot.DataLayer.Database
                             Sparse = true
                         }));
             }
-        }
-
-        private void IndexQuotes(IMongoCollection<TModel> collection)
-        {
-            collection.Indexes.CreateOne("{TimeStamp: 1}");
         }
     }
 }

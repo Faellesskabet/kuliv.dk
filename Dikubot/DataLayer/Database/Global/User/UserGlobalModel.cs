@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Dikubot.Discord;
+using Discord;
 using Discord.WebSocket;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -25,9 +26,9 @@ namespace Dikubot.DataLayer.Database.Global.User
         public string DiscordId { get; set; }
 
         [BsonIgnore]
-        public SocketUser DiscordUser
+        public IUser DiscordUser
         {
-            get => DiscordBot.Client.GetUser(DiscordIdLong);
+            get => DiscordBot.Client.GetUserAsync(DiscordIdLong).Result;
             set => DiscordId = value.Id.ToString();
         }
         
@@ -41,8 +42,8 @@ namespace Dikubot.DataLayer.Database.Global.User
         [BsonElement("Verified")] public bool Verified { get; set; } = false;
         [BsonElement("LastMessage")] public string LastMessage { get; set; }
 
-        [BsonElement("Permissions")]
-        public List<string> Permissions
+        [BsonElement("IsAdmin")]
+        public bool IsAdmin
         {
             get;
             set;
@@ -60,6 +61,7 @@ namespace Dikubot.DataLayer.Database.Global.User
         [BsonElement("JoinedAt")] public DateTime JoinedAt { get; set; } = DateTime.Now;
 
         [BsonElement("Banned")] public bool IsBanned { get; set; } = false;
+        [BsonElement("SelectedGuild")] public ulong SelectedGuild { get; set; }
         
     }
 }

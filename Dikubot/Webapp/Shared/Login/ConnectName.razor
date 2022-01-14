@@ -3,8 +3,10 @@
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Static
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
+<link href="css/diku/login.css" rel="stylesheet"/>
 <h1>Velkommen til KU-Liv</h1>
 <div class="card w-auto h-auto shadow">
     <div class="card-body">
@@ -43,23 +45,9 @@
     {
         SocketGuild guild = authenticator.GetGuild();
         IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong).MutualGuilds;
-        foreach (SocketGuild mutualGuild in mutualGuilds)
-        {
-            try
-            {
-                await guild.GetUser(Convert.ToUInt64(user.UserGlobalModel.DiscordId)).ModifyAsync(guildUser =>
-                {
-                    guildUser.Nickname = name;
-                });
-            }
-            catch (Exception e)
-            {
-                // ignored, this only happens when the bot doesn't have access to change the user's name
-            }
-
-        }
         user.UserGlobalModel.Name = name;
         new UserGlobalServices().Upsert(user.UserGlobalModel);
+        Util.UpdateUserNameOnAllForcedGuilds(DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong));
         SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
         await authenticator.UpdateSession(sessionModel);
         parent.Update();
