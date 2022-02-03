@@ -34,7 +34,6 @@ namespace Dikubot.DataLayer.Static
             return isEmail(email) && (email.EndsWith(".ku.dk") || email.EndsWith("@ku.dk"));
         }
 
-
         private static Random random = new Random();
 
         /// <summary>

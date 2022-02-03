@@ -1,14 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using Blazorise.Extensions;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Static;
-using Dikubot.Discord;
-using Discord.WebSocket;
-
 namespace Dikubot.Webapp.Authentication
 {
     public sealed class UserIdentity : ClaimsIdentity

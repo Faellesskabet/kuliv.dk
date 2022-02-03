@@ -6,13 +6,16 @@
 @using Dikubot.DataLayer.Logic.Email
 @using Dikubot.DataLayer.Logic.Email.Emails
 @using Dikubot.DataLayer.Logic.User
+@using Dikubot.DataLayer.Logic.Validators
 @using Dikubot.DataLayer.Permissions
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
 @using SendGrid.Helpers.Mail
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
+
 
 <link href="css/diku/login.css" rel="stylesheet"/>
 <h1>Velkommen til KU-Liv</h1>
@@ -27,33 +30,36 @@
             {
                 <h5 class="card-title">Bekræft din email</h5>
                 <div class="textFieldDiv">
-                    <Validation Validator="@ValidateEmail">
-                        <Field>
-                            <Label>Vi skal bruge din email, for at bekræfte du går på KU</Label>
-                            <TextEdit Placeholder="xyz123@alumni.ku.dk"
-                                      Style="padding-bottom: 5px" Class="text-field"
-                                      @bind-Text="email" KeyDown="@EmailOnEnter">
-                                <Feedback>
-                                    <ValidationNone>Indtast din KU-mail</ValidationNone>
-                                    <ValidationError>Det er ikke en valid KU-mail</ValidationError>
-                                </Feedback>
-                            </TextEdit>
-                        </Field>
-                    </Validation>
-                    <Button Clicked="@SendEmail">Send email</Button>
+                    <MudForm>
+                        <MudTextField 
+                            @bind-Value="email"
+                            Validation="@_kuEmailValidation"
+                            Immediate="true"
+                            HelperText="Vi skal bruge din email, for at bekræfte du går på KU"
+                            Label="KU Email"
+                            OnKeyDown="@EmailOnEnter"
+                            Style="padding-bottom: 5px">
+                        </MudTextField>
+                    </MudForm>
+                    <Button OnClick="@SendEmail">Send email</Button>
                 </div>
             }
             else
             {
                 <h5 class="card-title">Vi har sendt en kode til din email: @(email)</h5>
                 <div class="textFieldDiv">
-                    <Field>
-                        <Label>Indtast koden her:</Label>
-                        <TextEdit Placeholder="Hemmeligt kodeord"
-                                  Style="padding-bottom: 5px" Class="text-field"
-                                  @bind-Text="passwordInput" KeyDown="@PasswordOnEnter"></TextEdit>
-                    </Field>
-                    <Button Clicked="ConfirmEmailPassword">Bekræft kode</Button>
+                    <MudForm>
+                        <MudTextField 
+                            @bind-Value="passwordInput"
+                            Validation="@_kuEmailValidation"
+                            Immediate="true"
+                            HelperText="Du kan finde koden i din email"
+                            Label="Indtast koden her"
+                            OnKeyDown="@PasswordOnEnter"
+                            Style="padding-bottom: 5px">
+                        </MudTextField>
+                    </MudForm>
+                    <MudButton OnClick="ConfirmEmailPassword">Bekræft kode</MudButton>
                 </div>
             }
     </div>
@@ -63,14 +69,14 @@
      [Parameter]
     public Login parent { get; set; }
 
+
+    private KUEmailValidation _kuEmailValidation = new KUEmailValidation();
     private Authenticator authenticator;
     private UserIdentity user;
     private string email = "";
-    private string errorInputMessage = "";
     private string secretPassword = "";
     private string passwordInput = "";
     bool incorrectPassword = false;
-    bool validEmail = false;
 
     public void EmailOnEnter(KeyboardEventArgs e)
     {
@@ -94,22 +100,10 @@
         var authState = await authenticator.GetAuthenticationStateAsync();
         user = (UserIdentity) authState.User.Identity;
     }
-
-    private void ValidateEmail(ValidatorEventArgs e)
-    {
-        if (string.IsNullOrWhiteSpace(e.Value.ToString()) && !Util.IsKUEmail(e.Value.ToString()))
-        {
-            e.Status = ValidationStatus.Error;
-            validEmail = false;
-            return;
-        }
-        e.Status = ValidationStatus.Success;
-        validEmail = true;
-    }
-
+    
     private async void SendEmail()
     {
-        if (!validEmail)
+        if (!(await _kuEmailValidation.ValidateAsync(email)).IsValid)
         {
             return;
         }
