@@ -29,38 +29,43 @@
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
 @using Microsoft.Extensions.Configuration
-@using Color = Blazorise.Color
+@using Color = MudBlazor.Color
 
 <link href="css/diku/login.css" rel="stylesheet"/>
 <h1>Velkommen til KU-Liv</h1>
 
 @if (discordUser == null && !loading)
 {
-    <div class="card w-auto h-auto shadow">
-        <div class="card-body">
-            <h5 class="card-title">Log-in</h5>
-            <div class="discordConnect">
-                <a href="@loginURL()"><Button Class="login-button" Color="Color.Dark" Size="Size.ExtraLarge">Login med Discord</Button></a>
-            </div>
-            <a href="https://dnur.dk/" class="text-decoration-none" target="_blank">
-                <p class="text-xl-left">Klik her for hjælp</p>
-            </a>
-        </div>
-    </div>
+    <MudCard>
+        <MudCardHeader>
+            <MudText Typo="Typo.h6">Log-in med Discord</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.body1">For at tilgå KULiv, skal du logge ind med en Discord bruger.</MudText>
+        </MudCardContent>
+        <MudCardActions>
+            <a href="@loginURL()"><MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton></a>
+            <a href="https://dnur.dk/"><MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton></a>
+        </MudCardActions>
+    </MudCard>
 }
 else if (discordUser != null)
 {
-    <div class="card w-auto h-auto shadow">
-        <div class="card-body">
-            <h5 class="card-title">Er dette dig?</h5>
-            <h2>@DiscordNameMentionCombo(discordUser)</h2>
-            <div class="line"></div>
-            <Button Color="Color.Success" Clicked=@(ApproveDiscord)>Ja, godkend</Button>
-            <Button Color="Color.Danger" Clicked=@(RejectDiscord)>Nej, afvis</Button>
-            
-
-        </div>
-    </div>
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Image="@discordUser.GetAvatarUrl()" Size="Size.Large" Color="Color.Primary"></MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                 <MudText Typo="Typo.h6">Er dette dig?</MudText>
+                <MudText Typo="Typo.body1">@DiscordNameMentionCombo(discordUser)</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardActions>
+            <MudButton Color="Color.Success" OnClick=@(ApproveDiscord)>Ja, godkend</MudButton>
+            <MudButton Color="Color.Error" OnClick=@(RejectDiscord)>Nej, afvis</MudButton>
+        </MudCardActions>
+    </MudCard>
 }
 
 
@@ -119,7 +124,7 @@ else if (discordUser != null)
     {
         return $"{user.Username}#{user.Discriminator}";
     }
-    
+
 
     public string GetContactMessage()
     {

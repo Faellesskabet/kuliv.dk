@@ -21,23 +21,23 @@
             </div>
         </div>
         <div class="description">
-            <Text TextColor="TextColor.Primary">Beskrivelse:</Text>
-            <Paragraph>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</Paragraph>
-            <!--<Paragraph>@Guild.Description</Paragraph> -->
+            <MudText Color="Color.Primary">Beskrivelse:</MudText>
+            <MudText>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</MudText>
+            <!--<MudText>@Guild.Description</MudText> -->
         </div>
     </div>
     @if (EnableJoin)
     {
-        <Button class="join-button" Color="Color.Primary" Size="Size.Large" Clicked="@JoinGuild">Join fællesskab</Button>
+        <MudButton class="join-button" Color="Color.Primary" Size="Size.Large" OnClick="@JoinGuild">Join fællesskab</MudButton>
     }
     else
     {
-        <Button class="join-button" Color="Color.Primary" Size="Size.Large" Clicked="@GotoGuild">Gå til side</Button>
+        <MudButton class="join-button" Color="Color.Primary" Size="Size.Large" OnClick="@GotoGuild">Gå til side</MudButton>
     }
 </Card>
 
 @code {
-    [Inject] IMessageService MessageService { get; set; }
+    [Inject] private IDialogService DialogService { get; set; }
     [Parameter] public GuildSettingsModel Guild { get; set; }
     [Parameter] public bool EnableJoin { get; set; }
 
@@ -50,7 +50,7 @@
 
         if (userModel == null)
         {
-            await MessageService.Error("Der er sket en fejl. Prøv at clear dine cookies og refresh", "Fejl ???");
+            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
 
@@ -64,13 +64,9 @@
     
     private async Task JoinGuild()
     {
-        if ( await MessageService.Confirm( "Du er ved at join et nyt fællesskab. Er du sikker?", "Bekræft" ) )
-        {
-            Console.WriteLine( "OK Clicked" );
-        }
-        else
-        {
-            Console.WriteLine( "Cancel Clicked" );
-        }
+        bool? result = await DialogService.ShowMessageBox(
+            "Bekræft", 
+            "Du er ved at join et nyt fællesskab. Er du sikker?", 
+            yesText:"Join", cancelText:"Fortryd");
     }
 }

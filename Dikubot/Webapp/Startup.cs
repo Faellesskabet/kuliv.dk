@@ -8,11 +8,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using Blazored.LocalStorage;
-using Blazorise;
-using Blazorise.Icons.Material;
-using Blazorise.Material;
 using Dikubot.Webapp.Authentication;
 using Microsoft.AspNetCore.Http;
+using MudBlazor.Services;
 
 namespace Dikubot.Webapp
 {
@@ -33,10 +31,7 @@ namespace Dikubot.Webapp
             var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
             
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
-            services.AddBlazorise(options =>
-            {
-                options.ChangeTextOnKeyPress = true;
-            }).AddMaterialProviders().AddMaterialIcons();
+            services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();

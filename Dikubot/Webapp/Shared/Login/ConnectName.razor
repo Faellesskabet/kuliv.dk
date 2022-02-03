@@ -12,13 +12,10 @@
     <div class="card-body">
         <h5 class="card-title">Hvad er dit fulde navn?</h5>
         <div class="textFieldDiv">
-            <Field>
-                <FieldLabel>Fulde navn</FieldLabel>
-                <TextEdit Placeholder="Fornavn Efternavn"
-                          Style="padding-bottom: 5px" Class="text-field"
-                          @bind-Text="name" Autofocus="true"/>
-            </Field>
-            <Button Clicked="@ConfirmName">Bekræft Navn</Button>
+            <MudTextField Placeholder="Fulde navn"
+                          Style="padding-bottom: 5px"
+                          @bind-Value="name" Immediate="true" Autofocus="true"/>
+            <MudButton OnClick="@ConfirmName">Bekræft Navn</MudButton>
         </div>
 
     </div>

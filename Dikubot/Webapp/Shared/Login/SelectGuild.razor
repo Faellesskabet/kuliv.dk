@@ -1,9 +1,8 @@
 @using Dikubot.Webapp.Authentication
-@using Dikubot.Discord
+@using global::Discord
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
-@using global::Discord
-@using Color = Blazorise.Color
+@using Dikubot.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime;
 
@@ -15,16 +14,10 @@
 else
 {
     <h1>Dine fællesskaber:</h1>
-    <Field class="search-bar">
-        <TextEdit Placeholder="Søg efter navn, beskrivelse eller tags"/>
-    </Field>
     <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList()"></GuildWidgetCollection>
     @if (_mutualGuilds.Count > 0)
     {
         <h1 class="other-communities">Udforsk andre fællesskaber:</h1>
-        <Field class="search-bar">
-            <TextEdit Placeholder="Søg efter navn, beskrivelse eller tags"/>
-        </Field>
         <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList()" EnableJoin="true"></GuildWidgetCollection>
     }
     <br/>
@@ -52,6 +45,9 @@ else
     private List<GuildSettingsModel> _complementGuilds; // guilds that are not mutual
     private IUser _discordUser;
     private GuildSettingsService _guildSettingsService = new GuildSettingsService();
+    private string _mutualSearchQuery = "";
+    private string _complementSearchQuery = "";
+    
     
     // this code is terribly optimized
     protected override async Task OnInitializedAsync()

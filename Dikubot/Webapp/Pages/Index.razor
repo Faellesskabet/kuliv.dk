@@ -13,11 +13,11 @@
     </div>
     <div class="line"></div>
     <div class="page-body">
-        <Button Class="button">Vælg Fag / Gruppe</Button>
+        <MudButton Class="button">Vælg Fag / Gruppe</MudButton>
         <AuthorizeView Roles="TA, MOD, ADMIN">
         </AuthorizeView>
         <AuthorizeView Roles="@Permissions.GuildAdmin">
-            <a href="/admin"><Button Class="button" Disabled="true">Mod Kontrolpanel</Button></a>
+            <a href="/admin"><MudButton Class="button" Disabled="true">Mod Kontrolpanel</MudButton></a>
         </AuthorizeView>
     </div>
 </div>
