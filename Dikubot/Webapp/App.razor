@@ -4,7 +4,7 @@
 
 
 
-<MudThemeProvider/>
+<MudThemeProvider @ref="@_themeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="_theme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 @if (IsSubdomainValid())
@@ -39,6 +39,71 @@ else
 }
 
 @code {
+
+    private bool _isDarkMode = false;
+    private MudThemeProvider _themeProvider;
+
+    private MudTheme _theme = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Background = "#FFFFFF",
+            Surface = "#FFFFFF",
+
+            Primary = "#AE3030",
+            PrimaryLighten = "#FFDAD5",
+            PrimaryDarken = "#410003",
+            PrimaryContrastText = "#FFFFFF",
+            Secondary = "#775653",
+            SecondaryLighten = "#FFDAD7",
+            SecondaryDarken = "#2C1513",
+            SecondaryContrastText = "#FFFFFF",
+            Tertiary = "#725B2E",
+            TertiaryLighten = "#FFDEA6",
+            TertiaryDarken = "#271900",
+            TertiaryContrastText = "#FFFFFF",
+            Error = "#BA1B1B",
+            ErrorLighten = "#FFDAD4",
+            ErrorDarken = "#410001",
+            ErrorContrastText = "#FFFFFF"
+        },
+        PaletteDark = new Palette()
+        {
+            Background = "#000000",
+            Surface = "#000000",
+            TextPrimary = "#FFFFFF",
+            TextSecondary = "#9f9f9f",
+            TextDisabled = "#767676",
+            
+            Primary = "#FFB3AC",
+            PrimaryLighten = "#8C161B",
+            PrimaryDarken = "#FFDAD5",
+            PrimaryContrastText = "#690009",
+            Secondary = "#E7BDB9",
+            SecondaryLighten = "#5D3F3D",
+            SecondaryDarken = "#FFDAD7",
+            SecondaryContrastText = "#442927",
+            Tertiary = "#E1C28C",
+            TertiaryLighten = "#584319",
+            TertiaryDarken = "#FFDEA6",
+            TertiaryContrastText = "#402D05",
+            Error = "#FFB4A9",
+            ErrorLighten = "#930006",
+            ErrorDarken = "#FFDAD4",
+            ErrorContrastText = "#680003",
+        }
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+        _isDarkMode = await _themeProvider.GetSystemPreference();
+        StateHasChanged();
+    }
+    
     [Parameter]
     public string AuthCode { get; set; }
     public bool IsSubdomainValid()
