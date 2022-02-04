@@ -3,7 +3,7 @@
     -moz-filter: blur(5px);
     -o-filter: blur(5px);
     -ms-filter: blur(5px);
-    filter: blur(5px);*/
+    filter: blur(5px);
     background: #901a1e;
     /*background-repeat: no-repeat;
     background-attachment: fixed;
@@ -17,6 +17,7 @@
 body {
     background-color: #901a1e;
 }
+
 
 .login {
     width: 100%; 
@@ -66,6 +67,6 @@ body {
 
 h1 {
     color: white;
-    text-shadow: 2px 0 0 #000, 0 -2px 0 #000, 0 2px 0 #000, -2px 0 0 #000;
     text-align: center;
+    font-size: 70px;
 }

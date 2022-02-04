@@ -18,52 +18,60 @@
 
 
 <link href="css/diku/login.css" rel="stylesheet"/>
-<h1>Velkommen til KU-Liv</h1>
-<div class="card w-auto h-auto shadow">
-    <div class="card-body">
+<h1>Velkommen til KULiv</h1>
+@if (String.IsNullOrEmpty(secretPassword))
+{
+    <MudCard>
+        <MudCardHeader>
             @if (incorrectPassword)
             {
-                <Alert Color="Color.Danger">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</Alert>
-                <br/>
+                <MudAlert Severity="Severity.Error">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</MudAlert>
             }
-            @if (String.IsNullOrEmpty(secretPassword))
-            {
-                <h5 class="card-title">Bekræft din email</h5>
-                <div class="textFieldDiv">
-                    <MudForm>
-                        <MudTextField 
-                            @bind-Value="email"
-                            Validation="@_kuEmailValidation"
-                            Immediate="true"
-                            HelperText="Vi skal bruge din email, for at bekræfte du går på KU"
-                            Label="KU Email"
-                            OnKeyDown="@EmailOnEnter"
-                            Style="padding-bottom: 5px">
-                        </MudTextField>
-                    </MudForm>
-                    <Button OnClick="@SendEmail">Send email</Button>
-                </div>
-            }
-            else
-            {
-                <h5 class="card-title">Vi har sendt en kode til din email: @(email)</h5>
-                <div class="textFieldDiv">
-                    <MudForm>
-                        <MudTextField 
-                            @bind-Value="passwordInput"
-                            Validation="@_kuEmailValidation"
-                            Immediate="true"
-                            HelperText="Du kan finde koden i din email"
-                            Label="Indtast koden her"
-                            OnKeyDown="@PasswordOnEnter"
-                            Style="padding-bottom: 5px">
-                        </MudTextField>
-                    </MudForm>
-                    <MudButton OnClick="ConfirmEmailPassword">Bekræft kode</MudButton>
-                </div>
-            }
-    </div>
-</div>
+            <MudText Typo="Typo.h6">Bekræft din KU-mail</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudForm>
+                <MudTextField 
+                    @bind-Value="email"
+                    Validation="@_kuEmailValidation"
+                    Immediate="@true"
+                    AutoFocus="@true"
+                    HelperText="Vi skal bruge din email, for at bekræfte du går på KU"
+                    Label="KU Email"
+                    OnKeyDown="@EmailOnEnter">
+                </MudTextField>
+            </MudForm>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton OnClick="@SendEmail">Send email</MudButton>
+        </MudCardActions>
+    </MudCard>   
+}
+else
+{
+    <MudCard>
+        <MudCardHeader>
+            <MudText Typo="Typo.h6">Vi har sendt en kode til din email: @(email)</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudForm>
+                <MudTextField 
+                    @bind-Value="passwordInput"
+                    Validation="@_kuEmailValidation"
+                    Immediate="@true"
+                    AutoFocus="@true"
+                    HelperText="Du kan finde koden i din email"
+                    Label="Indtast koden her"
+                    OnKeyDown="@PasswordOnEnter">
+                </MudTextField>
+            </MudForm>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton OnClick="@ConfirmEmailPassword">Bekræft kode</MudButton>
+        </MudCardActions>
+    </MudCard>
+}
+
 
 @code {
      [Parameter]

@@ -7,19 +7,19 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <link href="css/diku/login.css" rel="stylesheet"/>
-<h1>Velkommen til KU-Liv</h1>
-<div class="card w-auto h-auto shadow">
-    <div class="card-body">
-        <h5 class="card-title">Hvad er dit fulde navn?</h5>
-        <div class="textFieldDiv">
-            <MudTextField Placeholder="Fulde navn"
-                          Style="padding-bottom: 5px"
-                          @bind-Value="name" Immediate="true" Autofocus="true"/>
-            <MudButton OnClick="@ConfirmName">Bekræft Navn</MudButton>
-        </div>
-
-    </div>
-</div>
+<h1>Velkommen til KULiv</h1>
+<MudCard>
+    <MudCardHeader>
+        <MudText Typo="Typo.h6">Hvad er dit fulde navn?</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTextField Placeholder="Fulde navn"
+                      @bind-Value="name" Immediate="@true" Autofocus="@true" />
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton OnClick="@ConfirmName">Bekræft Navn</MudButton>
+    </MudCardActions>
+</MudCard>
 
 
 @code {

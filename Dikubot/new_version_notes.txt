@@ -1,2 +1,8 @@
 Delete the permission field in the database on UserGlobalModel
 Replace all the blazor fluid ui with blazorize material components
+
+
+Arch setup:
+dotnet-runtime
+dotnet-sdk
+dotnet-targeting-pack
