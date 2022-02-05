@@ -26,7 +26,7 @@ public class GreetingListener
             return;
         }
 
-        string welcomeMessage = guildSettingsModel.WelcomeMessage?.Message ?? "";
+        string welcomeMessage = guildSettingsModel.WelcomeMessage;
         if (string.IsNullOrWhiteSpace(welcomeMessage))
         {
             return;

@@ -9,29 +9,23 @@
 <MudSnackbarProvider/>
 @if (IsSubdomainValid())
 {
-    <MudLayout>
-        <MudMainContent>
-            <CascadingAuthenticationState>
-                <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
-                    <Found Context="routeData">
-                        <AuthorizeView>
-                            <Authorized>
-                                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-                            </Authorized>
-                            <NotAuthorized>
-                                <Login AuthCode="@AuthCode"/>
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </Found>
-                    <NotFound>
-                        <RedirectToBase/>
-                    </NotFound>
-                </Router>
-                <MessageAlert />
-            </CascadingAuthenticationState>
-        </MudMainContent>
-        <FooterComponent/>
-    </MudLayout>
+    <CascadingAuthenticationState>
+        <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
+            <Found Context="routeData">
+                <AuthorizeView>
+                    <Authorized>
+                        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                    </Authorized>
+                    <NotAuthorized>
+                        <Login AuthCode="@AuthCode"/>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </Found>
+            <NotFound>
+                <RedirectToBase/>
+            </NotFound>
+        </Router>
+    </CascadingAuthenticationState>
 }
 else
 {
@@ -65,12 +59,12 @@ else
             Error = "#BA1B1B",
             ErrorLighten = "#FFDAD4",
             ErrorDarken = "#410001",
-            ErrorContrastText = "#FFFFFF"
+            ErrorContrastText = "#FFFFFF",
         },
         PaletteDark = new Palette()
         {
-            Background = "#000000",
-            Surface = "#000000",
+            Background = "#1a1a27",
+            Surface = "#1a1a27",
             TextPrimary = "#FFFFFF",
             TextSecondary = "#9f9f9f",
             TextDisabled = "#767676",

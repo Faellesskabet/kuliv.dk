@@ -1,13 +1,46 @@
 ﻿@inherits LayoutComponentBase
-
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
-
-    <div class="main">
-        <div class="content px-4">
+@using Dikubot.Webapp.Authentication
+<MudLayout>
+    <MudAppBar Elevation="1" Color="Color.Primary">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        <MudText Typo="Typo.h5">KULiv</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Lukires/sharper-dikubot/" Target="_blank" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="@open" Elevation="1">
+        <MudDrawerHeader>
+            <MudAvatar Image="./images/kuliv_logo.png" Size="Size.Large"></MudAvatar>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Home" Href="/">Forside</MudNavLink>
+            <AuthorizeView Roles="@Permissions.GlobalAdmin">
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CrueltyFree" IconColor="Color.Primary" Href="/op">System Admin indstillinger</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="@Permissions.GuildAdmin">
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Computer" Href="/admin">Admin indstillinger</MudNavLink>
+            </AuthorizeView>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Newspaper" Href="/news">Nyheder</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/profile">Min Profil</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.People" Href="/changeguild">Skift Fællesskab</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.DomainAdd" Href="/addguild">Tilføj dit eget fællesskab</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.SportsKabaddi" Href="/volunteer">Bliv frivillig</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Help" Href="/help">Få hjælp</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Logout" Href="/logout">Log-ud</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent Class="pt-16 px-16">
+        <MudContainer Class="mt-6" Style="min-height: 100vh">
             @Body
-        </div>
-    </div>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code{
+    bool open = true;
+
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
+}
+
