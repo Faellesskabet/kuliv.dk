@@ -18,7 +18,6 @@
     <Content Include="Webapp\wwwroot\css\open-iconic\ICON-LICENSE" />
     <Content Include="Webapp\wwwroot\css\open-iconic\README.md" />
     <Content Include="Webapp\wwwroot\css\site.css" />
-    <Content Include="Webapp\wwwrsoot\favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
