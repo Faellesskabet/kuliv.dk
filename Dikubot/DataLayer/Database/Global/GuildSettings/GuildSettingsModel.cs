@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using Dikubot.DataLayer.Database.Global.GuildSettings.Settings;
 using Dikubot.DataLayer.Database.Global.Settings.Tags;
-using Dikubot.Discord;
 using Discord.WebSocket;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -85,7 +83,7 @@ public class GuildSettingsModel : MainModel
     /// The Welcome message that is sent to new users.
     /// </summary>
     [BsonElement("WelcomeMessage")]
-    public WelcomeMessage WelcomeMessage { get; set; }
+    public string WelcomeMessage { get; set; }
     
     /// <summary>
     /// The tags associated with the guild. They're used for searching and filtering
@@ -97,4 +95,7 @@ public class GuildSettingsModel : MainModel
     /// Indicates whether the guild accept support tickets.
     /// </summary>
     public bool SupportTicketsEnabled { get; set; }
+    
+    [BsonElement("AnnouncementChannels")]
+    public List<ulong> AnnouncementChannels { get; set; }
 }

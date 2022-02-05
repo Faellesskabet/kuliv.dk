@@ -1,14 +1,79 @@
 @page "/admin"
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Discord
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
-<h3>Admin Kontrolpanel</h3>
 
-<div class="page-body">
-    
-</div>
+@if (!_loaded)
+{
+    <Loading></Loading>
+}
+else
+{
+    <MudText Typo="Typo.h5">Admin Kontrolpanel</MudText>
+    <MudCard>
+        <MudForm>
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">Du er ved at ændre indstillingerne for @(guild.Name) (@guild.Id)</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField @bind-Value="_guildSettingsModel.Name" Label="Navn" HelperText="Hvad skal dit fællesskab hedde i vores system?" Immediate="@true"></MudTextField>
+                <MudSwitch @bind-Checked="_guildSettingsModel.IsPublic" Color="Color.Success" Label="Offentlig - Skal folk der ikke er en del af dit fællesskab kunne se den i vores system?"></MudSwitch>
+                <MudTextField @bind-Value="_guildSettingsModel.LogoUrl" Label="Logo url" HelperText="Skal være et link" Immediate="@true"></MudTextField>
+                <MudTextField @bind-Value="_guildSettingsModel.BannerUrl" Label="Banner url" HelperText="Skal være et link" Immediate="@true"></MudTextField>
+                <MudTextField @bind-Value="_guildSettingsModel.Description" Label="Beskrivelse" HelperText="Beskriv dit fællesskab!" Immediate="@true" Lines="8" Variant="Variant.Outlined"></MudTextField>
+                <MudSwitch @bind-Checked="_guildSettingsModel.ForceNameChange" Color="Color.Success" Label="Skal vi tvinge alle til at bruge deres rigtige navn? Kan ikke fortrydes"></MudSwitch>
+                <MudSwitch @bind-Checked="_guildSettingsModel.ForceVerified" Color="Color.Success" Label="Skal man være verified for at se dit fællesskab i vores system?"></MudSwitch>
+                <MudTextField @bind-Value="_guildSettingsModel.VerifiedRole" Label="Verified rolle ID" HelperText="Skal folk få en rolle når de er verified? Indsæt rollens ID her!" Immediate="@true"></MudTextField>
+                <MudSwitch @bind-Checked="_guildSettingsModel.WelcomeMessageEnabled" Color="Color.Success" Label="Skal folk modtage en velkomst besked i dit fællesskab?"></MudSwitch>
+                <MudTextField @bind-Value="_guildSettingsModel.WelcomeMessage" Label="Velkomst besked" HelperText="Brug gerne Discord formattering!" Immediate="@true" Lines="8" Variant="Variant.Outlined"></MudTextField>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@saveSettings">Gem ændringer</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@discardSettings">Gem ikke ændringer</MudButton>
+            </MudCardActions>
+        </MudForm>
+    </MudCard>
+}
+
 
 
 
 @code {
-    
+    private Authenticator authenticator;
+    private UserIdentity user;
+    private SocketGuild guild;
+    private bool _loaded = false;
+    private GuildSettingsModel _guildSettingsModel;
+    private GuildSettingsService _guildSettingsService;
+    [Inject] private IDialogService DialogService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity) authState.User.Identity;
+        if (user == null)
+        {
+            return;
+        }
+        guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
+        _guildSettingsService = new GuildSettingsService();
+        _guildSettingsModel = _guildSettingsService.Get(guild);
+        _loaded = true;
+    }
+
+    private async void saveSettings()
+    {
+        _guildSettingsService.Upsert(_guildSettingsModel);
+        await DialogService.ShowMessageBox("Ændringer gemt", "Dine ændringer er blevet gemt", "Bekræft");
+    }
+
+    private async void discardSettings()
+    {
+        _guildSettingsModel = _guildSettingsService.Get(guild);
+        await DialogService.ShowMessageBox("Ændringer slettet", "Dine ændringer er blevet slettet", "Bekræft");   
+    }
 }
