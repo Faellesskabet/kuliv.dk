@@ -1,13 +1,21 @@
 ﻿@inherits LayoutComponentBase
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Discord
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@inject AuthenticationStateProvider AuthenticationStateProvider
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-        <MudText Typo="Typo.h5">KULiv</MudText>
+        @if (_loaded)
+        {
+            <MudText Typo="Typo.h5">@guild.Name fællesskabet</MudText>
+        }
         <MudSpacer />
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Lukires/sharper-dikubot/" Target="_blank" />
     </MudAppBar>
-    <MudDrawer @bind-Open="@open" Elevation="1">
+    <MudDrawer @bind-Open="@open" Elevation="1" Color="Color.Transparent">
         <MudDrawerHeader>
             <MudAvatar Image="./images/kuliv_logo.png" Size="Size.Large"></MudAvatar>
         </MudDrawerHeader>
@@ -37,6 +45,23 @@
 
 @code{
     bool open = true;
+    private Authenticator authenticator;
+    private UserIdentity user;
+    private SocketGuild guild;
+    private bool _loaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity) authState.User.Identity;
+        if (user == null)
+        {
+            return;
+        }
+        guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
+        _loaded = true;
+    }
 
     void ToggleDrawer()
     {
