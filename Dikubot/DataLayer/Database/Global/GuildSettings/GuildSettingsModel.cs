@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Dikubot.DataLayer.Database.Global.Settings.Tags;
 using Discord.WebSocket;
 using MongoDB.Bson.Serialization.Attributes;
@@ -31,25 +32,25 @@ public class GuildSettingsModel : MainModel
     /// <summary>
     /// The display name of the guild. Does not have to be the same as the guild name on Discord
     /// </summary>
-    [BsonElement("Name")]
+    [BsonElement("Name")] [StringLength(32)]
     public string Name { get; set; }
     
     /// <summary>
     /// The logo of the guild. Does not have to be the same as the guild logo on Discord.
     /// </summary>
-    [BsonElement("LogoUrl")]
+    [BsonElement("LogoUrl")] [StringLength(2048)]
     public string LogoUrl { get; set; }
     
     /// <summary>
     /// The banner of the guild. Does not have to be the same as the guild banner on Discord.
     /// </summary>
-    [BsonElement("BannerUrl")]
+    [BsonElement("BannerUrl")] [StringLength(2048)]
     public string BannerUrl { get; set; }
     
     /// <summary>
     /// The description of the guild. Does not have to be the same as the guild description on Discord.
     /// </summary>
-    [BsonElement("Description")]
+    [BsonElement("Description")] [StringLength(4096)]
     public string Description { get; set; }
     
     /// <summary>
@@ -82,7 +83,7 @@ public class GuildSettingsModel : MainModel
     /// <summary>
     /// The Welcome message that is sent to new users.
     /// </summary>
-    [BsonElement("WelcomeMessage")]
+    [BsonElement("WelcomeMessage")] [StringLength(4096)]
     public string WelcomeMessage { get; set; }
     
     /// <summary>
