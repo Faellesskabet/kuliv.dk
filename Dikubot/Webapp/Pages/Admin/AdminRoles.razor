@@ -1,0 +1,10 @@
+@page "/admin/roles"
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Discord
+@using global::Discord
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+<h3>Admin rolle indstillinger</h3>
+
+@code {
+    private string test;
+}
