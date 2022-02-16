@@ -16,7 +16,8 @@
             <MudText Typo="Typo.body2">@DiscordBot.Client.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
         </CardHeaderContent>
     </MudCardHeader>
-    <MudCardContent>
+    <MudCardMedia Image="@Guild.BannerUrl" Style="max-height: 250px;" />
+    <MudCardContent Style="max-height: 200px; overflow: scroll;">
         <MudText>@Guild.Description</MudText>
     </MudCardContent>
     <MudCardActions>
