@@ -21,7 +21,6 @@
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
-        guild = authenticator.GetGuild();
         discordUser = guild.GetUser(Convert.ToUInt64(user.UserGlobalModel.DiscordId));
         guildUser = guild.GetUser(discordUser.Id);
 

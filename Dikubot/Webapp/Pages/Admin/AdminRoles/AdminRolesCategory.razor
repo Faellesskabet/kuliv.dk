@@ -1,0 +1,11 @@
+@page "/admin/roles/create"
+@page "/admin/roles/edit/{uuid}"
+
+@using Dikubot.Webapp.Authentication
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+<h3>AdminRolesCategory @uuid</h3>
+
+@code {
+    [Parameter]
+    public string? uuid { get; set; }
+}

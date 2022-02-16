@@ -63,5 +63,15 @@ namespace Dikubot.DataLayer.Database.Global.User
         [BsonElement("Banned")] public bool IsBanned { get; set; } = false;
         [BsonElement("SelectedGuild")] public ulong SelectedGuild { get; set; }
         
+        public SocketGuild GetSelectedGuild()
+        {
+            SocketGuild guild = DiscordBot.Client.GetGuild(SelectedGuild);
+            if (guild == null)
+            {
+                throw new Exception($"SelectedGuild ({SelectedGuild}) can't be found");
+            }
+            return guild;
+        }
+        
     }
 }
