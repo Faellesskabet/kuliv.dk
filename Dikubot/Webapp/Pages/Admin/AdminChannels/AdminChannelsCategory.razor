@@ -1,0 +1,9 @@
+@page "/admin/channels/{uuid}"
+@using Dikubot.Webapp.Authentication
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+<h3>AdminChannelsCategory @uuid</h3>
+
+@code {
+    [Parameter]
+    public string? uuid { get; set; }
+}

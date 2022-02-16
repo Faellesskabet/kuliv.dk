@@ -1,13 +1,16 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 
-<link href="css/diku/guildwidgetcollection.css" rel="stylesheet"/>
-<div class="guild-widget-collection">
-    @foreach (GuildSettingsModel guild in Guilds)
-    {
-        <GuildWidget Guild="guild" EnableJoin="@EnableJoin"></GuildWidget>
-    }
-</div>
 
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <MudGrid>
+        @foreach (GuildSettingsModel guild in Guilds)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <GuildWidget Guild="guild" EnableJoin="@EnableJoin"></GuildWidget>
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
 @code {
     [Parameter] public List<GuildSettingsModel> Guilds { get; set; }
     [Parameter] public bool EnableJoin { get; set; }

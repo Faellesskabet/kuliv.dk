@@ -29,26 +29,40 @@
                     <MudText Typo="Typo.body1">Her kan du vælge hvilke roller dine brugere kan tilvælge dem selv.</MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@true">Gå til roller</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/admin/roles">Gå til roller</MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
         <MudItem xs="12" sm="12" md="4">
             <MudCard>
                 <MudCardHeader>
-                    <MudIcon Icon="@Icons.Filled.Newspaper"></MudIcon>
-                    <MudText Typo="Typo.h5">Nyheder indstillinger</MudText>
+                    <MudIcon Icon="@Icons.Filled.Chat"></MudIcon>
+                    <MudText Typo="Typo.h5">Offentlige kanaler</MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <MudText Typo="Typo.body1">Her kan du vælge hvilke kanaler der vil blive vist under nyheder</MudText>
+                    <MudText Typo="Typo.body1">Her kan du vælge hvilke kanaler dine brugere kan tilvælge dem selv.</MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@true">Gå til nyheder</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@true">Gå til kanaler</MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
         <MudItem xs="12" sm="6">
             <MudGrid>
+                <MudItem xs="12">
+                    <MudCard>
+                        <MudCardHeader>
+                            <MudIcon Icon="@Icons.Filled.Newspaper"></MudIcon>
+                            <MudText Typo="Typo.h5">Nyheder indstillinger</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText Typo="Typo.body1">Her kan du vælge hvilke kanaler der vil blive vist under nyheder</MudText>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@true">Gå til nyheder</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
                 <MudItem xs="12">
                     <MudCard>
                         <MudCardHeader>
@@ -62,21 +76,6 @@
                             <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@true">Gå til tickets</MudButton>
                         </MudCardActions>
                     </MudCard>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudCard>
-                        <MudCardHeader>
-                            <MudIcon Icon="@Icons.Filled.RoomPreferences"></MudIcon>
-                            <MudText Typo="Typo.h5">Lej udstyr</MudText>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <MudText Typo="Typo.body1">Har du brug for udstyr? Lej det her!</MudText>
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@true">Gå til udstyr</MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                    
                 </MudItem>
             </MudGrid>
         </MudItem>

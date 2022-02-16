@@ -3,7 +3,9 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using Dikubot.DataLayer.Database.Global.Session;
+using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Logic.WebDiscordBridge;
+using Dikubot.Discord;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -14,24 +16,27 @@ namespace Dikubot.Webapp.Authentication
     {
         private ILocalStorageService _localStorageService;
         private SessionServices _sessionServices;
-        private NavigationManager _navigationManager;
         private SocketGuild _guild;
         
-        public Authenticator(ILocalStorageService localStorageService, NavigationManager navigationManager)
+        public Authenticator(ILocalStorageService localStorageService)
         {
-            _navigationManager = navigationManager;
-            _guild = SubDomainConnector.GetGuildFromDomain(navigationManager.Uri);
             _sessionServices = new SessionServices();
             _localStorageService = localStorageService;
         }
 
         /// <summary>
-        /// Get the guild connectected to this authentication instance
+        /// Get the current UserGlobalModel
         /// </summary>
-        /// <returns>A Discord guild</returns>
-        public SocketGuild GetGuild()
+        /// <returns>Returns a nullable UserGlobalModel based on the current session</returns>
+        public async Task<UserGlobalModel> GetUserGlobal()
         {
-            return _guild;
+            var authState = await GetAuthenticationStateAsync();
+            UserIdentity user = (UserIdentity) authState.User.Identity!;
+            if (user?.UserGlobalModel == null)
+            {
+                throw new Exception("User cannot be found for this session.");
+            }
+            return user.UserGlobalModel;
         }
 
         /// <summary>

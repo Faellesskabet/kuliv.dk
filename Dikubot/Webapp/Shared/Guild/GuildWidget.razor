@@ -6,35 +6,30 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-<link href="css/diku/guildwidget.css" rel="stylesheet"/>
-<Card>
-    <div class="widget">
-        <div class="info-box">
-            <div class="guild-logo-box">
-                <object data="@Guild.LogoUrl" type="image/jpeg">
-                    <img src="./images/default_logo_test.png" alt="Logo"/>
-                </object>
-            </div>
-            <p class="guild-name">@Guild.Name</p>
-            <div class="member-count">
-                <p>Medlemmere:<br>@DiscordBot.Client.GetGuild(Guild.GuildId).MemberCount</p>
-            </div>
-        </div>
-        <div class="description">
-            <MudText Color="Color.Primary">Beskrivelse:</MudText>
-            <MudText>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</MudText>
-            <!--<MudText>@Guild.Description</MudText> -->
-        </div>
-    </div>
-    @if (EnableJoin)
-    {
-        <MudButton class="join-button" Color="Color.Primary" Size="Size.Large" OnClick="@JoinGuild">Join fællesskab</MudButton>
-    }
-    else
-    {
-        <MudButton class="join-button" Color="Color.Primary" Size="Size.Large" OnClick="@GotoGuild">Gå til side</MudButton>
-    }
-</Card>
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Image="@Guild.LogoUrl"></MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body1">@Guild.Name</MudText>
+            <MudText Typo="Typo.body2">@DiscordBot.Client.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudText>@Guild.Description</MudText>
+    </MudCardContent>
+    <MudCardActions>
+        @if (EnableJoin)
+        {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@JoinGuild">Join fællesskab</MudButton>
+        }
+        else
+        {
+            <MudButton Color="Color.Primary" OnClick="@GotoGuild">Gå til side</MudButton>
+        }
+    </MudCardActions>
+</MudCard>
 
 @code {
     [Inject] private IDialogService DialogService { get; set; }
