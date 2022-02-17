@@ -143,6 +143,11 @@ namespace Dikubot.DataLayer.Database
             return null;
         }
 
+        /// <Summary>Retrieves a list of elements in the collection.</Summary>
+        /// <return>A list of some Model type.</return>
+        public List<TModel> GetAll() =>
+            GetAll(model => true);
+
         /// <Summary>Retrieves a list of elements in the collection based on a custom filter</Summary>
         /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
         /// model.Id == id)</param>

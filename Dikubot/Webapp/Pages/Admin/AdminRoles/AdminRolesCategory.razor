@@ -2,10 +2,128 @@
 @page "/admin/roles/edit/{uuid}"
 
 @using Dikubot.Webapp.Authentication
+@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Role
+@using Microsoft.IdentityModel.Tokens
+@using System.Threading
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
-<h3>AdminRolesCategory @uuid</h3>
+<h3>Kategori indstillinger @uuid</h3>
+
+@if (!_loading)
+{
+    <MudContainer>
+            <MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5">Sæt din kategori indstillinger her</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudForm>
+                        <MudTextField @bind-Value="@_category.Name" Label="Kategori navn" Immediate="@true" MaxLength="32"></MudTextField>
+                        <MudTextField @bind-Value="@_category.Decs" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+                        <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
+                        <MudSelect Label="Påkrævet roller" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne se kategorien" @bind-SelectedValues="categoryPermissions"
+                                   Text="@(string.Join(", ", _category.GetPermissionRoles(_roleServices).Select(model => model.Name)))">
+                            @foreach (var role in _roleServices.GetAll())
+                            {
+                                <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudForm>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success">Gem indstillinger</MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Error">Gem ikke indstillinger</MudButton>
+                </MudCardActions>
+                
+            </MudCard>
+        <MudCard Style="margin-top: 25px; margin-bottom: 25px;">
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Roller i kategorien</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+
+                <MudTable Hover="@true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info"
+                          ServerData="@(new Func<TableState, Task<TableData<JoinRoleMainModel>>>(Reload))" @ref="@_table">
+                    <HeaderContent>
+                        <MudTh>Navn</MudTh>
+                        <MudTh>Beskrivelse</MudTh>
+                        <MudTh>Rolle</MudTh>
+                        <MudTh>Påkrævet roller</MudTh>
+                        <MudTh>Emoji</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Navn"><MudTextField @bind-Value="@context.Name" Label="Navn" Immediate="@true" MaxLength="32"></MudTextField></MudTd>
+                        <MudTd DataLabel="Beskrivelse"><MudTextField @bind-Value="@context.Desc" Label="Beskrivelse" Immediate="@true" MaxLength="256" Lines="2" Variant="Variant.Outlined"></MudTextField></MudTd>
+                        <MudTd DataLabel="Rolle">@context.RoleId</MudTd>
+                        <MudTd DataLabel="Påkrævet roller">@context.Permission</MudTd>
+                        <MudTd DataLabel="Emoji">@context.Emoji</MudTd>
+                    </RowTemplate>
+                    <NoRecordsContent>
+                        <MudText>Kunne ikke finde nogen elementer</MudText>
+                    </NoRecordsContent>
+                    <LoadingContent>
+                        <MudText>Loading...</MudText>
+                    </LoadingContent>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                           OnClick="@AddRole">Tilføj ny rolle</MudButton>
+            </MudCardContent>
+            <MudDivider DividerType="DividerType.Middle"></MudDivider>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success">Gem roller</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error">Gem ikke roller</MudButton>
+            </MudCardActions>
+        </MudCard>
+
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
 
 @code {
     [Parameter]
     public string? uuid { get; set; }
+
+    private MudTable<JoinRoleMainModel> _table;
+    private IEnumerable<Guid> categoryPermissions { get => _category.Permission; set => _category.Permission = new HashSet<Guid>(value); }
+    private bool _loading = true;
+    private UserGlobalModel _userGlobalModel;
+    private SocketGuild _guild;
+    private JoinChannelCategoryServices _joinChannelCategoryServices;
+    private List<JoinRoleMainModel> _joinRoleMainModels;
+    private JoinRoleCategoryMainModel _category;
+    private RoleServices _roleServices;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _userGlobalModel.GetSelectedGuild();
+        _joinChannelCategoryServices = new JoinChannelCategoryServices(_guild);
+        _category = _joinChannelCategoryServices.Get(model => model.Id == Guid.Parse(uuid)) ?? new JoinRoleCategoryMainModel();
+        _joinRoleMainModels = _category.TextRoles ?? new List<JoinRoleMainModel>();
+        _roleServices = new RoleServices(_guild);
+        _loading = false;
+    }
+    
+    private async Task<TableData<JoinRoleMainModel>> Reload(TableState state)
+    {
+        return new TableData<JoinRoleMainModel>() { Items = _joinRoleMainModels, TotalItems = _joinRoleMainModels.Count};
+    }
+    
+    private void AddRole()
+    {
+        _joinRoleMainModels.Add(new JoinRoleMainModel());
+        _table.ReloadServerData();
+    }
+    
+    
+
 }
