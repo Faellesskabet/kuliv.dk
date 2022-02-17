@@ -89,6 +89,7 @@ namespace Dikubot.Discord
                 scheduler.ScheduleTask(new UpdateUserRolesTask());
                 scheduler.ScheduleTask(new BackupDatabaseTask());
                 scheduler.ScheduleTask(new ClearExpiredSessionsTask());
+                
                 return Task.CompletedTask;
             };
             // Keeps the thread running

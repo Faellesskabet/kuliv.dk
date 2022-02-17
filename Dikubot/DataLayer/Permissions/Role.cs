@@ -95,8 +95,9 @@ namespace Dikubot.DataLayer.Permissions
             }
         }
 
-        public async void UpdateVerifyRole(UserGuildModel userGuildModel, ulong verificationRoleId)
+        private void UpdateVerifyRole(UserGuildModel userGuildModel, ulong verificationRoleId)
         {
+
             SocketRole role = guild.GetRole(verificationRoleId);
             // If the role is not set or does not exist, we return
             if (role == null)
@@ -109,15 +110,16 @@ namespace Dikubot.DataLayer.Permissions
             {
                 if (userGuildModel.HasRole(role.Id, guild))
                 {
-                    userGuildModel.RemoveRole(new UserRoleModel(_roleServices.Get(model => Convert.ToUInt64(model.DiscordId) == role.Id)));
+                    userGuildModel.RemoveRole(new UserRoleModel(_roleServices.Get(model => model.DiscordId == role.Id.ToString())));
                 }
                 return;
             }
-            
-            if (userGuildModel.HasRole(role.Id, guild))
+
+            if (!userGuildModel.HasRole(role.Id, guild))
             {
-                userGuildModel.AddRole(new UserRoleModel(_roleServices.Get(model => Convert.ToUInt64(model.DiscordId) == role.Id)));
+                userGuildModel.AddRole(new UserRoleModel(_roleServices.Get(model => model.DiscordId == role.Id.ToString())));
             }
+            
         }
 
         public async void SetDiscordUserRoles(UserGuildModel userMainModel)
