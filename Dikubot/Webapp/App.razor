@@ -1,3 +1,4 @@
+@using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
@@ -31,7 +32,10 @@
     public string AuthCode { get; set; }
     private bool _isDarkMode = false;
     private MudThemeProvider _themeProvider;
-
+    
+    private Authenticator authenticator;
+    private UserIdentity user;
+    
     private MudTheme _theme = new MudTheme()
     {
         Palette = new Palette()

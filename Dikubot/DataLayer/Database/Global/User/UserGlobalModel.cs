@@ -73,5 +73,8 @@ namespace Dikubot.DataLayer.Database.Global.User
             return guild;
         }
         
+        [BsonElement("DarkTheme")]
+        public bool DarkTheme { get; set; }
+        
     }
 }

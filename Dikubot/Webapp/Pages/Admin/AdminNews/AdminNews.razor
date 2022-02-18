@@ -1,8 +1,108 @@
 @page "/admin/news"
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Discord
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel
+@using Dikubot.DataLayer.Static
+@using Dikubot.Webapp.Shared.Dialog
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
-<h3>AdminNews</h3>
+<h3>Nyhed indstillinger</h3>
+@if (_loaded)
+{
+    <MudContainer>
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Hvilken kanaler skal vises under nyheder?</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudSelect Label="Nyhed kanaler" Lines="2" MultiSelection="true" HelperText="Vælg alle de kanaler der skal bruges til nyheder" @bind-SelectedValues="_selectedChannels"
+                           Text="@(Util.ConcatListToString(_selectedChannels.Select(model => model?.Name ?? "").ToList()))">
+                    @foreach (var textChannel in _textChannelMainModels)
+                    {
+                        <MudSelectItem Value="@textChannel">@textChannel.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveNews">Gem ændringer</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardNews">Gem ikke ændringer</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
 
 @code {
+    [Inject] private IDialogService DialogService { get; set; }
     
+    private Authenticator authenticator;
+    private UserIdentity user;
+    private SocketGuild _guild;
+    private TextChannelServices _textChannelServices;
+    private List<TextChannelMainModel> _textChannelMainModels;
+    
+    private IEnumerable<TextChannelMainModel> _selectedChannels { get; set; }
+
+    private bool _loaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity) authState.User.Identity;
+        if (user == null)
+        {
+            return;
+        }
+        
+        _guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
+        _textChannelServices = new TextChannelServices(_guild);
+        _textChannelMainModels = _textChannelServices.GetAll();
+        _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel);
+
+        _loaded = true;
+    }
+
+    private async void SaveNews()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil gemme dine ændringer?");
+        parameters.Add("ButtonText", "Gem Ændringer");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        foreach (var textChannelMainModel in _selectedChannels)
+        {
+            textChannelMainModel.IsNewsChannel = true;
+            _textChannelServices.Upsert(textChannelMainModel);
+        }
+        this.StateHasChanged();
+    }
+
+    private async void DiscardNews()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Warning);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel);
+        this.StateHasChanged();
+    }
 }

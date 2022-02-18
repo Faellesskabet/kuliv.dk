@@ -19,6 +19,10 @@
         <MudGrid>
             @foreach (JoinRoleCategoryMainModel category in _categories)
             {
+                @if (!HasPermissionForCategory(category))
+                {
+                    continue;
+                }
                 <MudItem xs="12" sm="6" md="4">
                     <MudCard Elevation="25" Class="rounded-lg pb-4">
                         <MudPaper Height="25px" Width="100%" Style=@($"background-color: {category.Color}")></MudPaper>
@@ -34,6 +38,10 @@
                             <MudList Class="mx-auto mt-4" Style="width:300px;">
                                 @foreach (JoinRoleMainModel role in category.TextRoles)
                                 {
+                                    @if (!HasPermissionForRole(role))
+                                    {
+                                        continue;
+                                    }
                                     <MudListItem>
                                         <MudTooltip Text="@role.Desc">
                                             <MudGrid Justify="Justify.Center">
@@ -58,7 +66,7 @@
                             </MudList>
                         </MudCardContent>
                         <MudCardActions Class="d-flex justify-center">
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Join alle</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="() => JoinAll(category)">Join alle</MudButton>
                         </MudCardActions>
                     </MudCard>
                 </MudItem>
@@ -103,6 +111,17 @@
         _categories = _joinRoleServices.GetAll();
         
         _loaded = true;
+    }
+
+    protected void JoinAll(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
+    {
+        foreach (var joinRoleMainModel in joinRoleCategoryMainModel.TextRoles)
+        {
+            _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
+        }
+        _userGuildServices.Update(_userGuildModel);
+        _permissionsService.SetDiscordUserRoles(_userGuildModel);
+        this.StateHasChanged();
     }
 
     protected void LeaveRole(JoinRoleMainModel joinRoleMainModel)
