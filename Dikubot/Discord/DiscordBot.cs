@@ -64,7 +64,10 @@ namespace Dikubot.Discord
             Client.JoinedGuild += guildDownloadListeners.DownloadGuildOnJoin;
             Client.LeftGuild += guildDownloadListeners.DropGuildOnLeave;
             Client.GuildUpdated += guildDownloadListeners.UpdateGuildOnChange;
-            Client.MessageReceived += new MessageListener().OnMessageReceived;
+
+            MessageListener messageListener = new MessageListener();
+            Client.MessageReceived += messageListener.OnMessageReceived;
+            Client.MessageDeleted += messageListener.OnMessageRemoved;
             Client.UserJoined += new GreetingListener().UserJoined;
 
             CommandService = new CommandService();

@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.Quote;
 using Dikubot.DataLayer.Static;
 using Discord;
@@ -11,18 +13,24 @@ namespace Dikubot.Discord.EventListeners
     {
         public async Task OnMessageReceived(SocketMessage message)
         {
-            ProcessQuote(message);
+            ProcessMessage(message);
             
             #if DEBUG
             DebugMessage(message);    
             #endif
         }
+
+        public async Task OnMessageRemoved(Cacheable<IMessage, ulong> cacheableMessage, Cacheable<IMessageChannel, ulong> cacheableChannel)
+        {
+            ProcessMessage(cacheableMessage.Value, true);
+        }
+
         private void DebugMessage(SocketMessage message)
         {
             Logger.Debug($"{message.Author.ToString()} > {message.ToString()}");
         }
 
-        public static void ProcessQuote(IMessage message)
+        public static void ProcessMessage(IMessage message, bool remove = false)
         {
             if (message.Source != MessageSource.User)
             {
@@ -36,15 +44,38 @@ namespace Dikubot.Discord.EventListeners
             SocketGuild guild = channel.Guild;
             TextChannelServices textChannelServices = new TextChannelServices(guild);
             TextChannelMainModel textChannelMainModel = 
-                textChannelServices.Get(model => model.IsQuoteChannel 
-                                                 && model.DiscordId == message.Channel.Id.ToString());
+                textChannelServices.Get(model => model.DiscordId == message.Channel.Id.ToString());
             if (textChannelMainModel == null)
             {
                 return;
             }
-
-            QuoteServices quoteServices = new QuoteServices(guild);
-            quoteServices.Insert(quoteServices.IMessageToModel(message));
+            
+            if (textChannelMainModel.IsQuoteChannel)
+            {
+                MessageService messageService = new QuoteServices(guild);
+                if (remove)
+                {
+                    messageService.Remove(messageService.IMessageToModel(message));
+                }
+                else
+                {
+                    messageService.Insert(messageService.IMessageToModel(message));
+                }
+            }
+            
+            if (textChannelMainModel.IsNewsChannel)
+            {
+                MessageService messageService = new NewsServices(guild);
+                if (remove)
+                {
+                    messageService.Remove(messageService.IMessageToModel(message));
+                }
+                else
+                {
+                    messageService.Insert(messageService.IMessageToModel(message));
+                }
+            }
+            
         }
     }
 }

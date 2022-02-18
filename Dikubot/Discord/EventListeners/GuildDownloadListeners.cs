@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Dikubot.DataLayer.Database;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.Quote;
 using Dikubot.DataLayer.Database.Guild.Models.Guild;
 using Dikubot.DataLayer.Permissions;
@@ -19,7 +20,8 @@ namespace Dikubot.Discord.EventListeners
                 permissionsService.SetDatabase();
                 permissionsService.AddOrUpdateDatabaseGuild(new GuildMainModel(guild));
                 permissionsService.UpdateUserDiscordRoles();
-                QuoteServices.DownloadAllQuotes(guild);
+                new NewsServices(guild).DownloadAllMessages();
+                new QuoteServices(guild).DownloadAllMessages();
                 Logger.Debug($"Successfully pulled Discord data into Database for {guild.Name} ({guild.Id.ToString()})");
             }
         }
@@ -31,7 +33,8 @@ namespace Dikubot.Discord.EventListeners
             permissionsService.SetDatabase();
             permissionsService.AddOrUpdateDatabaseGuild(new GuildMainModel(guild));
             permissionsService.UpdateUserDiscordRoles();
-            QuoteServices.DownloadAllQuotes(guild);
+            new NewsServices(guild).DownloadAllMessages();
+            new QuoteServices(guild).DownloadAllMessages();
             Logger.Debug($"Successfully pulled Discord data into Database for {guild.Name} ({guild.Id.ToString()})");
         }
         

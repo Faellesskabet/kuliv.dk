@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.Quote;
 using Dikubot.Discord.EventListeners;
 using Discord;
@@ -21,7 +22,7 @@ namespace Dikubot.Discord.Command
         public async Task GetQuote()
         {
             SocketGuild guild = Context.Guild;
-            QuoteModel quoteModel = new QuoteServices(Context.Guild).GetSamples(1).FirstOrDefault();
+            MessageModel quoteModel = new QuoteServices(Context.Guild).GetSamples(1).FirstOrDefault();
 
             if (quoteModel == null)
             {
@@ -85,7 +86,7 @@ namespace Dikubot.Discord.Command
             //We add all the quotes to the database
             if (connect)
             {
-                new QuoteServices(this.Context.Guild).DownloadQuotesFromChannel(Context.Guild.GetTextChannel(channelId));
+                new QuoteServices(this.Context.Guild).DownloadMessagesFromChannel(Context.Guild.GetTextChannel(channelId));
             }
             //We remove all the quotes from the channel
             else
