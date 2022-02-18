@@ -130,7 +130,7 @@ else
     private bool _loading = true;
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
-    private JoinChannelCategoryServices _joinChannelCategoryServices;
+    private JoinRoleServices _joinRoleServices;
     private List<JoinRoleMainModel> _joinRoleMainModels;
     private JoinRoleCategoryMainModel _category;
     private RoleServices _roleServices;
@@ -140,8 +140,8 @@ else
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _joinChannelCategoryServices = new JoinChannelCategoryServices(_guild);
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinChannelCategoryServices.Get(guid) : new JoinRoleCategoryMainModel();
+        _joinRoleServices = new JoinRoleServices(_guild);
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new JoinRoleCategoryMainModel();
         _joinRoleMainModels = _category.TextRoles ?? new List<JoinRoleMainModel>();
         _roleServices = new RoleServices(_guild);
         _roleMainModels = _roleServices.GetAll();
@@ -191,12 +191,12 @@ else
 
         // We don't wanna save the roles here, but the category references the roles, so we do this to avoid saving
         // role changes
-        var oldCategory = _joinChannelCategoryServices.Get(_category.Id);
+        var oldCategory = _joinRoleServices.Get(_category.Id);
         if (oldCategory?.TextRoles != null)
         {
             _category.TextRoles = oldCategory.TextRoles;
         }
-        _joinChannelCategoryServices.Upsert(_category);
+        _joinRoleServices.Upsert(_category);
     }
 
     private async void SaveRoles()
@@ -213,7 +213,7 @@ else
         }
 
         _category.TextRoles = _joinRoleMainModels;
-        _joinChannelCategoryServices.Upsert(_category);
+        _joinRoleServices.Upsert(_category);
     }
 
     private async void DiscardSettings()
@@ -229,7 +229,7 @@ else
             return;
         }
         
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinChannelCategoryServices.Get(guid) : new JoinRoleCategoryMainModel();
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new JoinRoleCategoryMainModel();
         this.StateHasChanged();
     }
 

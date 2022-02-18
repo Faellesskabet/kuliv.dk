@@ -8,9 +8,9 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
 {
-    public class JoinChannelCategoryServices : GuildServices<JoinRoleCategoryMainModel>
+    public class JoinRoleServices : GuildServices<JoinRoleCategoryMainModel>
     { 
-        public JoinChannelCategoryServices(SocketGuild guild) : base("JoinRole", guild)
+        public JoinRoleServices(SocketGuild guild) : base("JoinRole", guild)
         {
         }
         

@@ -4,7 +4,9 @@
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild.Models.JoinRole
 @using Dikubot.Discord
+@using Dikubot.Webapp.Shared.Dialog
 @using global::Discord.WebSocket
+@using Microsoft.IdentityModel.Tokens
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
@@ -22,13 +24,17 @@
         <MudTh>Beskrivelse</MudTh>
         <MudTh>Størrelse</MudTh>
         <MudTh>Indstillinger</MudTh>
+        <MudTh>Slet</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Navn">@context.Name</MudTd>
         <MudTd DataLabel="Beskrivelse">@context.Decs</MudTd>
         <MudTd DataLabel="Størrelse">@(context.TextRoles?.Count ?? 0)</MudTd>
         <MudTd DataLabel="Indstillinger">
-            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/admin/roles/edit/{@context.Id.ToString()}")>Redigere</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/admin/roles/edit/{@context.Id.ToString()}")>Rediger</MudButton>
+        </MudTd>
+        <MudTd DataLabel="Slet">
+            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
         </MudTd>
     </RowTemplate>
     <NoRecordsContent>
@@ -48,24 +54,33 @@
 
 @code {
 
+    [Inject] private IDialogService DialogService { get; set; }
+    
     private MudTable<JoinRoleCategoryMainModel> _table;
     private string _searchQuery = "";
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
-    private JoinChannelCategoryServices _services;
+    private JoinRoleServices _services;
 
     protected override async Task OnInitializedAsync()
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _services = new JoinChannelCategoryServices(_guild);
+        _services = new JoinRoleServices(_guild);
     }
 
     private async Task<TableData<JoinRoleCategoryMainModel>> Reload(TableState state)
     {
-        List<JoinRoleCategoryMainModel> items = 
-            _services.Get(model => model.Name.Contains(_searchQuery) || model.Decs.Contains(_searchQuery),
-                state.PageSize, state.Page);
+        List<JoinRoleCategoryMainModel> items;
+        if (!_searchQuery.IsNullOrEmpty())
+        {
+            items = _services.Get(model => model.Name.Contains(_searchQuery) || model.Decs.Contains(_searchQuery),
+                    state.PageSize, state.Page);   
+        }
+        else
+        {
+            items = _services.Get(state.PageSize, state.Page);   
+        }
 
         return new TableData<JoinRoleCategoryMainModel>() { Items = items, TotalItems = (int)_services.EstimatedCount()};
     }
@@ -74,6 +89,23 @@
     {
         _searchQuery = text;
         _table.ReloadServerData();
+    }
+
+    private async void DeleteCategory(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
+        parameters.Add("ButtonText", "Slet");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        _services.Remove(joinRoleCategoryMainModel);
+        await _table.ReloadServerData();
     }
     
 }

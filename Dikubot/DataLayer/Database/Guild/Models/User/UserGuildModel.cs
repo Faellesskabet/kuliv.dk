@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Guild.Models.Role;
 using Dikubot.DataLayer.Database.Guild.Models.User.SubModels;
 using Dikubot.DataLayer.Database.Interfaces;
@@ -48,8 +49,12 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
 
         public bool HasRole(ulong roleId, SocketGuild guild)
         {
-            RoleServices services = new RoleServices(guild);
             return _roles.Any(model => Convert.ToUInt64(model.GetRoleModel(guild).DiscordId) == roleId);
+        }
+        
+        public bool HasRole(Guid guid)
+        {
+            return _roles.Any(model => model.RoleId == guid);
         }
         
         
@@ -97,6 +102,11 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
             }
 
             return _roles.Add(userRoleModel);
+        }
+
+        public int RemoveRole(Guid guid)
+        {
+            return _roles.RemoveWhere(model => model.RoleId == guid);
         }
         
         public bool RemoveRole(UserRoleModel userRoleModel)
