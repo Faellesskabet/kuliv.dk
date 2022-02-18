@@ -17,7 +17,8 @@ namespace Dikubot.DataLayer.Permissions
         {
             var textChannelModels = _textChannelServices.Get();
             var socketRoles = guild.TextChannels.ToList();
-            var toBeRemoved = new List<TextChannelMainModel>(textChannelModels);
+            var discordRoleIds = new HashSet<ulong>(socketRoles.Select(role => role.Id));
+            var toBeRemoved = textChannelModels.Where(model => !discordRoleIds.Contains(UInt64.Parse(model.DiscordId))).ToList();
 
             Func<TextChannelMainModel, SocketTextChannel, bool> inDB = (m0, m1) =>
                 Convert.ToUInt64(m0.DiscordId) == m1.Id;

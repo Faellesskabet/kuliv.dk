@@ -10,7 +10,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
 {
     public class JoinChannelCategoryServices : GuildServices<JoinRoleCategoryMainModel>
     { 
-        public JoinChannelCategoryServices(SocketGuild guild) : base("JoinRoleCategory", guild)
+        public JoinChannelCategoryServices(SocketGuild guild) : base("JoinRole", guild)
         {
         }
         

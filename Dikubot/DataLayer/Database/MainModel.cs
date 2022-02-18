@@ -17,5 +17,15 @@ namespace Dikubot.DataLayer.Database
         [BsonIgnoreIfDefault]
         [BsonId(IdGenerator = typeof(GuidGenerator))] [HiddenInput] [Display(Order = -1)]
         public Guid Id { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is MainModel model && this.Id.Equals(model.Id);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Id.GetHashCode();
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Dikubot.DataLayer.Database.Interfaces;
+using Dikubot.DataLayer.Static;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
@@ -26,6 +27,9 @@ namespace Dikubot.DataLayer.Database
         public readonly MongoCollectionSettings CollectionSettings;
         public readonly IMongoDatabase database;
 
+        private readonly string _collectionName;
+        private readonly string _databaseName;
+
         /// <summary>
         /// Constructor for the services.
         /// </summary>
@@ -34,6 +38,8 @@ namespace Dikubot.DataLayer.Database
             MongoDatabaseSettings databaseSettings = null,
             MongoCollectionSettings collectionSettings = null)
         {
+            _databaseName = databaseName;
+            _collectionName = collectionName;
             this.DatabaseSettings = databaseSettings;
             this.CollectionSettings = collectionSettings;
             
@@ -47,12 +53,19 @@ namespace Dikubot.DataLayer.Database
             string indexKey = databaseName + ";" + collectionName;
             if (this is IIndexed<TModel> && !indexed.ContainsKey(indexKey))
             {
-                // this dropall is temporary. It is inefficient that we drop all the indexes, just to set them again
-                // but because of some breaking indexes in the past, we have to do this until the database has been updated
-                _models.Indexes.DropAll();
-                // MongoDB is smart enough to not duplicate indexes (i think ...) 
-                _models.Indexes.CreateMany(((IIndexed<TModel>)this).GetIndexes().Select(definition => new CreateIndexModel<TModel>(definition)));
-                indexed[indexKey] = true;
+                try
+                {
+                    // this dropall is temporary. It is inefficient that we drop all the indexes, just to set them again
+                    // but because of some breaking indexes in the past, we have to do this until the database has been updated
+                    _models.Indexes.DropAll();
+                    // MongoDB is smart enough to not duplicate indexes (i think ...) 
+                    _models.Indexes.CreateMany(((IIndexed<TModel>)this).GetIndexes().Select(definition => new CreateIndexModel<TModel>(definition)));
+                    indexed[indexKey] = true;
+                }
+                catch (Exception e)
+                {
+                    Logger.Debug("Indexing failed" + e.Message);
+                }
             }
         }
 
@@ -331,7 +344,17 @@ namespace Dikubot.DataLayer.Database
         {
             return _models.EstimatedDocumentCount();
         }
-        
+
+        /// <summary>
+        /// Get the collection name of the current service instance
+        /// </summary>
+        public string CollectionName => _collectionName;
+
+        /// <summary>
+        /// Get the database name of the current service instance
+        /// </summary>
+        public string DatabaseName => _databaseName;
+
         /// <Summary>Sets up the unique indexes for the current collection and service.</Summary>
         /// <param name="collection">The collection where we setup the Unique indexes.</param>
         /// <return>Void.</return>

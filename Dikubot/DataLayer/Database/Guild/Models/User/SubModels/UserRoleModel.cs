@@ -59,9 +59,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User.SubModels
         
         /// <summary>
         /// Start and End Date, if not set, they are set to min and max
-        /// ToDo: Se if the works :O
         /// </summary>
-        /// <returns>Hashcode of roleId</returns>
         [BsonElement("StartDate")][BsonRepresentation(BsonType.DateTime)]
         public DateTime StartDate { get; set; } = DateTime.MinValue;
         

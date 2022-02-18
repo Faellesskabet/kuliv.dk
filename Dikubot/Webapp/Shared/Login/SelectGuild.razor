@@ -70,8 +70,7 @@ else
         {
             _mutualGuilds = socketUser.MutualGuilds.ToHashSet();   
         }
-
-    // We sort the complementGuilds by member size
+        
         _complementGuilds = DiscordBot.Client.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => _guildSettingsService.Get(guild)).ToList();
         _loaded = true;
         this.StateHasChanged();

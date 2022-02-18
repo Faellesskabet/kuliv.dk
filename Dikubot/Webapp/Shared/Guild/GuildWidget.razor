@@ -3,6 +3,7 @@
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
+@using Microsoft.IdentityModel.Tokens
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
@@ -16,7 +17,10 @@
             <MudText Typo="Typo.body2">@DiscordBot.Client.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
         </CardHeaderContent>
     </MudCardHeader>
-    <MudCardMedia Image="@Guild.BannerUrl" Style="max-height: 250px;" />
+    @if (!@Guild.BannerUrl.IsNullOrEmpty())
+    {
+        <MudCardMedia Image="@Guild.BannerUrl" Height="250" />
+    }
     <MudCardContent Style="max-height: 200px; overflow: scroll;">
         <MudText>@Guild.Description</MudText>
     </MudCardContent>

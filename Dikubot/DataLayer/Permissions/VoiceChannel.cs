@@ -17,7 +17,8 @@ namespace Dikubot.DataLayer.Permissions
         {
             var voiceChannelModels = _voiceChannelServices.Get();
             var socketRoles = guild.VoiceChannels.ToList();
-            var toBeRemoved = new List<VoiceChannelMainModel>(voiceChannelModels);
+            var discordRoleIds = new HashSet<ulong>(socketRoles.Select(role => role.Id));
+            var toBeRemoved = voiceChannelModels.Where(model => !discordRoleIds.Contains(UInt64.Parse(model.DiscordId))).ToList();
 
             Func<VoiceChannelMainModel, SocketVoiceChannel, bool> inDB = (m0, m1) =>
                 Convert.ToUInt64(m0.DiscordId) == m1.Id;

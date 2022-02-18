@@ -22,7 +22,8 @@ namespace Dikubot.DataLayer.Permissions
         {
             var roleModels = _roleServices.Get();
             var socketRoles = guild.Roles.ToList();
-            var toBeRemoved = new List<RoleMainModel>(roleModels);
+            var discordRoleIds = new HashSet<ulong>(socketRoles.Select(role => role.Id));
+            var toBeRemoved = roleModels.Where(model => !discordRoleIds.Contains(UInt64.Parse(model.DiscordId))).ToList();
 
             Func<RoleMainModel, SocketRole, bool> inDB = (m0, m1) => Convert.ToUInt64(m0.DiscordId) == m1.Id;
 

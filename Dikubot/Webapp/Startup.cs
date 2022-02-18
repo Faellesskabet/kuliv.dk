@@ -1,4 +1,3 @@
-using Dikubot.Webapp.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -34,30 +33,11 @@ namespace Dikubot.Webapp
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddResponseCaching();
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
-           
-            /* MICROSOFT LOGIN DISABLED
-            services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"))
-                .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
-                .AddMicrosoftGraph(Configuration.GetSection("DownstreamApi"))
-                .AddInMemoryTokenCaches();
-            
-            services.AddControllersWithViews()
-                .AddMicrosoftIdentityUI();
-            services.AddAuthorization(options =>
-            {
-                // By default, all incoming requests will be authorized according to the default policy
-                options.FallbackPolicy = options.DefaultPolicy;
-            });
-            
-            services.AddServerSideBlazor()
-                .AddMicrosoftIdentityConsentHandler();*/
 
         }
 
