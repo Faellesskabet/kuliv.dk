@@ -26,7 +26,7 @@
     <RowTemplate>
         <MudTd DataLabel="Navn">@context.Name</MudTd>
         <MudTd DataLabel="Beskrivelse">@context.Decs</MudTd>
-        <MudTd DataLabel="Størrelse">@context.TextRoles.Count</MudTd>
+        <MudTd DataLabel="Størrelse">@(context.TextRoles?.Count ?? 0)</MudTd>
         <MudTd DataLabel="Indstillinger">
             <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/admin/roles/edit/{@context.Id.ToString()}")>Redigere</MudButton>
         </MudTd>

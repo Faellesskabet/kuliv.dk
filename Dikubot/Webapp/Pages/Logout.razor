@@ -14,8 +14,8 @@
         try
         {
             user.SessionModel.Expires = DateTime.Now;
-            NavigationManager.NavigateTo("/");
             await authenticator.UpdateSession(user.SessionModel);
+            NavigationManager.NavigateTo("/");
         }
         catch (Exception e)
         {

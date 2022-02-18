@@ -10,14 +10,17 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
         @if (_loaded)
         {
-            <MudText Typo="Typo.h5">@guild.Name fællesskabet</MudText>
+            <MudText Typo="Typo.h5">@_guildSettingsModel.Name fællesskabet</MudText>
         }
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Lukires/sharper-dikubot/" Target="_blank" />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank" />
     </MudAppBar>
     <MudDrawer @bind-Open="@open" Elevation="1" Color="Color.Transparent">
         <MudDrawerHeader>
-            <MudAvatar Image="./images/kuliv_logo.png" Size="Size.Large"></MudAvatar>
+            @if (_loaded)
+            {
+                <MudAvatar Image="@_guildSettingsModel.LogoUrl" Size="Size.Large">KULiv</MudAvatar>
+            }
         </MudDrawerHeader>
         <MudNavMenu>
             <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Home" Href="/">Forside</MudNavLink>
@@ -48,6 +51,7 @@
     private Authenticator authenticator;
     private UserIdentity user;
     private SocketGuild guild;
+    private GuildSettingsModel _guildSettingsModel;
     private bool _loaded = false;
 
     protected override async Task OnInitializedAsync()
@@ -60,6 +64,7 @@
             return;
         }
         guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
+        _guildSettingsModel = new GuildSettingsService().Get(model => model.GuildId == user.UserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
         _loaded = true;
     }
 

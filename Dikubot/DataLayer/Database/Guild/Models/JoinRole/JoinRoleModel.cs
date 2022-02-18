@@ -39,13 +39,18 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
         
         public IEnumerable<RoleMainModel> GetPermissionRoles(RoleServices roleServices)
         {
-            if (Permission.IsNullOrEmpty())
-            {
-                return new List<RoleMainModel>();
-            }
-            return Permission.Select(guid => roleServices.Get(model => model.Id == guid));
+            IEnumerable<RoleMainModel> roles = Permission.IsNullOrEmpty() ? new List<RoleMainModel>() : 
+                Permission.Select(guid => roleServices.Get(model => model.Id == guid)).Where(model => model != null);
+            
+            // Replace by ForiegnKey system
+            var roleMainModels = roles as RoleMainModel[] ?? roles.ToArray();
+            Permission = new HashSet<Guid>(roleMainModels.Select(model => model.Id));
+            return roleMainModels;
         }
         
+        [BsonIgnore]
+        public IEnumerable<Guid> PermissionEnumerable { get => Permission; set => Permission = new HashSet<Guid>(value); }
+
         /// <summary>
         /// Color is the color used to represent the category in the frontend.
         /// Colors are hexadecimal
@@ -53,15 +58,10 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
         [BsonElement("Color")]
         public string Color { get; set; }
         
-        /// <summary>
-        /// Obsolete, don't use this
-        /// </summary>
-        [BsonElement("Listeners")] [Obsolete("Does nothing.")]
-        public Dictionary<string, string> Listeners { get; set; } = new Dictionary<string, string>();
 
     }
     
-    public class JoinRoleMainModel : MainModel
+    public class JoinRoleMainModel
     {
         
         /// <summary>
@@ -75,15 +75,11 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
         /// </summary>
         [BsonElement("Desc")]
         public string Desc  { get;  set; }
-
+        
         /// <summary>
-        /// The roleid is the role the user will be assigned upon joining the group
+        /// The roleid is the internal RoleModel id the user will be assigned upon joining the group.
         /// </summary>
-        [BsonElement("RoleId")] public string RoleId  { get;  set; }
-        public SocketRole GetDiscordRole(SocketGuild guild)
-        {
-            return guild.GetRole(UInt64.Parse(RoleId));
-        }
+        [BsonElement("RoleId")] public Guid RoleId  { get;  set; }
 
         /// <summary>
         /// The Emoji is showen for the goupe.
@@ -95,20 +91,19 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
         /// Users with roles in this list will be join the role, if they also have access to the category.
         /// </summary>
         [BsonElement("Permission")] public HashSet<Guid> Permission { get; set; }
+        
         public IEnumerable<RoleMainModel> GetPermissionRoles(RoleServices roleServices)
         {
-            return Permission.Select(guid => roleServices.Get(model => model.Id == guid));
+            IEnumerable<RoleMainModel> roles = Permission.IsNullOrEmpty() ? new List<RoleMainModel>() : 
+                Permission.Select(guid => roleServices.Get(model => model.Id == guid)).Where(model => model != null);
+            
+            // Replace by ForiegnKey system
+            var roleMainModels = roles as RoleMainModel[] ?? roles.ToArray();
+            Permission = new HashSet<Guid>(roleMainModels.Select(model => model.Id));
+            return roleMainModels;
         }
         
-        /// <summary>
-        /// Obsolete, replaced by Permissions.
-        /// Is used to indicate whether or not any one can join the group
-        /// </summary>
-        [BsonElement("Public")] [Obsolete("Replaced by permissions")]
-        public bool Public { get; set; }
-        
-        
-        
-        
+        [BsonIgnore]
+        public IEnumerable<Guid> PermissionEnumerable { get => Permission; set => Permission = new HashSet<Guid>(value); }
     }
 }
