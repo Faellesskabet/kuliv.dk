@@ -36,32 +36,35 @@
                                 <MudText Typo="Typo.h4">@category.Decs</MudText>
                             </div>
                             <MudList Class="mx-auto mt-4" Style="width:300px;">
-                                @foreach (JoinRoleMainModel role in category.TextRoles)
+                                @if (category.TextRoles != null)
                                 {
-                                    @if (!HasPermissionForRole(role))
+                                    @foreach (JoinRoleMainModel role in category.TextRoles)
                                     {
-                                        continue;
+                                        @if (!HasPermissionForRole(role))
+                                        {
+                                            continue;
+                                        }
+                                        <MudListItem>
+                                            <MudTooltip Text="@role.Desc">
+                                                <MudGrid Justify="Justify.Center">
+                                                    <MudItem xs="4">
+                                                        @if (HasRole(role))
+                                                        {
+                                                            <MudButton Color="Color.Error" OnClick="() => LeaveRole(role)">Leave</MudButton>
+                                                        }
+                                                        else
+                                                        {
+                                                            <MudButton Color="Color.Success" OnClick="() => JoinRole(role)">Join</MudButton>
+                                                        }
+                                                    </MudItem>
+                                                    <MudItem xs="8">
+                                                        <MudText Typo="Typo.h6">@role.Emoji @role.Name</MudText>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudTooltip>
+                                            <MudDivider></MudDivider>
+                                        </MudListItem>
                                     }
-                                    <MudListItem>
-                                        <MudTooltip Text="@role.Desc">
-                                            <MudGrid Justify="Justify.Center">
-                                                <MudItem xs="4">
-                                                    @if (HasRole(role))
-                                                    {
-                                                        <MudButton Color="Color.Error" OnClick="() => LeaveRole(role)">Leave</MudButton>
-                                                    }
-                                                    else
-                                                    {
-                                                        <MudButton Color="Color.Success" OnClick="() => JoinRole(role)">Join</MudButton>
-                                                    }
-                                                </MudItem>
-                                                <MudItem xs="8">
-                                                    <MudText Typo="Typo.h6">@role.Emoji @role.Name</MudText>
-                                                </MudItem>
-                                            </MudGrid>
-                                        </MudTooltip>
-                                        <MudDivider></MudDivider>
-                                    </MudListItem>
                                 }
                             </MudList>
                         </MudCardContent>
