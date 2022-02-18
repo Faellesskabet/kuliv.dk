@@ -2,6 +2,7 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
+using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Logic.WebDiscordBridge;
@@ -37,6 +38,34 @@ namespace Dikubot.Webapp.Authentication
                 throw new Exception("User cannot be found for this session.");
             }
             return user.UserGlobalModel;
+        }
+        
+        /// <summary>
+        /// Get SocketGuild of the current session
+        /// </summary>
+        /// <returns></returns>
+        public async Task<SocketGuild> GetSocketGuild()
+        {
+            return await GetSocketGuild(await GetUserGlobal());
+        }
+        
+        private async Task<SocketGuild> GetSocketGuild(UserGlobalModel user)
+        {
+            return user == null ? null : DiscordBot.Client.GetGuild(user.SelectedGuild);
+        }
+
+        /// <summary>
+        /// Get the GuildSettingsModel of the current session
+        /// </summary>
+        /// <returns></returns>
+        public async Task<GuildSettingsModel> GetGuildSettings()
+        {
+            return await GetGuildSettings(await GetSocketGuild());
+        }
+
+        private async Task<GuildSettingsModel> GetGuildSettings(SocketGuild guild)
+        {
+            return new GuildSettingsService().Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
         }
 
         /// <summary>

@@ -115,7 +115,7 @@
             return;
         }
         guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
-        _guildSettingsModel = new GuildSettingsService().Get(model => model.GuildId == user.UserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
+        _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
         _loaded = true;
     }
 }
