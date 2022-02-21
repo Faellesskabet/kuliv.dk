@@ -118,7 +118,11 @@
 
     protected void JoinAll(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
     {
-        foreach (var joinRoleMainModel in joinRoleCategoryMainModel.TextRoles)
+        if (!HasPermissionForCategory(joinRoleCategoryMainModel))
+        {
+            return;
+        }
+        foreach (var joinRoleMainModel in joinRoleCategoryMainModel.TextRoles.Where(HasPermissionForRole))
         {
             _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
         }
