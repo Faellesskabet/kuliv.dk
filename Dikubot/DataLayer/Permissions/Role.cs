@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Database.Guild.Models.Role;
@@ -123,9 +124,10 @@ namespace Dikubot.DataLayer.Permissions
             
         }
 
-        public async void SetDiscordUserRoles(UserGuildModel userMainModel)
+        public Task SetDiscordUserRoles(UserGuildModel userMainModel)
         {
             SetDiscordUserRoles(userMainModel, _guildSettingsService.Get(guild));
+            return Task.CompletedTask;
         }
         /// <summary>
         /// This functions downloads a user's roles from the Database and adds them to their Discord profile. The user's roles will match exactly what is in the database,

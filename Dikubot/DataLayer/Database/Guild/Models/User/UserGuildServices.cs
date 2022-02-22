@@ -30,8 +30,10 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
             UserGuildModel mainModel = this.Get(inmodel => inmodel.DiscordId == discordId);
             if (mainModel == null)
             {
-                mainModel = new UserGuildModel();
-                mainModel.DiscordId = discordId;
+                mainModel = new UserGuildModel
+                {
+                    DiscordId = discordId
+                };
             }
 
             return mainModel;
