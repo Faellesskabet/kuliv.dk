@@ -48,6 +48,7 @@ namespace Dikubot
 
                     webBuilder.UseContentRoot(location);
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStaticWebAssets();
                 });
     }
 }
