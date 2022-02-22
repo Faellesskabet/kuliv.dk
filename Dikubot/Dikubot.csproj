@@ -56,8 +56,7 @@
 
   <ItemGroup>
     <Folder Include="DataLayer\Database\Global\GlobalSettings" />
-    <Folder Include="Webapp\wwwroot\css\material" />
-    <Folder Include="Webapp\wwwroot\js\material" />
+    <Folder Include="Webapp\wwwroot\js" />
   </ItemGroup>
 
 </Project>
