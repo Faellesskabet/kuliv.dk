@@ -1,13 +1,14 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
 @using Microsoft.IdentityModel.Tokens
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-<MudCard>
+<MudCard Elevation="25">
     <MudCardHeader>
         <CardHeaderAvatar>
             <MudAvatar Image="@Guild.LogoUrl"></MudAvatar>
@@ -16,6 +17,17 @@
             <MudText Typo="Typo.body1">@Guild.Name</MudText>
             <MudText Typo="Typo.body2">@DiscordBot.Client.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
         </CardHeaderContent>
+        <CardHeaderActions>
+            @if (EnableJoin)
+            {
+                <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@JoinGuild">Join fællesskab</MudButton>
+            }
+            else
+            {
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@GotoGuild">Gå til side</MudButton>
+            }
+                    
+        </CardHeaderActions>
     </MudCardHeader>
     @if (!@Guild.BannerUrl.IsNullOrEmpty())
     {
@@ -25,14 +37,6 @@
         <MudText>@Guild.Description</MudText>
     </MudCardContent>
     <MudCardActions>
-        @if (EnableJoin)
-        {
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@JoinGuild">Join fællesskab</MudButton>
-        }
-        else
-        {
-            <MudButton Color="Color.Primary" OnClick="@GotoGuild">Gå til side</MudButton>
-        }
     </MudCardActions>
 </MudCard>
 
@@ -64,9 +68,40 @@
     
     private async Task JoinGuild()
     {
+        UserGlobalModel userModel = await ((Authenticator) AuthenticationStateProvider).GetUserGlobal();
+        if (userModel == null)
+        {
+            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            return;
+        }
+        
+        SessionServices sessionServices = new SessionServices();
+        SessionModel sessionModel = sessionServices.Get(model => model.UserId == userModel.Id);
+        if (sessionModel == null)
+        {
+            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            return;
+        }
+
         bool? result = await DialogService.ShowMessageBox(
             "Bekræft", 
             "Du er ved at join et nyt fællesskab. Er du sikker?", 
             yesText:"Join", cancelText:"Fortryd");
+
+        if (!result.GetValueOrDefault())
+        {
+            return;
+        }
+
+        try
+        {
+            await DiscordBot.Client.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, sessionModel.DiscordAuthenticationModel.AccessToken);
+        }
+        catch (Exception e)
+        {
+            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            return;
+        }
+        await GotoGuild();
     }
 }

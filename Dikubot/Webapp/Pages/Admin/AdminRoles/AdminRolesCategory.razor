@@ -25,7 +25,7 @@
                         <MudTextField @bind-Value="@_category.Decs" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
                         <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
                         <MudSelect Label="Påkrævet roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne se kategorien" @bind-SelectedValues="_category.PermissionEnumerable"
-                                   Text="@(Util.ConcatListToString(_category.GetPermissionRoles(_roleServices).Select(model => model?.Name ?? "").ToList()))">
+                                   MultiSelectionTextFunc="list => GetRoleString(_category)" Text="@GetRoleString(_category)">
                             @foreach (var role in _roleMainModels)
                             {
                                 <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
@@ -75,7 +75,7 @@
                         </MudTd>
                         <MudTd>
                             <MudSelect Label="Påkrævet roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne vælge rollen" @bind-SelectedValues="@context.PermissionEnumerable"
-                                       Text="@(Util.ConcatListToString(@context.GetPermissionRoles(_roleServices).Select(model => model?.Name ?? "").ToList()))">
+                                       MultiSelectionTextFunc="list => GetRoleString(context)" Text="@GetRoleString(context)">
                                 @foreach (var role in _roleMainModels)
                                 {
                                     <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
@@ -157,6 +157,16 @@ else
     {
         _joinRoleMainModels.Add(new JoinRoleMainModel());
         _table.ReloadServerData();
+    }
+    
+    private string GetRoleString(JoinRoleCategoryMainModel category)
+    {
+        return Util.ConcatListToString(category.GetPermissionRoles(_roleServices).Select(model => model?.Name ?? "").ToList());
+    }
+    
+    private string GetRoleString(JoinRoleMainModel category)
+    {
+        return Util.ConcatListToString(category.GetPermissionRoles(_roleServices).Select(model => model?.Name ?? "").ToList());
     }
 
     private async void RemoveRole(JoinRoleMainModel joinRoleMainModel)

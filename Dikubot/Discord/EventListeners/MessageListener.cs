@@ -50,7 +50,7 @@ namespace Dikubot.Discord.EventListeners
                 return;
             }
             
-            if (textChannelMainModel.IsQuoteChannel)
+            if (textChannelMainModel.IsQuoteChannel.GetValueOrDefault())
             {
                 MessageService messageService = new QuoteServices(guild);
                 if (remove)
@@ -63,7 +63,7 @@ namespace Dikubot.Discord.EventListeners
                 }
             }
             
-            if (textChannelMainModel.IsNewsChannel)
+            if (textChannelMainModel.IsNewsChannel.GetValueOrDefault())
             {
                 MessageService messageService = new NewsServices(guild);
                 if (remove)

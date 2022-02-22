@@ -1,17 +1,29 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Microsoft.IdentityModel.Tokens
 
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <MudGrid>
-        @foreach (GuildSettingsModel guild in Guilds)
-        {
-            <MudItem xs="12" sm="6" md="4">
-                <GuildWidget Guild="guild" EnableJoin="@EnableJoin"></GuildWidget>
-            </MudItem>
-        }
+<MudContainer MaxWidth="MaxWidth.Large" Class="align-content-md-center align-items-center">
+    <MudGrid Justify="Justify.Center">
+        <MudItem lg="12" md="12" sm="12">
+            <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
+        </MudItem>
+        <MudItem lg="12" md="12" sm="12">
+            <MudPaper>
+                @foreach (GuildSettingsModel guild in Guilds)
+                {
+                    @if (string.IsNullOrWhiteSpace(SearchQuery) || (guild.Name?.Contains(SearchQuery) ?? false) || (guild.Description?.Contains(SearchQuery) ?? false))
+                    {
+                        <GuildWidget Guild="guild" EnableJoin="@EnableJoin"></GuildWidget>
+                        <MudDivider></MudDivider>
+                    }
+                }
+                <MudButton Style="margin-top: 15px;" FullWidth="@true" Link="@Environment.GetEnvironmentVariable("BOT_INVITE")" Variant="Variant.Outlined" Color="Color.Primary">Tilføj dit eget fælleskab til KULiv</MudButton>
+            </MudPaper>
+        </MudItem>
     </MudGrid>
 </MudContainer>
 @code {
     [Parameter] public List<GuildSettingsModel> Guilds { get; set; }
     [Parameter] public bool EnableJoin { get; set; }
+    private string SearchQuery { get; set; }
 }

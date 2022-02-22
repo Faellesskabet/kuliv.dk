@@ -23,7 +23,7 @@ namespace Dikubot.Discord.EventListeners
             var permissionsService = new PermissionsService(guild);
             var channelModel = voiceChannelServices.Get(m => m.DiscordId == channel.Id.ToString());
 
-            if (!channelModel.ExpandOnJoin)
+            if (!channelModel.ExpandOnJoin.GetValueOrDefault())
                 return;
 
             // Get's childrens and parent.

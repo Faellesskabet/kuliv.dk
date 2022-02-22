@@ -17,7 +17,7 @@
             </MudCardHeader>
             <MudCardContent>
                 <MudSelect Label="Nyhed kanaler" Lines="2" MultiSelection="true" HelperText="Vælg alle de kanaler der skal bruges til nyheder" @bind-SelectedValues="_selectedChannels"
-                           Text="@(Util.ConcatListToString(_selectedChannels.Select(model => model?.Name ?? "").ToList()))">
+                           MultiSelectionTextFunc="list => GetText(_selectedChannels)" Text="@GetText(_selectedChannels)">
                     @foreach (var textChannel in _textChannelMainModels)
                     {
                         <MudSelectItem Value="@textChannel">@textChannel.Name</MudSelectItem>
@@ -45,8 +45,13 @@ else
     private SocketGuild _guild;
     private TextChannelServices _textChannelServices;
     private List<TextChannelMainModel> _textChannelMainModels;
-    
+
     private IEnumerable<TextChannelMainModel> _selectedChannels { get; set; }
+
+    public string GetText(IEnumerable<TextChannelMainModel> channels)
+    {
+        return Util.ConcatListToString(channels.Select(model => model?.Name ?? "").ToList());
+    }
 
     private bool _loaded = false;
 
@@ -63,7 +68,7 @@ else
         _guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
         _textChannelServices = new TextChannelServices(_guild);
         _textChannelMainModels = _textChannelServices.GetAll();
-        _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel);
+        _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel.GetValueOrDefault());
 
         _loaded = true;
     }
@@ -81,9 +86,14 @@ else
             return;
         }
 
-        foreach (var textChannelMainModel in _selectedChannels)
+        HashSet<TextChannelMainModel> hashedSelection = new HashSet<TextChannelMainModel>(_selectedChannels);
+        foreach (var textChannelMainModel in _textChannelMainModels)
         {
-            textChannelMainModel.IsNewsChannel = true;
+            textChannelMainModel.IsNewsChannel = false;
+            if (_selectedChannels.Contains(textChannelMainModel))
+            {
+                textChannelMainModel.IsNewsChannel = true;
+            }
             _textChannelServices.Upsert(textChannelMainModel);
         }
         this.StateHasChanged();
@@ -102,7 +112,7 @@ else
             return;
         }
         
-        _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel);
+        _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel.GetValueOrDefault());
         this.StateHasChanged();
     }
 }
