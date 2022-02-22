@@ -8,8 +8,6 @@ namespace Dikubot.DataLayer.Database.Global.GuildSettings;
 
 public class GuildSettingsModel : MainModel
 {
-    public GuildSettingsModel() {}
-
     public GuildSettingsModel(SocketGuild guild)
     {
         GuildId = guild.Id;

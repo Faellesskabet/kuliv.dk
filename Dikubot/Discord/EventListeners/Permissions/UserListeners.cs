@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Database.Guild.Models.User;
 using Dikubot.DataLayer.Permissions;
 using Discord;
@@ -34,6 +35,13 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 return;
 
             UserGuildServices userGuildServices = new UserGuildServices(socketGuild);
+            UserGlobalServices userGlobalServices = new UserGlobalServices();
+            UserGlobalModel userGlobalModel = userGlobalServices.Get(socketUser);
+            if (userGlobalModel.SelectedGuild == socketGuild.Id)
+            {
+                userGlobalModel.SelectedGuild = 0;
+                userGlobalServices.Upsert(userGlobalModel);
+            }
             userGuildServices.Remove(model => Equals(model.DiscordId, socketUser.Id));
         }
 

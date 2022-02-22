@@ -16,7 +16,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.Q
 
         protected override Expression<Func<TextChannelMainModel, bool>> ChannelFilter()
         {
-            return model => model.IsQuoteChannel;
+            return model => model.IsQuoteChannel.Value;
         }
     }
 }

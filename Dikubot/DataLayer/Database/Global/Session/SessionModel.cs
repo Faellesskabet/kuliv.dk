@@ -1,4 +1,5 @@
 using System;
+using Dikubot.DataLayer.Database.Global.Session.DiscordAuthentication;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Database.Guild.Models.User;
 using Discord.WebSocket;
@@ -54,5 +55,7 @@ namespace Dikubot.DataLayer.Database.Global.Session
         {
             get => DateTime.Now > Expires;
         }
+        
+        public DiscordAuthenticationModel DiscordAuthenticationModel { get; set; }
     }
 }

@@ -25,6 +25,7 @@
 @using System.Net
 @using System.Text
 @using Dikubot.DataLayer.Database.Global.Session
+@using Dikubot.DataLayer.Database.Global.Session.DiscordAuthentication
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
@@ -84,6 +85,7 @@ else if (discordUser != null)
     private IUser discordUser;
     private string client_id, client_secret, redirect_url;
     private bool loading;
+    private DiscordAuthenticationModel _discordAuthenticationModel;
     
     protected override async Task OnInitializedAsync()
     {
@@ -92,15 +94,18 @@ else if (discordUser != null)
         var authState = await authenticator.GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
 
-        client_id = Configuration.GetValue<string>("DiscordAuth:CLIENT_ID");
-        client_secret = Configuration.GetValue<string>("DiscordAuth:CLIENT_SECRET");
+        client_id = Environment.GetEnvironmentVariable("CLIENT_ID");
+        client_secret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
         redirect_url = NavigationManager.BaseUri;
         
         if (AuthCode != null)
         {
             try
             {
-                JObject discordUserJson = GetUser(GetAuthtoken(AuthCode));
+                JObject authentication = GetAuth(AuthCode);
+                JObject discordUserJson = GetUser((string) authentication["access_token"]);
+                _discordAuthenticationModel = new DiscordAuthenticationModel()
+                { AccessToken = (string)authentication["access_token"], RefreshToken = (string)authentication["refresh_token"] };
                 ulong discordUserId = Convert.ToUInt64(discordUserJson["id"]);
                 discordUser = await DiscordBot.Client.GetUserAsync(discordUserId);
                 await InvokeAsync(() => { StateHasChanged(); });
@@ -148,13 +153,14 @@ else if (discordUser != null)
         }
         
         SessionModel sessionModel = new SessionModel(userServices.Get((discordUser.Id.ToString())));
+        sessionModel.DiscordAuthenticationModel = _discordAuthenticationModel;
         await authenticator.UpdateSession(sessionModel);
         parent.Update();
     }
     
     
     // https://www.yogihosting.com/discord-api-asp-net/
-    public string GetAuthtoken(string authCode)
+    public JObject GetAuth(string authCode)
     {
         
         /*Get Access Token from authorization code by making http post request*/
@@ -172,10 +178,8 @@ else if (discordUser != null)
         postStream = response.GetResponseStream();
         StreamReader reader = new StreamReader(postStream);
         string responseFromServer = reader.ReadToEnd();
-  
-        string tokenInfo = responseFromServer.Split(',')[0].Split(':')[1];
         
-        return tokenInfo.Trim().Substring(1, tokenInfo.Length - 3);
+        return JObject.Parse(responseFromServer);
     }
 
     public JObject GetUser(string accessToken)

@@ -2,6 +2,7 @@
 @using global::Discord
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime;
@@ -15,10 +16,10 @@ else
 {
     <h1>Dine fællesskaber:</h1>
     <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList()"></GuildWidgetCollection>
-    @if (_mutualGuilds.Count > 0)
+    @if (_complementGuilds.Count > 0)
     {
         <h1 class="other-communities">Udforsk andre fællesskaber:</h1>
-        <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList()" EnableJoin="true"></GuildWidgetCollection>
+        <GuildWidgetCollection Guilds="_complementGuilds" EnableJoin="true"></GuildWidgetCollection>
     }
     <br/>
     <ul class="circles">
@@ -70,7 +71,7 @@ else
         {
             _mutualGuilds = socketUser.MutualGuilds.ToHashSet();   
         }
-        
+
         _complementGuilds = DiscordBot.Client.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => _guildSettingsService.Get(guild)).ToList();
         _loaded = true;
         this.StateHasChanged();

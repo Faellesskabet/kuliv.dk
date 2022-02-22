@@ -33,11 +33,7 @@ namespace Dikubot.Webapp.Authentication
         {
             var authState = await GetAuthenticationStateAsync();
             UserIdentity user = (UserIdentity) authState.User.Identity!;
-            if (user?.UserGlobalModel == null)
-            {
-                throw new Exception("User cannot be found for this session.");
-            }
-            return user.UserGlobalModel;
+            return user?.UserGlobalModel;
         }
         
         /// <summary>

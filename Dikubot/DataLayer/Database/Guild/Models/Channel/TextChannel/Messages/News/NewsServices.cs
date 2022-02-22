@@ -10,7 +10,7 @@ public class NewsServices : MessageService
 
     protected override Expression<Func<TextChannelMainModel, bool>> ChannelFilter()
     {
-        return model => model.IsNewsChannel;
+        return model => model.IsNewsChannel.Value;
     }
 
 }
