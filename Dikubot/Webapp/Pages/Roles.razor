@@ -154,11 +154,11 @@
 
     protected bool HasPermissionForCategory(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
     {
-        return joinRoleCategoryMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
+        return joinRoleCategoryMainModel.Permission.IsNullOrEmpty() || joinRoleCategoryMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
     }
     
     protected bool HasPermissionForRole(JoinRoleMainModel joinRoleMainModel)
     {
-        return joinRoleMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
+        return joinRoleMainModel.Permission.IsNullOrEmpty() || joinRoleMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
     }
 }
