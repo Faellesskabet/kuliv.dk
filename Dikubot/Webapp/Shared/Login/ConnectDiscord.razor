@@ -30,12 +30,25 @@
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
 @using Microsoft.Extensions.Configuration
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor _httpContextAccessor
+@using Microsoft.AspNetCore.Components.Authorization
+@using Dikubot.Webapp.Extensions
+
 @using Color = MudBlazor.Color
+@using System.Collections
+
+
 
 <link href="css/diku/login.css" rel="stylesheet"/>
 <h1>Velkommen til KULiv</h1>
 
-@if (discordUser == null && !loading)
+@if (discordUser == null)
 {
     <MudCard>
         <MudCardHeader>
@@ -45,7 +58,11 @@
             <MudText Typo="Typo.body1">For at tilgå KULiv, skal du logge ind med en Discord bruger.</MudText>
         </MudCardContent>
         <MudCardActions>
-            <a href="@loginURL()"><MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton></a>
+            
+            @foreach (var scheme in ExternalProviders)
+            {
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick=" () => SignIn(scheme.Name)"> Connect using @scheme.DisplayName </MudButton>
+            }
             <a href="https://dnur.dk/"><MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton></a>
         </MudCardActions>
     </MudCard>
@@ -70,8 +87,6 @@ else if (discordUser != null)
 }
 
 
-
-
 @code {
     [Parameter]
     public Login parent { get; set; }
@@ -79,51 +94,22 @@ else if (discordUser != null)
     [Parameter]
     public string AuthCode { get; set; }
     
-    
-    private string password;
     private Authenticator authenticator;
     private IUser discordUser;
-    private string client_id, client_secret, redirect_url;
-    private bool loading;
+    
     private DiscordAuthenticationModel _discordAuthenticationModel;
+    
+    static HttpContext context = new DefaultHttpContext();
+    public AuthenticationScheme[] ExternalProviders;
     
     protected override async Task OnInitializedAsync()
     {
-        loading = true;
-        authenticator = ((Authenticator) AuthenticationStateProvider);
+       
         var authState = await authenticator.GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
-
-        client_id = Environment.GetEnvironmentVariable("CLIENT_ID");
-        client_secret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
-        redirect_url = NavigationManager.BaseUri;
-        
-        if (AuthCode != null)
-        {
-            try
-            {
-                JObject authentication = GetAuth(AuthCode);
-                JObject discordUserJson = GetUser((string) authentication["access_token"]);
-                _discordAuthenticationModel = new DiscordAuthenticationModel()
-                { AccessToken = (string)authentication["access_token"], RefreshToken = (string)authentication["refresh_token"] };
-                ulong discordUserId = Convert.ToUInt64(discordUserJson["id"]);
-                discordUser = await DiscordBot.Client.GetUserAsync(discordUserId);
-                await InvokeAsync(() => { StateHasChanged(); });
-            }
-            catch (Exception e)
-            {
-            // ignored
-            }
-        }
-        loading = false;
-
     }
 
-    public async void DiscordConnected(SocketUser user)
-    {
-        discordUser = user;
-        await InvokeAsync(() => { StateHasChanged(); });
-    }
+
 
     private string DiscordNameMentionCombo(IUser user)
     {
@@ -131,10 +117,6 @@ else if (discordUser != null)
     }
 
 
-    public string GetContactMessage()
-    {
-        return $"Send den følgende kommando til botten {DiscordBot.Client.CurrentUser.Username}#{DiscordBot.Client.CurrentUser.Discriminator}.";
-    } 
 
     private async Task RejectDiscord()
     {
@@ -158,52 +140,9 @@ else if (discordUser != null)
         parent.Update();
     }
     
+    public async Task SignIn([FromForm] string provider)
+    {
     
-    // https://www.yogihosting.com/discord-api-asp-net/
-    public JObject GetAuth(string authCode)
-    {
-        
-        /*Get Access Token from authorization code by making http post request*/
-        HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create("https://discordapp.com/api/oauth2/token");
-        webRequest.Method = "POST";
-        string parameters = "client_id=" + client_id + "&client_secret=" + client_secret + "&grant_type=authorization_code&code=" + authCode + "&redirect_uri=" + redirect_url + "";
-        byte[] byteArray = Encoding.UTF8.GetBytes(parameters);
-        webRequest.ContentType = "application/x-www-form-urlencoded";
-        webRequest.ContentLength = byteArray.Length;
-        Stream postStream = webRequest.GetRequestStream();
-  
-        postStream.Write(byteArray, 0, byteArray.Length);
-        postStream.Close();
-        WebResponse response = webRequest.GetResponse();
-        postStream = response.GetResponseStream();
-        StreamReader reader = new StreamReader(postStream);
-        string responseFromServer = reader.ReadToEnd();
-        
-        return JObject.Parse(responseFromServer);
     }
-
-    public JObject GetUser(string accessToken)
-    {
-        /*Do http get request to the URL to get the client info in json*/ 
-        HttpWebRequest webRequest1 = (HttpWebRequest)WebRequest.Create("https://discordapp.com/api/users/@me");
-        webRequest1.Method = "Get";
-        webRequest1.ContentLength = 0;
-        webRequest1.Headers.Add("Authorization", "Bearer " + accessToken);
-        webRequest1.ContentType = "application/x-www-form-urlencoded";
-  
-        string apiResponse1 = "";
-        using (HttpWebResponse response1 = webRequest1.GetResponse() as HttpWebResponse)
-            {
-                StreamReader reader1 = new StreamReader(response1.GetResponseStream());
-                apiResponse1 = reader1.ReadToEnd();
-            }
-            /*End*/
-            return JObject.Parse(apiResponse1);
-        }
-
-        public string loginURL()
-        {
-            return $"https://discordapp.com/api/oauth2/authorize?response_type=code&client_id={client_id}&scope=identify%20guilds.join&state=15773059ghq9183habn&redirect_uri={redirect_url}";
-        }
 
 }

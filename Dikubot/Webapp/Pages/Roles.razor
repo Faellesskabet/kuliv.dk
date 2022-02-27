@@ -11,7 +11,7 @@
 @using Microsoft.IdentityModel.Tokens
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+
     @if (_loaded)
     {
         <MudAlert Severity="Severity.Normal" Square="true" Class="my-2">Du er ved at vælge roller i fællesskabet @_guildSettingsModel.Name. 
@@ -80,8 +80,7 @@
     {
         <Loading></Loading>
     }
-    
-</MudContainer>
+
 @code {
     private Authenticator authenticator;
     private UserIdentity user;

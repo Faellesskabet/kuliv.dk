@@ -1,6 +1,6 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Microsoft.IdentityModel.Tokens
-
+@inject NavigationManager MyNavigationManager
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="align-content-md-center align-items-center">
     <MudGrid Justify="Justify.Center">
@@ -17,7 +17,9 @@
                         <MudDivider></MudDivider>
                     }
                 }
-                <MudButton Style="margin-top: 15px;" FullWidth="@true" Link="@Environment.GetEnvironmentVariable("BOT_INVITE")" Variant="Variant.Outlined" Color="Color.Primary">Tilføj dit eget fælleskab til KULiv</MudButton>
+                
+                Html.Raw($"https://{Context.Request.Host}/admin/SetupConfirmed")
+                <MudButton Style="margin-top: 15px;" FullWidth="@true" Link="@($"https://discord.com/oauth2/authorize?client_id={Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID")}&scope=applications.commands+bot&permissions=8&response_type=code&redirect_uri=https://{MyNavigationManager.BaseUri}/admin/SetupConfirmed")" Variant="Variant.Outlined" Color="Color.Primary">Tilføj dit eget fælleskab til KULiv</MudButton>
             </MudPaper>
         </MudItem>
     </MudGrid>

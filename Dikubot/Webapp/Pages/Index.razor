@@ -5,7 +5,6 @@
 @using Dikubot.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudAlert Severity="Severity.Warning" Square="true" Class="my-2">Dette er en åben beta af KULiv.dk. Hvis du finder en fejl, 
         må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues</MudAlert>
     <MudGrid>
@@ -28,7 +27,8 @@
                 </MudCarouselItem>
             </MudCarousel>
         </MudItem>
-        <MudItem xs="12" sm="6" md="4">
+        
+        <MudItem xs="12" sm="12" md="4">
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 <MudCardHeader>
                     <MudIcon Icon="@Icons.Filled.Group" Color="Color.Info"></MudIcon>
@@ -43,7 +43,8 @@
                 </MudCardActions>
             </MudCard>
         </MudItem>
-        <MudItem xs="12" sm="6" md="4">
+        
+        <MudItem xs="12" sm="12" md="4">
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 @if (_loaded)
                 {
@@ -65,6 +66,7 @@
                 }
             </MudCard>
         </MudItem>
+        
         <MudItem xs="12" sm="12" md="4">
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 <MudCardHeader>
@@ -96,7 +98,6 @@
             </MudGrid>
         </MudItem>
     </MudGrid>
-</MudContainer>
 
 @code {
     private Authenticator authenticator;
