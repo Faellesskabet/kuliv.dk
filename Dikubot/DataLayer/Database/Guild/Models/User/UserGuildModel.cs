@@ -85,7 +85,6 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
 
         public bool IsRoleActive(UserRoleModel userRoleModel)
         {
-            //ToDo: If there is no start or end date, set to active.
             return _roles.TryGetValue(userRoleModel, out userRoleModel) && ((IActiveTimeFrame)userRoleModel).IsActive();
         }
 
