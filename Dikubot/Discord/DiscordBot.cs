@@ -89,9 +89,10 @@ namespace Dikubot.Discord
                 int users = Client.Guilds.Sum(guild => guild.MemberCount-1);
                 Client.SetGameAsync($"{users.ToString()} users", null, ActivityType.Watching);
                     
-                scheduler.ScheduleTask(new UpdateUserRolesTask());
+                //scheduler.ScheduleTask(new UpdateUserRolesTask());
                 scheduler.ScheduleTask(new BackupDatabaseTask());
                 scheduler.ScheduleTask(new ClearExpiredSessionsTask());
+                scheduler.ScheduleTask(new ForceNameChangeTask());
                 
                 return Task.CompletedTask;
             };

@@ -32,13 +32,11 @@ namespace Dikubot.DataLayer.Database.Interfaces
             return DateTime.Now > EndDate && EndDate != DateTime.MinValue;
         }
         /// <summary>
-        /// Tells us whether the current time is in between the startdate and enddate
+        /// Tells us whether the current time is in between the startdate and enddate. IsActive is true if neither Ended or Started has been set
         /// </summary>
         /// <returns>Returns true if HasStarted() is true and HasEnded() is false</returns>
         public bool IsActive()
         {
-            
-            
             return HasStarted() && !HasEnded();
         }
     }

@@ -172,7 +172,7 @@ namespace Dikubot.DataLayer.Permissions
                 try
                 {
                     Logger.Debug($"Removing {role.Name} from {guildUser.Username}");
-                    await guildUser.RemoveRoleAsync(role, RequestOptions.Default);
+                    await guildUser.RemoveRoleAsync(role);
                 }
                 catch (Exception)
                 {
@@ -191,7 +191,7 @@ namespace Dikubot.DataLayer.Permissions
                 try
                 {
                     Logger.Debug($"Adding {role.Name} to {guildUser.Username}");
-                    await guildUser.AddRoleAsync(role, RequestOptions.Default);
+                    await guildUser.AddRoleAsync(role, new RequestOptions() { RetryMode = RetryMode.RetryRatelimit});
                 }
                 catch (Exception)
                 {
