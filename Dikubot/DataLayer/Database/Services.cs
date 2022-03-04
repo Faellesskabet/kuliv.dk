@@ -55,9 +55,6 @@ namespace Dikubot.DataLayer.Database
             {
                 try
                 {
-                    // this dropall is temporary. It is inefficient that we drop all the indexes, just to set them again
-                    // but because of some breaking indexes in the past, we have to do this until the database has been updated
-                    _models.Indexes.DropAll();
                     // MongoDB is smart enough to not duplicate indexes (i think ...) 
                     _models.Indexes.CreateMany(((IIndexed<TModel>)this).GetIndexes().Select(definition => new CreateIndexModel<TModel>(definition)));
                     indexed[indexKey] = true;
