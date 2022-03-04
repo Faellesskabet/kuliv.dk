@@ -12,7 +12,8 @@
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
 
 
-<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<JoinRoleCategoryMainModel>>>(Reload))" @ref="_table">
+<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<JoinRoleCategoryMainModel>>>(Reload))" @ref="_table"
+          Loading="@_loading">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
         <MudSpacer />
@@ -41,7 +42,7 @@
         <MudText>Kunne ikke finde nogen elementer</MudText>
     </NoRecordsContent>
     <LoadingContent>
-        <MudText>Loading...</MudText>
+        <Loading></Loading>
     </LoadingContent>
     <PagerContent>
         <MudTablePager />
@@ -61,12 +62,14 @@
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
     private JoinRoleServices _services;
+    private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
         _services = new JoinRoleServices(_guild);
+        _loading = false;
     }
 
     private async Task<TableData<JoinRoleCategoryMainModel>> Reload(TableState state)
