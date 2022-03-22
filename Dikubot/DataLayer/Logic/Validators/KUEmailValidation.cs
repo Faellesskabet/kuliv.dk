@@ -17,9 +17,7 @@ public class KUEmailValidation : AbstractValidator<string>
     private IEnumerable<string> ValidateValue(string arg)
     {
         var result = Validate(arg);
-        if (result.IsValid)
-            return new string[0];
-        return result.Errors.Select(e => e.ErrorMessage);
+        return result.IsValid ? Array.Empty<string>() : result.Errors.Select(e => e.ErrorMessage);
     }
 
     public Func<string, IEnumerable<string>> Validation => ValidateValue;
