@@ -124,7 +124,7 @@ else
 
     private async void ConfirmEmailPassword()
     {
-        if (!passwordInput.Equals(secretPassword) || string.IsNullOrEmpty(secretPassword))
+        if (string.IsNullOrEmpty(secretPassword) || !secretPassword.Equals(passwordInput))
         {
             passwordInput = "";
             email = "";
