@@ -5,12 +5,11 @@
 @using Dikubot.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudAlert Severity="Severity.Warning" Square="true" Class="my-2">Dette er en åben beta af KULiv.dk. Hvis du finder en fejl, 
         må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues</MudAlert>
     <MudGrid>
         <MudItem xs="36" sm="18" md="12">
-            <MudCarousel Class="mud-width-full" Style="height:100px;" ShowArrows="@false" ShowBullets="@false" AutoCycle="@true" TData="object">
+            <MudCarousel Style="height:100px;" ShowArrows="@false" ShowBullets="@false" AutoCycle="@true" TData="object">
                 <MudCarouselItem Transition="Transition.Slide" Color="@Color.Primary">
                     <div class="d-flex" style="height:100%">
                         <MudText Typo="Typo.h3" Class="mx-auto my-auto">KULiv - Find fællesskaber</MudText>
@@ -28,7 +27,7 @@
                 </MudCarouselItem>
             </MudCarousel>
         </MudItem>
-        <MudItem xs="12" sm="6" md="4">
+        <MudItem xs="12" sm="12" md="4">
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 <MudCardHeader>
                     <MudIcon Icon="@Icons.Filled.Group" Color="Color.Info"></MudIcon>
@@ -43,7 +42,7 @@
                 </MudCardActions>
             </MudCard>
         </MudItem>
-        <MudItem xs="12" sm="6" md="4">
+        <MudItem xs="12" sm="12" md="4">
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 @if (_loaded)
                 {
@@ -96,7 +95,6 @@
             </MudGrid>
         </MudItem>
     </MudGrid>
-</MudContainer>
 
 @code {
     private Authenticator authenticator;
