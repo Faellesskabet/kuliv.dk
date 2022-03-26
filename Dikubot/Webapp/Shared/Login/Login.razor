@@ -3,15 +3,17 @@
 @using Dikubot.Discord.Command
 @using Dikubot.Webapp.Authentication
 @using global::Discord.WebSocket
+@using Microsoft.AspNetCore.Http
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
+@inject IHttpContextAccessor httpContextAccessor;
 
 <div class="page">
     <div class="blur"></div>
     <div class="login">
         @if (_state == State.ConnectDiscord)
         {
-            <ConnectDiscord parent="@this" AuthCode="@AuthCode"/>
+            <ConnectDiscord parent="@this"/>
         }
         @if (_state == State.ConnectEmail)
         {
@@ -57,6 +59,8 @@
 
     private async Task<State> getState()
     {
+
+        var test = httpContextAccessor.HttpContext.User;
         authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
 

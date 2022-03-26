@@ -4,6 +4,8 @@ using System.Security.Claims;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Static;
+using Microsoft.AspNetCore.Http;
+
 namespace Dikubot.Webapp.Authentication
 {
     public sealed class UserIdentity : ClaimsIdentity
@@ -16,6 +18,7 @@ namespace Dikubot.Webapp.Authentication
         /// </summary>
         public UserIdentity()
         {
+            
         }
 
         /// <Summary>Creates a UserIdentity based on a session.</Summary>
