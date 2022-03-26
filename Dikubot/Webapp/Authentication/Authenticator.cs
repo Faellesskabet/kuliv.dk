@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
@@ -8,8 +9,13 @@ using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Logic.WebDiscordBridge;
 using Dikubot.Discord;
 using Discord.WebSocket;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Graph;
+
 
 namespace Dikubot.Webapp.Authentication
 {
@@ -18,12 +24,35 @@ namespace Dikubot.Webapp.Authentication
         private ILocalStorageService _localStorageService;
         private SessionServices _sessionServices;
         private SocketGuild _guild;
-        
+
         public Authenticator(ILocalStorageService localStorageService)
         {
             _sessionServices = new SessionServices();
             _localStorageService = localStorageService;
         }
+
+
+        /// <summary>
+        /// Get the current GetExternalProvidersAsync
+        /// </summary>
+        /// <returns>Returns All ExternalProbiders</returns>
+        public static async Task<AuthenticationScheme[]> GetExternalProvidersAsync()
+        {
+            HttpContext context = new DefaultHttpContext();
+            
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            var schemes = context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+
+            return (from scheme in await schemes.GetAllSchemesAsync()
+                where !string.IsNullOrEmpty(scheme.DisplayName)
+                select scheme).ToArray();
+        }
+
+
 
         /// <summary>
         /// Get the current UserGlobalModel
@@ -31,6 +60,7 @@ namespace Dikubot.Webapp.Authentication
         /// <returns>Returns a nullable UserGlobalModel based on the current session</returns>
         public async Task<UserGlobalModel> GetUserGlobal()
         {
+            
             var authState = await GetAuthenticationStateAsync();
             UserIdentity user = (UserIdentity) authState.User.Identity!;
             return user?.UserGlobalModel;
@@ -71,6 +101,7 @@ namespace Dikubot.Webapp.Authentication
         /// <returns>Task</returns>
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
+            
             //Get session key
             string sessionStringKey = await _localStorageService.GetItemAsStringAsync("session");
             
