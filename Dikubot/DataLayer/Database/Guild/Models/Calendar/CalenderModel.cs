@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Dikubot.DataLayer.Database.Guild.Models.Role;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
@@ -16,16 +19,54 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         [BsonElement("Visible")]
         public EnumAvailable Visible { get; set; }
 
+        
+        
+        
+        
         /// <Summary>Who can made events in the the Calaendar</Summary>
-        [BsonElement("Permission ")]
+        [BsonElement("Permission")]
         public HashSet<Guid> Permission { get; set; }
 
+        public IEnumerable<RoleMainModel> GetPermissionRoles(RoleServices roleServices)
+        {
+            IEnumerable<RoleMainModel> roles = Permission.IsNullOrEmpty() ? new List<RoleMainModel>() : 
+                Permission.Select(guid => roleServices.Get(model => model.Id == guid)).Where(model => model != null);
+            
+            // Replace by ForiegnKey system
+            var roleMainModels = roles as RoleMainModel[] ?? roles.ToArray();
+            Permission = new HashSet<Guid>(roleMainModels.Select(model => model.Id));
+            return roleMainModels;
+        }
+        
+        [BsonIgnore]
+        public IEnumerable<Guid> PermissionEnumerable { get => Permission; set => Permission = new HashSet<Guid>(value); }
+        
+        /// <Summary>The Decscrition for the calendar</Summary>
+        [BsonElement("Decs")]
+        public string Decs { get; set; }
+        
+        
         /// <Summary>
         /// If private, which roles can see the events in the the Calaendar
         /// Other than those who has Permission
         /// </Summary>
         [BsonElement("View")]
         public HashSet<Guid> View { get; set; }
+        
+        public IEnumerable<RoleMainModel> GetViewRoles(RoleServices roleServices)
+        {
+            IEnumerable<RoleMainModel> roles = View.IsNullOrEmpty() ? new List<RoleMainModel>() : 
+                Permission.Select(guid => roleServices.Get(model => model.Id == guid)).Where(model => model != null);
+            
+            // Replace by ForiegnKey system
+            var roleMainModels = roles as RoleMainModel[] ?? roles.ToArray();
+            Permission = new HashSet<Guid>(roleMainModels.Select(model => model.Id));
+            return roleMainModels;
+        }
+        
+        [BsonIgnore]
+        public IEnumerable<Guid> ViewEnumerable { get => View; set => View = new HashSet<Guid>(value); }
+        
 
         /// <Summary>How the Calendar Displays</Summary>
         [BsonElement("Display")]
@@ -53,7 +94,8 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         {
             Privat,
             Internt,
-            Externt
+            Externt,
+            Public
         }
 
         public enum EnumDisplay
