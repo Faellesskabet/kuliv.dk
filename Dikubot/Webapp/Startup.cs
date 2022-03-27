@@ -15,6 +15,8 @@ using Dikubot.Webapp.Authentication;
 using Discord.OAuth2;
 using Microsoft.AspNetCore.Http;
 using MudBlazor.Services;
+using Syncfusion.Blazor;
+
 
 namespace Dikubot.Webapp
 {
@@ -35,15 +37,16 @@ namespace Dikubot.Webapp
             var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
             
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
-           
-            
-            
+
             //Do NICE STUFF - with login :D
             services.AddHttpContextAccessor();
             
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            //Kalender
+            services.AddSyncfusionBlazor(); 
+           
             services.AddResponseCaching();
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
@@ -91,6 +94,9 @@ namespace Dikubot.Webapp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            
+            
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -101,6 +107,10 @@ namespace Dikubot.Webapp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            
+            //Kalendar
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Environment.GetEnvironmentVariable("SYNCFUSION_API_KEY"));
+            
             
             app.UseHttpsRedirection();
 
