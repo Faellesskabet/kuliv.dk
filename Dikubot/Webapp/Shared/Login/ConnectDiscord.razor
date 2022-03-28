@@ -102,7 +102,7 @@ else if(!loading)
         discordUser = null;
         await OnInitializedAsync();
         await InvokeAsync(() => { StateHasChanged(); });
-        Navigation.NavigateTo("Account/Login", true);
+        Navigation.NavigateTo("Account/Logout", true);
     }
 
     private async Task ApproveDiscord()

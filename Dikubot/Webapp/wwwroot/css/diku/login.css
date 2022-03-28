@@ -37,36 +37,34 @@ body {
     .text-field {
         width: 450px;
     }
+    .login-button {
+        width: 880px;
+    }
+    .mud-card {
+        width: 540px;
+    }
 }
 
 @media only screen and (max-width: 562px) {
     .text-field {
         width: 80vw;
     }
-    h1 {
-        font-size: 70px;
-    }
-}
-
-
-@media only screen and (min-width: 900px) {
-    .login-button {
-        width: 880px;
-    }
-}
-
-@media only screen and (max-width: 900px) {
     .login-button {
         width: 80vw;
     }
     h1 {
-        font-size: 70px;
+        font-size: 60px;
+    }
+    .mud-card {
+        width: 80vw;
     }
 }
+
 
 
 h1 {
     color: white;
     text-align: center;
+    text-wrap: normal;
     font-size: 70px;
 }
