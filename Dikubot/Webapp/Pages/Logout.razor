@@ -6,22 +6,18 @@
 <h3>Logger ud...</h3>
 
 @code {
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        var authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity) authState.User.Identity;
         try
         {
-            user.SessionModel.Expires = DateTime.Now;
-            await authenticator.UpdateSession(user.SessionModel);
-            NavigationManager.NavigateTo("/");
+            
+            NavigationManager.NavigateTo("Account/Logout", true);
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
         }
-        
+        return Task.CompletedTask;
     }
 
 }

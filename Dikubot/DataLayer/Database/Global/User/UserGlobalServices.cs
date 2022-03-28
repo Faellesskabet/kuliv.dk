@@ -17,7 +17,8 @@ namespace Dikubot.DataLayer.Database.Global.User
         {
             return Get(user.Id.ToString());
         }
-        
+
+        public UserGlobalModel Get(ulong discordId) => Get(discordId.ToString());
         public UserGlobalModel Get(string discordId)
         {
             UserGlobalModel mainModel = this.Get(inmodel => inmodel.DiscordId == discordId);

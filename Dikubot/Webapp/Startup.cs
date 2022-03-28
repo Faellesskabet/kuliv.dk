@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using BlazorLoginDiscord.Data;
 using Dikubot.Webapp.Authentication;
-using Discord.OAuth2;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
 using Microsoft.AspNetCore.Http;
 using MudBlazor.Services;
 
@@ -68,7 +68,6 @@ namespace Dikubot.Webapp
                 options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
                 options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                 options.Scope.Add("identify guilds guilds.join");
-                options.Prompt = "";
                 options.SaveTokens = true;
                 options.Events.OnCreatingTicket = ctx =>
                 {

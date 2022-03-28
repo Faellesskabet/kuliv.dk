@@ -60,8 +60,7 @@
 
         userModel.SelectedGuild = Guild.GuildId;
         new UserGlobalServices().Upsert(user.UserGlobalModel);
-        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
-        await authenticator.UpdateSession(sessionModel);
+        await authenticator.UpdateSession();
         NavigationManager.NavigateTo("/");
         
     }

@@ -142,8 +142,7 @@ else
         user.UserGlobalModel.Email = email;
         user.UserGlobalModel.Verified = true;
         userGlobalServices.Upsert(user.UserGlobalModel);
-        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
-        await authenticator.UpdateSession(sessionModel);
+        await authenticator.UpdateSession();
         parent.Update();
     }
     public async void UpdateUserInGuild(SocketGuild guild, UserGlobalServices userGlobalServices)
