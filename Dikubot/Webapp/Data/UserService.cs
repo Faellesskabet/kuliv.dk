@@ -48,10 +48,10 @@ namespace BlazorLoginDiscord.Data
             
             var userClaim = new DiscordUserClaim
             {
-                UserId = ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value),
-                Name = claims.First(x => x.Type == ClaimTypes.Name).Value,
-                Discriminator = claims.First(x => x.Type == "urn:discord:discriminator").Value,
-                Avatar = claims.First(x => x.Type == "urn:discord:avatar").Value,
+                UserId = ulong.Parse(claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value),
+                Name = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value,
+                Discriminator = claims.FirstOrDefault(x => x.Type == "urn:discord:discriminator")?.Value,
+                Avatar = claims.FirstOrDefault(x => x.Type == "urn:discord:avatar")?.Value,
                 Email = claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value,
                 Verified = verified
             };
