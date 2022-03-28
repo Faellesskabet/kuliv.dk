@@ -15,6 +15,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
 
 namespace BlazorLoginDiscord.Data
 {
@@ -29,7 +30,7 @@ namespace BlazorLoginDiscord.Data
         /// <returns></returns>
         public DiscordUserClaim GetInfo(HttpContext httpContext)
         {
-            if (!httpContext.User.Identity.IsAuthenticated)
+            if (!httpContext.User.Identity?.IsAuthenticated ?? false)
             {
                 return null;
             }
@@ -88,7 +89,7 @@ namespace BlazorLoginDiscord.Data
 
             var token = await GetTokenAsync(httpContext);
 
-            var guildEndpoint = Discord.OAuth2.DiscordDefaults.UserInformationEndpoint + "/guilds";
+            var guildEndpoint = DiscordDefaults.UserInformationEndpoint + "/guilds";
 
             using (var request = new HttpRequestMessage(HttpMethod.Get, guildEndpoint))
             {

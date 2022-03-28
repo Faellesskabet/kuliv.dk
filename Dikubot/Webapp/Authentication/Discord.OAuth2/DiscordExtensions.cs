@@ -1,10 +1,8 @@
-﻿
-using System;
-using Discord.OAuth2;
+﻿using System;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection;
 
-
-namespace Microsoft.Extensions.DependencyInjection
+namespace Dikubot.Webapp.Authentication.Discord.OAuth2
 {
     public static class DiscordAuthenticationOptionsExtensions
     {

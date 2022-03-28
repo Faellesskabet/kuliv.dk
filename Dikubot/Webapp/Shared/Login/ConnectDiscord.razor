@@ -40,7 +40,7 @@
 
 
 
-@if (discordUser == null && !loading)
+@if ((discordUser == null || !discordUser.HasClaim(claim => claim.Issuer == "Discord")) && !loading)
 {
     <MudCard>
         <MudCardHeader>
@@ -55,7 +55,7 @@
         </MudCardActions>
     </MudCard>
 }
-else if (discordUser != null)
+else if(!loading)
 {
     <MudCard>
         <MudCardHeader>
@@ -93,7 +93,7 @@ else if (discordUser != null)
 
     protected override async Task OnInitializedAsync()
     {
-        discordUser = httpContextAccessor.HttpContext.User;
+        discordUser = httpContextAccessor.HttpContext?.User;
     }
 
 
@@ -102,7 +102,7 @@ else if (discordUser != null)
         discordUser = null;
         await OnInitializedAsync();
         await InvokeAsync(() => { StateHasChanged(); });
-        Navigation.NavigateTo("Account/LogIn", true);
+        Navigation.NavigateTo("Account/Login", true);
     }
 
     private async Task ApproveDiscord()
@@ -117,9 +117,7 @@ else if (discordUser != null)
             userServices.Upsert(userModel);
         }
         
-        SessionModel sessionModel = new SessionModel(userServices.Get((id)));
-        sessionModel.DiscordAuthenticationModel = _discordAuthenticationModel;
-        await authenticator.UpdateSession(sessionModel);
+        await authenticator.UpdateSession();
         parent.Update();
     }
     

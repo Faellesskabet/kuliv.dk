@@ -2,12 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Security.Claims;
 using Microsoft.AspNetCore.DataProtection;
-using System.IO;
-using System.Text;
-using Newtonsoft.Json;
 
 namespace BlazorLoginDiscord.Data
 {
@@ -26,7 +21,6 @@ namespace BlazorLoginDiscord.Data
         [HttpGet]
         public IActionResult Login(string returnUrl = "/")
         {
-            
             return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, "Discord");
         }
 

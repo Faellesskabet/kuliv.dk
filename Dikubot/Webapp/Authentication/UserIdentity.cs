@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using BlazorLoginDiscord.Data;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Static;
-using Microsoft.AspNetCore.Http;
 
 namespace Dikubot.Webapp.Authentication
 {
     public sealed class UserIdentity : ClaimsIdentity
     {
         private UserGlobalModel _userGlobalModel;
-        private readonly SessionModel _sessionModel;
+        private readonly UserService.DiscordUserClaim _discordUserClaim;
 
         /// <summary>
         /// Empty UserIdentity
@@ -21,12 +21,14 @@ namespace Dikubot.Webapp.Authentication
             
         }
 
-        /// <Summary>Creates a UserIdentity based on a session.</Summary>
-        /// <param name="sessionModel">A session consists of a key and a user.</param>
-        public UserIdentity(SessionModel sessionModel)
+        /// <summary>
+        /// Creates a UserIdentity from a DiscordUserClaim
+        /// </summary>
+        /// <param name="discordUserClaim"></param>
+        public UserIdentity(UserService.DiscordUserClaim discordUserClaim)
         {
-            _sessionModel = sessionModel;
-            _userGlobalModel = sessionModel.GetUserModel();
+            _discordUserClaim = discordUserClaim;
+            _userGlobalModel = new UserGlobalServices().Get(discordUserClaim.UserId);
             if (_userGlobalModel != null)
             {
                 try
@@ -49,7 +51,7 @@ namespace Dikubot.Webapp.Authentication
                 }
             }
         }
-        
+
         /// <Summary>This is simply just a name and it has no purposes except for us to differentiate between AuthenticationTypes / reasons for authentication</Summary>
         /// <return>"User" as a string</return>
         public string AuthenticationType
@@ -68,7 +70,7 @@ namespace Dikubot.Webapp.Authentication
         public override bool IsAuthenticated
         {
             get => _userGlobalModel?.DiscordId != null && _userGlobalModel.Verified && _userGlobalModel.Name != null &&
-                   !_sessionModel.IsExpired && !_userGlobalModel.IsBanned && _userGlobalModel.SelectedGuild != 0;
+                   _discordUserClaim != null && _discordUserClaim.UserId != 0 && !_userGlobalModel.IsBanned && _userGlobalModel.SelectedGuild != 0;
         }
 
         public string Name
@@ -88,9 +90,9 @@ namespace Dikubot.Webapp.Authentication
         /// <summary>
         /// Get the SessionModel
         /// </summary>
-        public SessionModel SessionModel
+        public UserService.DiscordUserClaim DiscordUserClaim
         {
-            get => _sessionModel;
+            get => _discordUserClaim;
         }
     }
 }

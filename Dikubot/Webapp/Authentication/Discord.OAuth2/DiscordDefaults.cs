@@ -1,4 +1,4 @@
-﻿namespace Discord.OAuth2
+﻿namespace Dikubot.Webapp.Authentication.Discord.OAuth2
 {
     public static class DiscordDefaults
     {

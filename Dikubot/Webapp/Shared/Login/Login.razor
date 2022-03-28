@@ -59,12 +59,10 @@
 
     private async Task<State> getState()
     {
-
-        var test = httpContextAccessor.HttpContext.User;
         authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
         UserIdentity user = (UserIdentity) authState.User.Identity;
 
-        if (user?.SessionModel == null || user.UserGlobalModel == null)
+        if (user?.UserGlobalModel == null)
         {
             return State.ConnectDiscord;
         }

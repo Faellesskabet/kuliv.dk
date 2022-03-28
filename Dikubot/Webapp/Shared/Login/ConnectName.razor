@@ -44,8 +44,7 @@
         user.UserGlobalModel.Name = name;
         new UserGlobalServices().Upsert(user.UserGlobalModel);
         Util.UpdateUserNameOnAllForcedGuilds(DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong));
-        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
-        await authenticator.UpdateSession(sessionModel);
+        await authenticator.UpdateSession();
         parent.Update();
     }
 

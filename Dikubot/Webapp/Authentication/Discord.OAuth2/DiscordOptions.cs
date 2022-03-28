@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
-namespace Discord.OAuth2
+namespace Dikubot.Webapp.Authentication.Discord.OAuth2
 {
     /// <summary> Configuration options for <see cref="DiscordHandler"/>. </summary>
     public class DiscordOptions : OAuthOptions
@@ -15,6 +15,7 @@ namespace Discord.OAuth2
             AuthorizationEndpoint = DiscordDefaults.AuthorizationEndpoint;
             TokenEndpoint = DiscordDefaults.TokenEndpoint;
             UserInformationEndpoint = DiscordDefaults.UserInformationEndpoint;
+            AccessDeniedPath = "/";
             Scope.Add("identify");
 
             ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id", ClaimValueTypes.UInteger64);
