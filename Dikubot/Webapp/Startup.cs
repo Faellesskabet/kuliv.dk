@@ -10,6 +10,8 @@ using Blazored.LocalStorage;
 using Dikubot.Webapp.Authentication;
 using Microsoft.AspNetCore.Http;
 using MudBlazor.Services;
+using Syncfusion.Blazor;
+
 
 namespace Dikubot.Webapp
 {
@@ -33,6 +35,9 @@ namespace Dikubot.Webapp
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            //Kalender
+            services.AddSyncfusionBlazor(); 
+           
             services.AddResponseCaching();
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
@@ -55,6 +60,12 @@ namespace Dikubot.Webapp
                 app.UseHsts();
             }
             
+            //Kalendar
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Environment.GetEnvironmentVariable("SYNCFUSION_API_KEY"));
+            
+            
+            app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseRouting();
