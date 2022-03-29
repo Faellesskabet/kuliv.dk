@@ -1,4 +1,4 @@
-﻿@page "admin/calendar"
+﻿@page "/admin/calendar"
 
 @using Dikubot.Webapp.Authentication
 @using System.Net.Http.Json
@@ -24,15 +24,17 @@
         <MudTh>Navn</MudTh>
         <MudTh>Beskrivelse</MudTh>
         <MudTh>Synlighed</MudTh>
+        <MudTh>CalendarType</MudTh>
         <MudTh>Indstillinger</MudTh>
         <MudTh>Slet</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Navn">@context.Name</MudTd>
         <MudTd DataLabel="Beskrivelse">@context.Decs</MudTd>
-        <MudTd DataLabel="Størrelse">@context.Visible</MudTd>
+        <MudTd DataLabel="Visible">@context.Visible</MudTd>
+        <MudTd DataLabel="CalendarType">@context.CalendarType</MudTd>
         <MudTd DataLabel="Indstillinger">
-            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/admin/roles/edit/{@context.Id.ToString()}")>Rediger</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/admin/calendar/edit/{@context.Id.ToString()}")>Rediger</MudButton>
         </MudTd>
         <MudTd DataLabel="Slet">
             <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>

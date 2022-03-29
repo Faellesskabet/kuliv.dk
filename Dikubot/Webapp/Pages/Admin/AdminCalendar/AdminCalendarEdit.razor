@@ -25,14 +25,29 @@
                         <MudTextField @bind-Value="@_category.Decs" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
                         
                         <MudSelect @bind-Value="@_category.CalendarType" Label="Vælg Type">
-                            
+                            @foreach (CalendarModel.EnumCalendarType item in Enum.GetValues(typeof(CalendarModel.EnumCalendarType)))
+                            {
+                                <MudSelectItem Value="@(item)" />
+                            }
                         </MudSelect>       
                         
                         <MudSelect @bind-Value="@_category.Display" Label="Vælg Display">
-                        </MudSelect>   
+                            @foreach (CalendarModel.EnumDisplay item in Enum.GetValues(typeof(CalendarModel.EnumDisplay)))
+                            {
+                                <MudSelectItem Value="@(item)" />
+                            }
+                        </MudSelect>
+
+                        <MudSelect @bind-Value="@_category.Visible" Label="Vælg Visible">
+                            @foreach (CalendarModel.EnumAvailable item in Enum.GetValues(typeof(CalendarModel.EnumAvailable)))
+                            {
+                                <MudSelectItem Value="@(item)" />
+                            }
+                        </MudSelect>
                         
-                        
-                        
+
+
+
                         <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
                         
                         
@@ -43,6 +58,7 @@
                                 <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
                             }
                         </MudSelect>
+                        
                         <MudSelect Label="View roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne lave begivenheder" @bind-SelectedValues="_category.ViewEnumerable"
                                    MultiSelectionTextFunc="list => GetViewRolesString(_category)" Text="@GetViewRolesString(_category)">
                             @foreach (var role in _roleMainModels)
