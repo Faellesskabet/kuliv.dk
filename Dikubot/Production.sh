@@ -1,5 +1,5 @@
 sudo systemctl stop kestrel-bot.service
-mv ./bin/Release/net6.0/Backups/ ../../Discord-Backups/
+mv ./bin/Release/net6.0/Backups/* ../../Discord-Backups/
 sudo rm -rf ./bin/Release/net6.0
 dotnet publish --configuration Release
 rm -rf ./bin/Release/net6.0/wwwroot
