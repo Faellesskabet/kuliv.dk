@@ -62,15 +62,13 @@ namespace Dikubot.Webapp
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
             })
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                .AddCookie(options =>
                 {
                     options.Cookie.SameSite = SameSiteMode.None;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 }).
                 AddDiscord("Discord",options =>
                 {
-                    options.CorrelationCookie.SameSite = SameSiteMode.Strict;
-                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
