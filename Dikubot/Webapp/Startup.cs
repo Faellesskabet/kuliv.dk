@@ -40,7 +40,7 @@ namespace Dikubot.Webapp
             
             //Do NICE STUFF - with login :D
             services.AddHttpContextAccessor();
-            
+
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -106,7 +106,7 @@ namespace Dikubot.Webapp
             }
             
             app.UseStaticFiles();
-
+            app.UseHttpsRedirection();
             app.UseRouting();
             
             app.UseAuthentication();
