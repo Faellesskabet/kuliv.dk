@@ -62,7 +62,7 @@ namespace Dikubot.Webapp
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
             })
-                .AddCookie("cookies", options =>
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
                     options.Cookie.SameSite = SameSiteMode.Strict;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
