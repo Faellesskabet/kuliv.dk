@@ -40,8 +40,8 @@
         "API_BASE_URL": "https://discord.com/api/users/@me",
         "REVOKE_URL" : " https://discordapp.com/api/oauth2/token/revoke",
         "TOKEN": "ODA5NzgxNzY4MDIxNzM3NTAy.YCaGCg.bbeFbij9ydeHN4-Uz-7dSsdPoJs",
-        "CLIENT_ID": "801122350086356992",
-        "CLIENT_SECRET": "Kv8lxA63GFffICPHCBQeeOg9H7lZBCIK",
+        "DISCORD_CLIENT_ID": "801122350086356992",
+        "DISCORD_CLIENT_SECRET": "Kv8lxA63GFffICPHCBQeeOg9H7lZBCIK",
         "BOT_INVITE": "https://discord.com/oauth2/authorize?client_id=801122350086356992&permissions=8&scope=bot"
       }
     }

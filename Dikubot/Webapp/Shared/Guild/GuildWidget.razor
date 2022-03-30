@@ -4,9 +4,12 @@
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
+@using Microsoft.AspNetCore.Http
 @using Microsoft.IdentityModel.Tokens
+@using BlazorLoginDiscord.Data
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject IHttpContextAccessor httpContextAccessor;
 
 <MudCard Elevation="25">
     <MudCardHeader>
@@ -60,8 +63,7 @@
 
         userModel.SelectedGuild = Guild.GuildId;
         new UserGlobalServices().Upsert(user.UserGlobalModel);
-        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
-        await authenticator.UpdateSession(sessionModel);
+        await authenticator.UpdateSession();
         NavigationManager.NavigateTo("/");
         
     }
@@ -74,15 +76,10 @@
             await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
-        
-        SessionServices sessionServices = new SessionServices();
-        SessionModel sessionModel = sessionServices.Get(model => model.UserId == userModel.Id);
-        if (sessionModel == null)
-        {
-            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
-            return;
-        }
 
+
+        UserService userService = new UserService();
+        
         bool? result = await DialogService.ShowMessageBox(
             "Bekræft", 
             "Du er ved at join et nyt fællesskab. Er du sikker?", 
@@ -92,10 +89,11 @@
         {
             return;
         }
-
+        
         try
         {
-            await DiscordBot.Client.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, sessionModel.DiscordAuthenticationModel.AccessToken);
+            string accessToken = await userService.GetTokenAsync(httpContextAccessor.HttpContext);
+            await DiscordBot.Client.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, accessToken);
         }
         catch (Exception e)
         {

@@ -18,6 +18,7 @@
     </MudCardContent>
     <MudCardActions>
         <MudButton OnClick="@ConfirmName">Bekræft Navn</MudButton>
+        <MudButton Link="Account/Logout" Color="Color.Error">Logud</MudButton>
     </MudCardActions>
 </MudCard>
 
@@ -40,12 +41,10 @@
 
     private async void ConfirmName()
     {
-        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong).MutualGuilds;
         user.UserGlobalModel.Name = name;
         new UserGlobalServices().Upsert(user.UserGlobalModel);
         Util.UpdateUserNameOnAllForcedGuilds(DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong));
-        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
-        await authenticator.UpdateSession(sessionModel);
+        await authenticator.UpdateSession();
         parent.Update();
     }
 
