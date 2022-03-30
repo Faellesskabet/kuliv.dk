@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using BlazorLoginDiscord.Data;
@@ -49,6 +50,11 @@ namespace Dikubot.Webapp
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
+            services.AddHttpsRedirection(options =>
+            {
+                options.RedirectStatusCode = (int)HttpStatusCode.TemporaryRedirect;
+                options.HttpsPort = 5001;
+            });
 
             
             //AddAuthentication
@@ -73,21 +79,7 @@ namespace Dikubot.Webapp
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
-                    options.Events.OnCreatingTicket = ctx =>
-                {
-                    /*ctx.Identity.AddClaim(new Claim("Discord:CurrentGuild:ID",
-                        Environment.GetEnvironmentVariable("OPTIONS_MAIN_GUILD_ID") ?? "string.Empty"));
-                    ctx.Identity.AddClaim(new Claim("User:Verify",true.ToString(),typeof(bool).ToString(),"http://kuliv.dk"));*/
-                    //var test = ctx.User;
-                    /*
-                    if(ctx.Identity != null && ctx.Identity.FindFirst(c => c.Type.Equals(ClaimTypes.NameIdentifier)).Value.Equals("581865014063792197"))
-                        ctx.Identity.AddClaim(new Claim(ClaimTypes.Role,"ADMIN"));
-                        */
-                    //TODO: giv role claims insted of just inRole().
-                    //options.ClaimActions.Add(new  JsonKeyClaimAction(ClaimTypes.Role,ClaimTypes.Role, "ADMIN"));
-                    return Task.CompletedTask;
-                };
-            });
+                });
             
         }
 
@@ -102,11 +94,11 @@ namespace Dikubot.Webapp
             {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                //app.UseHsts();
+                app.UseHsts();
+                app.UseHttpsRedirection();
             }
             
             app.UseStaticFiles();
-            app.UseHttpsRedirection();
             app.UseRouting();
             
             app.UseAuthentication();
