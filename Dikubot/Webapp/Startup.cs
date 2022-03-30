@@ -70,7 +70,7 @@ namespace Dikubot.Webapp
                 AddDiscord("Discord",options =>
                 {
                     options.CorrelationCookie.SameSite = SameSiteMode.Strict;
-                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.None;
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
