@@ -41,7 +41,6 @@
 
     private async void ConfirmName()
     {
-        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong).MutualGuilds;
         user.UserGlobalModel.Name = name;
         new UserGlobalServices().Upsert(user.UserGlobalModel);
         Util.UpdateUserNameOnAllForcedGuilds(DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong));

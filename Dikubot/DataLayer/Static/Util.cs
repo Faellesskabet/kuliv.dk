@@ -65,6 +65,10 @@ namespace Dikubot.DataLayer.Static
 
         public static void UpdateUserNameOnAllForcedGuilds(SocketUser user)
         {
+            if (user == null)
+            {
+                return;
+            }
             GuildSettingsService guildSettingsService = new GuildSettingsService();
             UserGlobalServices userGlobalServices = new UserGlobalServices();
             UserGlobalModel userGlobalModel = userGlobalServices.Get(user);
