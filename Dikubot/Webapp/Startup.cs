@@ -36,8 +36,8 @@ namespace Dikubot.Webapp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             //Kalender
-            services.AddSyncfusionBlazor(); 
-           
+            services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
+            
             services.AddResponseCaching();
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
