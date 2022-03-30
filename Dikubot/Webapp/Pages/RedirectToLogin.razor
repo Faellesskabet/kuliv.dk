@@ -1,0 +1,45 @@
+﻿@using Dikubot.Webapp.Authentication
+@using global::Discord
+@using Color = MudBlazor.Color
+@inject NavigationManager Navigation
+@code {
+    protected override void OnInitialized()
+    {
+        //This auto redirects a user to the login page
+        //Navigation.NavigateTo("Account/Login", true);
+        
+    }
+    
+    private IUser discordUser;
+}
+
+@if (discordUser == null)
+{
+    <MudCard>
+        <MudCardHeader>
+            <MudText Typo="Typo.h6">Log-in med Discord</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.body1">For at tilgå KULiv, skal du logge ind med en Discord bruger.</MudText>
+        </MudCardContent>
+        <MudCardActions>
+            <a href="Account/Login"><MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton></a>
+            <a href="https://dnur.dk/"><MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton></a>
+        </MudCardActions>
+    </MudCard>
+}
+else if (discordUser != null)
+{
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Image="@discordUser.GetAvatarUrl()" Size="Size.Large" Color="Color.Primary"></MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Er dette dig?</MudText>
+                <MudText Typo="Typo.body1">DiscordNameMentionCombo(discordUser)</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+
+    </MudCard>
+}
