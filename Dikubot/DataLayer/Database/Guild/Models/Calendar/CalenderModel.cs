@@ -56,11 +56,11 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         public IEnumerable<RoleMainModel> GetViewRoles(RoleServices roleServices)
         {
             IEnumerable<RoleMainModel> roles = View.IsNullOrEmpty() ? new List<RoleMainModel>() : 
-                Permission.Select(guid => roleServices.Get(model => model.Id == guid)).Where(model => model != null);
+                View.Select(guid => roleServices.Get(model => model.Id == guid)).Where(model => model != null);
             
             // Replace by ForiegnKey system
             var roleMainModels = roles as RoleMainModel[] ?? roles.ToArray();
-            Permission = new HashSet<Guid>(roleMainModels.Select(model => model.Id));
+            View = new HashSet<Guid>(roleMainModels.Select(model => model.Id));
             return roleMainModels;
         }
         
