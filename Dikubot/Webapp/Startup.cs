@@ -62,14 +62,20 @@ namespace Dikubot.Webapp
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
             })
-                .AddCookie()
-                .AddDiscord("Discord",options =>
-            {
-                options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
-                options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
-                options.Scope.Add("identify guilds guilds.join");
-                options.SaveTokens = true;
-                options.Events.OnCreatingTicket = ctx =>
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                {
+                    options.Cookie.SameSite = SameSiteMode.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                }).
+                AddDiscord("Discord",options =>
+                {
+                    options.CorrelationCookie.SameSite = SameSiteMode.Strict;
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.None;
+                    options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
+                    options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
+                    options.Scope.Add("identify guilds guilds.join");
+                    options.SaveTokens = true;
+                    options.Events.OnCreatingTicket = ctx =>
                 {
                     /*ctx.Identity.AddClaim(new Claim("Discord:CurrentGuild:ID",
                         Environment.GetEnvironmentVariable("OPTIONS_MAIN_GUILD_ID") ?? "string.Empty"));
