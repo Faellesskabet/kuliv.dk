@@ -21,7 +21,7 @@ namespace BlazorLoginDiscord.Data
         [HttpGet]
         public IActionResult Login(string returnUrl = "/")
         {
-            return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, "Discord");
+            return Challenge(new AuthenticationProperties { RedirectUri = returnUrl.Replace("http://","https://") }, "Discord");
         }
 
         [HttpGet]
