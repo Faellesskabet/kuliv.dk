@@ -67,6 +67,9 @@ namespace Dikubot.Webapp
                 {
                     options.Cookie.SameSite = SameSiteMode.None;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    # if !DEBUG
+                    options.Cookie.Domain = "kuliv.dk";
+                    #endif
                 }).
                 AddDiscord("Discord",options =>
                 {
@@ -74,6 +77,10 @@ namespace Dikubot.Webapp
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
+                    # if !DEBUG
+                    options.CorrelationCookie.Domain = "kuliv.dk";
+                    #endif
+                    
                 });
             
         }
