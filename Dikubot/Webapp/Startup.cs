@@ -65,11 +65,8 @@ namespace Dikubot.Webapp
             })
                 .AddCookie(options =>
                 {
-# if !DEBUG
-                    options.Cookie.SameSite = SameSiteMode.None;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                    options.Cookie.Domain = "kuliv.dk";
-#endif
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
                 }).
                 AddDiscord("Discord",options =>
                 {
@@ -77,12 +74,7 @@ namespace Dikubot.Webapp
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
-# if !DEBUG
-                    options.CorrelationCookie.SameSite = SameSiteMode.None;
-                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                    options.CorrelationCookie.Domain = "kuliv.dk";
-#endif
-                    
+                    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
                 });
             
         }
