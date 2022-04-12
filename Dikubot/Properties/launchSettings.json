@@ -25,25 +25,20 @@
     "Dikubot": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DISCORD_BOT_TOKEN": "ODAxMTIyMzUwMDg2MzU2OTky.YAcFVA.dWHdLjpjSmFXI2NvhyPB6gReBSE",
+        "DISCORD_PUBLIC_KEY": "38bb7cb17f57febce9e849738ac1f48b863dadb6430e8ef150658df254170839",
+        "DISCORD_CLIENT_SECRET":"9ZdP-eJ1bjd8lGhFGPoNMR2nRILVUWm5",
+        "DISCORD_CLIENT_ID": "840270097176461354",
         "DIKU_DISCORD_ID": "786946524310929419",
         "SENDGRID_API_KEY":"ODQxNzUwODEzNTAzNTIwODY4.YJrTiA.LLhvvbFT3SE7doudRDwDJ8MJcUY",
         "SENDGRID_EMAIL": "noreply@kuliv.dk",
-        "TOKEN_URL" : "https://discord.com/api/oauth2/token",
-        "REDIRECT_URL" : "https://localhost:5001/",
-        "AUTHORIZE_URL" : "https://discord.com/api/oauth2/authorize",
-        "DISCORD_API_URL" : "https://discord.com/api/v8",
-        "API_BASE_URL": "https://discord.com/api/users/@me",
-        "REVOKE_URL" : " https://discordapp.com/api/oauth2/token/revoke",
-        "TOKEN": "ODA5NzgxNzY4MDIxNzM3NTAy.YCaGCg.bbeFbij9ydeHN4-Uz-7dSsdPoJs",
-        "CLIENT_ID": "801122350086356992",
-        "CLIENT_SECRET": "Kv8lxA63GFffICPHCBQeeOg9H7lZBCIK",
-        "BOT_INVITE": "https://discord.com/oauth2/authorize?client_id=801122350086356992&permissions=8&scope=bot"
+        "SYNCFUSION_API_KEY": "NjAxMjAzQDMxMzkyZTM0MmUzMEhyUVM4MFB4VDZ1UkxRYUxFQ3l6dDR6SFNCTklRMVNqSXZia2RuUHg5S0k9"
       }
     }
   }
 }
+

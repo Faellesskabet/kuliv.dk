@@ -6,8 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using Dikubot.Webapp.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using MudBlazor.Services;
 
@@ -39,6 +42,56 @@ namespace Dikubot.Webapp
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
 
+            
+            /// AUTH
+            ///
+            services.AddHttpContextAccessor();
+            services.AddAuthentication(options =>
+                {
+                    ///CookieAuthenticationDefaults.AuthenticationScheme
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddCookie("DiscordCookie", options =>
+                {
+                    options.LoginPath = "/signin";
+                    options.LogoutPath = "/signout";
+                    options.AccessDeniedPath = "/AccessDenied";
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                }).
+                AddDiscord("Discord",options =>
+                {
+                    options.SignInScheme = "DiscordCookie";
+                    options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
+                    options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
+                    options.Scope.Add("identify guilds guilds.join");
+                    options.Prompt = "";
+                    options.SaveTokens = true;
+                    options.Events.OnCreatingTicket = ctx =>
+                    {
+                        
+                        ctx.Identity.AddClaim(new Claim("Discord:CurrentGuild:ID",
+                            Environment.GetEnvironmentVariable("OPTIONS_MAIN_GUILD_ID") ?? "string.Empty"));
+                        ctx.Identity.AddClaim(new Claim("User:Verify",true.ToString(),typeof(bool).ToString(),"http://kuliv.dk"));
+                        //var test = ctx.User;
+                        /*
+                        if(ctx.Identity != null && ctx.Identity.FindFirst(c => c.Type.Equals(ClaimTypes.NameIdentifier)).Value.Equals("581865014063792197"))
+                            ctx.Identity.AddClaim(new Claim(ClaimTypes.Role,"ADMIN"));
+                            */
+                        //TODO: giv role claims insted of just inRole().
+                        //options.ClaimActions.Add(new  JsonKeyClaimAction(ClaimTypes.Role,ClaimTypes.Role, "ADMIN"));
+                        return Task.CompletedTask;
+                    };
+                });
+            
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

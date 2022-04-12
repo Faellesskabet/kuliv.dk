@@ -11,7 +11,7 @@
     <div class="login">
         @if (_state == State.ConnectDiscord)
         {
-            <ConnectDiscord parent="@this" AuthCode="@AuthCode"/>
+            <ConnectDiscord parent="@this"/>
         }
         @if (_state == State.ConnectEmail)
         {
