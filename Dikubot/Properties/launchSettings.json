@@ -13,7 +13,7 @@
         "Url": "http://kuliv.dk:5000"
       },
       "Https": {
-        "Url": "https://kuliv.dk:5001"
+        "Url": "https://kuliv.dk"
       }
     }
   },

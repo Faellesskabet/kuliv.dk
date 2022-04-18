@@ -57,16 +57,14 @@ namespace Dikubot.Webapp
             
             services.AddAuthentication(options =>
             {
-                ///CookieAuthenticationDefaults.AuthenticationScheme
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
             })
                 .AddCookie(options =>
                 {
                     options.Cookie.SameSite = SameSiteMode.Lax;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 }).
                 AddDiscord("Discord",options =>
                 {
@@ -74,7 +72,6 @@ namespace Dikubot.Webapp
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
-                    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
                 });
             
         }
@@ -92,7 +89,8 @@ namespace Dikubot.Webapp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            
+
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
             
