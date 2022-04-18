@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using BlazorLoginDiscord.Data;
@@ -40,7 +41,7 @@ namespace Dikubot.Webapp
             
             //Do NICE STUFF - with login :D
             services.AddHttpContextAccessor();
-            
+
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -50,7 +51,7 @@ namespace Dikubot.Webapp
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
 
-            
+
             //AddAuthentication
             services.AddSingleton<UserService>();
             
@@ -62,28 +63,19 @@ namespace Dikubot.Webapp
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
             })
-                .AddCookie().
-                AddDiscord("Discord",options =>
-            {
-                options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
-                options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
-                options.Scope.Add("identify guilds guilds.join");
-                options.SaveTokens = true;
-                options.Events.OnCreatingTicket = ctx =>
+                .AddCookie(options =>
                 {
-                    /*ctx.Identity.AddClaim(new Claim("Discord:CurrentGuild:ID",
-                        Environment.GetEnvironmentVariable("OPTIONS_MAIN_GUILD_ID") ?? "string.Empty"));
-                    ctx.Identity.AddClaim(new Claim("User:Verify",true.ToString(),typeof(bool).ToString(),"http://kuliv.dk"));*/
-                    //var test = ctx.User;
-                    /*
-                    if(ctx.Identity != null && ctx.Identity.FindFirst(c => c.Type.Equals(ClaimTypes.NameIdentifier)).Value.Equals("581865014063792197"))
-                        ctx.Identity.AddClaim(new Claim(ClaimTypes.Role,"ADMIN"));
-                        */
-                    //TODO: giv role claims insted of just inRole().
-                    //options.ClaimActions.Add(new  JsonKeyClaimAction(ClaimTypes.Role,ClaimTypes.Role, "ADMIN"));
-                    return Task.CompletedTask;
-                };
-            });
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+                }).
+                AddDiscord("Discord",options =>
+                {
+                    options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
+                    options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
+                    options.Scope.Add("identify guilds guilds.join");
+                    options.SaveTokens = true;
+                    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                });
             
         }
 
@@ -101,10 +93,7 @@ namespace Dikubot.Webapp
                 app.UseHsts();
             }
             
-            app.UseHttpsRedirection();
-
             app.UseStaticFiles();
-
             app.UseRouting();
             
             app.UseAuthentication();
