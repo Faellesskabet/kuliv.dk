@@ -72,7 +72,7 @@ namespace Dikubot.DataLayer.Database
         public static void Backup(IMongoDatabase database)
         {
             /*
-            ProcessStartInfo procStartInfo = new ProcessStartInfo("mongodump",
+            /*ProcessStartInfo procStartInfo = new ProcessStartInfo("mongodump",
                 $"--out=\"./Backups/{database.DatabaseNamespace.DatabaseName}/{DateTime.Now.ToUniversalTime():yyyy-MM-dd-HH-mm-ss}\" --db=\"{database.DatabaseNamespace.DatabaseName}\" --gzip");
             Process process = new Process() {StartInfo = procStartInfo};
             process.Start();

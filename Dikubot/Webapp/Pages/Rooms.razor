@@ -1,4 +1,4 @@
-@page "/equipment"
+@page "/rooms"
 @using Dikubot.Webapp.Authentication
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
@@ -7,6 +7,7 @@
 @using Dikubot.DataLayer.Database.Guild.Models.Equipment
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.DataLayer.Database.Guild.Models.JoinRole
+@using Dikubot.DataLayer.Database.Guild.Models.Room
 @using Dikubot.DataLayer.Database.Guild.Models.User
 @using Dikubot.DataLayer.Database.Guild.Models.User.SubModels
 @using Dikubot.DataLayer.Permissions
@@ -24,7 +25,7 @@
   @if (true)
     {
 <div class="control-section">
-    <SfSchedule ID="schedule" TValue="EquipmentModel" Width="100%" Height="650px" @bind-SelectedDate="@CurrentDate">
+    <SfSchedule ID="schedule" TValue="RoomModel" Width="100%" Height="650px" @bind-SelectedDate="@CurrentDate">
         <ScheduleTemplates>
             <ResourceHeaderTemplate>
                 <div class='template-wrap'>
@@ -38,7 +39,7 @@
             <ScheduleResource TItem="CalendarModel" TValue="Guid" DataSource="@ResourceDatasource" Field="EquiqmentId" Title="Resources" Name="Resources" TextField="Name" IdField="Id" ColorField="Color" AllowMultiple="false"></ScheduleResource>
         </ScheduleResources>
         
-        <ScheduleEventSettings TValue="EquipmentModel">
+        <ScheduleEventSettings TValue="RoomModel">
                 <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
             </ScheduleEventSettings>
 
@@ -56,7 +57,7 @@
     ///            <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
     //// https://github.com/syncfusion/blazor-showcase-appointment-planner/blob/master/server-side/AppointmentPlanner/Pages/Schedule/Schedule.razor
     
-    SfSchedule<EquipmentModel> scheduleObj { get; set; }
+    SfSchedule<RoomModel> scheduleObj { get; set; }
     
     [Inject]
     protected IJSRuntime JsRuntime { get; set; }
@@ -65,7 +66,7 @@
     
     private int CurrentYear;
     public List<CalendarModel> ResourceDatasource = new List<CalendarModel>();
-    public List<EquipmentModel> EquipmentData = new List<EquipmentModel>();
+    public List<RoomModel> EquipmentData = new List<RoomModel>();
     private string[] groupData = { "Resources" };
     private DateTime CurrentDate { get; set; }
     
@@ -76,7 +77,7 @@
 
     
     private CalendarServices _calendarServices;
-    private EquipmentServices _equipmentServices;
+    private RoomServices _RoomServices;
     
     
     protected override async Task OnInitializedAsync()
@@ -93,12 +94,12 @@
         _userGlobalModel = user.UserGlobalModel;
         guild = DiscordBot.Client.GetGuild(_userGlobalModel.SelectedGuild);
         _calendarServices = new CalendarServices(guild);
-        _equipmentServices = new EquipmentServices(guild);
+        _RoomServices = new RoomServices(guild);
 
         CurrentYear = DateTime.Today.Year;
         CurrentDate = DateTime.Now;
-        EquipmentData = _equipmentServices.GetAll();
-        ResourceDatasource = _calendarServices.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Equipment);
+        EquipmentData = _RoomServices.GetAll();
+        ResourceDatasource = _calendarServices.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Room);
         
     }
 
@@ -106,13 +107,13 @@
     {
         args.Cancel = true;
     }
-    public void OnActionBegin(ActionEventArgs<EquipmentModel> args)
+    public void OnActionBegin(ActionEventArgs<RoomModel> args)
     {
         if (args.ActionType == ActionType.EventCreate && args.AddedRecords.Count > 0)
         {
-            foreach(EquipmentModel Data in args.AddedRecords)
+            foreach(RoomModel Data in args.AddedRecords)
             {
-                Data.Id = _equipmentServices.Upsert(Data).Id;
+                Data.Id = _RoomServices.Upsert(Data).Id;
             }
         }
     }
@@ -122,11 +123,11 @@
      public class CustomAdaptor : DataAdaptor
      {
          
-         public EquipmentServices services;
+         public RoomServices services;
          
          public CustomAdaptor()
          {
-            services = new EquipmentServices("815997079850713130");
+            services = new RoomServices("815997079850713130");
          }
          
          
@@ -141,12 +142,12 @@
         public async override Task<object> InsertAsync(DataManager dataManager, object data, string key)
         {
             
-            return (object) services.Upsert(data as EquipmentModel);
+            return (object) services.Upsert(data as RoomModel);
         }
 
         public async override Task<object> UpdateAsync(DataManager dataManager, object data, string keyField, string key)
         {
-            return (object) services.Upsert(data as EquipmentModel);
+            return (object) services.Upsert(data as RoomModel);
         }
         
         public async override Task<object> RemoveAsync(DataManager dataManager, object data, string keyField, string key) //triggers on appointment deletion through public method DeleteEvent
@@ -161,21 +162,21 @@
         {
             
             object records = deletedRecords;
-            List<EquipmentModel> deleteData = deletedRecords as List<EquipmentModel>;
+            List<RoomModel> deleteData = deletedRecords as List<RoomModel>;
             foreach (var data in deleteData)
             {
                 services.Remove(services.Get((AppointmentData) => AppointmentData.Id == data.Id));
             }
-            List<EquipmentModel> addData = addedRecords as List<EquipmentModel>;
+            List<RoomModel> addData = addedRecords as List<RoomModel>;
             foreach (var data in addData)
             {
-                services.Upsert(data as EquipmentModel);
+                services.Upsert(data as RoomModel);
                 records = addedRecords;
             }
-            List<EquipmentModel> updateData = changedRecords as List<EquipmentModel>;
+            List<RoomModel> updateData = changedRecords as List<RoomModel>;
             foreach (var data in updateData)
             {
-                var val = (data as EquipmentModel);
+                var val = (data as RoomModel);
                 var appointment = services.Get((AppointmentData) => AppointmentData.Id == val.Id);
                 if (appointment != null)
                 {
