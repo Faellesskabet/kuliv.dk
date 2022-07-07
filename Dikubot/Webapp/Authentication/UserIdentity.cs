@@ -10,7 +10,6 @@ namespace Dikubot.Webapp.Authentication
 {
     public sealed class UserIdentity : ClaimsIdentity
     {
-        private UserGlobalModel _userGlobalModel;
         private readonly UserService.DiscordUserClaim _discordUserClaim;
 
         /// <summary>
@@ -28,36 +27,34 @@ namespace Dikubot.Webapp.Authentication
         public UserIdentity(UserService.DiscordUserClaim discordUserClaim)
         {
             _discordUserClaim = discordUserClaim;
-            _userGlobalModel = new UserGlobalServices().Get(discordUserClaim.UserId);
-            if (_userGlobalModel != null)
+            UserGlobalModel = new UserGlobalServices().Get(discordUserClaim.UserId);
+            if (UserGlobalModel == null)
             {
-                try
+                return;
+            }
+            try
+            {
+                List<Claim> roleClaims = new List<Claim>();
+                if (UserGlobalModel.IsAdmin)
                 {
-                    List<Claim> roleClaims = new List<Claim>();
-                    if (_userGlobalModel.IsAdmin)
-                    {
-                        roleClaims.Add(new Claim(ClaimTypes.Role, Permissions.GlobalAdmin));
-                    }
+                    roleClaims.Add(new Claim(ClaimTypes.Role, Permissions.GlobalAdmin));
+                }
                     
-                    if (_userGlobalModel.IsAdmin || Util.IsGuildAdmin(_userGlobalModel.DiscordIdLong, _userGlobalModel.SelectedGuild))
-                    {
-                        roleClaims.Add(new Claim(ClaimTypes.Role, Permissions.GuildAdmin));
-                    }
-                    AddClaims(roleClaims);
-                }
-                catch (Exception e)
+                if (UserGlobalModel.IsAdmin || Util.IsGuildAdmin(UserGlobalModel.DiscordIdLong, UserGlobalModel.SelectedGuild))
                 {
-                    Logger.Debug(e.Message);
+                    roleClaims.Add(new Claim(ClaimTypes.Role, Permissions.GuildAdmin));
                 }
+                AddClaims(roleClaims);
+            }
+            catch (Exception e)
+            {
+                Logger.Debug(e.Message);
             }
         }
 
         /// <Summary>This is simply just a name and it has no purposes except for us to differentiate between AuthenticationTypes / reasons for authentication</Summary>
         /// <return>"User" as a string</return>
-        public string AuthenticationType
-        {
-            get => "User";
-        }
+        public string AuthenticationType => "User";
 
         /// <summary>
         /// isAuthenticated gets the user specified in the session, if the user exists. A user is authenticated if the following holds true:
@@ -67,32 +64,20 @@ namespace Dikubot.Webapp.Authentication
         /// The user may not be banned
         /// The user must have selected a guild
         /// </summary>
-        public override bool IsAuthenticated
-        {
-            get => _userGlobalModel?.DiscordId != null && _userGlobalModel.Verified && _userGlobalModel.Name != null &&
-                   _discordUserClaim != null && _discordUserClaim.UserId != 0 && !_userGlobalModel.IsBanned && _userGlobalModel.SelectedGuild != 0;
-        }
+        public override bool IsAuthenticated =>
+            UserGlobalModel?.DiscordId != null && UserGlobalModel.Verified && UserGlobalModel.Name != null &&
+            _discordUserClaim != null && _discordUserClaim.UserId != 0 && !UserGlobalModel.IsBanned && UserGlobalModel.SelectedGuild != 0;
 
-        public string Name
-        {
-            get => _userGlobalModel == null ? "Intet navn" : _userGlobalModel.Name;
-        }
+        public string Name => UserGlobalModel == null ? "Intet navn" : UserGlobalModel.Name;
 
         /// <summary>
         /// Get the UserModel
         /// </summary>
-        public UserGlobalModel UserGlobalModel
-        {
-            get => _userGlobalModel;
-            set => _userGlobalModel = value;
-        }
+        public UserGlobalModel UserGlobalModel { get; set; }
 
         /// <summary>
         /// Get the SessionModel
         /// </summary>
-        public UserService.DiscordUserClaim DiscordUserClaim
-        {
-            get => _discordUserClaim;
-        }
+        public UserService.DiscordUserClaim DiscordUserClaim => _discordUserClaim;
     }
 }
