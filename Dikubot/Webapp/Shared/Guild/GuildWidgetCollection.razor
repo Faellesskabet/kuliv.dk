@@ -11,7 +11,7 @@
             <MudPaper>
                 @foreach (GuildSettingsModel guild in Guilds)
                 {
-                    @if (string.IsNullOrWhiteSpace(SearchQuery) || (guild.Name?.Contains(SearchQuery) ?? false) || (guild.Description?.Contains(SearchQuery) ?? false))
+                    @if (string.IsNullOrWhiteSpace(SearchQuery) || (guild.Name?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false) || (guild.Description?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false))
                     {
                         <GuildWidget Guild="guild" EnableJoin="@EnableJoin"></GuildWidget>
                         <MudDivider></MudDivider>
