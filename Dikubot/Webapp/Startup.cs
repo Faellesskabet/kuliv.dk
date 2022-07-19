@@ -115,6 +115,7 @@ namespace Dikubot.Webapp
             app.UseHttpsRedirection();
             app.UseRouting();
             
+            app.UseForwardedHeaders();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseResponseCaching();
