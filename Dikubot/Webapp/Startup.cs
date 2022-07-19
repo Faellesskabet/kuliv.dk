@@ -37,6 +37,26 @@ namespace Dikubot.Webapp
             
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
            
+            services.AddServerSideBlazor(options =>
+            {
+                options.DetailedErrors = true;
+                options.DisconnectedCircuitMaxRetained = 100;
+                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
+                options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
+                options.MaxBufferedUnacknowledgedRenderBatches = 10;
+            });
+            
+            services.AddServerSideBlazor()
+                .AddHubOptions(options =>
+                {
+                    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+                    options.EnableDetailedErrors = true;
+                    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+                    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                    options.MaximumParallelInvocationsPerClient = 1;
+                    options.MaximumReceiveMessageSize = 32 * 1024;
+                    options.StreamBufferCapacity = 10;
+                });
             
             
             //Do NICE STUFF - with login :D
