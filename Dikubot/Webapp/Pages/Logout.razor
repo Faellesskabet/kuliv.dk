@@ -1,4 +1,4 @@
-@page "/logout"
+@page "/oldlogout"
 @using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
@@ -11,7 +11,7 @@
         try
         {
             
-            NavigationManager.NavigateTo("Account/Logout", true);
+            NavigationManager.NavigateTo("/logout", true);
         }
         catch (Exception e)
         {

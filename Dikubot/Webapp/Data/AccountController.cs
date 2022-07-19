@@ -2,34 +2,26 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using AspNet.Security.OAuth.Discord;
 using Microsoft.AspNetCore.DataProtection;
 
 namespace BlazorLoginDiscord.Data
-{
-    [Route("[controller]/[action]")]
+
+{ 
+    [ApiController]
     public class AccountController : ControllerBase
     {
-        public IDataProtectionProvider Provider { get; }
-
-        public AccountController(IDataProtectionProvider provider)
-        {
-            Provider = provider;
-        }
-
         
-        
-        [HttpGet]
-        public IActionResult Login(string returnUrl = "/")
+        [HttpGet("/login")]
+        [HttpPost("/login")]
+        public async Task<IActionResult> Login(string returnUrl = "/")
         {
-            return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, "Discord");
+            return this.Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, DiscordAuthenticationDefaults.AuthenticationScheme);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> LogOut(string returnUrl = "/")
-        {
-            //This removes the cookie assigned to the user login.
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return LocalRedirect(returnUrl);
-        }
+        [HttpGet("/logout")]
+        [HttpPost("/logout")]
+        public async Task<SignOutResult> LogOut(string returnUrl = "/") => this.SignOut(new AuthenticationProperties { RedirectUri = returnUrl },
+            CookieAuthenticationDefaults.AuthenticationScheme);
     }
 }
