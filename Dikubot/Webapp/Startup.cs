@@ -71,6 +71,12 @@ namespace Dikubot.Webapp
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
 
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.Secure = CookieSecurePolicy.Always;
+            });
+
 
             //AddAuthentication
             services.AddSingleton<UserService>();
@@ -115,7 +121,6 @@ namespace Dikubot.Webapp
             app.UseHttpsRedirection();
             app.UseRouting();
             
-            app.UseForwardedHeaders();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseResponseCaching();
