@@ -1,6 +1,6 @@
 ﻿namespace Dikubot.Webapp.Authentication.Discord.OAuth2
 {
-    public static class DiscordDefaults
+    public static class DiscordConstants
     {
         public const string AuthenticationScheme = "Discord";
         public const string DisplayName = "Discord";

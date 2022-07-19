@@ -74,29 +74,29 @@ namespace Dikubot.Webapp
 
             //AddAuthentication
             services.AddSingleton<UserService>();
-            
+
             services.AddAuthentication(options =>
-            {
-                ///CookieAuthenticationDefaults.AuthenticationScheme
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
-            })
+                {
+                    ///CookieAuthenticationDefaults.AuthenticationScheme
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = DiscordConstants.AuthenticationScheme;
+                })
                 .AddCookie(options =>
                 {
                     options.Cookie.SameSite = SameSiteMode.Lax;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.None;
-                }).
-                AddDiscord("Discord",options =>
+                }).AddDiscord(options =>
                 {
                     options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
                     options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                    options.Prompt = "none";
                 });
-            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
