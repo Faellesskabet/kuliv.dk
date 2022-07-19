@@ -89,7 +89,7 @@ namespace BlazorLoginDiscord.Data
 
             var token = await GetTokenAsync(httpContext);
 
-            var guildEndpoint = DiscordDefaults.UserInformationEndpoint + "/guilds";
+            var guildEndpoint = DiscordConstants.UserInformationEndpoint + "/guilds";
 
             using (var request = new HttpRequestMessage(HttpMethod.Get, guildEndpoint))
             {

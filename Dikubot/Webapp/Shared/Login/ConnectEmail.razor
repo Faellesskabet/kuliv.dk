@@ -123,6 +123,7 @@ else
         }
 
         secretPassword = Util.SimpleRandomString(12);
+        Console.WriteLine(secretPassword);
         VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
         await EmailService.SendEmail(verification);
         await InvokeAsync(() => { StateHasChanged(); });
