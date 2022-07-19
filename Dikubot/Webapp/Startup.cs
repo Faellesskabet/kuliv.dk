@@ -81,7 +81,6 @@ namespace Dikubot.Webapp
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = DiscordConstants.AuthenticationScheme;
                 })
                 .AddCookie(options =>
                 {
