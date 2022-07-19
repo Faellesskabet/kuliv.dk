@@ -14,6 +14,7 @@ using Blazored.LocalStorage;
 using BlazorLoginDiscord.Data;
 using Dikubot.Webapp.Authentication;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
 using MudBlazor.Services;
 
@@ -71,12 +72,12 @@ namespace Dikubot.Webapp
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
 
-            services.Configure<CookiePolicyOptions>(options =>
+            services.AddCookiePolicy(options =>
             {
-                options.MinimumSameSitePolicy = SameSiteMode.None;
                 options.Secure = CookieSecurePolicy.Always;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.HttpOnly = HttpOnlyPolicy.Always;
             });
-
 
             //AddAuthentication
             services.AddSingleton<UserService>();
@@ -92,6 +93,9 @@ namespace Dikubot.Webapp
                 {
                     options.LoginPath = "/login";
                     options.LogoutPath = "/logout";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 }).AddDiscord(options =>
                 {
                     options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
@@ -99,6 +103,9 @@ namespace Dikubot.Webapp
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
                     options.Prompt = "none";
+                    options.CorrelationCookie.HttpOnly = true;
+                    options.CorrelationCookie.SameSite = SameSiteMode.None;
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
                 });
 
         }
@@ -124,6 +131,14 @@ namespace Dikubot.Webapp
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseResponseCaching();
+            
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                Secure = CookieSecurePolicy.Always,
+                MinimumSameSitePolicy = SameSiteMode.None,
+                HttpOnly = HttpOnlyPolicy.Always
+            });
+
             
             
             
