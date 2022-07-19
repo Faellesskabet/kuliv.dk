@@ -50,8 +50,8 @@
             <MudText Typo="Typo.body1">For at tilgå KULiv, skal du logge ind med en Discord bruger.</MudText>
         </MudCardContent>
         <MudCardActions>
-            <a href="Account/Login"><MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton></a>
-            <a href="https://dnur.dk/"><MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton></a>
+            <MudLink Href="/login"><MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton></MudLink>
+            <MudLink Href="https://dnur.dk/"><MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton></MudLink>
         </MudCardActions>
     </MudCard>
 }
@@ -102,7 +102,7 @@ else if(!loading)
         discordUser = null;
         await OnInitializedAsync();
         await InvokeAsync(() => { StateHasChanged(); });
-        Navigation.NavigateTo("Account/Logout", true);
+        Navigation.NavigateTo("/Logout", true);
     }
 
     private async Task ApproveDiscord()

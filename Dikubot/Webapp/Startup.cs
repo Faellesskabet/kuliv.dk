@@ -84,15 +84,14 @@ namespace Dikubot.Webapp
                 })
                 .AddCookie(options =>
                 {
-                    options.Cookie.SameSite = SameSiteMode.Lax;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+                    options.LoginPath = "/login";
+                    options.LogoutPath = "/logout";
                 }).AddDiscord(options =>
                 {
                     options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
-                    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
                     options.Prompt = "none";
                 });
 
