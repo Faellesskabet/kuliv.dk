@@ -64,7 +64,6 @@ namespace Dikubot.Webapp
             //Do NICE STUFF - with login :D
             services.AddHttpContextAccessor();
 
-            services.AddDataProtection();
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -72,9 +71,9 @@ namespace Dikubot.Webapp
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
-
-            //AddAuthentication
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
+            
+            //AddAuthentication
             services.AddSingleton<UserService>();
 
             services.AddAuthentication(options =>
@@ -94,10 +93,6 @@ namespace Dikubot.Webapp
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
-                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                    options.CorrelationCookie.IsEssential = true;
-                    options.CorrelationCookie.HttpOnly = true;
-                    options.CorrelationCookie.SameSite = SameSiteMode.None;
                 });
 
         }
