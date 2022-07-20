@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using AspNet.Security.OAuth.Discord;
 using Blazored.LocalStorage;
 using BlazorLoginDiscord.Data;
 using Dikubot.Webapp.Authentication;
@@ -63,6 +64,7 @@ namespace Dikubot.Webapp
             //Do NICE STUFF - with login :D
             services.AddHttpContextAccessor();
 
+            services.AddDataProtection();
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -70,40 +72,32 @@ namespace Dikubot.Webapp
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
-            services.AddScoped<AuthenticationStateProvider, Authenticator>();
-
-            services.AddCookiePolicy(options =>
-            {
-                options.Secure = CookieSecurePolicy.Always;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-                options.HttpOnly = HttpOnlyPolicy.Always;
-            });
 
             //AddAuthentication
+            services.AddScoped<AuthenticationStateProvider, Authenticator>();
             services.AddSingleton<UserService>();
 
             services.AddAuthentication(options =>
                 {
+                    ///CookieAuthenticationDefaults.AuthenticationScheme
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/login";
                     options.LogoutPath = "/logout";
-                    options.Cookie.HttpOnly = true;
-                    options.Cookie.SameSite = SameSiteMode.None;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 }).AddDiscord(options =>
                 {
                     options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");
                     options.SaveTokens = true;
-                    options.Prompt = "none";
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.CorrelationCookie.IsEssential = true;
                     options.CorrelationCookie.HttpOnly = true;
                     options.CorrelationCookie.SameSite = SameSiteMode.None;
-                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
                 });
 
         }
@@ -117,10 +111,9 @@ namespace Dikubot.Webapp
             }
             else
             {
-                //app.UseExceptionHandler("/Error");
-                app.UseDeveloperExceptionPage();
-                //// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                //app.UseHsts();
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
             }
             
             app.UseStaticFiles();
@@ -130,16 +123,6 @@ namespace Dikubot.Webapp
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseResponseCaching();
-            
-            app.UseCookiePolicy(new CookiePolicyOptions
-            {
-                Secure = CookieSecurePolicy.Always,
-                MinimumSameSitePolicy = SameSiteMode.None,
-                HttpOnly = HttpOnlyPolicy.Always
-            });
-
-            
-            
             
 
             //Cache life span set to 1 second if it's a dev build.
