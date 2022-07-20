@@ -25,13 +25,16 @@
     <link href="css/site.css" rel="stylesheet"/>
     <link rel="stylesheet" href="Dikubot.styles.css"/>
     <link rel="stylesheet" href="css/diku/footer.css"/>
-
+    <meta name="description" content="Online Discord community for students at The University of Copenhagen."/>
 </head>
 <body>
 
 <component type="typeof(App)" render-mode="Server" param-AuthCode="@Model.AuthCode"/>
 
 <div id="blazor-error-ui">
+    <div id="components-reconnect-modal">
+        There was a problem with the connection!
+    </div>
     <environment include="Staging,Production">
         An error has occurred. This application may no longer respond until reloaded.
     </environment>

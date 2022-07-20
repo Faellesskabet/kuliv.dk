@@ -21,8 +21,7 @@
             if (user != null)
             {
                 new UserGlobalServices().Upsert(user.UserGlobalModel);
-                SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
-                await authenticator.UpdateSession(sessionModel);
+                await authenticator.UpdateSession();
             }
         }
         catch (Exception e)

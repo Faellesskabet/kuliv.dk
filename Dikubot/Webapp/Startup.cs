@@ -1,13 +1,21 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
+using System.Net;
+using System.Threading.Tasks;
+using AspNet.Security.OAuth.Discord;
 using Blazored.LocalStorage;
+using BlazorLoginDiscord.Data;
 using Dikubot.Webapp.Authentication;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
 using MudBlazor.Services;
 using Syncfusion.Blazor;
@@ -32,6 +40,32 @@ namespace Dikubot.Webapp
             var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
             
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
+           
+            services.AddServerSideBlazor(options =>
+            {
+                options.DetailedErrors = true;
+                options.DisconnectedCircuitMaxRetained = 100;
+                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
+                options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
+                options.MaxBufferedUnacknowledgedRenderBatches = 10;
+            });
+            
+            services.AddServerSideBlazor()
+                .AddHubOptions(options =>
+                {
+                    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+                    options.EnableDetailedErrors = true;
+                    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+                    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                    options.MaximumParallelInvocationsPerClient = 1;
+                    options.MaximumReceiveMessageSize = 32 * 1024;
+                    options.StreamBufferCapacity = 10;
+                });
+            
+            
+            //Do NICE STUFF - with login :D
+            services.AddHttpContextAccessor();
+
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -43,6 +77,28 @@ namespace Dikubot.Webapp
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
+            
+            //AddAuthentication
+            services.AddSingleton<UserService>();
+
+            services.AddAuthentication(options =>
+                {
+                    ///CookieAuthenticationDefaults.AuthenticationScheme
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/login";
+                    options.LogoutPath = "/logout";
+                }).AddDiscord(options =>
+                {
+                    options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
+                    options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
+                    options.Scope.Add("identify guilds guilds.join");
+                    options.SaveTokens = true;
+                });
 
         }
 
@@ -67,32 +123,17 @@ namespace Dikubot.Webapp
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
-
+            app.UseHttpsRedirection();
             app.UseRouting();
+            
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseResponseCaching();
-
-            //Cache life span set to 1 second if it's a dev build.
-            TimeSpan maxAge = main.IS_DEV ? TimeSpan.FromSeconds(1) : TimeSpan.FromDays(2);
-
-            //We do a bunch of caching here
-            app.Use(async (context, next) =>
-            {
-                context.Response.GetTypedHeaders().CacheControl =
-                    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
-                    {
-                        Public = true,
-                        MaxAge = maxAge
-                    };
-                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
-                    new string[] {"Accept-Encoding"};
-
-                await next();
-            });
+            
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
