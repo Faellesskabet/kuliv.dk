@@ -1,18 +1,22 @@
-# sharper-dikubot
-A complete rewrite of the DIKU discord bot in C#
+# KULiv
+KULiv is a student driven organization at the Univeristy of Copenhagen, which seeks to connect students through the use of Discord.
 
-## Getting started
-The application is split into 3 three main components, there's the Discord bot, the website and a datalayer.
+## Contributing
+### Find a bug or have a suggestion?
+Create a new issue at https://github.com/Faellesskabet/Discord-Botten/issues with your suggestion or bug!
 
+
+## Setting up
 ### Prerequisites
-1. .NET 5.0
+1. .NET 6.0
 2. .NET Core 3.1
+3. [MongoDB](https://www.mongodb.com/try/download/community)
 
 ### Setting up Discord Bot
 You need to set a Discord Token in order to run the bot,
 1. Create a Discord bot and copy its in the [Discord Developer Portal](https://discord.com/developers/applications)
 2. Navigate to `Dikubot/Properties/launchSettings.json`
-3. Set `"DISCORD_TOKEN:"` to your bot's Discord Token
+3. Set all the things
 
 You've now connected your own Discord Bot.
 
@@ -24,12 +28,6 @@ You need to have Sendgrid account and a Sendgrid API token with access to send e
 
 
 ### Setting up Datalayer
-1. All you need is to [install MongoDB](https://www.mongodb.com/try/download/community)
-
-### Setting up Lavalink (Music)
-1. Get newest release [here](https://github.com/Frederikam/Lavalink/releases)
-2. Create application.yaml from [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) and place it with Lavalink.jar
-3. Run Lavalink `java -jar Lavalink.jar`
-
-
+1. All you need is to [install MongoDB](https://www.mongodb.com/try/download/community) if you haven't already
+2. Make sure it is running
 
