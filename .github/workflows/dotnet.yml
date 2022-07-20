@@ -44,6 +44,13 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
         script: |
+          eval "$(ssh-agent -s)"
+          ssh-add /home/${{ secrets.SSH_USER }}/secrets/github-deploy-key
           cd /home/${{ secrets.SSH_USER }}/Discord-Botten/Dikubot
           git pull
-           echo ${{ secrets.PASSWORD }} | sudo -S sh ./Production.sh
+          echo ${{ secrets.PASSWORD }} | sudo -S systemctl stop kestrel-bot.service
+          echo ${{ secrets.PASSWORD }} | sudo -S rm -rf ./bin/Release/net6.0
+          dotnet publish --configuration Release
+          rm -rf ./bin/Release/net6.0/wwwroot
+          cp -r Webapp/wwwroot/ ./bin/Release/net6.0
+          echo ${{ secrets.PASSWORD }} | sudo -S systemctl start kestrel-bot.service
