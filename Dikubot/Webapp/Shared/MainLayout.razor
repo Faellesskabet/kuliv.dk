@@ -4,6 +4,7 @@
 @using Dikubot.Discord
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using MudBlazor.Utilities
 @inject AuthenticationStateProvider AuthenticationStateProvider
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
@@ -15,7 +16,7 @@
         <MudSpacer />
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank" />
     </MudAppBar>
-    <MudDrawer @bind-Open="@open" Elevation="1" Color="Color.Transparent">
+    <MudDrawer @bind-Open="@open" Elevation="1" Style="@($"background-color: {NavColor}; color: {NavTextColor};")">
         <MudDrawerHeader>
             @if (_loaded)
             {
@@ -53,9 +54,14 @@
     private SocketGuild guild;
     private GuildSettingsModel _guildSettingsModel;
     private bool _loaded = false;
+    private string NavColor = "";
+    private string NavTextColor = "";
 
     protected override async Task OnInitializedAsync()
     {
+        NavColor = GetColor().Value;
+        NavTextColor = GetTextColor().Value;
+        
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         user = (UserIdentity) authState.User.Identity;
@@ -72,5 +78,16 @@
     {
         open = !open;
     }
+
+    private MudColor GetColor()
+    {
+        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.Background : App.ThemeProvider.Theme.Palette.Background;
+    }
+
+    private MudColor GetTextColor()
+    {
+        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.TextPrimary : App.ThemeProvider.Theme.Palette.TextPrimary;
+    }
+    
 }
 

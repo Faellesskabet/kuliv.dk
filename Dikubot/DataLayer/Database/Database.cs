@@ -71,9 +71,11 @@ namespace Dikubot.DataLayer.Database
         // This is bad and will only work on linux, but I needed to get something out quickly
         public static void Backup(IMongoDatabase database)
         {
-            /*
-            /*ProcessStartInfo procStartInfo = new ProcessStartInfo("mongodump",
-                $"--out=\"./Backups/{database.DatabaseNamespace.DatabaseName}/{DateTime.Now.ToUniversalTime():yyyy-MM-dd-HH-mm-ss}\" --db=\"{database.DatabaseNamespace.DatabaseName}\" --gzip");
+            #if DEBUG 
+            return;
+            #endif
+            ProcessStartInfo procStartInfo = new ProcessStartInfo("mongodump",
+                $"--out=\"/home/rofudox/Backups/{database.DatabaseNamespace.DatabaseName}/{DateTime.Now.ToUniversalTime():yyyy-MM-dd-HH-mm-ss}\" --db=\"{database.DatabaseNamespace.DatabaseName}\" --gzip");
             Process process = new Process() {StartInfo = procStartInfo};
             process.Start();
             */

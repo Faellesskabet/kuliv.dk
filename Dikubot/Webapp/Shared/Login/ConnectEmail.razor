@@ -27,6 +27,10 @@
             {
                 <MudAlert Severity="Severity.Error">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</MudAlert>
             }
+            @if (emailTaken)
+            {
+                <MudAlert Severity="Severity.Error">Emailen @(email) er allerede i brug. Log ind på din anden Discord profil eller kontakt en administrator</MudAlert>
+            }
             <MudText Typo="Typo.h6">Bekræft din KU-mail</MudText>
         </MudCardHeader>
         <MudCardContent>
@@ -44,6 +48,7 @@
         </MudCardContent>
         <MudCardActions>
             <MudButton OnClick="@SendEmail">Send email</MudButton>
+            <MudButton Link="Logout" Color="Color.Error">Logud</MudButton>
         </MudCardActions>
     </MudCard>   
 }
@@ -85,6 +90,7 @@ else
     private string secretPassword = "";
     private string passwordInput = "";
     bool incorrectPassword = false;
+    bool emailTaken = false;
 
     public void EmailOnEnter(KeyboardEventArgs e)
     {
@@ -117,6 +123,7 @@ else
         }
 
         secretPassword = Util.SimpleRandomString(12);
+        Console.WriteLine(secretPassword);
         VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
         await EmailService.SendEmail(verification);
         await InvokeAsync(() => { StateHasChanged(); });
@@ -133,44 +140,41 @@ else
             await InvokeAsync(() => { StateHasChanged(); });
             return;
         }
-        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong).MutualGuilds;
+        
         UserGlobalServices userGlobalServices = new UserGlobalServices();
-        foreach(SocketGuild mutualGuild in mutualGuilds)
+        
+        // If the user already exists, throw an error at them!
+        if (userGlobalServices.EmailExists(email))
         {
-            UpdateUserInGuild(mutualGuild, userGlobalServices);
+            emailTaken = true;
+            passwordInput = "";
+            email = "";
+            secretPassword = "";
+            await InvokeAsync(() => { StateHasChanged(); });
+            return;
         }
+        
+        // null if user or no mutual guilds can be found.
+        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong)?.MutualGuilds;
+
+        if (mutualGuilds != null)
+            foreach (SocketGuild mutualGuild in mutualGuilds)
+            {
+                UpdateUserInGuild(mutualGuild, userGlobalServices);
+            }
         user.UserGlobalModel.Email = email;
         user.UserGlobalModel.Verified = true;
         userGlobalServices.Upsert(user.UserGlobalModel);
-        SessionModel sessionModel = new SessionModel(user.UserGlobalModel);
-        await authenticator.UpdateSession(sessionModel);
+        await authenticator.UpdateSession();
         parent.Update();
     }
-    public async void UpdateUserInGuild(SocketGuild guild, UserGlobalServices userGlobalServices)
+    private async void UpdateUserInGuild(SocketGuild guild, UserGlobalServices userGlobalServices)
     {
         UserGuildServices userGuildServices = new UserGuildServices(guild);
         PermissionsService permissionsService = new PermissionsService(guild);
         UserGuildModel newUser = userGuildServices.Get(user.UserGlobalModel.DiscordId);
-        
-    //In case the email already exists, then we simply override the old user with the new user, while removing the old user's roles on the Discord server
-        if (userGlobalServices.EmailExists(email))
-        {
-        //We get the old user
-            UserGuildModel oldUser = userGuildServices.Get(userGlobalServices.GetFromEmail(email).DiscordId);
 
-            if (oldUser.DiscordId != newUser.DiscordId)
-            {
-    //We override the old user's id and set our current user to old user
-                string oldId = oldUser.DiscordId;
-                oldUser.DiscordId = newUser.DiscordId;
-                newUser = oldUser;
-
-        //We now update all the Discord roles of our users. The old discord user will have all their roles removed, while the new user will get all the old user's roles.
-                permissionsService.SetDiscordUserRoles(new UserGuildModel() {DiscordId = oldId});   
-            }
-        }
-        
-        permissionsService.SetDiscordUserRoles(newUser);
+        await permissionsService.SetDiscordUserRoles(newUser);
         
         string name = new KUUser(email.Split("@")[0]).GetName();
         if (name != "")
@@ -178,7 +182,7 @@ else
             newUser.Name = name;
             try
             {
-                await guild.GetUser(Convert.ToUInt64(newUser.DiscordId)).ModifyAsync(guildUser =>
+                await guild.GetUser(Convert.ToUInt64(user.UserGlobalModel.DiscordId)).ModifyAsync(guildUser =>
                 {
                     guildUser.Nickname = name;
                 });
@@ -188,6 +192,6 @@ else
     //ignored
             }
         }
-        userGuildServices.Upsert(newUser);        
+        userGuildServices.Upsert(newUser);
     }
 }
