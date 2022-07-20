@@ -6,6 +6,9 @@ KULiv is a student driven organization at the Univeristy of Copenhagen, which se
 Create a new issue at https://github.com/Faellesskabet/Discord-Botten/issues with your suggestion or bug!
 
 
+### Creating new features
+You are welcome to add whatever you want! Checkout from the develop branch and make whatever you feel like. If you want to help, but are not sure with what, then you can take a look at some existing issues :D
+
 ## Setting up
 ### Prerequisites
 1. .NET 6.0
