@@ -45,5 +45,5 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd /home/${{ secrets.SSH_USER }}/Discord-Botten/Dikubot
-          git fetch origin main
-           echo ${{ secrets.PASSWORD }} | sh ./Production.sh
+          git pull
+           echo ${{ secrets.PASSWORD }} | sudo -S sh ./Production.sh
