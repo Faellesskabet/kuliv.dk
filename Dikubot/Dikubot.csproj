@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Content Include="Properties\launchSettings.json" />
+    <Content Include="Webapp\Discord.OAuth2\Discord.OAuth2.csproj" />
     <Content Include="Webapp\wwwroot\css\open-iconic\FONT-LICENSE" />
     <Content Include="Webapp\wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css" />
     <Content Include="Webapp\wwwroot\css\open-iconic\font\fonts\open-iconic.eot" />
@@ -32,6 +33,7 @@
     <PackageReference Include="Cronos" Version="0.7.1" />
     <PackageReference Include="Discord.Net" Version="3.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="6.0.0-preview.4.21253.5" />
@@ -41,6 +43,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.1" />
     <PackageReference Include="MongoDB.Driver" Version="2.14.1" />
     <PackageReference Include="MudBlazor" Version="6.0.7" />
+    <PackageReference Include="Syncfusion.Blazor.Schedule" Version="19.4.0.56" />
     <PackageReference Include="SendGrid" Version="9.28.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
     <PackageReference Include="System.Console" Version="4.3.1" />
@@ -58,6 +61,13 @@
   <ItemGroup>
     <Folder Include="DataLayer\Database\Global\GlobalSettings" />
     <Folder Include="Webapp\wwwroot\js" />
+  </ItemGroup>
+  
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Webapp\Pages\Account\AccessDenied.cshtml" />
+    <_ContentIncludedByDefault Remove="Webapp\Pages\Account\Login.cshtml" />
+    <_ContentIncludedByDefault Remove="Webapp\Pages\Account\Logout.cshtml" />
   </ItemGroup>
 
 </Project>

@@ -9,17 +9,17 @@ using Dikubot.DataLayer.Database.Guild.Models.Calendar;
 using Dikubot.DataLayer.Database.Guild.Models.Role;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Dikubot.DataLayer.Database.Guild.Models.Equipment
+namespace Dikubot.DataLayer.Database.Guild.Models.Room
 {
-    public class EquipmentModel : EventsAttributes
+    public class RoomModel : EventsAttributes
     {
 
-        public EquipmentModel()
+        public RoomModel()
         {
             
         }
 
-        public EquipmentModel(Guid id,
+        public RoomModel(Guid id,
             string description, 
             string subject,
             string location, 

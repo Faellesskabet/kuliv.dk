@@ -1,0 +1,200 @@
+@page "/equipment"
+@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.DataLayer.Database.Guild.Models.Equipment
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
+@using Dikubot.DataLayer.Database.Guild.Models.User
+@using Dikubot.DataLayer.Database.Guild.Models.User.SubModels
+@using Dikubot.DataLayer.Permissions
+@using Dikubot.Discord
+@using Microsoft.Graph
+@using Microsoft.IdentityModel.Tokens
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@using Syncfusion.Blazor.Schedule
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Navigations
+@using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
+
+<h3>Equipment</h3>
+  @if (true)
+    {
+<div class="control-section">
+    <SfSchedule ID="schedule" TValue="EquipmentModel" Width="100%" Height="650px" @bind-SelectedDate="@CurrentDate">
+        <ScheduleTemplates>
+            <ResourceHeaderTemplate>
+                <div class='template-wrap'>
+                    <div class="Calendar-name"><b>@(((context as TemplateContext).ResourceData as CalendarModel).Name)</b></div>
+                    <div class="Calendar-designation">@(((context as TemplateContext).ResourceData as CalendarModel).Decs)</div>
+                </div>
+            </ResourceHeaderTemplate>
+        </ScheduleTemplates>
+        <ScheduleGroup EnableCompactView="false" Resources="@groupData"></ScheduleGroup>
+        <ScheduleResources>
+            <ScheduleResource TItem="CalendarModel" TValue="Guid" DataSource="@ResourceDatasource" Field="EquiqmentId" Title="Resources" Name="Resources" TextField="Name" IdField="Id" ColorField="Color" AllowMultiple="false"></ScheduleResource>
+        </ScheduleResources>
+        
+        <ScheduleEventSettings TValue="EquipmentModel">
+                <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+            </ScheduleEventSettings>
+
+        <ScheduleViews>
+            <ScheduleView MaxEventsPerRow="1" Option="View.TimelineMonth" AllowVirtualScrolling="true"></ScheduleView>
+        </ScheduleViews>
+    </SfSchedule>
+</div>
+    }else
+    {
+        <Loading></Loading>
+}
+
+@code{
+    ///            <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+    //// https://github.com/syncfusion/blazor-showcase-appointment-planner/blob/master/server-side/AppointmentPlanner/Pages/Schedule/Schedule.razor
+    
+    SfSchedule<EquipmentModel> scheduleObj { get; set; }
+    
+    [Inject]
+    protected IJSRuntime JsRuntime { get; set; }
+
+    bool editUpcoming = true;
+    
+    private int CurrentYear;
+    public List<CalendarModel> ResourceDatasource = new List<CalendarModel>();
+    public List<EquipmentModel> EquipmentData = new List<EquipmentModel>();
+    private string[] groupData = { "Resources" };
+    private DateTime CurrentDate { get; set; }
+    
+    private Authenticator authenticator;
+    private UserIdentity user;
+    private SocketGuild guild;
+    private UserGlobalModel _userGlobalModel;
+
+    
+    private CalendarServices _calendarServices;
+    private EquipmentServices _equipmentServices;
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity) authState.User.Identity;
+        if (user == null)
+        {
+            return;
+        }
+        _userGlobalModel = user.UserGlobalModel;
+        guild = DiscordBot.Client.GetGuild(_userGlobalModel.SelectedGuild);
+        _calendarServices = new CalendarServices(guild);
+        _equipmentServices = new EquipmentServices(guild);
+
+        CurrentYear = DateTime.Today.Year;
+        CurrentDate = DateTime.Now;
+        EquipmentData = _equipmentServices.GetAll();
+        ResourceDatasource = _calendarServices.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Equipment);
+        
+    }
+
+    public void OnCellClick(CellClickEventArgs args)
+    {
+        args.Cancel = true;
+    }
+    public void OnActionBegin(ActionEventArgs<EquipmentModel> args)
+    {
+        if (args.ActionType == ActionType.EventCreate && args.AddedRecords.Count > 0)
+        {
+            foreach(EquipmentModel Data in args.AddedRecords)
+            {
+                Data.Id = _equipmentServices.Upsert(Data).Id;
+            }
+        }
+    }
+    
+    
+    
+     public class CustomAdaptor : DataAdaptor
+     {
+         
+         public EquipmentServices services;
+         
+         public CustomAdaptor()
+         {
+            services = new EquipmentServices("815997079850713130");
+         }
+         
+         
+         
+        static int CurrentYear = DateTime.Today.Year;
+
+         public async override Task<object> ReadAsync(DataManagerRequest dataManagerRequest, string key = null)
+        {//KULIV_null hmm
+            return dataManagerRequest.RequiresCounts ? new DataResult() { Result = services.GetAll(), Count = services.GetAll().Count } : (object)services.GetAll();
+        }
+        
+        public async override Task<object> InsertAsync(DataManager dataManager, object data, string key)
+        {
+            
+            return (object) services.Upsert(data as EquipmentModel);
+        }
+
+        public async override Task<object> UpdateAsync(DataManager dataManager, object data, string keyField, string key)
+        {
+            return (object) services.Upsert(data as EquipmentModel);
+        }
+        
+        public async override Task<object> RemoveAsync(DataManager dataManager, object data, string keyField, string key) //triggers on appointment deletion through public method DeleteEvent
+        {
+            
+            Guid value = (Guid)data;
+            services.Remove(services.Get((AppointmentData) => AppointmentData.Id == value));
+            return data;
+        }
+        
+        public async override Task<object> BatchUpdateAsync(DataManager dataManager, object changedRecords, object addedRecords, object deletedRecords, string keyField, string key, int? dropIndex)
+        {
+            
+            object records = deletedRecords;
+            List<EquipmentModel> deleteData = deletedRecords as List<EquipmentModel>;
+            foreach (var data in deleteData)
+            {
+                services.Remove(services.Get((AppointmentData) => AppointmentData.Id == data.Id));
+            }
+            List<EquipmentModel> addData = addedRecords as List<EquipmentModel>;
+            foreach (var data in addData)
+            {
+                services.Upsert(data as EquipmentModel);
+                records = addedRecords;
+            }
+            List<EquipmentModel> updateData = changedRecords as List<EquipmentModel>;
+            foreach (var data in updateData)
+            {
+                var val = (data as EquipmentModel);
+                var appointment = services.Get((AppointmentData) => AppointmentData.Id == val.Id);
+                if (appointment != null)
+                {
+                    appointment.Id = val.Id;
+                    appointment.Subject = val.Subject;
+                    appointment.StartTime = val.StartTime;
+                    appointment.EndTime = val.EndTime;
+                    appointment.Location = val.Location;
+                    appointment.Description = val.Description;
+                    appointment.IsAllDay = val.IsAllDay;
+                    appointment.RecurrenceException = val.RecurrenceException;
+                    appointment.RecurrenceRule = val.RecurrenceRule;
+                }
+                records = changedRecords;
+            }
+            return records;
+        }
+
+    }
+    
+    
+}
