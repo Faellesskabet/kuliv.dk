@@ -78,7 +78,6 @@ namespace Dikubot.DataLayer.Database
                 $"--out=\"/home/rofudox/Backups/{database.DatabaseNamespace.DatabaseName}/{DateTime.Now.ToUniversalTime():yyyy-MM-dd-HH-mm-ss}\" --db=\"{database.DatabaseNamespace.DatabaseName}\" --gzip");
             Process process = new Process() {StartInfo = procStartInfo};
             process.Start();
-            */
         }
     }
 }
