@@ -18,6 +18,8 @@ using Dikubot.Webapp.Authentication.Discord.OAuth2;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
 using MudBlazor.Services;
+using Syncfusion.Blazor;
+
 
 namespace Dikubot.Webapp
 {
@@ -67,6 +69,9 @@ namespace Dikubot.Webapp
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            //Kalender
+            services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
+            
             services.AddResponseCaching();
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
@@ -111,6 +116,12 @@ namespace Dikubot.Webapp
                 app.UseHsts();
             }
             
+            //Kalendar
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Environment.GetEnvironmentVariable("SYNCFUSION_API_KEY"));
+            
+            
+            app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseRouting();
