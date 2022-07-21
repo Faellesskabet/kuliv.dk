@@ -91,8 +91,7 @@ namespace Dikubot.Webapp.Authentication
         /// </summary>
         public List<UserGuildModel> GetJoinedGuilds()
         {
-            GuildServices UserGuildService
-                
+            return new List<UserGuildModel>();
         }
 
 
