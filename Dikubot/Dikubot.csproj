@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Content Include="Properties\launchSettings.json" />
-    <Content Include="Webapp\Discord.OAuth2\Discord.OAuth2.csproj" />
     <Content Include="Webapp\wwwroot\css\open-iconic\FONT-LICENSE" />
     <Content Include="Webapp\wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css" />
     <Content Include="Webapp\wwwroot\css\open-iconic\font\fonts\open-iconic.eot" />

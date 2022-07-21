@@ -15,15 +15,14 @@
     {
         <MudAlert Severity="Severity.Normal" Square="true" Class="my-2">Du er ved at vælge roller i fællesskabet @_guildSettingsModel.Name. 
             Du vil modtage rollerne på fællesskabets Discord med det samme.</MudAlert>
-        <MudGrid>
+        <div class="d-flex flex-wrap gap-4 justify-center">
             @foreach (JoinRoleCategoryMainModel category in _categories)
             {
                 @if (!HasPermissionForCategory(category))
                 {
                     continue;
                 }
-                <MudItem xs="12" sm="6" md="4">
-                    <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudPaper Elevation="25" Class="rounded-lg pb-4">
                         <MudPaper Height="25px" Width="100%" Style=@($"background-color: {category.Color}")></MudPaper>
                         <MudCardHeader>
                             <CardHeaderContent>
@@ -32,7 +31,7 @@
                         </MudCardHeader>
                         <MudCardContent>
                             <div class="d-flex justify-center">
-                                <MudText Typo="Typo.h4">@category.Decs</MudText>
+                                <MudText Typo="Typo.h6">@category.Decs</MudText>
                             </div>
                             <MudList Class="mx-auto mt-4" Style="width:300px;">
                                 @if (category.TextRoles != null)
@@ -45,8 +44,8 @@
                                         }
                                         <MudListItem>
                                             <MudTooltip Text="@role.Desc">
-                                                <MudGrid Justify="Justify.Center">
-                                                    <MudItem xs="4">
+                                                <div class="d-flex gap-4">
+                                                    <MudPaper Class="flex-none d-flex">
                                                         @if (HasRole(role))
                                                         {
                                                             <MudButton Color="Color.Error" OnClick="() => LeaveRole(role)">Leave</MudButton>
@@ -55,11 +54,11 @@
                                                         {
                                                             <MudButton Color="Color.Success" OnClick="() => JoinRole(role)">Join</MudButton>
                                                         }
-                                                    </MudItem>
-                                                    <MudItem xs="8">
+                                                    </MudPaper>
+                                                    <MudItem Class="flex-auto d-flex">
                                                         <MudText Typo="Typo.h6">@role.Emoji @role.Name</MudText>
                                                     </MudItem>
-                                                </MudGrid>
+                                                </div>
                                             </MudTooltip>
                                             <MudDivider></MudDivider>
                                         </MudListItem>
@@ -70,10 +69,9 @@
                         <MudCardActions Class="d-flex justify-center">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="() => JoinAll(category)">Join alle</MudButton>
                         </MudCardActions>
-                    </MudCard>
-                </MudItem>
+                    </MudPaper>
             }
-        </MudGrid>
+        </div>
     }
     else
     {
