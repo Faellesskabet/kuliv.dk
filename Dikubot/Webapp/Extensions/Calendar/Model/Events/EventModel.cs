@@ -16,17 +16,13 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 
         [BsonElement("Place")] 
         public string Place { get; set; }
-        
-        
-        
+
         [BsonElement("Description")] 
         public string Description { get; set; }
         
-        
         [BsonElement("Calendars")] 
         public string Calendars{ get; set; }
-        
-        
+
         [BsonElement("Hosts")] 
         public HashSet<string> Hosts{ get; set; }
 

@@ -1,0 +1,127 @@
+﻿@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
+
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment
+@using Dikubot.Extensions.Calendar.Equipment
+
+@using Dikubot.Discord
+@using Dikubot.Extensions.Models.Equipment
+
+@using Syncfusion.Blazor
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@using Syncfusion.Blazor.Schedule
+@using Syncfusion.Blazor.Data
+
+
+@using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
+
+  @if (true)
+    {
+<div class="control-section">
+    <SfSchedule ID="schedule" TValue="EquipmentModel" Width="100%" Height="650px" @bind-SelectedDate="@CurrentDate">
+        <ScheduleTemplates>
+            <ResourceHeaderTemplate>
+                <div class='template-wrap'>
+                    <div class="Calendar-name"><b>@(((context as TemplateContext).ResourceData as CalendarModel).Name)</b></div>
+                    <div class="Calendar-designation">@(((context as TemplateContext).ResourceData as CalendarModel).Decs)</div>
+                </div>
+            </ResourceHeaderTemplate>
+        </ScheduleTemplates>
+        <ScheduleGroup EnableCompactView="false" Resources="@groupData"></ScheduleGroup>
+        <ScheduleResources>
+            <ScheduleResource TItem="CalendarModel" TValue="Guid" DataSource="@ResourceDatasource" Field="EquiqmentId" Title="Resources" Name="Resources" TextField="Name" IdField="Id" ColorField="Color" AllowMultiple="false"></ScheduleResource>
+        </ScheduleResources>
+        
+        <ScheduleEventSettings TValue="EquipmentModel">
+                <SfDataManager AdaptorInstance="@typeof(EquipmentAdaptor)" Adaptor="Adaptors.CustomAdaptor" ></SfDataManager>
+            </ScheduleEventSettings>
+
+        <ScheduleViews>
+            <ScheduleView MaxEventsPerRow="1" Option="View.TimelineMonth" AllowVirtualScrolling="true"></ScheduleView>
+        </ScheduleViews>
+    </SfSchedule>
+</div>
+    }else
+    {
+        <Loading></Loading>
+}
+
+@code{
+    ///            <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+    //// https://github.com/syncfusion/blazor-showcase-appointment-planner/blob/master/server-side/AppointmentPlanner/Pages/Schedule/Schedule.razor
+    
+    [Parameter]
+    public ulong guildID { get; set; }
+
+    [Inject] 
+    protected IJSRuntime JsRuntime { get; set; }
+    
+    SfSchedule<EquipmentModel> scheduleObj { get; set; }
+    
+
+
+    bool editUpcoming = true;
+    
+    private int CurrentYear;
+    public List<CalendarModel> ResourceDatasource = new List<CalendarModel>();
+    public List<EquipmentModel> EquipmentData = new List<EquipmentModel>();
+    private string[] groupData = { "Resources" };
+    private DateTime CurrentDate { get; set; }
+    
+    private Authenticator authenticator;
+    private UserIdentity user;
+    private SocketGuild guild;
+    private UserGlobalModel _userGlobalModel;
+
+    
+    private CalendarServices _calendarServices;
+    private EquipmentServices _equipmentServices;
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity) authState.User.Identity;
+        if (user == null)
+        {
+            return;
+        }
+        guild = DiscordBot.Client.GetGuild(guildID);
+        _calendarServices = new CalendarServices(guild);
+        _equipmentServices = new EquipmentServices(guild);
+
+        CurrentYear = DateTime.Today.Year;
+        CurrentDate = DateTime.Now;
+        
+        EquipmentData = _equipmentServices.GetAll();
+        ResourceDatasource = _calendarServices.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Equipment);
+        
+    }
+
+    public void OnCellClick(CellClickEventArgs args)
+    {
+        args.Cancel = true;
+    }
+    public void OnActionBegin(ActionEventArgs<EquipmentModel> args)
+    {
+        if (args.ActionType == ActionType.EventCreate && args.AddedRecords.Count > 0)
+        {
+            foreach(EquipmentModel Data in args.AddedRecords)
+            {
+                Data.Id = _equipmentServices.Upsert(Data).Id;
+            }
+        }
+    }
+    
+    
+    
+     
+    
+    
+}

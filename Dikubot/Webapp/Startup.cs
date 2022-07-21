@@ -17,7 +17,9 @@ using Dikubot.Webapp.Authentication;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using MudBlazor.Services;
+using Syncfusion.Blazor;
 
 namespace Dikubot.Webapp
 {
@@ -62,6 +64,7 @@ namespace Dikubot.Webapp
             
             
             //Do NICE STUFF - with login :D
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHttpContextAccessor();
 
             services.AddMudServices();
@@ -72,6 +75,12 @@ namespace Dikubot.Webapp
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
+            
+            //Kalender
+            services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
+            
+            //Kalender End
+            
             
             //AddAuthentication
             services.AddSingleton<UserService>();
@@ -118,6 +127,11 @@ namespace Dikubot.Webapp
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseResponseCaching();
+            
+            //Kalendar
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Environment.GetEnvironmentVariable("SYNCFUSION_API_KEY"));
+            
+            //Kalender end
             
 
             app.UseEndpoints(endpoints =>

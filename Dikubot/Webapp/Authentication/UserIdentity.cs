@@ -4,6 +4,7 @@ using System.Security.Claims;
 using BlazorLoginDiscord.Data;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Guild.Models.User;
 using Dikubot.DataLayer.Static;
 
 namespace Dikubot.Webapp.Authentication
@@ -79,5 +80,21 @@ namespace Dikubot.Webapp.Authentication
         /// Get the SessionModel
         /// </summary>
         public UserService.DiscordUserClaim DiscordUserClaim => _discordUserClaim;
+
+        /// <summary>
+        /// Get the Current Guild
+        /// </summary>
+        public string CurrentGuild => UserGlobalModel.SelectedGuild.ToString();
+
+        /// <summary>
+        /// Get all Guild the user have joined
+        /// </summary>
+        public List<UserGuildModel> GetJoinedGuilds()
+        {
+            GuildServices UserGuildService
+                
+        }
+
+
     }
 }
