@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
+using Dikubot.DataLayer.Database.Global;
 using Dikubot.DataLayer.Database.Interfaces;
+using Dikubot.Discord;
 using Discord.WebSocket;
 using MongoDB.Driver;
 
@@ -14,6 +17,10 @@ public class GuildSettingsService : GlobalServices<GuildSettingsModel>, IIndexed
         GuildSettingsModel model = this.Get(model => model.GuildId == guild.Id);
         return model ?? new GuildSettingsModel(guild);
     }
+
+    public GuildSettingsModel Get(string guildId) =>
+        Get(DiscordBot.Client.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guildId)));
+
 
     public IEnumerable<IndexKeysDefinition<GuildSettingsModel>> GetIndexes()
     {

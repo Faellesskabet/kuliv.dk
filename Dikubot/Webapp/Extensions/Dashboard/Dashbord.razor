@@ -5,6 +5,7 @@
 @using Syncfusion.Blazor.SplitButtons
 @using Dikubot.Discord
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment
 
 @using Dikubot.DataLayer.Database.Guild.Models.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.JoinRole
@@ -14,35 +15,14 @@
 @using Dikubot.Roles
 @using Syncfusion.Blazor.DropDowns
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
+@using Dikubot.Webapp.Extensions.Dashboard.Model
 @using global::Discord.WebSocket
 @using SendGrid.Helpers.Mail
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Navigations
 @using EventArgs = System.EventArgs
-    <MudAlert Severity="Severity.Warning" Square="true" Class="my-2">Dette er en åben beta af KULiv.dk. Hvis du finder en fejl, 
-        må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues</MudAlert>
-
-
-<MudItem xs="36" sm="18" md="12">
-        <MudCarousel Style="height:100px;" ShowArrows="@false" ShowBullets="@false" AutoCycle="@true" TData="object">
-            <MudCarouselItem Transition="Transition.Slide" Color="@Color.Primary">
-                <div class="d-flex" style="height:100%">
-                    <MudText Typo="Typo.h3" Class="mx-auto my-auto">KULiv - Find fællesskaber</MudText>
-                </div>
-            </MudCarouselItem>
-            <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
-                <div class="d-flex" style="height:100%">
-                    <MudText Typo="Typo.h3" Class="mx-auto my-auto">KULiv - Af studerende</MudText>
-                </div>
-            </MudCarouselItem>
-            <MudCarouselItem Transition="Transition.Slide" Color="@Color.Tertiary">
-                <div class="d-flex" style="height:100%">
-                    <MudText Typo="Typo.h3" Class="mx-auto my-auto">KULiv - Bliv frivillig</MudText>
-                </div>
-            </MudCarouselItem>
-        </MudCarousel>
-    </MudItem>
+@using Dikubot.Roles
+@using Dikubot.Webapp.Extensions.Dashboard.Model;
 
 <div class="control-section" id="target">
     <div style="padding-right:10px;padding-bottom:10px;text-align: right;">
@@ -56,55 +36,23 @@
 		    <DropDownListEvents TItem="GuildSettingsModel" TValue="string" OnValueSelect="@AddGuild" ></DropDownListEvents>
 		    <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
 	    </SfDropDownList>
+	    <SfButton CssClass="e-btn e-primary" Content="Save" @onclick="SavePanels"></SfButton>
     </div>
 
 
-    <SfDashboardLayout @ref="dashboardObject" Columns="12" AllowResizing="true">
-        <DashboardLayoutPanels>
-            <DashboardLayoutPanel Id="one" Row="0" Column="0" SizeX=4 SizeY=3>
-	            <HeaderTemplate>
-		            <MudText Typo="Typo.h5" Color="Color.Info"> <MudIcon Icon="@Icons.Filled.Group" Color="Color.Info"></MudIcon> Tilmeld roller</MudText>
-	            </HeaderTemplate>
-                <ContentTemplate>
-                    <MudText Typo="Typo.body2">Til gå forskellige roller her </MudText>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/roles">Gå til side</MudButton>
-                </ContentTemplate>
-            </DashboardLayoutPanel>
-            <DashboardLayoutPanel Id="two" Row="0" Column="4" SizeX=4 SizeY=3>
-                <HeaderTemplate>Panel 2</HeaderTemplate>
-            </DashboardLayoutPanel>
-	        <DashboardLayoutPanel Id="three" Row="0" Column="8" SizeX=4 SizeY=3>
-		        <HeaderTemplate><MudText Typo="Typo.h5" Color="Color.Info"> <MudIcon Icon="@Icons.Filled.HelpCenter"></MudIcon> Få hjælp</MudText></HeaderTemplate>
-		        <ContentTemplate>
-			        <MudText Typo="Typo.body2">Til gå forskellige roller her </MudText>
-			        <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/help">Få hjælp</MudButton>
-		        </ContentTemplate>
-	        </DashboardLayoutPanel>
-	        
-            <DashboardLayoutPanel Id="four" Row="3" Column="0" SizeX=8 SizeY=8>
-              <HeaderTemplate><MudText Typo="Typo.h5" Color="Color.Info"> Nyhedder  </MudText></HeaderTemplate>
-
-            </DashboardLayoutPanel>
-        </DashboardLayoutPanels>
-    </SfDashboardLayout>
+	<SfDashboardLayout @ref="dashboardObject" Columns="12" AllowResizing="true">
+	</SfDashboardLayout>
 </div>
 
 
 @code {
 	
-	public class ContextMenuItemModel
-	{
-		public List<ContextMenuItemModel> Items { get; set; }
-		public string Content { get; set; }
-		public string Id { get; set; }
-		public string IconCss { get; set; }
-		public Boolean Separator { get; set; }
-	}
 	
 	private Authenticator authenticator;
 	private UserIdentity user;
 	private List<JoinRoleCategoryMainModel> _categories;
 	private List<GuildSettingsModel> _guildSettings;
+	private DashboardPanelServices _panelServices;
 	
 	protected override async Task OnInitializedAsync()
 	{
@@ -117,7 +65,8 @@
 		}
 		
 		GuildSettingsService guildSettingsService = new GuildSettingsService();
-		JoinRoleServices _joinRoleServices = new JoinRoleServices(DiscordBot.Client.Guilds.First());
+		JoinRoleServices _joinRoleServices = new JoinRoleServices(user.CurrentGuild);
+		_panelServices = new DashboardPanelServices(user.CurrentGuild);
 		
 		_categories = _joinRoleServices.GetAll();
 		_guildSettings = new List<GuildSettingsModel>();
@@ -126,92 +75,76 @@
 		{
 			_guildSettings.Add(guildSettingsService.Get(guild));
 		}
-		
-		
 	}
 	
-    SfDashboardLayout dashboardObject;
-    public int Count = 9;
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		base.OnAfterRender(firstRender);
+		foreach (var dashboardPanel in _panelServices.Get())
+		{
+			dashboardObject.AddPanelAsync(dashboardPanel.LoadPanel(user, user.CurrentGuild, dashboardPanel.Id));
+		}
+		
+	}
+
+	SfDashboardLayout dashboardObject;
+	
+	List<PanelModel> panels;
+	
+	public async void SavePanels(EventArgs args)
+	{
+		List<PanelModel> panel = await this.dashboardObject.Serialize();
+		
+		foreach (var panelModel in panel)
+		{
+			_panelServices.SavePanel(panelModel);
+		}
+		panels = panel;
+
+	}
+	
+
+	public int Count = 9;
+	
 	public int Length { get; set; }
     public async Task AddClick(EventArgs args)
     {
-        string ContentValue = this.Count.ToString();
-        PanelModel panel = new PanelModel
-        {
-            Id = this.Count.ToString() + "_layout",
-            SizeX = 1,
-            SizeY = 1,
-            Column = 0,
-            Row = 0,
-            Header = @<div class='text-align'> Panel @ContentValue </div>,
-        };
-        await dashboardObject.AddPanelAsync(panel);
-        this.Count = this.Count + 1;
+	    DashboardPanelModel.DashboardPanel panelModel = new DashboardPanelModel.DashboardPanel();
+	    PanelModel panel = panelModel.CreatePanel(user, user.CurrentGuild, "Nice Header","MERE NICE TEXT");
+	    await dashboardObject.AddPanelAsync(panel);
     }
-	public async void RemoveClick(EventArgs args)
-    {
-        List<PanelModel> panel = await this.dashboardObject.Serialize();
-        Length = panel.Count;
-        if (Length != 0)
-        {
-            for (var i = Length - 1; i < Length; i++)
-            {
-                await dashboardObject.RemovePanelAsync(panel[Length - 1 - i].Id);
-            }
-        }
-	}
-	
-	
-
 	
 	public async Task AddRoles(SelectEventArgs<JoinRoleCategoryMainModel> args)
 	{
-		SocketGuild guild = DiscordBot.Client.Guilds.First();
-		JoinRoleServices _joinRoleServices = new JoinRoleServices(DiscordBot.Client.Guilds.First());
-		GuildSettingsService guildSettingsService = new GuildSettingsService();
-;
-		UserGuildServices _userGuildServices = new UserGuildServices(guild);
 		
-		UserGuildModel _userGuildModel = _userGuildServices.Get(user.UserGlobalModel.DiscordId);
-		PermissionsService _permissionsService = new PermissionsService(guild);
-		
-		
-		
-		string ContentValue = this.Count.ToString();
-        PanelModel panel = new PanelModel
-        {
-            Id = this.Count.ToString() + "_layout",
-            SizeX = 4,
-            SizeY = 4,
-            Column = 0,
-            Row = 0,
-	        Content =@<RolesWidget category="@_joinRoleServices.Get(model => model.Id == args.ItemData.Id)"
-                                                   _permissionsService="@_permissionsService"
-                                                   _userGuildModel="@_userGuildModel"
-                                                   _userGuildServices="@_userGuildServices"></RolesWidget>
-        };
-        await dashboardObject.AddPanelAsync(panel);
-        this.Count = this.Count + 1;
-    }
+		DashboardPanelModel.DashboardPanel panelModel = new DashboardPanelModel.DashboardPanel();
+		PanelModel panel = panelModel.CreatePanel(user, user.CurrentGuild, args.ItemData);
+		await dashboardObject.AddPanelAsync(panel);
+
+	}
 	
 	public async Task AddGuild(SelectEventArgs<GuildSettingsModel> args)
 	{
-		GuildSettingsModel guildSettingsModel = args.ItemData;
 		
-		string ContentValue = this.Count.ToString();
-		PanelModel panel = new PanelModel
-		{
-			Id = this.Count.ToString() + "_layout",
-			SizeX = 5,
-			SizeY = 2,
-			Column = 0,
-			Row = 0,
-			Content =@<GuildWidget Guild="guildSettingsModel" EnableJoin="true"></GuildWidget> 
-		};
+		DashboardPanelModel.DashboardPanel panelModel = new DashboardPanelModel.DashboardPanel();
+		PanelModel panel = panelModel.CreatePanel(user, user.CurrentGuild, args.ItemData);
+		
 		await dashboardObject.AddPanelAsync(panel);
-		this.Count = this.Count + 1;
-	}
 	
+	}
+	public async void RemoveClick(EventArgs args)
+	{
+		List<PanelModel> panel = await this.dashboardObject.Serialize();
+		Length = panel.Count;
+		if (Length != 0)
+		{
+			for (var i = Length - 1; i < Length; i++)
+			{
+				await dashboardObject.RemovePanelAsync(panel[Length - 1 - i].Id);
+			}
+		}
+	}
 	
 
 

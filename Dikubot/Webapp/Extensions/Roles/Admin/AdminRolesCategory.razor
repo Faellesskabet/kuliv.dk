@@ -5,6 +5,7 @@
 @using Dikubot.DataLayer.Database.Guild.Models.JoinRole
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Extensions.EmojiSelector
 @using Dikubot.DataLayer.Database.Guild.Models.Role
 @using Dikubot.DataLayer.Static
 @using Dikubot.Webapp.Shared.Dialog
@@ -83,13 +84,7 @@
                             </MudSelect>
                         </MudTd>
                         <MudTd DataLabel="Emoji">
-                            <MudSelect Label="Emoji" HelperText="Hvilken emoji skal bruges til at repræsentere rollen?" T="string" @bind-Value="@context.Emoji"
-                                       Text="@context.Emoji">
-                                @foreach (string emoji in Util.GetEmojiUnicodes())
-                                {
-                                    <MudSelectItem Value="@emoji">@emoji</MudSelectItem>
-                                }
-                            </MudSelect>
+                            <EmojiSelector @bind-Value="context.Emoji" />
                         </MudTd>
                         <MudTd DataLabel="Slet"><MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="() => RemoveRole(context)">Slet</MudButton></MudTd>
                     </RowTemplate>

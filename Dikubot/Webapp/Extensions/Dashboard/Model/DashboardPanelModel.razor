@@ -1,0 +1,241 @@
+﻿
+@using Dikubot.DataLayer.Database;
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment
+@using Dikubot.DataLayer.Database.Guild.Models.JoinRole;
+@using Dikubot.DataLayer.Database.Guild.Models.User;
+@using Dikubot.DataLayer.Permissions;
+@using Dikubot.Roles;
+@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
+@using MongoDB.Bson.Serialization.Attributes;
+@using Syncfusion.Blazor.Layouts;
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Guild.Models.Guild
+@using Dikubot.Discord
+@using MudBlazor
+
+
+@namespace Dikubot.Webapp.Extensions.Dashboard.Model
+
+
+@code {
+
+    public partial class DashboardPanel : MainModel
+    {
+        /// <Summary>The type of panel.</Summary>
+        [BsonElement("Type")]
+        public DashBordTypes Type{ get; set; }
+
+        public enum DashBordTypes
+        {
+            JoinRoleMainModel, 
+            GuildSettingsModel,
+            TitleAndContent
+        }
+        
+        /// <Summary>Who can see the calendar.</Summary>
+        [BsonElement("Options")]
+        public Dictionary<string, string> Options { get; set; }
+
+        /// <Summary>Specifies the row value in which the panel to be placed.</Summary>
+        [BsonElement("Row")]
+        public int Row { get; set; } = 0;
+
+        /// <Summary>Specifies the column value in which the panel to be placed.</Summary>
+        [BsonElement("Col")]
+        public int Col { get; set; } = 0;
+
+        /// <Summary>Specifies the width of the panel in cells count.</Summary>
+        [BsonElement("SizeX")]
+        public int SizeX { get; set; } = 1;
+
+        /// <Summary>Specifies the height of the panel in cells count.</Summary>
+        [BsonElement("SizeY")]
+        public int SizeY { get; set; } = 1;
+
+        /// <Summary>Specifies the minimum width of the panel in cells count.</Summary>
+        [BsonElement("MinSizeX")]
+        public int MinSizeX { get; set; } = 1;
+
+        /// <Summary>Specifies the minimum height of the panel in cells count.</Summary>
+        [BsonElement("MinSizeY")]
+        public int MinSizeY { get; set; } = 1;
+
+        /// <Summary>Specifies the maximum width of the panel in cells count.</Summary>
+        [BsonElement("MaxSizeX")]
+        public int? MaxSizeX { get; set; } = null;
+
+        /// <Summary>Specifies the maximum height of the panel in cells count.</Summary>
+        [BsonElement("MaxSizeY")]
+        public int? MaxSizeY { get; set; } = null;
+
+        /// <Summary>Specifies the CSS class name that can be appended with each panel element.
+        /// </Summary>
+        [BsonElement("CssClass")]
+        public string? CssClass { get; set; } = null;
+
+        public PanelModel LoadPanel(UserIdentity user, string guild, Guid panelId)
+        {
+            DashboardPanelServices panelServices = new DashboardPanelServices(guild);
+            DashboardPanel dashboardPanel = panelServices.Get(panelId);
+             
+            PanelModel panel = new PanelModel
+            {
+                Id = dashboardPanel.Id.ToString(),
+                SizeX = dashboardPanel.SizeX,
+                SizeY = dashboardPanel.SizeY,
+                Column = dashboardPanel.Col,
+                Row = dashboardPanel.Row,
+            };
+
+            switch (dashboardPanel.Type)
+            {
+                case DashBordTypes.JoinRoleMainModel:
+                    JoinRoleServices _joinRoleServices = new JoinRoleServices(guild);
+                    UserGuildServices _userGuildServices = new UserGuildServices(guild);
+                    PermissionsService _permissionsService = new PermissionsService(DiscordBot.Client.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guild)));
+                    UserGuildModel userGuildModel = _userGuildServices.Get(user.UserGlobalModel.DiscordId);
+                    
+                    JoinRoleCategoryMainModel category = _joinRoleServices.Get().First(model => model.Id.ToString() == dashboardPanel.Options["categoryId"]);
+                    panel.Content = @<RolesWidget category="@category"
+                                                  _permissionsService="@_permissionsService"
+                                                  _userGuildModel="@userGuildModel"
+                                                  _userGuildServices="@_userGuildServices"></RolesWidget>;
+                    break;
+                    
+                case DashBordTypes.GuildSettingsModel:
+                    GuildSettingsService guildSettingsService = new GuildSettingsService();
+                    GuildSettingsModel guildSettings = guildSettingsService.Get(dashboardPanel.Options["guildSettingsId"]);
+                    panel.Content = @<GuildWidget Guild="@guildSettings"
+                                                      EnableJoin="true"></GuildWidget>;
+                        break;
+                    case DashBordTypes.TitleAndContent:
+                        panel.Header = @<p> @dashboardPanel.Options["Header"]</p>;
+                        panel.Content = @<p>@dashboardPanel.Options["Content"]</p>;
+                            break;
+                    
+            }
+            
+            
+
+            return panel;
+        }
+    }
+    
+     public partial class DashboardPanel : MainModel
+        {
+            public PanelModel CreatePanel(UserIdentity User, string guild, JoinRoleCategoryMainModel argsItemData)
+            {
+                JoinRoleServices _joinRoleServices = new JoinRoleServices(guild);
+                UserGuildServices _userGuildServices = new UserGuildServices(guild);
+                PermissionsService _permissionsService = new PermissionsService(DiscordBot.Client.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guild)));
+                UserGuildModel userGuildModel = _userGuildServices.Get(User.UserGlobalModel.DiscordId);
+                
+                DashboardPanelServices panelServices = new DashboardPanelServices(guild);
+
+                DashboardPanel dashboardPanel = panelServices.Upsert(new DashboardPanel()
+                {
+                    SizeX = 4,
+                    SizeY = 4,
+                    Col = 0,
+                    Row = 0,
+                    Type = DashBordTypes.JoinRoleMainModel,
+                    Options = new Dictionary<string, string>()
+                    {
+                        {"categoryId",argsItemData.Id.ToString()},
+                    }
+                });
+                JoinRoleCategoryMainModel category = _joinRoleServices.Get().First(model => model.Id.ToString() == argsItemData.Id.ToString());
+                
+                PanelModel panel = new PanelModel
+                {
+                    Id = dashboardPanel.Id.ToString(),
+                    SizeX = dashboardPanel.SizeX,
+                    SizeY = dashboardPanel.SizeY,
+                    Column = dashboardPanel.Col,
+                    Row = dashboardPanel.Row,
+                    Content = @<RolesWidget category="@category"
+                                            _permissionsService="@_permissionsService"
+                                            _userGuildModel="@userGuildModel"
+                                            _userGuildServices="@_userGuildServices"></RolesWidget>
+                };
+   
+                return panel;
+            }
+         
+        }
+
+    public partial class DashboardPanel : MainModel
+    {
+        public PanelModel CreatePanel(UserIdentity User, string guild, GuildSettingsModel argsItemData)
+        {
+            DashboardPanelServices panelServices = new DashboardPanelServices(guild);
+
+            DashboardPanel dashboardPanel = panelServices.Upsert(new DashboardPanel()
+            {
+                SizeX = 5,
+                SizeY = 2,
+                Col = 0,
+                Row = 0,
+                Type = DashBordTypes.GuildSettingsModel,
+                Options = new Dictionary<string, string>()
+                {
+                    {"guildSettingsId",argsItemData.GuildId.ToString()}
+                }
+            });
+
+            PanelModel panel = new PanelModel
+            {
+                Id = dashboardPanel.Id.ToString(),
+                SizeX = dashboardPanel.SizeX,
+                SizeY = dashboardPanel.SizeY,
+                Column = dashboardPanel.Col,
+                Row = dashboardPanel.Row,
+                Content = @<GuildWidget Guild="argsItemData" EnableJoin="true"></GuildWidget>
+            };
+                
+                
+            return panel;
+        }
+         
+    }
+    
+    public partial class DashboardPanel : MainModel
+    {
+        public PanelModel CreatePanel(UserIdentity User, string guild, string header, string content)
+        {
+            DashboardPanelServices panelServices = new DashboardPanelServices(guild);
+
+            DashboardPanel dashboardPanel = panelServices.Upsert(new DashboardPanel()
+            {
+                SizeX = 2,
+                SizeY = 2,
+                Col = 0,
+                Row = 0,
+                Type = DashBordTypes.TitleAndContent,
+                Options = new Dictionary<string, string>()
+                {
+                    {"Header", header},
+                    {"Content",content}
+                }
+            });
+
+            PanelModel panel = new PanelModel
+            {
+                Id = dashboardPanel.Id.ToString(),
+                SizeX = dashboardPanel.SizeX,
+                SizeY = dashboardPanel.SizeY,
+                Column = dashboardPanel.Col,
+                Row = dashboardPanel.Row,
+                Header = @<p>@header</p>,
+                Content = @<p>@content</p>
+        };
+                
+                
+            return panel;
+        }
+         
+    }
+    
+}

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dikubot.DataLayer.Database.Guild.Models.Role;
 using Dikubot.DataLayer.Database.Guild.Models.User.SubModels;
 using Dikubot.DataLayer.Database.Interfaces;
+using Dikubot.Discord;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
@@ -17,6 +19,10 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
     public class UserGuildServices : GuildServices<UserGuildModel>, IIndexed<UserGuildModel>
     {
         public UserGuildServices(SocketGuild guild) : base("Users", guild)
+        {
+        }
+        
+        public UserGuildServices(string guidId) : base("Users", DiscordBot.Client.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
         {
         }
 

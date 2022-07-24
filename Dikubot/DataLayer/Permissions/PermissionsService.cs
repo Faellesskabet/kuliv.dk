@@ -1,3 +1,4 @@
+using System.Linq;
 using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.CategoryChannel;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
@@ -5,6 +6,7 @@ using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
 using Dikubot.DataLayer.Database.Guild.Models.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Role;
 using Dikubot.DataLayer.Database.Guild.Models.User;
+using Dikubot.Discord;
 using Discord.WebSocket;
 
 namespace Dikubot.DataLayer.Permissions
@@ -35,6 +37,10 @@ namespace Dikubot.DataLayer.Permissions
             _guildServices = new GuildServices(guild);
             _guildSettingsService = new GuildSettingsService();
         }
+        
+        
+            
+            
 
         /// <Summary>Takes channels, roles and users information from discord and saves it in the database.</Summary>
         /// <returns>Void.</returns>

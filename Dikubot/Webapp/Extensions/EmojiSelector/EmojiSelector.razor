@@ -5,11 +5,15 @@
 
 @using Newtonsoft.Json
 @using System.IO
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs
+@namespace Dikubot.Extensions.EmojiSelector
+
+
+<input name="Emoji" @bind="@Value" hidden @oninput="OnValueChanged" />
 
 <button class="e-btn e-tbar-btn" @onclick="ClickHandler">
-    <div class="e-tbar-btn-text" style="font-weight: 500;">@value</div>
+    <div class="e-tbar-btn-text" style="font-weight: 500;">@Value</div>
 </button>
-
 
 <SfDialog @bind-Visible="@dialogVisible" ZIndex="1000" ShowCloseIcon="false" IsModal="true" Width="45%" Target="#rteSection">
     <DialogTemplates>
@@ -206,9 +210,20 @@
 @code {
     string rteObj;
 
+    
     [Parameter]
-    public string value { get; set; } = "🙂";
+    public string Value { get; set; } = "🙂";
 
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+    
+    private async Task OnValueChanged(ChangeEventArgs e)
+    {
+        Value = e.Value.ToString();
+
+        await ValueChanged.InvokeAsync(Value);
+    }
+    
     int currentIndex { get; set; } = -1;
     int currentTabIndex { get; set; }
     string activeClass = "e-active";
@@ -264,30 +279,30 @@
             switch (this.currentTabIndex)
     {
         case 0:
-            value = this.smileyList.Keys.ToList()[this.currentIndex];
+            Value = this.smileyList.Keys.ToList()[this.currentIndex];
             break;
         case 1:
-            value = this.animalsList.Keys.ToList()[this.currentIndex];
+            Value = this.animalsList.Keys.ToList()[this.currentIndex];
             break;
         case 2:
-            value = this.objectsList.Keys.ToList()[this.currentIndex];
+            Value = this.objectsList.Keys.ToList()[this.currentIndex];
             break;
         case 3:
-            value = this.symbolsList.Keys.ToList()[this.currentIndex];
+            Value = this.symbolsList.Keys.ToList()[this.currentIndex];
             break;
         case 4:
-            value = this.travelPlacesList.Keys.ToList()[this.currentIndex];
+            Value = this.travelPlacesList.Keys.ToList()[this.currentIndex];
             break;
         case 5:
-            value = this.flagsList.Keys.ToList()[this.currentIndex];
+            Value = this.flagsList.Keys.ToList()[this.currentIndex];
             break;
         case 6:
-            value = this.activitiesList.Keys.ToList()[this.currentIndex];
+            Value = this.activitiesList.Keys.ToList()[this.currentIndex];
             break;
         default:
             break;
     }
-            
+            await ValueChanged.InvokeAsync(Value);
             this.dialogVisible = false;
             this.currentIndex = -1;
         }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Dikubot.DataLayer.Database;
 using Dikubot.DataLayer.Database.Global.Settings.Tags;
 using Discord.WebSocket;
 using MongoDB.Bson.Serialization.Attributes;
@@ -91,10 +92,21 @@ public class GuildSettingsModel : MainModel
     public List<TagsMainModel> Tags { get; set; }
     
     /// <summary>
+    /// The tags associated with the guild. They're used for searching and filtering
+    /// </summary>
+    [BsonElement("Volunteer")]
+    public string Volunteer { get; set; }
+    
+    
+    /// <summary>
     /// Indicates whether the guild accept support tickets.
     /// </summary>
     public bool SupportTicketsEnabled { get; set; }
-    
+
     [BsonElement("AnnouncementChannels")]
     public List<ulong> AnnouncementChannels { get; set; }
+    
+    
+    
+    
 }
