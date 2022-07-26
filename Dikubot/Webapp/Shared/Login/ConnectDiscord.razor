@@ -51,30 +51,15 @@
         </MudCardContent>
         <MudCardActions>
             <MudLink Href="/login"><MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton></MudLink>
-            <MudLink Href="https://dnur.dk/"><MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton></MudLink>
+            <MudLink><MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton></MudLink>
         </MudCardActions>
     </MudCard>
 }
-else if(!loading)
+else
 {
-    <MudCard>
-        <MudCardHeader>
-            <CardHeaderAvatar>
-                <MudAvatar Image="discordUser.GetAvatarUrl()" Size="Size.Large" Color="Color.Primary"></MudAvatar>
-            </CardHeaderAvatar>
-            <CardHeaderContent>
-                 <MudText Typo="Typo.h6">Er dette dig?</MudText>
-                <MudText Typo="Typo.body1">@httpContextAccessor.HttpContext.User.Identity.Name! </MudText>
-            </CardHeaderContent>
-        </MudCardHeader>
-        <MudCardActions>
-            <MudButton Color="Color.Success" OnClick=@(ApproveDiscord)>Ja, godkend</MudButton>
-            <MudButton Color="Color.Error" OnClick=@(RejectDiscord)>Nej, afvis</MudButton>
-        </MudCardActions>
-    </MudCard>
+    <Loading></Loading>
+
 }
-
-
 
 
 @code {
