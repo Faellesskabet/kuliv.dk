@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using AspNet.Security.OAuth.Discord;
 using Blazored.LocalStorage;
 using BlazorLoginDiscord.Data;
+using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment;
+using Dikubot.Extensions.Calendar.Equipment;
 using Dikubot.Webapp.Authentication;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
 using Microsoft.AspNetCore.CookiePolicy;
@@ -77,6 +79,7 @@ namespace Dikubot.Webapp
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
             
             //Kalender
+            
             services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
             
             //Kalender End

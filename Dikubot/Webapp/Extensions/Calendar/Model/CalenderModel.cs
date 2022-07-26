@@ -25,7 +25,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         
         /// <Summary>Who can made events in the the Calaendar</Summary>
         [BsonElement("Permission")]
-        public HashSet<Guid> Permission { get; set; }
+        public HashSet<Guid> Permission { get; set; } = new HashSet<Guid>();
 
         public IEnumerable<RoleMainModel> GetPermissionRoles(RoleServices roleServices)
         {
@@ -44,14 +44,14 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         /// <Summary>The Decscrition for the calendar</Summary>
         [BsonElement("Decs")]
         public string Decs { get; set; }
-        
-        
+
+
         /// <Summary>
         /// If private, which roles can see the events in the the Calaendar
         /// Other than those who has Permission
         /// </Summary>
         [BsonElement("View")]
-        public HashSet<Guid> View { get; set; }
+        public HashSet<Guid> View { get; set; } = new HashSet<Guid>();
         
         public IEnumerable<RoleMainModel> GetViewRoles(RoleServices roleServices)
         {

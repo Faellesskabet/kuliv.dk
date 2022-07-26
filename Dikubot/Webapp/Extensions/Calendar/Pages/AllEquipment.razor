@@ -1,5 +1,6 @@
 @page "/All/equipment"
 @using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
 @using Microsoft.Graph
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -7,13 +8,17 @@
 @using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
 
 <h3>Equipment</h3>
-
-<EquipmentWidget guildID="@user.UserGlobalModel.SelectedGuild"> </EquipmentWidget>
+@foreach (var item in guilds)
+{
+    <EquipmentWidget GuildId="@item.Id"> </EquipmentWidget>
+};
 
 
 @code{
     private UserIdentity user;
     private Authenticator authenticator;
+
+    private IReadOnlyCollection<SocketGuild> guilds;
     
     protected override async Task OnInitializedAsync()
     {
@@ -26,6 +31,7 @@
         {
             return;
         }
+        guilds = user.GetJoinedGuilds();
        
     }
     

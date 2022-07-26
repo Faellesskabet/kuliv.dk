@@ -98,8 +98,6 @@
         guild = DiscordBot.Client.GetGuild(GuildId);
         _calendarServices = new CalendarServices(guild);
         _equipmentServices = new EquipmentServices(guild);
-
-        var test = user.GetRolesGuid();
         
         ResourceDatasource = GetCalendarModels();
         EquipmentData = GetEvents(CurrentDate);
@@ -148,8 +146,7 @@
                                                ||
                                                (model.EndTime.CompareTo(startTime) >= 0
                                                 && model.EndTime.CompareTo(endTime) <= 0)
-                ).Select(m => { m.IsReadonly 
-                    = !(m.CreateBy == user.DiscordId || ResourceDatasource.First(rd => rd.Id == m.EquiqmentId).Permission.Overlaps(user.GetRolesGuid())); return m; }).ToList();
+                );
     //.FindAll(EMmodel => ResourceDatasource
     //                .Exists(RDmodel => RDmodel.View.Contains(EMmodel.EquiqmentId) ||
     //                                   RDmodel.Permission.Contains(EMmodel.EquiqmentId)));
@@ -167,7 +164,6 @@
             {
                 foreach (EquipmentModel eventData in args.AddedRecords)
                 {
-                    eventData.CreateBy = user.DiscordId;
                     _equipmentServices.Upsert(eventData);
                 }
             }
@@ -175,19 +171,14 @@
             {
                 foreach (EquipmentModel eventData in args.ChangedRecords)
                 {
-                    if (!eventData.IsReadonly)
-                    {
-                        _equipmentServices.Upsert(eventData);
-                    }
+                    _equipmentServices.Upsert(eventData);
                 }
             }
             if (args.DeletedRecords != null && args.DeletedRecords.Count > 0)
             {
                 foreach (EquipmentModel eventData in args.DeletedRecords)
-                {if (!eventData.IsReadonly)
                 {
                     _equipmentServices.Remove(eventData);
-                }
                 }
             }
             this.EquipmentData = GetEvents(CurrentDate);

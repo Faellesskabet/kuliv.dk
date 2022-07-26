@@ -6,6 +6,8 @@
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment
+@using Dikubot.DataLayer.Database.Guild.Models.User
+@using Dikubot.Discord
 
 @using Dikubot.Extensions.Models.Equipment
 @using Dikubot.Webapp.Shared.Dialog
@@ -28,6 +30,12 @@
                         <MudDatePicker @bind-Value="@_category.StartTime" Label="Start tid"></MudDatePicker>
                         <MudDatePicker @bind-Value="@_category.EndTime"  Label="Slut tid"></MudDatePicker>
                         <MudTextField @bind-Value="@_category.Location" Label="Lokation" Immediate="@true" MaxLength="32"></MudTextField>
+                        <MudSelect Label="Create By" @bind-Value="@_category.CreateBy">
+                            @foreach (var user in _usersInGuild)
+                            {
+                                <MudSelectItem Value="@user.DiscordId">@user.Name</MudSelectItem>
+                            }
+                        </MudSelect>
                         <MudSelect Label="Caleder" @bind-Value="@_category.EquiqmentId">
                                                         @foreach (var role in _roleMainModels)
                                                         {
@@ -64,16 +72,18 @@ else
     private EquipmentModel _category;
     private CalendarServices _roleServices;
     private List<CalendarModel> _roleMainModels;
-    
+    private List<UserGuildModel> _usersInGuild;
     
     protected override async Task OnInitializedAsync()
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
         _joinRoleServices = new EquipmentServices(_guild);
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EquipmentModel();
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EquipmentModel() {CreateBy = _userGlobalModel.DiscordId};
         _roleServices = new CalendarServices(_guild);
         _roleMainModels = _roleServices.GetAll();
+        var userService = new UserGuildServices(_guild);
+        _usersInGuild = userService.GetAll();
         _loading = false;
     }
     

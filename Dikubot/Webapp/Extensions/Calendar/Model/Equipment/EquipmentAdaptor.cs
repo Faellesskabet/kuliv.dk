@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment;
 using Dikubot.Extensions.Models.Equipment;
@@ -25,22 +26,38 @@ namespace Dikubot.Extensions.Calendar.Equipment
          private UserIdentity user;
          private Authenticator authenticator;
          
-         public Authenticator AuthenticationStateProvider { get; set; }
-
-         static int CurrentYear = DateTime.Today.Year;
-
          public EquipmentAdaptor()
          {
              services = new EquipmentServices("815997079850713130");
          }
-         public EquipmentAdaptor(string guildID)
+         public EquipmentAdaptor(string key)
          {
-             services = new EquipmentServices(guildID);
+             services = new EquipmentServices(key);
+         }
+         
+         public EquipmentAdaptor(EquipmentServices _equipmentServices)
+         {
+             services = _equipmentServices;
          }
          
          public async override Task<object> ReadAsync(DataManagerRequest dataManagerRequest, string key = null)
         {//KULIV_null hmm
-            return dataManagerRequest.RequiresCounts ? new DataResult() { Result = services.GetAll(), Count = services.GetAll().Count } : (object)services.GetAll();
+            //dataManagerRequest.Params["StartDate"] [StartDate, 01-07-2022 00:00:00]
+            //dataManagerRequest.Params["EndDate"]
+
+            
+            DateTime startTime = (DateTime) dataManagerRequest.Params["StartDate"];
+            DateTime endTime = (DateTime) dataManagerRequest.Params["EndDate"];
+            
+            List<EquipmentModel> result = 
+                services.GetAll(model => model.StartTime.CompareTo(startTime) >= 0 ||
+                                                model.StartTime.CompareTo(endTime) <= 0
+                                                                    || 
+                                                (model.EndTime.CompareTo(startTime) >= 0 
+                                                 && model.EndTime.CompareTo(endTime) <= 0 )
+                                              );
+            
+            return dataManagerRequest.RequiresCounts ? new DataResult() { Result = result, Count = result.Count } : (object) result;
         }
         
         public async override Task<object> InsertAsync(DataManager dataManager, object data, string key)

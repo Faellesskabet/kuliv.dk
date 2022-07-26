@@ -24,29 +24,32 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
 
         [BsonElement("StartTime")]
         [BsonRepresentation(BsonType.DateTime)]
-        [BsonDateTimeOptions(Kind = DateTimeKind.Local)] 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         //[DisplayFormat(DataFormatString = "{0:dddd, dd-MM-yyyy, HH:mm}")]
         [Required]
-        public DateTime StartTime { get; set; }
+        public DateTime StartTime { get; set; } = new DateTime();
 
         [BsonElement("EndTime")]
         [Required]
         [BsonRepresentation(BsonType.DateTime)]
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         //[DisplayFormat(DataFormatString = "{0:dddd, dd-MM-yyyy, HH:mm}")]
-        public DateTime EndTime {get; set; } 
+        public DateTime EndTime {get; set; } = new DateTime();
         
         [BsonElement("RecurrenceRule")] 
         public string RecurrenceRule { get; set; }
         
         [BsonElement("RecurrenceException")] 
         public string RecurrenceException { get; set; }
-        
-        
-        
-            
+
         [BsonElement("IsAllDay")]
         public bool IsAllDay { get; set; }
-        
+
+        [BsonElement("CreateBy")] public string CreateBy { get; set; }
+
+        [BsonIgnore]
+        public bool IsReadonly { get; set; } = true;
+
+
     }
 }
