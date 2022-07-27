@@ -1,6 +1,7 @@
 using System;
 using Blazored.LocalStorage;
 using BlazorLoginDiscord.Data;
+using Dikubot.Discord;
 using Dikubot.Webapp.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -28,9 +29,10 @@ namespace Dikubot
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            
-            var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
-            
+
+            services.AddSingleton<DiscordBot>();
+            services.AddSingleton<UserService>();
+
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
            
             services.AddServerSideBlazor(options =>
@@ -69,10 +71,6 @@ namespace Dikubot
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
-            
-            //AddAuthentication
-            services.AddSingleton<UserService>();
-
             services.AddAuthentication(options =>
                 {
                     ///CookieAuthenticationDefaults.AuthenticationScheme
