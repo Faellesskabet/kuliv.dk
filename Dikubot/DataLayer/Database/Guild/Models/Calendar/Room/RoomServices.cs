@@ -14,7 +14,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Room
         public RoomServices(SocketGuild guild) : base("Room", guild)
         {
         }
-        public RoomServices(string guidId) : base("Room", DiscordBot.Client.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
+        public RoomServices(string guidId) : base("Room", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
         {
         }
         

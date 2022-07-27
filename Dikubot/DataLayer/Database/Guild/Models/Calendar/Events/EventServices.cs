@@ -16,7 +16,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
         }
         
         
-        public EventsServices(string guidId, string calendar = null) : base("Events", DiscordBot.Client.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
+        public EventsServices(string guidId, string calendar = null) : base("Events", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
         {
             _calendar = calendar;
         }
