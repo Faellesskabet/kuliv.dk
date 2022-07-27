@@ -10,8 +10,9 @@
 @using Dikubot.Discord
 @using Microsoft.IdentityModel.Tokens
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject DiscordBot DiscordBot;
 
-    @if (_loaded)
+@if (_loaded)
     {
         <MudAlert Severity="Severity.Normal" Square="true" Class="my-2">Du er ved at vælge roller i fællesskabet @_guildSettingsModel.Name. 
             Du vil modtage rollerne på fællesskabets Discord med det samme.</MudAlert>
@@ -118,6 +119,17 @@
         {
             return;
         }
+
+        if (joinRoleCategoryMainModel.TextRoles.IsNullOrEmpty())
+        {
+            return;
+        }
+
+        if (joinRoleCategoryMainModel.TextRoles.Where(HasPermissionForRole).IsNullOrEmpty())
+        {
+            return;
+        }
+        
         foreach (var joinRoleMainModel in joinRoleCategoryMainModel.TextRoles.Where(HasPermissionForRole))
         {
             _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
