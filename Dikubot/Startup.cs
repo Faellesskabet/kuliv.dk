@@ -1,27 +1,19 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Components.Authorization;
 using System;
-using System.Net;
-using System.Threading.Tasks;
-using AspNet.Security.OAuth.Discord;
 using Blazored.LocalStorage;
 using BlazorLoginDiscord.Data;
 using Dikubot.Webapp.Authentication;
-using Dikubot.Webapp.Authentication.Discord.OAuth2;
-using Microsoft.AspNetCore.CookiePolicy;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
 using Syncfusion.Blazor;
 
-
-namespace Dikubot.Webapp
+namespace Dikubot
 {
     public class Startup
     {
