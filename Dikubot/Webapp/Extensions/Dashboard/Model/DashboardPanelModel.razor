@@ -112,8 +112,9 @@
                         break;
                     case DashBordTypes.TitleAndContent:
                         panel.Header = @<p> @dashboardPanel.Options["Header"]</p>;
-                        panel.Content = @<p>@dashboardPanel.Options["Content"]</p>;
-                            break;
+                        panel.Content = @<div>@((MarkupString)@dashboardPanel.Options["Content"])</div>;
+                            
+                        break;
                     
             }
             
@@ -229,7 +230,7 @@
                 Column = dashboardPanel.Col,
                 Row = dashboardPanel.Row,
                 Header = @<p>@header</p>,
-                Content = @<p>@content</p>
+                Content = @<div>@((MarkupString)content)</div>
         };
                 
                 

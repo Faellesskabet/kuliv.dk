@@ -2,99 +2,18 @@
 @using Dikubot.Webapp.Authentication
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment
 @using Dikubot.Discord
+@using Dikubot.Webapp.Extensions.Dashboard;
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
     <MudAlert Severity="Severity.Warning" Square="true" Class="my-2">Dette er en åben beta af KULiv.dk. Hvis du finder en fejl, 
-        må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues</MudAlert>
-    <MudGrid>
-        <MudItem xs="36" sm="18" md="12">
-            <MudCarousel Style="height:100px;" ShowArrows="@false" ShowBullets="@false" AutoCycle="@true" TData="object">
-                <MudCarouselItem Transition="Transition.Slide" Color="@Color.Primary">
-                    <div class="d-flex" style="height:100%">
-                        <MudText Typo="Typo.h3" Class="mx-auto my-auto">KULiv - Find fællesskaber</MudText>
-                    </div>
-                </MudCarouselItem>
-                <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
-                    <div class="d-flex" style="height:100%">
-                        <MudText Typo="Typo.h3" Class="mx-auto my-auto">KULiv - Af studerende</MudText>
-                    </div>
-                </MudCarouselItem>
-                <MudCarouselItem Transition="Transition.Slide" Color="@Color.Tertiary">
-                    <div class="d-flex" style="height:100%">
-                        <MudText Typo="Typo.h3" Class="mx-auto my-auto">KULiv - Bliv frivillig</MudText>
-                    </div>
-                </MudCarouselItem>
-            </MudCarousel>
-        </MudItem>
-        <MudItem xs="12" sm="12" md="4">
-            <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
-                <MudCardHeader>
-                    <MudIcon Icon="@Icons.Filled.Group" Color="Color.Info"></MudIcon>
-                    <MudText Typo="Typo.h5" Color="Color.Info"> Tilmeld roller</MudText>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudText Typo="Typo.body2">Dit fællesskab har måske nogen ting som kun kan tilgås,
-                        hvis man er en del af en specifik rolle. Find den rolle her!</MudText>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/roles">Gå til side</MudButton>
-                </MudCardActions>
-            </MudCard>
-        </MudItem>
-        <MudItem xs="12" sm="12" md="4">
-            <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
-                @if (_loaded)
-                {
-                    <MudCardHeader Style="overflow: scroll">
-                        <MudIcon Icon="@Icons.Filled.People" ></MudIcon>
-                        <MudText Typo="Typo.h5">@_guildSettingsModel.Name</MudText>
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudText Typo="Typo.body2">Du er logget ind i @_guildSettingsModel.Name fællesskabet. Alt hvad du ser og gør er i forhold til
-                            dette fællesskab.</MudText>
-                    </MudCardContent>
-                    <MudCardActions>
-                        <MudButton Variant="Variant.Text" Color="Color.Primary" Link="/changeguild">Skift fællesskab</MudButton>
-                    </MudCardActions>
-                }
-                else
-                {
-                    <MudSkeleton Width="90%" Height="90%" Class="ml-2" />
-                }
-            </MudCard>
-        </MudItem>
-        <MudItem xs="12" sm="12" md="4">
-            <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
-                <MudCardHeader>
-                    <MudIcon Icon="@Icons.Filled.HelpCenter"></MudIcon>
-                    <MudText Typo="Typo.h5">Få hjælp</MudText>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudText Typo="Typo.body2">Har du nogen problemer? Her kan du finde kontakt informationer samt massere af guides!</MudText>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton Variant="Variant.Text" Color="Color.Primary" Link="/help">Få hjælp</MudButton>
-                </MudCardActions>
-            </MudCard>
-        </MudItem>
-        <MudItem xs="12" sm="8" md="8">
-            <MudPaper Style="height: 100%"></MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="4">
-            <MudGrid>
-                <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 220px;"></MudPaper>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 220px;"></MudPaper>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 220px;"></MudPaper>
-                </MudItem>
-            </MudGrid>
-        </MudItem>
-    </MudGrid>
+        må du meget gerne rappotere det her: https://github.com/Faellesskabet/</MudAlert>
+
+<Dashboard PanelServices="_panelServices"></Dashboard>
+
+
 
 @code {
     private Authenticator authenticator;
@@ -102,7 +21,8 @@
     private SocketGuild guild;
     private GuildSettingsModel _guildSettingsModel;
     private bool _loaded = false;
-
+    private DashboardPanelServices _panelServices;
+    
     protected override async Task OnInitializedAsync()
     {
         authenticator = ((Authenticator) AuthenticationStateProvider);
@@ -115,5 +35,7 @@
         guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
         _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
         _loaded = true;
+        _panelServices = new DashboardPanelServices(guild);
+
     }
 }

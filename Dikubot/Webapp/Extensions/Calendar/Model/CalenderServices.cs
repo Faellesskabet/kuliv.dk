@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events;
 using Dikubot.Discord;
-using Dikubot.Extensions.Calendar;
 using Discord.WebSocket;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Calendar

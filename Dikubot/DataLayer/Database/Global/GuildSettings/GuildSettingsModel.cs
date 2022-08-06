@@ -18,6 +18,11 @@ public class GuildSettingsModel : MainModel
         Description = guild.Description;
     }
     
+    public GuildSettingsModel()
+    {}
+    
+    
+    
     [BsonElement("GuildId")] [BsonUnique]
     public ulong GuildId { get; set; }
     

@@ -1,0 +1,100 @@
+﻿@namespace Dikubot.Webapp.Extensions.NavMenu
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Discord
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Webapp.Pages
+@using MudBlazor.Utilities
+@using Syncfusion.Blazor.DropDowns
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+
+
+<SfComboBox TValue="string" TItem="GuildSettingsModel" AllowFiltering="true" PopupHeight="230px" Placeholder="Skift Fælleskab" @bind-Value="@ComboBoxValue" DataSource="@_guilds">
+    <ComboBoxEvents TValue="string" TItem="GuildSettingsModel" ValueChange="@ChangeGuild"/>
+    <ComboBoxFieldSettings Text="Name" Value="Id"/>
+</SfComboBox>
+
+
+
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Home" Href="/">Forside</MudNavLink>
+
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Newspaper" Href="/news">Nyheder</MudNavLink>
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/roles">Tilmeld roller</MudNavLink>
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CalendarMonth" Href="/equipment">Tilmeld roller</MudNavLink>
+
+<MudDivider Class="my-2" />
+
+<AuthorizeView Roles="@Permissions.GlobalAdmin">
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CrueltyFree" IconColor="Color.Primary" Href="/op">System Admin indstillinger</MudNavLink>
+<MudDivider Class="my-2" />
+    </AuthorizeView>
+
+<AuthorizeView Roles="@Permissions.GuildAdmin">
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Computer" Href="/admin">Admin indstillinger</MudNavLink>
+     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Computer" Href="/admin/edit/dashbord">Admin indstillinger</MudNavLink>
+    <MudDivider Class="my-2" />
+</AuthorizeView>
+
+
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.DomainAdd" Href="/addguild">Tilføj dit eget fællesskab</MudNavLink>
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.SportsKabaddi" Href="/volunteer">Bliv frivillig</MudNavLink>
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Help" Href="/help">Få hjælp</MudNavLink>
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/profile">Min Profil</MudNavLink>
+<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Logout" Href="/logout">Log-ud</MudNavLink>
+
+
+@code
+{
+    
+    /*
+<SfDropDownList TItem="GuildSettingsModel" TValue="string"  DataSource="@_guilds">
+    <DropDownListEvents TItem="GuildSettingsModel" TValue="string" OnValueSelect="@ChangeGuild" ></DropDownListEvents>
+    <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+</SfDropDownList>
+     */
+    [Parameter] public UserIdentity User { get; set; }
+    [Inject] private IDialogService DialogService { get; set; }
+    public string ComboBoxValue;
+    private List<GuildSettingsModel> _guilds;
+
+    protected override void OnInitialized()
+    {
+        
+        GuildSettingsService guildSettingsService = new GuildSettingsService();
+        
+        _guilds = new List<GuildSettingsModel>();
+        
+        foreach (var guild in User.GetJoinedGuilds())
+        {
+            _guilds.Add(guildSettingsService.Get(guild));
+        }
+
+        GuildSettingsModel ShowMore = new GuildSettingsModel() {Name = "Show More", Id = Guid.Empty};
+        _guilds.Add(ShowMore);
+        base.OnInitialized();
+        
+    }
+
+    public async Task ChangeGuild(ChangeEventArgs<string, GuildSettingsModel> args)
+    {
+        var authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        
+        if (User == null)
+        {
+            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            return;
+        }
+
+        User.UserGlobalModel.SelectedGuild = args.ItemData.GuildId;
+        new UserGlobalServices().Upsert(User.UserGlobalModel);
+        await authenticator.UpdateSession();
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        
+        
+    }
+}

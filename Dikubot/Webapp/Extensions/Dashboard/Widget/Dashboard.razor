@@ -1,0 +1,80 @@
+﻿
+@namespace Dikubot.Webapp.Extensions.Dashboard
+@using Syncfusion.Blazor.Layouts
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment
+@using Dikubot.Webapp.Authentication;
+
+
+
+@inject AuthenticationStateProvider _authenticationStateProvider
+
+
+<SfDashboardLayout  @ref="this.DashboardObject" CellAspectRatio="2" Columns="this.Columns" AllowResizing="this.AllowResizing" AllowDragging="AllowDragging">
+	</SfDashboardLayout>
+
+@code {
+
+	[Parameter]
+	public bool AllowResizing { get; set; } = false;
+
+	[Parameter]
+	public bool AllowDragging { get; set; } = false;
+
+	[Parameter]
+	public SfDashboardLayout DashboardObject { get; set; } = new SfDashboardLayout();
+
+	[Parameter]
+	public int Columns { get; set; } = 12;
+
+	[Parameter]
+	public DashboardPanelServices PanelServices { get; set; }
+
+	[Parameter]  
+	public EventCallback<SfDashboardLayout> DashboardObjectChanged { get; set; }
+	
+	
+	private bool _isRender = false;
+	
+	protected override Task OnParametersSetAsync()
+	{
+		return Task.CompletedTask; 
+	}
+	
+	private async Task ChangeValue()  
+	{
+		await DashboardObjectChanged.InvokeAsync(DashboardObject);  
+	}  
+	
+	private UserIdentity _user;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await ((Authenticator) _authenticationStateProvider).GetAuthenticationStateAsync();
+		_user = (UserIdentity) authState.User.Identity;
+		if (_user == null)
+		{
+			return;
+		}
+		await ChangeValue();
+	}
+	
+
+	protected override void OnAfterRender(bool firstRender)
+    	{
+		if (firstRender)
+		{
+			foreach (var dashboardPanel in PanelServices.Get())
+			{
+				this.DashboardObject.AddPanelAsync(dashboardPanel.LoadPanel(_user, _user.CurrentGuild, dashboardPanel.Id));
+				ChangeValue();
+			}
+		}
+    		base.OnAfterRender(firstRender);
+    		
+			
+		
+	    }
+	
+	
+	
+}

@@ -1,6 +1,7 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.Webapp.Pages
 @using Microsoft.IdentityModel.Tokens
-
+@inject NavigationManager _navigationManager
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="align-content-md-center align-items-center">
     <MudGrid Justify="Justify.Center">
@@ -17,7 +18,11 @@
                         <MudDivider></MudDivider>
                     }
                 }
-                <MudButton Style="margin-top: 15px;" FullWidth="@true" Link="@Environment.GetEnvironmentVariable("BOT_INVITE")" Variant="Variant.Outlined" Color="Color.Primary">Tilføj dit eget fælleskab til KULiv</MudButton>
+                @code
+                {
+                    
+                }
+                <MudButton Color="Color.Primary" FullWidth="@true" url="/addguild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
             </MudPaper>
         </MudItem>
     </MudGrid>
@@ -26,4 +31,8 @@
     [Parameter] public List<GuildSettingsModel> Guilds { get; set; }
     [Parameter] public bool EnableJoin { get; set; }
     private string SearchQuery { get; set; }
+    
+
+    
+    
 }

@@ -1,6 +1,86 @@
-@page "/addguild"
-<h3>AddGuild</h3>
 
-@code {
+@page "/addguild/{permissions}"
+@page "/addguild"
+@using Microsoft.AspNetCore.Http
+
+@inject NavigationManager _navigationManager
+@inject IHttpContextAccessor httpContextAccessor;
+
+
+
+<h2>Botten er i åben Beta</h2>
+
+<p>@permissions , @this.code, @this.guild_id </p>
+<h2>Botten er i åben Beta</h2>
+
+<h2>Botten er i åben Beta</h2>
+Vær opmærksom på at der kan foregå ændringer, hvordan botten fungere.
+
+
+<h2>Inden du tilføjer din server</h2>
+For at din server skal komme på listen af servere, er det et krav at du burges vores bot på din server.
+
+Botten er lavet for at gøre det nemmere for dig og andre at håndtere en discord server.
+Når du tilføjer din server, vil den komme på vores liste med servere man kan joine.
+
+<h3> GDPR </h3>
+Når du bruger vores service opbevare vi brugerne af din server i vores database. Det ink. bl.a deres userName, NickName og unikke DiscordId.
+Hvis du ikke ønsker at bruge vores service, fjerne du blot botten fra din server og vi fjerne automatisk alt data om din server fra vores database.
+Vi tager backup af vores database, og hvis din server er i vores backup, vil den blive fjernet næste gang der bliver taget backup.
+
+<h2> Sådan tilføjer du din server:</h2>
+
+<MudButton Color="Color.Primary" FullWidth="@true" OnClick="AddGuildAction" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
+            
+
+@code
+{
     
+    private string? code { get; set; } = "";
+    private string? guild_id { get; set; } = "";
+    private string permissions { get; set; } = "";
+    private string error { get; set; } = "";
+    private string error_description { get; set; } = "";
+
+    protected override void OnInitialized()
+    {
+       
+        
+        if (_navigationManager.Uri.Contains("error"))
+        {
+            var header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?')+1);
+            var Request = header.Split('&','=').ToList();
+            
+            error = Request[Request.FindIndex(x => x.Equals("error"))+1];
+            error_description = Request[Request.FindIndex(x => x.Equals("error"))+1];
+        }
+        
+        if (_navigationManager.Uri.Contains("code")&&_navigationManager.Uri.Contains("permissions")&&_navigationManager.Uri.Contains("guild_id") )
+        {
+            var header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?')+1);
+            var Request = header.Split('&','=').ToList();
+            
+            //error=access_denied&error_description=The+resource+owner+or+authorization+server+denied+the+request
+            permissions = Request[Request.FindIndex(x => x.Equals("permissions"))+1];
+            code = Request[Request.FindIndex(x => x.Equals("code"))+1];
+            guild_id = Request[Request.FindIndex(x => x.Equals("guild_id"))+1];
+            
+        }
+        
+
+    }
+
+    private void AddGuildAction()
+    {
+        var link = 
+            "https://discord.com/api/oauth2/authorize?" +
+            "client_id=" + Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID")
+            + "&permissions=8" +
+            "&scope=bot%20applications.commands" +
+            "&response_type=code&" +
+            "redirect_uri=" + _navigationManager.Uri;
+        
+        _navigationManager.NavigateTo(link);
+    }
 }
+

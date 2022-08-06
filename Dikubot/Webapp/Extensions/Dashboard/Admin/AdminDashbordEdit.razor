@@ -1,0 +1,265 @@
+﻿@page "/admin/edit/dashbord"
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+
+@using Syncfusion.Blazor.Layouts
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.SplitButtons
+@using Dikubot.Discord
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Equipment
+
+@using Dikubot.DataLayer.Database.Guild.Models.Guild
+@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
+@using Dikubot.DataLayer.Database.Guild.Models.User
+@using Dikubot.DataLayer.Permissions
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Roles
+@using Syncfusion.Blazor.DropDowns
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Dikubot.Webapp.Extensions.Dashboard.Model
+@using global::Discord.WebSocket
+@using SendGrid.Helpers.Mail
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Navigations
+@using EventArgs = System.EventArgs
+@using Dikubot.Roles
+@using Dikubot.Webapp.Extensions.Dashboard.Model;
+@using Dikubot.Webapp.Extensions.Dashboard;
+@using Syncfusion.Blazor.Inputs;
+@using Syncfusion.Blazor.Popups
+@using System.ComponentModel.DataAnnotations
+@using Dikubot.Webapp.Extensions.Dashboard
+@using Syncfusion.Blazor.RichTextEditor
+
+<div class="control-section" style="height: 100%" id="target">
+	<div style="padding-right:10px;padding-bottom:10px;text-align: right;">
+		<SfButton Content="Add" OnClick="OnClick"></SfButton>
+		<SfButton CssClass="e-btn e-primary" Content="Save" @onclick="SavePanels"></SfButton>
+	</div>
+
+	<Dashboard @bind-DashboardObject="dashboardObject" AllowDragging="true" AllowResizing="true" PanelServices="@_panelServices"></Dashboard>
+
+	
+	<SfDialog Width="700px" Target="#target" ShowCloseIcon="true" EnableResize="true"  ResizeHandles="@dialogResizeDirections" AllowDragging="true" @bind-Visible="@dialogVisible">
+        <DialogTemplates>
+	        <Header>
+		        Syncfusion Components inside Dialog
+	        </Header>
+	        
+	        <Content>
+		        <SfTab>
+			        <TabItems>
+				        <TabItem>
+					        <ChildContent>
+						        <TabHeader Text="Roles"></TabHeader>
+					        </ChildContent>
+					        <ContentTemplate>
+						        <SfDropDownList TItem="JoinRoleCategoryMainModel" TValue="string" DataSource="@_categories">
+							        <DropDownListEvents TItem="JoinRoleCategoryMainModel" TValue="string" OnValueSelect="@AddRoles"></DropDownListEvents>
+							        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+						        </SfDropDownList>
+					        </ContentTemplate>
+				        </TabItem>
+				        <TabItem>
+					        <ChildContent>
+						        <TabHeader Text="Guilds"></TabHeader>
+					        </ChildContent>
+					        <ContentTemplate>
+						        <SfDropDownList TItem="GuildSettingsModel" TValue="string" DataSource="@_guildSettings">
+							        <DropDownListEvents TItem="GuildSettingsModel" TValue="string" OnValueSelect="@AddGuild"></DropDownListEvents>
+							        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+						        </SfDropDownList>
+					        </ContentTemplate>
+				        </TabItem>
+				        <TabItem>
+					        <ChildContent>
+						        <TabHeader Text="Guilds"></TabHeader>
+					        </ChildContent>
+					        <ContentTemplate>
+
+						        <SfButton CssClass="e-btn e-primary" Content="Add Panel" @onclick="AddClick"></SfButton>
+					        </ContentTemplate>
+				        </TabItem>
+				        <TabItem>
+					        <ChildContent>
+						        <TabHeader Text="Panels"></TabHeader>
+					        </ChildContent>
+					        <ContentTemplate>
+						        <EditForm Model="@_panelForm" OnValidSubmit="@ValidSubmit">
+							        <DataAnnotationsValidator/>
+							        <div class="form-group">
+								        <SfTextBox Placeholder="Header" FloatLabelType="FloatLabelType.Auto" @bind-Value="@_panelForm.header"/>
+								        <ValidationMessage For="@(() => _panelForm.header)"/>
+							        </div>
+							        <div class="form-group">
+								        <SfRichTextEditor @bind-Value="@_panelForm.content" ShowCharCount="true"
+								                          Enabled="true" EnableHtmlEncode="false" />
+							        </div>
+
+							        <div class="e-row">
+								        <div style="width: 220px;margin:0px auto;height: 100px;padding-top: 25px;">
+									        <div style="display: inline-block;">
+										        <button class="samplebtn e-control e-btn" type="submit" data-ripple="true">Add Customer</button>
+									        </div>
+									        <div style="float: right;">
+										        <button class="samplebtn e-control e-btn" type="reset" data-ripple="true">Clear</button>
+									        </div>
+								        </div>
+							        </div>
+						        </EditForm>
+					        </ContentTemplate>
+				        </TabItem>
+			        </TabItems>
+		        </SfTab>
+	        </Content>
+        </DialogTemplates>
+        <DialogAnimationSettings Effect="animationEffect"></DialogAnimationSettings>
+        <DialogEvents Opened="OnOpen" Closed="OnClose"></DialogEvents>
+        <DialogButtons>
+            <DialogButton Content="OK" IsPrimary="true" OnClick="OnBtnClick"></DialogButton>
+            <DialogButton Content="Cancel" IsPrimary="true" OnClick="OnBtnClick"></DialogButton>
+        </DialogButtons>
+    </SfDialog>
+
+</div>
+@code {
+	
+
+	private Authenticator authenticator;
+	private UserIdentity user;
+	private List<JoinRoleCategoryMainModel> _categories;
+	private List<GuildSettingsModel> _guildSettings;
+	private DashboardPanelServices _panelServices;
+	bool dialogVisible { get; set; } = false;
+	DialogEffect animationEffect = DialogEffect.None;
+	
+	private ResizeDirection[] dialogResizeDirections { get; set; } = new ResizeDirection[] { ResizeDirection.All };
+	
+	private List<PanelModel> _tooDeletion;
+	
+	protected override async Task OnInitializedAsync()
+	{
+		authenticator = ((Authenticator) AuthenticationStateProvider);
+		var authState = await authenticator.GetAuthenticationStateAsync();
+		user = (UserIdentity) authState.User.Identity;
+		if (user == null)
+		{
+			return;
+		}
+		
+		GuildSettingsService guildSettingsService = new GuildSettingsService();
+		JoinRoleServices _joinRoleServices = new JoinRoleServices(user.CurrentGuild);
+		_panelServices = new DashboardPanelServices(user.CurrentGuild);
+		
+		_categories = _joinRoleServices.GetAll();
+		_guildSettings = new List<GuildSettingsModel>();
+		
+		foreach (var guild in DiscordBot.Client.Guilds)
+		{
+			_guildSettings.Add(guildSettingsService.Get(guild));
+		}
+	}
+	
+	private void OnOpen()
+	{
+		
+	}
+	private void OnClose()
+	{
+		
+	}
+	private void OnClick()
+	{
+		this.dialogVisible = true;
+	}
+	private void OnBtnClick()
+	{
+		this.dialogVisible = false;
+	}
+	
+
+	SfDashboardLayout dashboardObject = new SfDashboardLayout();
+	
+	List<PanelModel> panels;
+	
+	public async void SavePanels(EventArgs args)
+	{
+		List<PanelModel> panel = await this.dashboardObject.Serialize();
+		
+		foreach (var panelModel in panel)
+		{
+			_panelServices.SavePanel(panelModel);
+		}
+		panels = panel;
+
+	}
+	
+	
+	public int Length { get; set; }
+	
+	DashboardPanelModel.DashboardPanel panelModel = new DashboardPanelModel.DashboardPanel();
+    public async Task AddClick(EventArgs args)
+    {
+	    
+	    PanelModel panel = panelModel.CreatePanel(user, user.CurrentGuild, "Nice Header","MERE NICE TEXT");
+	    await dashboardObject.AddPanelAsync(panel);
+    }
+	
+	private class _panelFormModel
+	{
+		[Required(ErrorMessage = "Header required")]
+		public string header { get; set; }
+		[Required(ErrorMessage = "Content required")]
+		public string content { get; set; }
+	}
+
+	_panelFormModel _panelForm { get; set; } = new _panelFormModel();
+
+	private async Task ValidSubmit(EditContext context)
+	{
+		panelModel = new DashboardPanelModel.DashboardPanel();
+		PanelModel panel = panelModel.CreatePanel(user, user.CurrentGuild, _panelForm.header,_panelForm.content);
+		await dashboardObject.AddPanelAsync(panel);
+		
+	}
+	
+	public async Task AddRoles(SelectEventArgs<JoinRoleCategoryMainModel> args)
+	{
+		
+		DashboardPanelModel.DashboardPanel panelModel = new DashboardPanelModel.DashboardPanel();
+		PanelModel panel = panelModel.CreatePanel(user, user.CurrentGuild, args.ItemData);
+		await dashboardObject.AddPanelAsync(panel);
+
+	}
+	
+	public async Task AddGuild(SelectEventArgs<GuildSettingsModel> args)
+	{
+		
+		DashboardPanelModel.DashboardPanel panelModel = new DashboardPanelModel.DashboardPanel();
+		PanelModel panel = panelModel.CreatePanel(user, user.CurrentGuild, args.ItemData);
+		
+		await dashboardObject.AddPanelAsync(panel);
+	
+	}
+	public async void RemoveClick(EventArgs args)
+	{
+		List<PanelModel> panel = await this.dashboardObject.Serialize();
+		Length = panel.Count;
+		if (Length != 0)
+		{
+			for (var i = Length - 1; i < Length; i++)
+			{
+				await dashboardObject.RemovePanelAsync(panel[Length - 1 - i].Id);
+			}
+		}
+	}
+	
+
+
+}
+
+<style>
+    #target {
+        height: 500px;
+    }
+</style>
