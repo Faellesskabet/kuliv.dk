@@ -20,7 +20,7 @@ public class ForceNameChangeTask: CronTask
         Logger.Debug("Forcing name changes for selected servers");
         GuildSettingsService guildSettingsService = new GuildSettingsService();
         UserGlobalServices userGlobalServices = new UserGlobalServices();
-        foreach (var guild in DiscordBot.Client.Guilds)
+        foreach (var guild in DiscordBot.ClientStatic.Guilds)
         {
             GuildSettingsModel guildSettingsModel = guildSettingsService.Get(guild);
             if (!guildSettingsModel.ForceNameChange)

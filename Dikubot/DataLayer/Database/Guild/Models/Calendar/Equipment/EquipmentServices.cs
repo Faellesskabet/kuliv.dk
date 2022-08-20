@@ -14,7 +14,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Equipment
         public EquipmentServices(SocketGuild guild) : base("Equipment", guild)
         {
         }
-        public EquipmentServices(string guidId) : base("Equipment", DiscordBot.Client.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
+        public EquipmentServices(string guidId) : base("Equipment", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
         {
         }
         

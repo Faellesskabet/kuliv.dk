@@ -19,7 +19,7 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs
         private static void Update()
         {
             Logger.Debug("Updating all user roles");
-            foreach (var guild in DiscordBot.Client.Guilds)
+            foreach (var guild in DiscordBot.ClientStatic.Guilds)
             {
                 PermissionsService permissionsService = new PermissionsService(guild);
                 GuildSettingsModel guildSettingsModel = permissionsService.GetGuildSettingsService().Get(guild);

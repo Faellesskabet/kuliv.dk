@@ -38,7 +38,7 @@ public class Help : ModuleBase<SocketCommandContext>
         
         private EmbedBuilder GetHelpEmbed(string[] args)
         {
-            CommandService commandService = DiscordBot.CommandHandler.GetCommandService();
+            CommandService commandService = DiscordBot.CommandHandlerStatic.GetCommandService();
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.WithTitle("Help commands");
             embedBuilder.WithColor(Color.Green);
@@ -76,7 +76,7 @@ public class Help : ModuleBase<SocketCommandContext>
                         name += " " + string.Join(" ", command.Parameters.Select(info => $"[{info.Name}]"));
                     }
                         
-                    embedBuilder.Fields.Add(GetEmbedFieldBuilder($"```{DiscordBot.CommandHandler.GetCommandPrefix()}{name.ToLower()}```", embedFieldText, true));
+                    embedBuilder.Fields.Add(GetEmbedFieldBuilder($"```{DiscordBot.CommandHandlerStatic.GetCommandPrefix()}{name.ToLower()}```", embedFieldText, true));
                 }
             }
             return embedBuilder;
