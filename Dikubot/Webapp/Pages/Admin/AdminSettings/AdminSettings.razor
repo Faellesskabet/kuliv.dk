@@ -5,7 +5,6 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.DataLayer.Static
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject DiscordBot DiscordBot;
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
 
 @if (!_loaded)

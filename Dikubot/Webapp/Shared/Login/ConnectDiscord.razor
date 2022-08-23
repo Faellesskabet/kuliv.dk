@@ -55,11 +55,26 @@
         </MudCardActions>
     </MudCard>
 }
-else
+else if(!loading)
 {
-    <Loading></Loading>
-
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Image="discordUser.GetAvatarUrl()" Size="Size.Large" Color="Color.Primary"></MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                 <MudText Typo="Typo.h6">Er dette dig?</MudText>
+                <MudText Typo="Typo.body1">@httpContextAccessor.HttpContext.User.Identity.Name! </MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardActions>
+            <MudButton Color="Color.Success" OnClick=@(ApproveDiscord)>Ja, godkend</MudButton>
+            <MudButton Color="Color.Error" OnClick=@(RejectDiscord)>Nej, afvis</MudButton>
+        </MudCardActions>
+    </MudCard>
 }
+
+
 
 
 @code {

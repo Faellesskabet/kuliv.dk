@@ -1,20 +1,27 @@
-using System;
-using Blazored.LocalStorage;
-using BlazorLoginDiscord.Data;
-using Dikubot.Discord;
-using Dikubot.Webapp.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Components.Authorization;
+using System;
+using System.Net;
+using System.Threading.Tasks;
+using AspNet.Security.OAuth.Discord;
+using Blazored.LocalStorage;
+using BlazorLoginDiscord.Data;
+using Dikubot.Webapp.Authentication;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Http;
 using MudBlazor.Services;
 using Syncfusion.Blazor;
 
-namespace Dikubot
+
+namespace Dikubot.Webapp
 {
     public class Startup
     {
@@ -29,10 +36,9 @@ namespace Dikubot
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddSingleton<DiscordBot>();
-            services.AddSingleton<UserService>();
-
+            
+            var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
+            
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
            
             services.AddServerSideBlazor(options =>
@@ -71,6 +77,10 @@ namespace Dikubot
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
+            
+            //AddAuthentication
+            services.AddSingleton<UserService>();
+
             services.AddAuthentication(options =>
                 {
                     ///CookieAuthenticationDefaults.AuthenticationScheme
