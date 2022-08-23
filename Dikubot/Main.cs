@@ -11,10 +11,15 @@ namespace Dikubot
 {
     public class main
     {
+        public readonly static DiscordBot DiscordBot = new DiscordBot();
+        public readonly static Thread DiscordThread = new Thread(new ThreadStart(DiscordBot.run));
         public static bool IS_DEV = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
         public static void Main(string[] args)
         {
+            //We initialise a new thread for our Discord bot to run in
+            DiscordThread.Start();
+
             //We start the webserver in this thread
             CreateHostBuilder(args).Build().Run();
         }
@@ -29,6 +34,7 @@ namespace Dikubot
                 .ConfigureAppConfiguration((hostContext, builder) =>
                 {
                     // Add other providers for JSON, etc.
+
                     if (hostContext.HostingEnvironment.IsDevelopment())
                     {
                         builder.AddUserSecrets<main>();
@@ -39,7 +45,7 @@ namespace Dikubot
                     //this is simply finding the file location of our webserver files
                     var location = System.Reflection.Assembly.GetEntryAssembly().Location;
                     location = location.Substring(0, location.IndexOf("bin")) + "Webapp";
-                    
+
                     webBuilder.UseContentRoot(location);
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseStaticWebAssets();

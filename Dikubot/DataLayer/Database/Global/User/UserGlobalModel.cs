@@ -28,7 +28,7 @@ namespace Dikubot.DataLayer.Database.Global.User
         [BsonIgnore]
         public IUser DiscordUser
         {
-            get => DiscordBot.ClientStatic.GetUserAsync(DiscordIdLong).Result;
+            get => DiscordBot.Client.GetUserAsync(DiscordIdLong).Result;
             set => DiscordId = value.Id.ToString();
         }
         
@@ -65,7 +65,7 @@ namespace Dikubot.DataLayer.Database.Global.User
         
         public SocketGuild GetSelectedGuild()
         {
-            SocketGuild guild = DiscordBot.ClientStatic.GetGuild(SelectedGuild);
+            SocketGuild guild = DiscordBot.Client.GetGuild(SelectedGuild);
             if (guild == null)
             {
                 throw new Exception($"SelectedGuild ({SelectedGuild}) can't be found");
