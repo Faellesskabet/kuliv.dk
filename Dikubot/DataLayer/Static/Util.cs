@@ -92,7 +92,7 @@ namespace Dikubot.DataLayer.Static
         
         public static bool IsGuildAdmin(ulong userId, ulong guildId)
         {
-            SocketGuild guild = DiscordBot.ClientStatic.GetGuild(guildId);
+            SocketGuild guild = DiscordBot.Client.GetGuild(guildId);
             SocketGuildUser user = guild?.GetUser(userId);
             return guild != null &&
                    (guild.OwnerId == user.Id || user.Roles.Any(role => role.Permissions.Administrator));
