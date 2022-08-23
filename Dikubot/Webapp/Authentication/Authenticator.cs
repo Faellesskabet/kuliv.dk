@@ -25,13 +25,11 @@ namespace Dikubot.Webapp.Authentication
         private IHttpContextAccessor _httpContextAccssor;
         private UserService _userService;
         private SocketGuild _guild;
-        private DiscordBot _discordBot;
 
-        public Authenticator(IHttpContextAccessor httpContextAccssor, DiscordBot discordBot)
+        public Authenticator(IHttpContextAccessor httpContextAccssor)
         {
             _httpContextAccssor = httpContextAccssor;
             _userService = new UserService();
-            _discordBot = discordBot;
         }
         
         /// <summary>
@@ -57,7 +55,7 @@ namespace Dikubot.Webapp.Authentication
         
         private async Task<SocketGuild> GetSocketGuild(UserGlobalModel user)
         {
-            return user == null ? null : _discordBot.Client.GetGuild(user.SelectedGuild);
+            return user == null ? null : DiscordBot.Client.GetGuild(user.SelectedGuild);
         }
 
         /// <summary>

@@ -14,26 +14,15 @@ namespace Dikubot.Discord
 {
     public class DiscordBot
     {
-        
-        [Obsolete]
-        public static DiscordSocketClient ClientStatic;
-        [Obsolete]
-        public static CommandHandler CommandHandlerStatic;
-        [Obsolete]
-        public static CommandService CommandServiceStatic;
+        public static DiscordSocketClient Client;
+        public static CommandHandler CommandHandler;
+        public static CommandService CommandService;
 
-        
-        public DiscordSocketClient Client;
-        public CommandHandler CommandHandler;
-        public CommandService CommandService;
-
-        public DiscordBot()
+        public void run()
         {
-            #pragma warning disable CS4014
-            Run();
-            #pragma warning restore CS4014
+            Main().GetAwaiter().GetResult();
         }
-        
+
         private Task Log(LogMessage msg)
         {
             #if DEBUG
@@ -43,7 +32,7 @@ namespace Dikubot.Discord
             return Task.CompletedTask;
         }
 
-        private async Task Run()
+        public async Task Main()
         {
             var config = new DiscordSocketConfig()
             {
@@ -90,9 +79,6 @@ namespace Dikubot.Discord
 
             CommandHandler = new CommandHandler(CommandService, Client);
             await CommandHandler.init();
-            ClientStatic = Client;
-            CommandHandlerStatic = CommandHandler;
-            CommandServiceStatic = CommandService;
                 
             Scheduler scheduler = new Scheduler();
 
@@ -108,9 +94,10 @@ namespace Dikubot.Discord
                 scheduler.ScheduleTask(new ClearExpiredSessionsTask());
                 scheduler.ScheduleTask(new ForceNameChangeTask());
                 
-                
                 return Task.CompletedTask;
             };
+            // Keeps the thread running
+            await Task.Delay(-1);
         }
         
     }
