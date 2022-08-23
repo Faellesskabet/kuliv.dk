@@ -25,7 +25,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
         [BsonIgnore]
         public SocketUser DiscordUser
         {
-            get => DiscordBot.ClientStatic.GetUser(Convert.ToUInt64(DiscordId));
+            get => DiscordBot.Client.GetUser(Convert.ToUInt64(DiscordId));
             set => DiscordId = value.Id.ToString();
         }
         

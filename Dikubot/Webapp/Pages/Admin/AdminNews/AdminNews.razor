@@ -6,7 +6,6 @@
 @using Dikubot.DataLayer.Static
 @using Dikubot.Webapp.Shared.Dialog
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject DiscordBot DiscordBot;
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
 <h3>Nyhed indstillinger</h3>
 @if (_loaded)
