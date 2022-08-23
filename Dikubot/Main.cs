@@ -43,6 +43,7 @@ namespace Dikubot
                     webBuilder.UseContentRoot(location);
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseStaticWebAssets();
+                    webBuilder.UseUrls("http://localhost:5000", "https://localhost:5001");
                 });
     }
 }
