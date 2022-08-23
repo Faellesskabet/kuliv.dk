@@ -18,8 +18,8 @@ public class GreetingListener
                 $"vælge roller, bekræfte at du går på KU og meget mere på vores hjemmeside https://kuliv.dk/");
         }
 
-        GuildSettingsService guildSettingsService = new GuildSettingsService();
-        GuildSettingsModel guildSettingsModel = guildSettingsService.Get(user.Guild);
+        GuildSettingsMongoService guildSettingsMongoService = new GuildSettingsMongoService();
+        GuildSettingsModel guildSettingsModel = guildSettingsMongoService.Get(user.Guild);
 
         if (!guildSettingsModel.WelcomeMessageEnabled)
         {

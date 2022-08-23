@@ -3,12 +3,13 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
-using BlazorLoginDiscord.Data;
 using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Logic.WebDiscordBridge;
 using Dikubot.Discord;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
+using Dikubot.Webapp.Data;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
@@ -30,7 +31,6 @@ namespace Dikubot.Webapp.Authentication
         public Authenticator(IHttpContextAccessor httpContextAccssor, DiscordBot discordBot)
         {
             _httpContextAccssor = httpContextAccssor;
-            _userService = new UserService();
             _discordBot = discordBot;
         }
         
@@ -71,18 +71,9 @@ namespace Dikubot.Webapp.Authentication
 
         private async Task<GuildSettingsModel> GetGuildSettings(SocketGuild guild)
         {
-            return new GuildSettingsService().Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
+            return new GuildSettingsMongoService().Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
         }
-
-        private UserService.DiscordUserClaim GetDiscordUserClaim()
-        {
-            if (_httpContextAccssor.HttpContext == null)
-            {
-                return null;
-            }
-            return _userService.GetInfo(_httpContextAccssor.HttpContext);
-        }
-
+        
         /// <summary>
         /// GetAuthenticationStateAsync is used to set the AuthenticationState based on a UserIdentity.
         /// </summary>
@@ -90,7 +81,7 @@ namespace Dikubot.Webapp.Authentication
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             
-            UserService.DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
+            DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
             if (discordUserClaim == null)
             {
                 //Returns an empty UserIdentity, meaning the user isn't authorized to do anything
@@ -109,11 +100,63 @@ namespace Dikubot.Webapp.Authentication
         /// <returns>Task</returns>
         public async Task UpdateSession()
         {
-            UserService.DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
+            DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
             UserIdentity userIdentity =
                 discordUserClaim == null ? new UserIdentity() : new UserIdentity(discordUserClaim);
             NotifyAuthenticationStateChanged(
                 Task.FromResult(new AuthenticationState(new ClaimsPrincipal(userIdentity))));
+        }
+        
+        /// <summary>
+        /// Parses the user's discord claim for their `identify` information
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <returns></returns>
+        public DiscordUserClaim GetDiscordUserClaim()
+        {
+            if (!_httpContextAccssor.HttpContext!.User.Identity?.IsAuthenticated ?? false)
+            {
+                return null;
+            }
+
+            var claims = _httpContextAccssor.HttpContext.User.Claims;
+            bool? verified;
+            if (bool.TryParse(claims.FirstOrDefault(x => x.Type == "urn:discord:verified")?.Value, out var _verified))
+            {
+                verified = _verified;
+            }
+            else
+            {
+                verified = null;
+            }
+            
+            var userClaim = new DiscordUserClaim
+            {
+                UserId = ulong.Parse(claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value),
+                Name = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value,
+                Discriminator = claims.FirstOrDefault(x => x.Type == "urn:discord:discriminator")?.Value,
+                Avatar = claims.FirstOrDefault(x => x.Type == "urn:discord:avatar")?.Value,
+                Email = claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value,
+                Verified = verified
+            };
+
+            return userClaim;
+        }
+
+        /// <summary>
+        /// Gets the user's discord oauth2 access token
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <returns></returns>
+        public async Task<string> GetTokenAsync()
+        {
+            if (!_httpContextAccssor.HttpContext!.User.Identity!.IsAuthenticated)
+            {
+                return null;
+            }
+
+            var tk = await _httpContextAccssor.HttpContext.GetTokenAsync("Discord", "access_token");
+            return tk;
         }
     }
 }

@@ -1,8 +1,26 @@
 using System;
 using Blazored.LocalStorage;
-using BlazorLoginDiscord.Data;
+using Dikubot.DataLayer.Database;
+using Dikubot.DataLayer.Database.Global.GuildSettings;
+using Dikubot.DataLayer.Database.Global.Session;
+using Dikubot.DataLayer.Database.Global.Settings.Tags;
+using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Guild.Models.Calendar;
+using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events;
+using Dikubot.DataLayer.Database.Guild.Models.Channel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
+using Dikubot.DataLayer.Database.Guild.Models.Course;
+using Dikubot.DataLayer.Database.Guild.Models.Equipment;
+using Dikubot.DataLayer.Database.Guild.Models.Group;
+using Dikubot.DataLayer.Database.Guild.Models.Guild;
+using Dikubot.DataLayer.Database.Guild.Models.JoinRole;
+using Dikubot.DataLayer.Database.Guild.Models.Role;
+using Dikubot.DataLayer.Database.Guild.Models.User;
 using Dikubot.Discord;
 using Dikubot.Webapp.Authentication;
+using Dikubot.Webapp.Data;
+using Discord;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -31,7 +49,31 @@ namespace Dikubot
         {
 
             services.AddSingleton<DiscordBot>();
+
+            // Mongo database
+            services.AddSingleton<DatabaseService>();
+            
+            // Global mongo services
+            services.AddSingleton<UserGlobalMongoService>();
+            services.AddSingleton<TagMongoService>();
+            services.AddSingleton<SessionMongoService>();
+            services.AddSingleton<GuildSettingsMongoService>();
+            
+            // User Service
             services.AddSingleton<UserService>();
+            
+            // Guild mongo services
+            services.AddSingleton<UserGuildMongoService>();
+            services.AddSingleton<RoleMongoService>();
+            services.AddSingleton<JoinRoleMongoService>();
+            services.AddSingleton<GuildMongoService>();
+            services.AddSingleton<EducationMongoService>();
+            services.AddSingleton<CourseMongoService>();
+            services.AddSingleton<TextChannelMongoService>();
+            services.AddSingleton<VoiceChannelMongoService>();
+            services.AddSingleton<CalendarMongoService>();
+            services.AddSingleton<EventsMongoService>();
+            services.AddSingleton<EquipmentMongoService>();
 
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
            

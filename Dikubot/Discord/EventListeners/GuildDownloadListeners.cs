@@ -20,8 +20,8 @@ namespace Dikubot.Discord.EventListeners
                 permissionsService.SetDatabase();
                 permissionsService.AddOrUpdateDatabaseGuild(new GuildMainModel(guild));
                 permissionsService.UpdateUserDiscordRoles();
-                new NewsServices(guild).DownloadAllMessages();
-                new QuoteServices(guild).DownloadAllMessages();
+                new NewsMongoServices(guild).DownloadAllMessages();
+                new QuoteMongoServices(guild).DownloadAllMessages();
                 Logger.Debug($"Successfully pulled Discord data into Database for {guild.Name} ({guild.Id.ToString()})");
             }
         }
@@ -33,15 +33,15 @@ namespace Dikubot.Discord.EventListeners
             permissionsService.SetDatabase();
             permissionsService.AddOrUpdateDatabaseGuild(new GuildMainModel(guild));
             permissionsService.UpdateUserDiscordRoles();
-            new NewsServices(guild).DownloadAllMessages();
-            new QuoteServices(guild).DownloadAllMessages();
+            new NewsMongoServices(guild).DownloadAllMessages();
+            new QuoteMongoServices(guild).DownloadAllMessages();
             Logger.Debug($"Successfully pulled Discord data into Database for {guild.Name} ({guild.Id.ToString()})");
         }
         
         public async Task DropGuildOnLeave(SocketGuild guild)
         {
             Logger.Debug($"Dropping Discord data into Database for {guild.Name} ({guild.Id.ToString()})");
-            await Database.GetInstance.GetDatabase($"{guild.Id.ToString()}_Main").Client
+            await DatabaseService.GetInstance.GetDatabase($"{guild.Id.ToString()}_Main").Client
                 .DropDatabaseAsync($"{guild.Id.ToString()}_Main");
             Logger.Debug($"Successfully Drop Discord data into Database for {guild.Name} ({guild.Id.ToString()})");
         }

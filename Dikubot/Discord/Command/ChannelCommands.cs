@@ -27,7 +27,7 @@ namespace Dikubot.Discord.Command
                 return;
             }
             
-            var voiceChannelServices = new VoiceChannelServices(Context.Guild);
+            var voiceChannelServices = new VoiceChannelMongoService(Context.Guild);
             var newModel = voiceChannelServices.Get(model => model.DiscordId == channelid[0]);
             if (newModel == null)
             {

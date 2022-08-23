@@ -15,9 +15,9 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs
         private static void Update()
         {
             Logger.Debug("Taking a backup of all databases");
-            foreach (var database in Database.Database.GetDatabaseDictionary())
+            foreach (var database in Database.DatabaseService.GetDatabaseDictionary())
             {
-                Database.Database.Backup(database.Value);
+                Database.DatabaseService.Backup(database.Value);
             }
             Logger.Debug("All databases have been backed up");
 

@@ -62,14 +62,14 @@
     private string _searchQuery = "";
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
-    private CalendarServices _services;
+    private CalendarMongoService _mongoService;
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _services = new CalendarServices(_guild);
+        _mongoService = new CalendarMongoService(_guild);
         _loading = false;
     }
 
@@ -78,15 +78,15 @@
         List<CalendarModel> items;
         if (!_searchQuery.IsNullOrEmpty())
         {
-            items = _services.Get(model => model.Name.Contains(_searchQuery) || model.Decs.Contains(_searchQuery),
+            items = _mongoService.Get(model => model.Name.Contains(_searchQuery) || model.Decs.Contains(_searchQuery),
                     state.PageSize, state.Page);   
         }
         else
         {
-            items = _services.Get(state.PageSize, state.Page);   
+            items = _mongoService.Get(state.PageSize, state.Page);   
         }
 
-        return new TableData<CalendarModel>() { Items = items, TotalItems = (int)_services.EstimatedCount()};
+        return new TableData<CalendarModel>() { Items = items, TotalItems = (int)_mongoService.EstimatedCount()};
     }
     
     private void OnSearch(string text)
@@ -108,7 +108,7 @@
             return;
         }
         
-        _services.Remove(joinRoleCategoryMainModel);
+        _mongoService.Remove(joinRoleCategoryMainModel);
         await _table.ReloadServerData();
     }
     

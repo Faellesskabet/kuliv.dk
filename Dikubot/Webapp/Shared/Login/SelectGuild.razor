@@ -47,7 +47,7 @@ else
     private HashSet<SocketGuild> _mutualGuilds; // we use a hashmap because it's faster:)
     private List<GuildSettingsModel> _complementGuilds; // guilds that are not mutual
     private IUser _discordUser;
-    private GuildSettingsService _guildSettingsService = new GuildSettingsService();
+    private GuildSettingsMongoService _guildSettingsMongoService = new GuildSettingsMongoService();
     private string _mutualSearchQuery = "";
     private string _complementSearchQuery = "";
     
@@ -74,15 +74,15 @@ else
             _mutualGuilds = socketUser.MutualGuilds.ToHashSet();   
         }
 
-        _complementGuilds = DiscordBot.Client.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => _guildSettingsService.Get(guild)).ToList();
+        _complementGuilds = DiscordBot.Client.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => _guildSettingsMongoService.Get(guild)).ToList();
         _loaded = true;
         this.StateHasChanged();
     }
 
     private GuildSettingsModel SocketToModelGuild(SocketGuild guild)
     {
-        GuildSettingsService guildSettingsService = new GuildSettingsService();
-        GuildSettingsModel guildSettingsModel = guildSettingsService.Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
+        GuildSettingsMongoService guildSettingsMongoService = new GuildSettingsMongoService();
+        GuildSettingsModel guildSettingsModel = guildSettingsMongoService.Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
         return guildSettingsModel;
     }
 }

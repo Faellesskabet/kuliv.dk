@@ -4,13 +4,14 @@
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Data
 @using Microsoft.AspNetCore.Http
 @using Microsoft.IdentityModel.Tokens
-@using BlazorLoginDiscord.Data
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor httpContextAccessor;
 @inject DiscordBot DiscordBot;
+@inject UserService UserService;
 
 <MudCard Elevation="25">
     <MudCardHeader>
@@ -63,7 +64,7 @@
         }
 
         userModel.SelectedGuild = Guild.GuildId;
-        new UserGlobalServices().Upsert(user.UserGlobalModel);
+        new UserGlobalMongoService().Upsert(user.UserGlobalModel);
         await authenticator.UpdateSession();
         NavigationManager.NavigateTo("/");
         
@@ -77,9 +78,6 @@
             await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
-
-
-        UserService userService = new UserService();
         
         bool? result = await DialogService.ShowMessageBox(
             "Bekræft", 
@@ -93,7 +91,7 @@
         
         try
         {
-            string accessToken = await userService.GetTokenAsync(httpContextAccessor.HttpContext);
+            string accessToken = await UserService.GetTokenAsync();
             await DiscordBot.Client.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, accessToken);
         }
         catch (Exception e)

@@ -42,9 +42,9 @@ namespace Dikubot.Discord.EventListeners
                 return;
             }
             SocketGuild guild = channel.Guild;
-            TextChannelServices textChannelServices = new TextChannelServices(guild);
+            TextChannelMongoService textChannelMongoService = new TextChannelMongoService(guild);
             TextChannelMainModel textChannelMainModel = 
-                textChannelServices.Get(model => model.DiscordId == message.Channel.Id.ToString());
+                textChannelMongoService.Get(model => model.DiscordId == message.Channel.Id.ToString());
             if (textChannelMainModel == null)
             {
                 return;
@@ -52,27 +52,27 @@ namespace Dikubot.Discord.EventListeners
             
             if (textChannelMainModel.IsQuoteChannel.GetValueOrDefault())
             {
-                MessageService messageService = new QuoteServices(guild);
+                MessageMongoService messageMongoService = new QuoteMongoServices(guild);
                 if (remove)
                 {
-                    messageService.Remove(messageService.IMessageToModel(message));
+                    messageMongoService.Remove(messageMongoService.IMessageToModel(message));
                 }
                 else
                 {
-                    messageService.Insert(messageService.IMessageToModel(message));
+                    messageMongoService.Insert(messageMongoService.IMessageToModel(message));
                 }
             }
             
             if (textChannelMainModel.IsNewsChannel.GetValueOrDefault())
             {
-                MessageService messageService = new NewsServices(guild);
+                MessageMongoService messageMongoService = new NewsMongoServices(guild);
                 if (remove)
                 {
-                    messageService.Remove(messageService.IMessageToModel(message));
+                    messageMongoService.Remove(messageMongoService.IMessageToModel(message));
                 }
                 else
                 {
-                    messageService.Insert(messageService.IMessageToModel(message));
+                    messageMongoService.Insert(messageMongoService.IMessageToModel(message));
                 }
             }
             

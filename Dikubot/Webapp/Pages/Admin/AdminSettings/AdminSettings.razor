@@ -61,7 +61,7 @@ else
     private SocketGuild guild;
     private bool _loaded = false;
     private GuildSettingsModel _guildSettingsModel;
-    private GuildSettingsService _guildSettingsService;
+    private GuildSettingsMongoService _guildSettingsMongoService;
     [Inject] private IDialogService DialogService { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -74,20 +74,20 @@ else
             return;
         }
         guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
-        _guildSettingsService = new GuildSettingsService();
-        _guildSettingsModel = _guildSettingsService.Get(guild);
+        _guildSettingsMongoService = new GuildSettingsMongoService();
+        _guildSettingsModel = _guildSettingsMongoService.Get(guild);
         _loaded = true;
     }
 
     private async void saveSettings()
     {
-        _guildSettingsService.Upsert(_guildSettingsModel);
+        _guildSettingsMongoService.Upsert(_guildSettingsModel);
         await DialogService.ShowMessageBox("Ændringer gemt", "Dine ændringer er blevet gemt. Der kan gå nogle timer før alle ændringer ses.", "Bekræft");
     }
 
     private async void discardSettings()
     {
-        _guildSettingsModel = _guildSettingsService.Get(guild);
+        _guildSettingsModel = _guildSettingsMongoService.Get(guild);
         await DialogService.ShowMessageBox("Ændringer slettet", "Dine ændringer er blevet slettet", "Bekræft");   
     }
 }

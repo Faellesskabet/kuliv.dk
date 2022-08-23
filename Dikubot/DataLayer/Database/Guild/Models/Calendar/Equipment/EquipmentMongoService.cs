@@ -9,12 +9,12 @@ using Discord.WebSocket;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Equipment
 {
-    public class EquipmentServices : GuildServices<EquipmentModel>
+    public class EquipmentMongoService : GuildMongoService<EquipmentModel>
     {
-        public EquipmentServices(SocketGuild guild) : base("Equipment", guild)
+        public EquipmentMongoService(SocketGuild guild) : base("Equipment", guild)
         {
         }
-        public EquipmentServices(string guidId) : base("Equipment", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
+        public EquipmentMongoService(string guidId) : base("Equipment", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
         {
         }
         

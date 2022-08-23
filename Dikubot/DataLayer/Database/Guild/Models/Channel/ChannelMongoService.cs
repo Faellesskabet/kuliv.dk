@@ -3,9 +3,9 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Channel
 {
-    public abstract class ChannelServices<TCModel> : GuildServices<TCModel> where TCModel : ChannelMainModel
+    public abstract class ChannelMongoService<TCModel> : GuildMongoService<TCModel> where TCModel : ChannelMainModel
     {
-        protected ChannelServices(
+        protected ChannelMongoService(
             string collectionName, SocketGuild guild)
             : base(collectionName, guild)
         {

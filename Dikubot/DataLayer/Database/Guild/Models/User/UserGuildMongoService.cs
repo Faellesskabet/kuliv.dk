@@ -14,9 +14,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
     /// <summary>
     /// Class for for retrieving information from the User collection.
     /// </summary>
-    public class UserGuildServices : GuildServices<UserGuildModel>, IIndexed<UserGuildModel>
+    public class UserGuildMongoService : GuildMongoService<UserGuildModel>, IIndexed<UserGuildModel>
     {
-        public UserGuildServices(SocketGuild guild) : base("Users", guild)
+        public UserGuildMongoService(SocketGuild guild) : base("Users", guild)
         {
         }
 
@@ -83,7 +83,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
         /// <return>A UserModel.</return>
         public UserGuildModel SocketToModel(SocketGuildUser user)
         {
-            var roleServices = new RoleServices(Guild);
+            var roleServices = new RoleMongoService(Guild);
             var _user = new UserGuildModel();
             _user.DiscordId = user.Id.ToString();
             _user.IsBot = user.IsBot;
@@ -102,7 +102,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
         /// <return>A UserModel.</return>
         public UserGuildModel RestToModel(RestGuildUser user)
         {
-            var roleServices = new RoleServices(Guild);
+            var roleServices = new RoleMongoService(Guild);
             var _user = new UserGuildModel();
             _user.DiscordId = user.Id.ToString();
             _user.IsBot = user.IsBot;

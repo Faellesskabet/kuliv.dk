@@ -10,9 +10,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel
     /// <summary>
     /// Class for for retrieving information from the TextChannel collection.
     /// </summary>
-    public class TextChannelServices : ChannelServices<TextChannelMainModel>
+    public class TextChannelMongoService : ChannelMongoService<TextChannelMainModel>
     {
-        public TextChannelServices(SocketGuild guild) : base("TextChannels", guild)
+        public TextChannelMongoService(SocketGuild guild) : base("TextChannels", guild)
         {
         }
 

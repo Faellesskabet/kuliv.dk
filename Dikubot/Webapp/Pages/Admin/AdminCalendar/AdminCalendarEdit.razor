@@ -93,30 +93,30 @@ else
     private bool _loading = true;
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
-    private CalendarServices _joinRoleServices;
+    private CalendarMongoService _joinRoleMongoService;
     private CalendarModel _category;
-    private RoleServices _roleServices;
+    private RoleMongoService _roleMongoService;
     private List<RoleMainModel> _roleMainModels;
 
     protected override async Task OnInitializedAsync()
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _joinRoleServices = new CalendarServices(_guild);
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new CalendarModel();
-        _roleServices = new RoleServices(_guild);
-        _roleMainModels = _roleServices.GetAll();
+        _joinRoleMongoService = new CalendarMongoService(_guild);
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleMongoService.Get(guid) : new CalendarModel();
+        _roleMongoService = new RoleMongoService(_guild);
+        _roleMainModels = _roleMongoService.GetAll();
         _loading = false;
     }
 
     private string GetPermissionRolesString(CalendarModel category)
     {
-        return Util.ConcatListToString(category.GetPermissionRoles(_roleServices).Select(model => model?.Name ?? "").ToList());
+        return Util.ConcatListToString(category.GetPermissionRoles(_roleMongoService).Select(model => model?.Name ?? "").ToList());
     }
     
     private string GetViewRolesString(CalendarModel category)
     {
-        return Util.ConcatListToString(category.GetViewRoles(_roleServices).Select(model => model?.Name ?? "").ToList());
+        return Util.ConcatListToString(category.GetViewRoles(_roleMongoService).Select(model => model?.Name ?? "").ToList());
     }
     
     private async void SaveSettings()
@@ -135,7 +135,7 @@ else
         // We don't wanna save the roles here, but the category references the roles, so we do this to avoid saving
         // role changes
 
-        _joinRoleServices.Upsert(_category);
+        _joinRoleMongoService.Upsert(_category);
     }
 
     
@@ -152,7 +152,7 @@ else
             return;
         }
         
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new CalendarModel();
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleMongoService.Get(guid) : new CalendarModel();
         this.StateHasChanged();
     }
 

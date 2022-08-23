@@ -33,7 +33,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User.SubModels
         
         public RoleMainModel GetRoleModel(SocketGuild guild)
         {
-            return new RoleServices(guild).Get(_roleId);
+            return new RoleMongoService(guild).Get(_roleId);
         }
 
 

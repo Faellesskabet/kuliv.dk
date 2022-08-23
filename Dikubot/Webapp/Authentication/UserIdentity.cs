@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using BlazorLoginDiscord.Data;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Static;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
+using Dikubot.Webapp.Data;
 
 namespace Dikubot.Webapp.Authentication
 {
     public sealed class UserIdentity : ClaimsIdentity
     {
-        private readonly UserService.DiscordUserClaim _discordUserClaim;
+        private readonly DiscordUserClaim _discordUserClaim;
 
         /// <summary>
         /// Empty UserIdentity
@@ -24,10 +25,10 @@ namespace Dikubot.Webapp.Authentication
         /// Creates a UserIdentity from a DiscordUserClaim
         /// </summary>
         /// <param name="discordUserClaim"></param>
-        public UserIdentity(UserService.DiscordUserClaim discordUserClaim)
+        public UserIdentity(DiscordUserClaim discordUserClaim)
         {
             _discordUserClaim = discordUserClaim;
-            UserGlobalModel = new UserGlobalServices().Get(discordUserClaim.UserId);
+            UserGlobalModel = new UserGlobalMongoService().Get(discordUserClaim.UserId);
             if (UserGlobalModel == null)
             {
                 return;
@@ -78,6 +79,6 @@ namespace Dikubot.Webapp.Authentication
         /// <summary>
         /// Get the SessionModel
         /// </summary>
-        public UserService.DiscordUserClaim DiscordUserClaim => _discordUserClaim;
+        public DiscordUserClaim DiscordUserClaim => _discordUserClaim;
     }
 }

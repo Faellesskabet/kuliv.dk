@@ -8,15 +8,15 @@ using Discord.WebSocket;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
 {//https://stackoverflow.com/questions/13905359/cannot-provide-arguments-when-creating-an-instance-of-generic-type
-    public class CalendarServices : GuildServices<CalendarModel>
+    public class CalendarMongoService : GuildMongoService<CalendarModel>
     {
         
-        public CalendarServices(SocketGuild guild) : base("Calendar", guild)
+        public CalendarMongoService(SocketGuild guild) : base("Calendar", guild)
         {
         }
         
 
-        public CalendarServices(string guidId) : base("Calendar", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
+        public CalendarMongoService(string guidId) : base("Calendar", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
         {
         }
 
@@ -24,7 +24,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         public List<EventModel> GetEvents(Expression<Func<CalendarModel, bool>> calFilter = null, Expression<Func<EventModel, bool>> eventFilter = null)
         {
             var res = new List<EventModel>();
-            var eventsServices = new EventsServices(Guild);
+            var eventsServices = new EventsMongoService(Guild);
             var cal = this.GetAllAsDictionary(calFilter).SelectMany(c => c.Value);
             
             if (cal.Any())

@@ -19,7 +19,7 @@ namespace Dikubot.Discord.EventListeners
                 return;
 
             var guild = channel.Guild;
-            var voiceChannelServices = new VoiceChannelServices(guild);
+            var voiceChannelServices = new VoiceChannelMongoService(guild);
             var permissionsService = new PermissionsService(guild);
             var channelModel = voiceChannelServices.Get(m => m.DiscordId == channel.Id.ToString());
 
@@ -60,7 +60,7 @@ namespace Dikubot.Discord.EventListeners
             }
             
             // ToDo: får en fejl System.NullReferenceException: Object reference not set to an instance of an object.
-            var voiceChannelServices = new VoiceChannelServices(channel.Guild);
+            var voiceChannelServices = new VoiceChannelMongoService(channel.Guild);
 
             // If channel is null return.
             

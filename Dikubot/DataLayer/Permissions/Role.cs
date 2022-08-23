@@ -21,7 +21,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <return>void.</return>
         public void SetDatabaseRoles()
         {
-            var roleModels = _roleServices.Get();
+            var roleModels = _roleMongoService.Get();
             var socketRoles = guild.Roles.ToList();
             var discordRoleIds = new HashSet<ulong>(socketRoles.Select(role => role.Id));
             var toBeRemoved = roleModels.Where(model => !discordRoleIds.Contains(UInt64.Parse(model.DiscordId))).ToList();
@@ -32,17 +32,17 @@ namespace Dikubot.DataLayer.Permissions
             roleModels.RemoveAll(m => socketRoles.Exists(n => inDB(m, n)));
 
             // Remove the roles from the database that is not on the discord server.
-            toBeRemoved.ForEach(m => _roleServices.Remove(m));
+            toBeRemoved.ForEach(m => _roleMongoService.Remove(m));
 
             // Makes an upsert of the roles on the server so they match the ones in the database.
-            socketRoles.ForEach(model => _roleServices.Upsert(_roleServices.SocketToModel(model)));
+            socketRoles.ForEach(model => _roleMongoService.Upsert(_roleMongoService.SocketToModel(model)));
         }
 
         /// <Summary>Will sync all the roles on the database to the discord server.</Summary>
         /// <return>void.</return>
         public async void SetDiscordRoles()
         {
-            var roleModels = _roleServices.Get();
+            var roleModels = _roleMongoService.Get();
             var socketRoles = guild.Roles.ToList();
 
             var toBeRemoved = new List<SocketRole>(socketRoles);
@@ -71,7 +71,7 @@ namespace Dikubot.DataLayer.Permissions
                 if (socketRole == null)
                 {
                     // If the role could not be found create it.
-                    var properties = _roleServices.ModelToRoleProperties(roleModel);
+                    var properties = _roleMongoService.ModelToRoleProperties(roleModel);
                     await guild.CreateRoleAsync(properties.Name.Value,
                         properties.Permissions.Value,
                         properties.Color.Value,
@@ -82,7 +82,7 @@ namespace Dikubot.DataLayer.Permissions
                 else
                 {
                     // If the role could be found modify it so it matches the database.
-                    var _properties = _roleServices.ModelToRoleProperties(roleModel);
+                    var _properties = _roleMongoService.ModelToRoleProperties(roleModel);
                     await socketRole.ModifyAsync(properties =>
                     {
                         properties.Color = _properties.Color;
@@ -107,26 +107,26 @@ namespace Dikubot.DataLayer.Permissions
                 return;
             }
             
-            UserGlobalServices userGlobalServices = new UserGlobalServices();
-            if (!userGlobalServices.Get(userGuildModel.DiscordId).Verified)
+            UserGlobalMongoService userGlobalMongoService = new UserGlobalMongoService();
+            if (!userGlobalMongoService.Get(userGuildModel.DiscordId).Verified)
             {
                 if (userGuildModel.HasRole(role.Id, guild))
                 {
-                    userGuildModel.RemoveRole(new UserRoleModel(_roleServices.Get(model => model.DiscordId == role.Id.ToString())));
+                    userGuildModel.RemoveRole(new UserRoleModel(_roleMongoService.Get(model => model.DiscordId == role.Id.ToString())));
                 }
                 return;
             }
 
             if (!userGuildModel.HasRole(role.Id, guild))
             {
-                userGuildModel.AddRole(new UserRoleModel(_roleServices.Get(model => model.DiscordId == role.Id.ToString())));
+                userGuildModel.AddRole(new UserRoleModel(_roleMongoService.Get(model => model.DiscordId == role.Id.ToString())));
             }
             
         }
 
         public Task SetDiscordUserRoles(UserGuildModel userMainModel)
         {
-            SetDiscordUserRoles(userMainModel, _guildSettingsService.Get(guild));
+            SetDiscordUserRoles(userMainModel, _guildSettingsMongoService.Get(guild));
             return Task.CompletedTask;
         }
         /// <summary>
@@ -164,8 +164,8 @@ namespace Dikubot.DataLayer.Permissions
             // Removes roles if they aren't active
             IEnumerable<IRole> removeRoles = discordRoles.Where((role) =>
                 userRoleModels
-                    .FirstOrDefault(usr => new UserRoleModel(_roleServices.SocketToModel(role)).RoleId.Equals(usr.RoleId)) == null //Kigger på om brugeren har rollen med samme RoleID.
-                || !userMainModel.IsRoleActive(_roleServices.SocketToModel(role)));
+                    .FirstOrDefault(usr => new UserRoleModel(_roleMongoService.SocketToModel(role)).RoleId.Equals(usr.RoleId)) == null //Kigger på om brugeren har rollen med samme RoleID.
+                || !userMainModel.IsRoleActive(_roleMongoService.SocketToModel(role)));
             
             foreach (IRole role in removeRoles)
             {
@@ -183,7 +183,7 @@ namespace Dikubot.DataLayer.Permissions
             //We add the roles in the database to the user, but only if the role is currently active and the user don't have the role.
             IEnumerable<IRole> addRoles =
                 userRoleModels.Where(model => ((IActiveTimeFrame)model).IsActive() && 
-                                              (discordRoles.FirstOrDefault(role => new UserRoleModel(_roleServices.SocketToModel(role)).RoleId.Equals(model.RoleId)) == null)) //Se om brugeren ikke har rollen.
+                                              (discordRoles.FirstOrDefault(role => new UserRoleModel(_roleMongoService.SocketToModel(role)).RoleId.Equals(model.RoleId)) == null)) //Se om brugeren ikke har rollen.
                     .Select((model) => guild.GetRole(Convert.ToUInt64(model.GetRoleModel(guild)?.DiscordId))).Where(role => role != null);
             
             foreach (IRole role in addRoles)
@@ -201,41 +201,41 @@ namespace Dikubot.DataLayer.Permissions
         }
         public void SetDiscordUserRoles(SocketUser user, GuildSettingsModel guildSettingsModel)
         {
-            SetDiscordUserRoles(_userServices.Get(user), guildSettingsModel);
+            SetDiscordUserRoles(_userMongoService.Get(user), guildSettingsModel);
         }
         public void SetDiscordUserRoles(SocketUser user)
         {
-            SetDiscordUserRoles(_userServices.Get(user));
+            SetDiscordUserRoles(_userMongoService.Get(user));
         }
 
         /// <Summary>Add a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseRole(SocketRole role) =>
-            _roleServices.Upsert(_roleServices.SocketToModel(role));
+            _roleMongoService.Upsert(_roleMongoService.SocketToModel(role));
 
         /// <Summary>Add a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseRole(RestRole role) =>
-            _roleServices.Upsert(_roleServices.RestToModel(role));
+            _roleMongoService.Upsert(_roleMongoService.RestToModel(role));
 
         /// <Summary>Add a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseRole(RoleMainModel roleMain) =>
-            _roleServices.Upsert(roleMain);
+            _roleMongoService.Upsert(roleMain);
 
         /// <Summary>Removes a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseRole(SocketRole role) =>
-            _roleServices.Remove(_roleServices.SocketToModel(role));
+            _roleMongoService.Remove(_roleMongoService.SocketToModel(role));
 
         /// <Summary>Removes a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseRole(RestRole role) =>
-            _roleServices.Remove(_roleServices.RestToModel(role));
+            _roleMongoService.Remove(_roleMongoService.RestToModel(role));
 
         /// <Summary>Removes a role on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseRole(RoleMainModel roleMain) =>
-            _roleServices.Remove(roleMain);
+            _roleMongoService.Remove(roleMain);
     }
 }

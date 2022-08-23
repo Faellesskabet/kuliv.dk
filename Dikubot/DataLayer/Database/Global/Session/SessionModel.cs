@@ -36,7 +36,7 @@ namespace Dikubot.DataLayer.Database.Global.Session
         
         public UserGlobalModel GetUserModel()
         {
-            return new UserGlobalServices().Get(this.UserId);
+            return new UserGlobalMongoService().Get(this.UserId);
         }
 
         private DateTime _expires;

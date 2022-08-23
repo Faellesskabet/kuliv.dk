@@ -15,7 +15,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <return>void.</return>
         public void SetDatabaseVoiceChannels()
         {
-            var voiceChannelModels = _voiceChannelServices.Get();
+            var voiceChannelModels = _voiceChannelMongoService.Get();
             var socketRoles = guild.VoiceChannels.ToList();
             var discordRoleIds = new HashSet<ulong>(socketRoles.Select(role => role.Id));
             var toBeRemoved = voiceChannelModels.Where(model => !discordRoleIds.Contains(UInt64.Parse(model.DiscordId))).ToList();
@@ -28,18 +28,18 @@ namespace Dikubot.DataLayer.Permissions
                 socketRoles.Exists(n => inDB(m, n)));
 
             // Remove the roles from the database that is not on the discord server.
-            toBeRemoved.ForEach(m => _voiceChannelServices.Remove(m));
+            toBeRemoved.ForEach(m => _voiceChannelMongoService.Remove(m));
 
             // Makes an upsert of the roles on the server so they match the ones in the database.
             socketRoles.ForEach(model =>
-                _voiceChannelServices.Upsert(_voiceChannelServices.SocketToModel(model)));
+                _voiceChannelMongoService.Upsert(_voiceChannelMongoService.SocketToModel(model)));
         }
 
         /// <Summary>Will sync all the voice channels on the database to the discord server.</Summary>
         /// <return>void.</return>
         public async void SetDiscordVoiceChannels()
         {
-            var voiceChannelModels = _voiceChannelServices.Get();
+            var voiceChannelModels = _voiceChannelMongoService.Get();
             var socketVoiceChannels = guild.VoiceChannels.ToList();
             var toBeRemoved = new List<SocketVoiceChannel>(socketVoiceChannels);
 
@@ -61,7 +61,7 @@ namespace Dikubot.DataLayer.Permissions
                 if (socketVoiceChannel == null)
                 {
                     // If the role could not be found create it.
-                    var properties = _voiceChannelServices.ModelToVoiceChannelProperties(voiceChannelModel);
+                    var properties = _voiceChannelMongoService.ModelToVoiceChannelProperties(voiceChannelModel);
                     var restVoiceChannel = await guild.CreateVoiceChannelAsync(
                         voiceChannelModel.Name,
                         channelProperties =>
@@ -89,7 +89,7 @@ namespace Dikubot.DataLayer.Permissions
                 else
                 {
                     // If the role could be found modify it so it matches the database.
-                    var properties = _voiceChannelServices.ModelToVoiceChannelProperties(voiceChannelModel);
+                    var properties = _voiceChannelMongoService.ModelToVoiceChannelProperties(voiceChannelModel);
                     await socketVoiceChannel.ModifyAsync(channelProperties =>
                     {
                         channelProperties.Name = properties.Name;
@@ -130,32 +130,32 @@ namespace Dikubot.DataLayer.Permissions
         /// <Summary>Add a voice channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseVoiceChannel(SocketVoiceChannel voiceChannel) =>
-            _voiceChannelServices.Upsert(_voiceChannelServices.SocketToModel(voiceChannel));
+            _voiceChannelMongoService.Upsert(_voiceChannelMongoService.SocketToModel(voiceChannel));
 
         /// <Summary>Add a voice channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseVoiceChannel(RestVoiceChannel voiceChannel) =>
-            _voiceChannelServices.Upsert(_voiceChannelServices.RestToModel(voiceChannel));
+            _voiceChannelMongoService.Upsert(_voiceChannelMongoService.RestToModel(voiceChannel));
 
         /// <Summary>Add a voice channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseVoiceChannel(VoiceChannelMainModel voiceChannelMain) =>
-            _voiceChannelServices.Upsert(voiceChannelMain);
+            _voiceChannelMongoService.Upsert(voiceChannelMain);
 
         /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseVoiceChannel(SocketVoiceChannel voiceChannel) =>
-            _voiceChannelServices.Remove(_voiceChannelServices.SocketToModel(voiceChannel));
+            _voiceChannelMongoService.Remove(_voiceChannelMongoService.SocketToModel(voiceChannel));
 
         /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseVoiceChannel(RestVoiceChannel voiceChannel) =>
-            _voiceChannelServices.Remove(_voiceChannelServices.RestToModel(voiceChannel));
+            _voiceChannelMongoService.Remove(_voiceChannelMongoService.RestToModel(voiceChannel));
 
         /// <Summary>Removes a voice channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseVoiceChannel(VoiceChannelMainModel voiceChannelMain) =>
-            _voiceChannelServices.Remove(voiceChannelMain);
+            _voiceChannelMongoService.Remove(voiceChannelMain);
 
         /// <Summary>Removes a voice channel from the database and the discord server.</Summary>
         /// <return>void.</return>
@@ -185,7 +185,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <return>void.</return>
         public async Task<VoiceChannelMainModel> AddVoiceChannel(VoiceChannelMainModel voiceChannelMain)
         {
-            var properties = _voiceChannelServices.ModelToVoiceChannelProperties(voiceChannelMain);
+            var properties = _voiceChannelMongoService.ModelToVoiceChannelProperties(voiceChannelMain);
             var restVoiceChannel = await guild.CreateVoiceChannelAsync(
                 voiceChannelMain.Name,
                 channelProperties =>

@@ -8,9 +8,9 @@ using Discord.WebSocket;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.Quote
 {
-    public class QuoteServices : MessageService
+    public class QuoteMongoServices : MessageMongoService
     {
-        public QuoteServices(SocketGuild guild) : base("Quotes", guild)
+        public QuoteMongoServices(SocketGuild guild) : base("Quotes", guild)
         {
         }
 

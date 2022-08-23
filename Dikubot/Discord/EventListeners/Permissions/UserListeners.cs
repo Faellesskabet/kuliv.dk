@@ -34,15 +34,15 @@ namespace Dikubot.Discord.EventListeners.Permissions
             if (await util.IsBotFirstEntryInAuditLog(socketGuild))
                 return;
 
-            UserGuildServices userGuildServices = new UserGuildServices(socketGuild);
-            UserGlobalServices userGlobalServices = new UserGlobalServices();
-            UserGlobalModel userGlobalModel = userGlobalServices.Get(socketUser);
+            UserGuildMongoService userGuildMongoService = new UserGuildMongoService(socketGuild);
+            UserGlobalMongoService userGlobalMongoService = new UserGlobalMongoService();
+            UserGlobalModel userGlobalModel = userGlobalMongoService.Get(socketUser);
             if (userGlobalModel.SelectedGuild == socketGuild.Id)
             {
                 userGlobalModel.SelectedGuild = 0;
-                userGlobalServices.Upsert(userGlobalModel);
+                userGlobalMongoService.Upsert(userGlobalModel);
             }
-            userGuildServices.Remove(model => Equals(model.DiscordId, socketUser.Id));
+            userGuildMongoService.Remove(model => Equals(model.DiscordId, socketUser.Id));
         }
 
         /// <Summary>When a user gets edited it will be updated in the database.</Summary>

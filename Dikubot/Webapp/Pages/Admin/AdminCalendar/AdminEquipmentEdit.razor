@@ -59,9 +59,9 @@ else
     private bool _loading = true;
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
-    private EquipmentServices _joinRoleServices;
+    private EquipmentMongoService _joinRoleMongoService;
     private EquipmentModel _category;
-    private CalendarServices _roleServices;
+    private CalendarMongoService _roleMongoService;
     private List<CalendarModel> _roleMainModels;
     
     
@@ -69,10 +69,10 @@ else
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _joinRoleServices = new EquipmentServices(_guild);
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EquipmentModel();
-        _roleServices = new CalendarServices(_guild);
-        _roleMainModels = _roleServices.GetAll();
+        _joinRoleMongoService = new EquipmentMongoService(_guild);
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleMongoService.Get(guid) : new EquipmentModel();
+        _roleMongoService = new CalendarMongoService(_guild);
+        _roleMainModels = _roleMongoService.GetAll();
         _loading = false;
     }
     
@@ -88,7 +88,7 @@ else
         {
             return;
         }
-        _joinRoleServices.Upsert(_category);
+        _joinRoleMongoService.Upsert(_category);
     }
 
     
@@ -105,7 +105,7 @@ else
             return;
         }
         
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EquipmentModel();
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleMongoService.Get(guid) : new EquipmentModel();
         this.StateHasChanged();
     }
 

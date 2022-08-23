@@ -93,13 +93,13 @@ else
     private async Task ApproveDiscord()
     {
         
-        UserGlobalServices userServices = new UserGlobalServices();
+        UserGlobalMongoService userMongoService = new UserGlobalMongoService();
         var id = ulong.Parse(discordUser.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value).ToString();
 
-        if (!userServices.Exists(model => model.DiscordId == id))
+        if (!userMongoService.Exists(model => model.DiscordId == id))
         {
             UserGlobalModel userModel = new UserGlobalModel {DiscordId = id};
-            userServices.Upsert(userModel);
+            userMongoService.Upsert(userModel);
         }
         
         await authenticator.UpdateSession();

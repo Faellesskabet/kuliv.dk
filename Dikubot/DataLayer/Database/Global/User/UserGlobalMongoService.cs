@@ -7,9 +7,9 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Global.User
 {
-    public class UserGlobalServices : GlobalServices<UserGlobalModel>, IIndexed<UserGlobalModel>
+    public class UserGlobalMongoService : GlobalMongoService<UserGlobalModel>, IIndexed<UserGlobalModel>
     {
-        public UserGlobalServices() : base("Users")
+        public UserGlobalMongoService() : base("Users")
         {
         }
         

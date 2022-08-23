@@ -20,7 +20,7 @@
             if (userModel != null) userModel.SelectedGuild = 0;
             if (user != null)
             {
-                new UserGlobalServices().Upsert(user.UserGlobalModel);
+                new UserGlobalMongoService().Upsert(user.UserGlobalModel);
                 await authenticator.UpdateSession();
             }
         }

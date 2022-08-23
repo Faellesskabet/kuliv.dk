@@ -8,41 +8,26 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database
 {
-    /// <summary>
-    /// Class for safely communicating with a database by using a Double-Checked locking singleton
-    /// pattern.
-    /// </summary>
-    public sealed class Database
+    public sealed class DatabaseService
     {
         private const string ConnectionString = "mongodb://localhost:27017";
         private static readonly MongoClient MongoClient = new MongoClient(ConnectionString);
-        private static Database instance = null;
         private static readonly Dictionary<string, IMongoDatabase> Databases = new Dictionary<string, IMongoDatabase>();
 
-        public static Database GetInstance
+        public DatabaseService()
         {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new Database();
+            // This is very important for our "Unique" elements to work
+            // It ensures that unique empty elements won't collide and cause errors
+            // What is this is basically it doesn't add an element if it is equal to null
+            ConventionRegistry.Register("IgnoreIfNull",
+                new ConventionPack {new IgnoreIfNullConvention(true)},
+                t => true);
 
-                    // This is very important for our "Unique" elements to work
-                    // It ensures that unique empty elements won't collide and cause errors
-                    // What is this is basically it doesn't add an element if it is equal to null
-                    ConventionRegistry.Register("IgnoreIfNull",
-                        new ConventionPack {new IgnoreIfNullConvention(true)},
-                        t => true);
-
-                    //This is used to tell mongodb to store our IDs as GUIDs
-                    BsonSerializer.RegisterIdGenerator(
-                        typeof(Guid),
-                        GuidGenerator.Instance
-                    );
-                }
-
-                return instance;
-            }
+            //This is used to tell mongodb to store our IDs as GUIDs
+            BsonSerializer.RegisterIdGenerator(
+                typeof(Guid),
+                GuidGenerator.Instance
+            );
         }
 
         /// <Summary>Method for retrieving a database from the client through the singleton pattern.</Summary>

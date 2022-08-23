@@ -10,7 +10,7 @@ namespace Dikubot.DataLayer.Database;
 /// TODO: Implement system for foreign keys and detecting when the foreign object no longer exists
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class ForeignKey<Service, Model> where Service : Services<Model> where Model : MainModel
+public class ForeignKey<Service, Model> where Service : MongoService<Model> where Model : MainModel
 {
     public ForeignKey(Guid guid)
     {
@@ -35,7 +35,7 @@ public class ForeignKey<Service, Model> where Service : Services<Model> where Mo
     }
 }
 
-public class ForeignKeySet<Service, Model> where Service : Services<Model> where Model : MainModel
+public class ForeignKeySet<Service, Model> where Service : MongoService<Model> where Model : MainModel
 {
     [BsonElement("ForeignKeys")]
     private HashSet<ForeignKey<Service, Model>> ForeignKeys { get; set; }

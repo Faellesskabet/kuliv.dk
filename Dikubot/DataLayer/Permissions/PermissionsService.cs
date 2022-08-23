@@ -16,24 +16,24 @@ namespace Dikubot.DataLayer.Permissions
         /// <param name="guild">The guild for which the PermissionService is being executed in.</param>
         SocketGuild guild; // This can not be made private.
 
-        private RoleServices _roleServices;
-        private VoiceChannelServices _voiceChannelServices;
-        private TextChannelServices _textChannelServices;
-        private CategoryChannelServices _categoryChannelServices;
-        private UserGuildServices _userServices;
-        private GuildServices _guildServices;
-        private readonly GuildSettingsService _guildSettingsService;
+        private RoleMongoService _roleMongoService;
+        private VoiceChannelMongoService _voiceChannelMongoService;
+        private TextChannelMongoService _textChannelMongoService;
+        private CategoryChannelMongoService _categoryChannelMongoService;
+        private UserGuildMongoService _userMongoService;
+        private GuildMongoService _guildMongoService;
+        private readonly GuildSettingsMongoService _guildSettingsMongoService;
 
         public PermissionsService(SocketGuild guild)
         {
             this.guild = guild;
-            _roleServices = new RoleServices(guild);
-            _voiceChannelServices = new VoiceChannelServices(guild);
-            _textChannelServices = new TextChannelServices(guild);
-            _categoryChannelServices = new CategoryChannelServices(guild);
-            _userServices = new UserGuildServices(guild);
-            _guildServices = new GuildServices(guild);
-            _guildSettingsService = new GuildSettingsService();
+            _roleMongoService = new RoleMongoService(guild);
+            _voiceChannelMongoService = new VoiceChannelMongoService(guild);
+            _textChannelMongoService = new TextChannelMongoService(guild);
+            _categoryChannelMongoService = new CategoryChannelMongoService(guild);
+            _userMongoService = new UserGuildMongoService(guild);
+            _guildMongoService = new GuildMongoService(guild);
+            _guildSettingsMongoService = new GuildSettingsMongoService();
         }
 
         /// <Summary>Takes channels, roles and users information from discord and saves it in the database.</Summary>
@@ -59,9 +59,9 @@ namespace Dikubot.DataLayer.Permissions
             SetDiscordTextChannels();
         }
 
-        public GuildSettingsService GetGuildSettingsService()
+        public GuildSettingsMongoService GetGuildSettingsService()
         {
-            return _guildSettingsService;
+            return _guildSettingsMongoService;
         }
     }
 }

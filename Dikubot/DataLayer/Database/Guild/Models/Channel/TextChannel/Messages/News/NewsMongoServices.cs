@@ -4,9 +4,9 @@ using Discord.WebSocket;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News;
 
-public class NewsServices : MessageService
+public class NewsMongoServices : MessageMongoService
 {
-    public NewsServices(SocketGuild guild) : base("News", guild) { }
+    public NewsMongoServices(SocketGuild guild) : base("News", guild) { }
 
     protected override Expression<Func<TextChannelMainModel, bool>> ChannelFilter()
     {

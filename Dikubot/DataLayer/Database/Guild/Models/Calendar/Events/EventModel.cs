@@ -24,7 +24,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
         
         public List<TagsMainModel> getTags()
         {
-            var tagSevice = new TagServices();
+            var tagSevice = new TagMongoService();
             return Tags.Select(t => tagSevice.Get(t)).ToList();
         }
 

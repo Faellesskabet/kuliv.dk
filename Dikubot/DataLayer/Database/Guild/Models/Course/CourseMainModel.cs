@@ -37,7 +37,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Course
 
         public TextChannelMainModel GetMainTextChannel(SocketGuild guild)
         {
-            return new TextChannelServices(guild).Get(MainTextChannelModelId);
+            return new TextChannelMongoService(guild).Get(MainTextChannelModelId);
         }
 
         /// <summary>

@@ -18,11 +18,11 @@ public class ForceNameChangeTask: CronTask
     private static void Update()
     {
         Logger.Debug("Forcing name changes for selected servers");
-        GuildSettingsService guildSettingsService = new GuildSettingsService();
-        UserGlobalServices userGlobalServices = new UserGlobalServices();
+        GuildSettingsMongoService guildSettingsMongoService = new GuildSettingsMongoService();
+        UserGlobalMongoService userGlobalMongoService = new UserGlobalMongoService();
         foreach (var guild in DiscordBot.ClientStatic.Guilds)
         {
-            GuildSettingsModel guildSettingsModel = guildSettingsService.Get(guild);
+            GuildSettingsModel guildSettingsModel = guildSettingsMongoService.Get(guild);
             if (!guildSettingsModel.ForceNameChange)
             {
                 continue;
@@ -30,7 +30,7 @@ public class ForceNameChangeTask: CronTask
             
             foreach (SocketGuildUser user in guild.Users)
             {
-                string name = userGlobalServices.Get(user)?.Name ?? "";
+                string name = userGlobalMongoService.Get(user)?.Name ?? "";
                 if (string.IsNullOrWhiteSpace(name))
                 {
                     continue;

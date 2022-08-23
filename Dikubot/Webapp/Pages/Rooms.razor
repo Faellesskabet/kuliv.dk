@@ -77,8 +77,8 @@
     private UserGlobalModel _userGlobalModel;
 
     
-    private CalendarServices _calendarServices;
-    private RoomServices _RoomServices;
+    private CalendarMongoService _calendarMongoService;
+    private RoomMongoService _roomMongoService;
     
     
     protected override async Task OnInitializedAsync()
@@ -94,13 +94,13 @@
         }
         _userGlobalModel = user.UserGlobalModel;
         guild = DiscordBot.Client.GetGuild(_userGlobalModel.SelectedGuild);
-        _calendarServices = new CalendarServices(guild);
-        _RoomServices = new RoomServices(guild);
+        _calendarMongoService = new CalendarMongoService(guild);
+        _roomMongoService = new RoomMongoService(guild);
 
         CurrentYear = DateTime.Today.Year;
         CurrentDate = DateTime.Now;
-        EquipmentData = _RoomServices.GetAll();
-        ResourceDatasource = _calendarServices.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Room);
+        EquipmentData = _roomMongoService.GetAll();
+        ResourceDatasource = _calendarMongoService.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Room);
         
     }
 
@@ -114,7 +114,7 @@
         {
             foreach(RoomModel Data in args.AddedRecords)
             {
-                Data.Id = _RoomServices.Upsert(Data).Id;
+                Data.Id = _roomMongoService.Upsert(Data).Id;
             }
         }
     }
@@ -124,11 +124,11 @@
      public class CustomAdaptor : DataAdaptor
      {
          
-         public RoomServices services;
+         public RoomMongoService MongoService;
          
          public CustomAdaptor()
          {
-            services = new RoomServices("815997079850713130");
+            MongoService = new RoomMongoService("815997079850713130");
          }
          
          
@@ -137,25 +137,25 @@
 
          public async override Task<object> ReadAsync(DataManagerRequest dataManagerRequest, string key = null)
         {//KULIV_null hmm
-            return dataManagerRequest.RequiresCounts ? new DataResult() { Result = services.GetAll(), Count = services.GetAll().Count } : (object)services.GetAll();
+            return dataManagerRequest.RequiresCounts ? new DataResult() { Result = MongoService.GetAll(), Count = MongoService.GetAll().Count } : (object)MongoService.GetAll();
         }
         
         public async override Task<object> InsertAsync(DataManager dataManager, object data, string key)
         {
             
-            return (object) services.Upsert(data as RoomModel);
+            return (object) MongoService.Upsert(data as RoomModel);
         }
 
         public async override Task<object> UpdateAsync(DataManager dataManager, object data, string keyField, string key)
         {
-            return (object) services.Upsert(data as RoomModel);
+            return (object) MongoService.Upsert(data as RoomModel);
         }
         
         public async override Task<object> RemoveAsync(DataManager dataManager, object data, string keyField, string key) //triggers on appointment deletion through public method DeleteEvent
         {
             
             Guid value = (Guid)data;
-            services.Remove(services.Get((AppointmentData) => AppointmentData.Id == value));
+            MongoService.Remove(MongoService.Get((AppointmentData) => AppointmentData.Id == value));
             return data;
         }
         
@@ -166,19 +166,19 @@
             List<RoomModel> deleteData = deletedRecords as List<RoomModel>;
             foreach (var data in deleteData)
             {
-                services.Remove(services.Get((AppointmentData) => AppointmentData.Id == data.Id));
+                MongoService.Remove(MongoService.Get((AppointmentData) => AppointmentData.Id == data.Id));
             }
             List<RoomModel> addData = addedRecords as List<RoomModel>;
             foreach (var data in addData)
             {
-                services.Upsert(data as RoomModel);
+                MongoService.Upsert(data as RoomModel);
                 records = addedRecords;
             }
             List<RoomModel> updateData = changedRecords as List<RoomModel>;
             foreach (var data in updateData)
             {
                 var val = (data as RoomModel);
-                var appointment = services.Get((AppointmentData) => AppointmentData.Id == val.Id);
+                var appointment = MongoService.Get((AppointmentData) => AppointmentData.Id == val.Id);
                 if (appointment != null)
                 {
                     appointment.Id = val.Id;

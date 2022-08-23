@@ -5,9 +5,9 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Global.GuildSettings;
 
-public class GuildSettingsService : GlobalServices<GuildSettingsModel>, IIndexed<GuildSettingsModel>
+public class GuildSettingsMongoService : GlobalMongoService<GuildSettingsModel>, IIndexed<GuildSettingsModel>
 {
-    public GuildSettingsService() : base("GuildSettings") { }
+    public GuildSettingsMongoService() : base("GuildSettings") { }
 
     public GuildSettingsModel Get(SocketGuild guild)
     {

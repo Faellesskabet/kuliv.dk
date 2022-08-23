@@ -83,11 +83,11 @@
     private Authenticator authenticator;
     private UserIdentity user;
     private SocketGuild guild;
-    private JoinRoleServices _joinRoleServices;
+    private JoinRoleMongoService _joinRoleMongoService;
     private UserGlobalModel _userGlobalModel;
     private List<JoinRoleCategoryMainModel> _categories;
     private GuildSettingsModel _guildSettingsModel;
-    private UserGuildServices _userGuildServices;
+    private UserGuildMongoService _userGuildMongoService;
     private UserGuildModel _userGuildModel;
     private PermissionsService _permissionsService;
     private bool _loaded = false;
@@ -103,12 +103,12 @@
         }
         _userGlobalModel = user.UserGlobalModel;
         guild = DiscordBot.Client.GetGuild(_userGlobalModel.SelectedGuild);
-        _joinRoleServices = new JoinRoleServices(guild);
-        _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
-        _userGuildServices = new UserGuildServices(guild);
-        _userGuildModel = _userGuildServices.Get(_userGlobalModel.DiscordId);
+        _joinRoleMongoService = new JoinRoleMongoService(guild);
+        _guildSettingsModel = new GuildSettingsMongoService().Get(guild) ?? new GuildSettingsModel(guild);
+        _userGuildMongoService = new UserGuildMongoService(guild);
+        _userGuildModel = _userGuildMongoService.Get(_userGlobalModel.DiscordId);
         _permissionsService = new PermissionsService(guild);
-        _categories = _joinRoleServices.GetAll();
+        _categories = _joinRoleMongoService.GetAll();
         
         _loaded = true;
     }
@@ -134,7 +134,7 @@
         {
             _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
         }
-        _userGuildServices.Update(_userGuildModel);
+        _userGuildMongoService.Update(_userGuildModel);
         _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
         this.StateHasChanged();
     }
@@ -142,7 +142,7 @@
     protected void LeaveRole(JoinRoleMainModel joinRoleMainModel)
     {
         _userGuildModel.RemoveRole(joinRoleMainModel.RoleId);
-        _userGuildServices.Update(_userGuildModel);
+        _userGuildMongoService.Update(_userGuildModel);
         _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
         this.StateHasChanged();
     }
@@ -150,7 +150,7 @@
     protected void JoinRole(JoinRoleMainModel joinRoleMainModel)
     {
         _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
-        _userGuildServices.Update(_userGuildModel);
+        _userGuildMongoService.Update(_userGuildModel);
         _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
         this.StateHasChanged();
     }

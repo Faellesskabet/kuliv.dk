@@ -10,9 +10,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Role
     /// <summary>
     /// Class for for retrieving information from the User collection.
     /// </summary>
-    public class RoleServices : GuildServices<RoleMainModel>
+    public class RoleMongoService : GuildMongoService<RoleMainModel>
     {
-        public RoleServices(SocketGuild guild) : base("Roles", guild)
+        public RoleMongoService(SocketGuild guild) : base("Roles", guild)
         {
         }
 

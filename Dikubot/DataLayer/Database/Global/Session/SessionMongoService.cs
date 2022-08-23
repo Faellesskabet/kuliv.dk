@@ -6,9 +6,9 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Global.Session
 {
-    public class SessionServices : GlobalServices<SessionModel>, IIndexed<SessionModel>
+    public class SessionMongoService : GlobalMongoService<SessionModel>, IIndexed<SessionModel>
     {
-        public SessionServices() : base("UserSessions")
+        public SessionMongoService() : base("UserSessions")
         {
         }
 

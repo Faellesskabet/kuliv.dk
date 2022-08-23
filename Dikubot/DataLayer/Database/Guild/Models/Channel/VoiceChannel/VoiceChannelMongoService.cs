@@ -10,9 +10,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel
     /// <summary>
     /// Class for for retrieving information from the VoiceChannel collection.
     /// </summary>
-    public class VoiceChannelServices : ChannelServices<VoiceChannelMainModel>
+    public class VoiceChannelMongoService : ChannelMongoService<VoiceChannelMainModel>
     {
-        public VoiceChannelServices(SocketGuild guild) : base("VoiceChannels", guild)
+        public VoiceChannelMongoService(SocketGuild guild) : base("VoiceChannels", guild)
         {
         }
 

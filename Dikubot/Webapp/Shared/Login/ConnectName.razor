@@ -43,7 +43,7 @@
     private async void ConfirmName()
     {
         user.UserGlobalModel.Name = name;
-        new UserGlobalServices().Upsert(user.UserGlobalModel);
+        new UserGlobalMongoService().Upsert(user.UserGlobalModel);
         Util.UpdateUserNameOnAllForcedGuilds(DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong));
         await authenticator.UpdateSession();
         parent.Update();

@@ -3,9 +3,9 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Guild
 {
-    public class GuildServices : GuildServices<GuildMainModel>
+    public class GuildMongoService : GuildMongoService<GuildMainModel>
     {
-        public GuildServices(SocketGuild guild) : base("Guild", guild)
+        public GuildMongoService(SocketGuild guild) : base("Guild", guild)
         {
         }
 

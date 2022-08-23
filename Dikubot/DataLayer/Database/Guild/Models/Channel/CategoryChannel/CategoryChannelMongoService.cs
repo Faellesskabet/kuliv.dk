@@ -10,9 +10,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Channel.CategoryChannel
     /// <summary>
     /// Class for for retrieving information from the CategoryChannel collection.
     /// </summary>
-    public class CategoryChannelServices : ChannelServices<CategoryChannelMainModel>
+    public class CategoryChannelMongoService : ChannelMongoService<CategoryChannelMainModel>
     {
-        public CategoryChannelServices(SocketGuild guild) : base("CategoryChannels", guild)
+        public CategoryChannelMongoService(SocketGuild guild) : base("CategoryChannels", guild)
         {
         }
 

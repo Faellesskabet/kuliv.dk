@@ -14,6 +14,6 @@ public class ClearExpiredSessionsTask : CronTask
 
     private static void Clear()
     {
-        new SessionServices().RemoveAll(model => model.IsExpired);
+        new SessionMongoService().RemoveAll(model => model.IsExpired);
     }
 }

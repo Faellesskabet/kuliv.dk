@@ -69,12 +69,12 @@ namespace Dikubot.DataLayer.Static
             {
                 return;
             }
-            GuildSettingsService guildSettingsService = new GuildSettingsService();
-            UserGlobalServices userGlobalServices = new UserGlobalServices();
-            UserGlobalModel userGlobalModel = userGlobalServices.Get(user);
+            GuildSettingsMongoService guildSettingsMongoService = new GuildSettingsMongoService();
+            UserGlobalMongoService userGlobalMongoService = new UserGlobalMongoService();
+            UserGlobalModel userGlobalModel = userGlobalMongoService.Get(user);
             foreach (SocketGuild guild in user.MutualGuilds)
             {
-                GuildSettingsModel guildSettingsModel = guildSettingsService.Get(guild);
+                GuildSettingsModel guildSettingsModel = guildSettingsMongoService.Get(guild);
                 if (!guildSettingsModel.ForceNameChange)
                 {
                     continue;

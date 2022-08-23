@@ -6,17 +6,17 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 {
-    public class EventsServices : GuildServices<EventModel>
+    public class EventsMongoService : GuildMongoService<EventModel>
     {
         private string _calendar;
         
-        public EventsServices(SocketGuild guild, string calendar = null) : base("Events", guild)
+        public EventsMongoService(SocketGuild guild, string calendar = null) : base("Events", guild)
         {
             _calendar = calendar;
         }
         
         
-        public EventsServices(string guidId, string calendar = null) : base("Events", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
+        public EventsMongoService(string guidId, string calendar = null) : base("Events", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
         {
             _calendar = calendar;
         }

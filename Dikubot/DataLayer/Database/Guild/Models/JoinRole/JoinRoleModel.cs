@@ -37,10 +37,10 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
         [BsonElement("Permission")]
         public HashSet<Guid> Permission { get; set; }
         
-        public IEnumerable<RoleMainModel> GetPermissionRoles(RoleServices roleServices)
+        public IEnumerable<RoleMainModel> GetPermissionRoles(RoleMongoService roleMongoService)
         {
             IEnumerable<RoleMainModel> roles = Permission.IsNullOrEmpty() ? new List<RoleMainModel>() : 
-                Permission.Select(guid => roleServices.Get(model => model.Id == guid)).Where(model => model != null);
+                Permission.Select(guid => roleMongoService.Get(model => model.Id == guid)).Where(model => model != null);
             
             // Replace by ForiegnKey system
             var roleMainModels = roles as RoleMainModel[] ?? roles.ToArray();
@@ -92,10 +92,10 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
         /// </summary>
         [BsonElement("Permission")] public HashSet<Guid> Permission { get; set; }
         
-        public IEnumerable<RoleMainModel> GetPermissionRoles(RoleServices roleServices)
+        public IEnumerable<RoleMainModel> GetPermissionRoles(RoleMongoService roleMongoService)
         {
             IEnumerable<RoleMainModel> roles = Permission.IsNullOrEmpty() ? new List<RoleMainModel>() : 
-                Permission.Select(guid => roleServices.Get(model => model.Id == guid)).Where(model => model != null);
+                Permission.Select(guid => roleMongoService.Get(model => model.Id == guid)).Where(model => model != null);
             
             // Replace by ForiegnKey system
             var roleMainModels = roles as RoleMainModel[] ?? roles.ToArray();

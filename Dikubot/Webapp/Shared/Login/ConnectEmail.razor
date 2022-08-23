@@ -141,10 +141,10 @@ else
             return;
         }
         
-        UserGlobalServices userGlobalServices = new UserGlobalServices();
+        UserGlobalMongoService userGlobalMongoService = new UserGlobalMongoService();
         
         // If the user already exists, throw an error at them!
-        if (userGlobalServices.EmailExists(email))
+        if (userGlobalMongoService.EmailExists(email))
         {
             emailTaken = true;
             passwordInput = "";
@@ -160,19 +160,19 @@ else
         if (mutualGuilds != null)
             foreach (SocketGuild mutualGuild in mutualGuilds)
             {
-                UpdateUserInGuild(mutualGuild, userGlobalServices);
+                UpdateUserInGuild(mutualGuild, userGlobalMongoService);
             }
         user.UserGlobalModel.Email = email;
         user.UserGlobalModel.Verified = true;
-        userGlobalServices.Upsert(user.UserGlobalModel);
+        userGlobalMongoService.Upsert(user.UserGlobalModel);
         await authenticator.UpdateSession();
         parent.Update();
     }
-    private async void UpdateUserInGuild(SocketGuild guild, UserGlobalServices userGlobalServices)
+    private async void UpdateUserInGuild(SocketGuild guild, UserGlobalMongoService userGlobalMongoService)
     {
-        UserGuildServices userGuildServices = new UserGuildServices(guild);
+        UserGuildMongoService userGuildMongoService = new UserGuildMongoService(guild);
         PermissionsService permissionsService = new PermissionsService(guild);
-        UserGuildModel newUser = userGuildServices.Get(user.UserGlobalModel.DiscordId);
+        UserGuildModel newUser = userGuildMongoService.Get(user.UserGlobalModel.DiscordId);
 
         await permissionsService.SetDiscordUserRoles(newUser);
         
@@ -192,6 +192,6 @@ else
     //ignored
             }
         }
-        userGuildServices.Upsert(newUser);
+        userGuildMongoService.Upsert(newUser);
     }
 }

@@ -16,7 +16,7 @@ namespace Dikubot.DataLayer.Database
     /// <summary>
     /// Class for for retrieving information from a given collection.
     /// </summary>
-    public abstract class Services<TModel> where TModel : MainModel
+    public abstract class MongoService<TModel> where TModel : MainModel
     {
         internal readonly IMongoCollection<TModel> _models;
         private readonly Dictionary<string, bool> indexed = new Dictionary<string, bool>();
@@ -26,6 +26,7 @@ namespace Dikubot.DataLayer.Database
         public readonly MongoDatabaseSettings DatabaseSettings;
         public readonly MongoCollectionSettings CollectionSettings;
         public readonly IMongoDatabase database;
+        private DatabaseService _databaseService;
 
         private readonly string _collectionName;
         private readonly string _databaseName;
@@ -33,18 +34,19 @@ namespace Dikubot.DataLayer.Database
         /// <summary>
         /// Constructor for the services.
         /// </summary>
-        protected Services(string databaseName,
+        protected MongoService(DatabaseService databaseService, string databaseName,
             string collectionName,
             MongoDatabaseSettings databaseSettings = null,
             MongoCollectionSettings collectionSettings = null)
         {
+            _databaseService = databaseService;
             _databaseName = databaseName;
             _collectionName = collectionName;
             this.DatabaseSettings = databaseSettings;
             this.CollectionSettings = collectionSettings;
             
             // The database to retrieve from.
-            this.database = Database.GetInstance.GetDatabase($"{databaseName}", databaseSettings);
+            this.database = _databaseService.GetDatabase($"{databaseName}", databaseSettings);
             
             // The collection to retrieve from.
             _models = SetModels(this.database, collectionName, collectionSettings);
@@ -66,13 +68,10 @@ namespace Dikubot.DataLayer.Database
             }
         }
 
-
-        protected virtual IMongoCollection<TModel> SetModels(IMongoDatabase database, string collectionName, MongoDB.Driver.MongoCollectionSettings collectionSettings )
+        private IMongoCollection<TModel> SetModels(IMongoDatabase database, string collectionName, MongoDB.Driver.MongoCollectionSettings collectionSettings )
         {
             return database.GetCollection<TModel>(collectionName, collectionSettings);
         }
-        
-
 
         /// <Summary>Retrieves all the elements in the collection.</Summary>
         /// <return>A list of some Model type.</return>

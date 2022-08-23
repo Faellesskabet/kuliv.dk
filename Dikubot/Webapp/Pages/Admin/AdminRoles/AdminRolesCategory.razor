@@ -60,7 +60,7 @@
                         <MudTd DataLabel="Beskrivelse"><MudTextField @bind-Value="@context.Desc" Label="Beskrivelse" Immediate="@true" MaxLength="256" Lines="2" Variant="Variant.Outlined"></MudTextField></MudTd>
                         <MudTd>
                             <MudSelect Label="Rolle" Lines="2" HelperText="Hvilken rolle skal man kunne tilvælge sig selv" @bind-Value="@context.RoleId"
-                                       Text="@(_roleServices.Get(model => model.Id == @context.RoleId)?.Name ?? "")">
+                                       Text="@(_roleMongoService.Get(model => model.Id == @context.RoleId)?.Name ?? "")">
                                 @foreach (RoleMainModel role in _roleMainModels)
                                 {
                                     // We won't let people choose administrator roles as the verified role,
@@ -130,21 +130,21 @@ else
     private bool _loading = true;
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
-    private JoinRoleServices _joinRoleServices;
+    private JoinRoleMongoService _joinRoleMongoService;
     private List<JoinRoleMainModel> _joinRoleMainModels;
     private JoinRoleCategoryMainModel _category;
-    private RoleServices _roleServices;
+    private RoleMongoService _roleMongoService;
     private List<RoleMainModel> _roleMainModels;
 
     protected override async Task OnInitializedAsync()
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _joinRoleServices = new JoinRoleServices(_guild);
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new JoinRoleCategoryMainModel();
+        _joinRoleMongoService = new JoinRoleMongoService(_guild);
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleMongoService.Get(guid) : new JoinRoleCategoryMainModel();
         _joinRoleMainModels = _category.TextRoles ?? new List<JoinRoleMainModel>();
-        _roleServices = new RoleServices(_guild);
-        _roleMainModels = _roleServices.GetAll();
+        _roleMongoService = new RoleMongoService(_guild);
+        _roleMainModels = _roleMongoService.GetAll();
         _loading = false;
     }
     
@@ -161,12 +161,12 @@ else
     
     private string GetRoleString(JoinRoleCategoryMainModel category)
     {
-        return Util.ConcatListToString(category.GetPermissionRoles(_roleServices).Select(model => model?.Name ?? "").ToList());
+        return Util.ConcatListToString(category.GetPermissionRoles(_roleMongoService).Select(model => model?.Name ?? "").ToList());
     }
     
     private string GetRoleString(JoinRoleMainModel category)
     {
-        return Util.ConcatListToString(category.GetPermissionRoles(_roleServices).Select(model => model?.Name ?? "").ToList());
+        return Util.ConcatListToString(category.GetPermissionRoles(_roleMongoService).Select(model => model?.Name ?? "").ToList());
     }
 
     private async void RemoveRole(JoinRoleMainModel joinRoleMainModel)
@@ -201,12 +201,12 @@ else
 
         // We don't wanna save the roles here, but the category references the roles, so we do this to avoid saving
         // role changes
-        var oldCategory = _joinRoleServices.Get(_category.Id);
+        var oldCategory = _joinRoleMongoService.Get(_category.Id);
         if (oldCategory?.TextRoles != null)
         {
             _category.TextRoles = oldCategory.TextRoles;
         }
-        _joinRoleServices.Upsert(_category);
+        _joinRoleMongoService.Upsert(_category);
     }
 
     private async void SaveRoles()
@@ -223,7 +223,7 @@ else
         }
 
         _category.TextRoles = _joinRoleMainModels;
-        _joinRoleServices.Upsert(_category);
+        _joinRoleMongoService.Upsert(_category);
     }
 
     private async void DiscardSettings()
@@ -239,7 +239,7 @@ else
             return;
         }
         
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new JoinRoleCategoryMainModel();
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleMongoService.Get(guid) : new JoinRoleCategoryMainModel();
         this.StateHasChanged();
     }
 
