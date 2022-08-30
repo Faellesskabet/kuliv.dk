@@ -142,11 +142,12 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
             return properties;
         }
 
-        public IEnumerable<IndexKeysDefinition<UserGuildModel>> GetIndexes()
+        public IEnumerable<CreateIndexModel<UserGuildModel>> GetIndexes()
         {
-            return new List<IndexKeysDefinition<UserGuildModel>>
+            var options = new CreateIndexOptions() { Unique = true };
+            return new List<CreateIndexModel<UserGuildModel>>
             {
-                Builders<UserGuildModel>.IndexKeys.Ascending(model => model.DiscordId)
+                new CreateIndexModel<UserGuildModel>(Builders<UserGuildModel>.IndexKeys.Ascending(model => model.DiscordId), options)
             };
         }
     }

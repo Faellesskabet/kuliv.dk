@@ -87,12 +87,13 @@ namespace Dikubot.DataLayer.Database.Global.User
             Remove(model => model.DiscordId == mainModelIn.DiscordId);
         }
 
-        public IEnumerable<IndexKeysDefinition<UserGlobalModel>> GetIndexes()
+        public IEnumerable<CreateIndexModel<UserGlobalModel>> GetIndexes()
         {
-            return new List<IndexKeysDefinition<UserGlobalModel>>
+            var options = new CreateIndexOptions() { Unique = true };
+            return new List<CreateIndexModel<UserGlobalModel>>
             {
-                Builders<UserGlobalModel>.IndexKeys.Ascending(model => model.DiscordId),
-                Builders<UserGlobalModel>.IndexKeys.Ascending(model => model.Email),
+                new CreateIndexModel<UserGlobalModel>(Builders<UserGlobalModel>.IndexKeys.Ascending(model => model.DiscordId), options),
+                new CreateIndexModel<UserGlobalModel>(Builders<UserGlobalModel>.IndexKeys.Ascending(model => model.Email)),
             };
         }
     }
