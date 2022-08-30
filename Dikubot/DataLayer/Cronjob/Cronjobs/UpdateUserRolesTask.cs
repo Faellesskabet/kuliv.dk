@@ -29,7 +29,6 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs
                 }
             }
             Logger.Debug("All user roles have been updated");
-
         }
     }
 }

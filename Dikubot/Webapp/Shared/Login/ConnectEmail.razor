@@ -56,11 +56,12 @@ else
 {
     <MudCard>
         <MudCardHeader>
-            <MudText Typo="Typo.h6">Vi har sendt en kode til din email: @(email)</MudText>
+            <MudText Typo="Typo.h5">Vi har sendt en kode til din email: @(email)</MudText>
         </MudCardHeader>
         <MudCardContent>
+        <MudText Typo="Typo.body1">Hvis du ikke har modtaget en email, tjek om den er endt som spam her: <MudLink Href="https://security.microsoft.com/quarantine">https://security.microsoft.com/quarantine</MudLink></MudText>
             <MudForm>
-                <MudTextField 
+                <MudTextField
                     @bind-Value="passwordInput"
                     Validation="@_kuEmailValidation"
                     Immediate="@true"
@@ -157,14 +158,14 @@ else
         // null if user or no mutual guilds can be found.
         IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong)?.MutualGuilds;
 
+        user.UserGlobalModel.Email = email;
+        user.UserGlobalModel.Verified = true;
+        userGlobalServices.Upsert(user.UserGlobalModel);
         if (mutualGuilds != null)
             foreach (SocketGuild mutualGuild in mutualGuilds)
             {
                 UpdateUserInGuild(mutualGuild, userGlobalServices);
             }
-        user.UserGlobalModel.Email = email;
-        user.UserGlobalModel.Verified = true;
-        userGlobalServices.Upsert(user.UserGlobalModel);
         await authenticator.UpdateSession();
         parent.Update();
     }
