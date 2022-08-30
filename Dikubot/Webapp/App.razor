@@ -1,30 +1,33 @@
 @using Dikubot.Webapp.Authentication
+@using System.Threading
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using global::Discord.WebSocket
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
-
 
 
 <MudThemeProvider @ref="@ThemeProvider" IsDarkMode="@true" Theme="_theme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
-        <Found Context="routeData">
-            <AuthorizeView>
-                <Authorized>
-                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-                </Authorized>
-                <NotAuthorized>
-                    <Login />
-                </NotAuthorized>
-            </AuthorizeView>
-        </Found>
-        <NotFound>
-            <RedirectToBase/>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
-
+<LoadingScreen>
+    <CascadingAuthenticationState>
+        <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
+            <Found Context="routeData">
+                <AuthorizeView>
+                    <Authorized>
+                        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                    </Authorized>
+                    <NotAuthorized>
+                        <Login />
+                    </NotAuthorized>
+                </AuthorizeView>
+            </Found>
+            <NotFound>
+                <RedirectToBase/>
+            </NotFound>
+        </Router>
+    </CascadingAuthenticationState>
+</LoadingScreen>
 
 @code {
 
@@ -34,6 +37,7 @@
     public static MudThemeProvider ThemeProvider;
     private Authenticator authenticator;
     private UserIdentity user;
+    private bool _loaded = false;
     
     private MudTheme _theme = new MudTheme()
     {
@@ -86,6 +90,7 @@
             ErrorContrastText = "#680003",**/
         }
     };
+    
 
     /*
     protected override async Task OnAfterRenderAsync(bool firstRender)
