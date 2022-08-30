@@ -56,12 +56,14 @@ namespace Dikubot.DataLayer.Database
                 try
                 {
                     // MongoDB is smart enough to not duplicate indexes (i think ...) 
-                    _models.Indexes.CreateMany(((IIndexed<TModel>)this).GetIndexes().Select(definition => new CreateIndexModel<TModel>(definition)));
+                    // not that it matters because we drop all indexes on the first init
+                    _models.Indexes.DropAll();
+                    _models.Indexes.CreateMany(((IIndexed<TModel>)this).GetIndexes());
                     indexed[indexKey] = true;
                 }
                 catch (Exception e)
                 {
-                    Logger.Debug("Indexing failed" + e.Message);
+                    Logger.Debug($"Indexing failed {e.Message}");
                 }
             }
         }

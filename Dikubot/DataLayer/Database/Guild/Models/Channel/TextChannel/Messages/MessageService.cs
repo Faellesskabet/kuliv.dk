@@ -70,11 +70,12 @@ public abstract class MessageService : GuildServices<MessageModel>, IIndexed<Mes
     }
 
     protected abstract Expression<Func<TextChannelMainModel, bool>> ChannelFilter();
-    public IEnumerable<IndexKeysDefinition<MessageModel>> GetIndexes()
+    public IEnumerable<CreateIndexModel<MessageModel>> GetIndexes()
     {
-        return new List<IndexKeysDefinition<MessageModel>>
+        var options = new CreateIndexOptions() { Unique = true };
+        return new List<CreateIndexModel<MessageModel>>
         {
-            Builders<MessageModel>.IndexKeys.Ascending(model => model.TimeStamp).Ascending(model => model.MessageId)
+            new CreateIndexModel<MessageModel>(Builders<MessageModel>.IndexKeys.Ascending(model => model.TimeStamp).Ascending(model => model.MessageId), options)
         };
     }
 }
