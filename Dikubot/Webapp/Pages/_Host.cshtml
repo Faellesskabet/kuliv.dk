@@ -36,6 +36,17 @@
 </style>
 <body>
 
+<div id="loading-host" style="position:absolute; top:30vh; width:100%; text-align:center">
+    <h3>kuliv.dk</h3>
+    <p>is currently loading</p>
+    <div class="docs-section-content-inner relative d-flex flex-grow-1 flex-wrap justify-center align-center px-8 pb-8 pt-2"><!--!--><!--!--><div class="mud-progress-circular mud-default-text mud-progress-medium mud-progress-indeterminate" role="progressbar" aria-valuenow="0"><svg class="mud-progress-circular-svg" viewBox="22 22 44 44"><circle class="mud-progress-circular-circle mud-progress-indeterminate" cx="44" cy="44" r="20" fill="none" stroke-width="3"></circle></svg></div><!--!-->
+        <div class="mud-progress-circular mud-primary-text mud-progress-medium mud-progress-indeterminate" role="progressbar" aria-valuenow="0"><svg class="mud-progress-circular-svg" viewBox="22 22 44 44"><circle class="mud-progress-circular-circle mud-progress-indeterminate" cx="44" cy="44" r="20" fill="none" stroke-width="3"></circle></svg></div><!--!-->
+        <div class="mud-progress-circular mud-secondary-text mud-progress-medium mud-progress-indeterminate" role="progressbar" aria-valuenow="0"><svg class="mud-progress-circular-svg" viewBox="22 22 44 44"><circle class="mud-progress-circular-circle mud-progress-indeterminate" cx="44" cy="44" r="20" fill="none" stroke-width="3"></circle></svg></div><!--!-->
+        <div class="mud-progress-circular mud-success-text mud-progress-medium mud-progress-indeterminate" role="progressbar" aria-valuenow="0"><svg class="mud-progress-circular-svg" viewBox="22 22 44 44"><circle class="mud-progress-circular-circle mud-progress-indeterminate" cx="44" cy="44" r="20" fill="none" stroke-width="3"></circle></svg></div><!--!-->
+        <div class="mud-progress-circular mud-info-text mud-progress-medium mud-progress-indeterminate" role="progressbar" aria-valuenow="0"><svg class="mud-progress-circular-svg" viewBox="22 22 44 44"><circle class="mud-progress-circular-circle mud-progress-indeterminate" cx="44" cy="44" r="20" fill="none" stroke-width="3"></circle></svg></div>
+        </div>
+    </div>
+
 <component type="typeof(App)" render-mode="Server"/>
 
 <div id="blazor-error-ui">
@@ -53,9 +64,10 @@
 </div>
 
 <script src="_framework/blazor.server.js" autostart="false"></script>
-    <script>
+<script>
       document.addEventListener("DOMContentLoaded", function() {
         document.body.style.backgroundColor = "";
+        document.getElementById("loading-host").remove();
         Blazor.start();
       });
     </script>
