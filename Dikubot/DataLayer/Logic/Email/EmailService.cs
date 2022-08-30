@@ -15,7 +15,7 @@ namespace Dikubot.DataLayer.Logic.Email
             new SendGridClient(Environment.GetEnvironmentVariable("SENDGRID_API_KEY"));
 
         private static readonly EmailAddress from =
-            new EmailAddress(Environment.GetEnvironmentVariable("SENDGRID_EMAIL"), "Discord Bot");
+            new EmailAddress(Environment.GetEnvironmentVariable("SENDGRID_EMAIL"), "KULiv");
 
         /// <summary>
         /// Send Email
