@@ -5,5 +5,5 @@ namespace Dikubot.DataLayer.Database.Interfaces;
 
 public interface IIndexed<TModel> where TModel : MainModel
 {
-    public IEnumerable<IndexKeysDefinition<TModel>> GetIndexes();
+    public IEnumerable<CreateIndexModel<TModel>> GetIndexes();
 }

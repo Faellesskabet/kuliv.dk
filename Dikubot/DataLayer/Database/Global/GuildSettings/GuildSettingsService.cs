@@ -15,11 +15,12 @@ public class GuildSettingsService : GlobalServices<GuildSettingsModel>, IIndexed
         return model ?? new GuildSettingsModel(guild);
     }
 
-    public IEnumerable<IndexKeysDefinition<GuildSettingsModel>> GetIndexes()
+    public IEnumerable<CreateIndexModel<GuildSettingsModel>> GetIndexes()
     {
-        return new List<IndexKeysDefinition<GuildSettingsModel>>
+        var options = new CreateIndexOptions() { Unique = true };
+        return new List<CreateIndexModel<GuildSettingsModel>>
         {
-            Builders<GuildSettingsModel>.IndexKeys.Ascending(model => model.GuildId),
+            new CreateIndexModel<GuildSettingsModel>(Builders<GuildSettingsModel>.IndexKeys.Ascending(model => model.GuildId), options),
         };
     }
 }

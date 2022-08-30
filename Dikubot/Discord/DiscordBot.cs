@@ -95,6 +95,9 @@ namespace Dikubot.Discord
                 scheduler.ScheduleTask(new ForceNameChangeTask());
                 scheduler.ScheduleTask(new UpdateVerifiedTask());
                 
+                // This is a legacy fix and can be removed after 1 run.
+                new FixForbiddenDuplicatesTask().Action();
+                
                 return Task.CompletedTask;
             };
             // Keeps the thread running

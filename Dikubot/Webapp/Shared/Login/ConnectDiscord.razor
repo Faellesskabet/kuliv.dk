@@ -113,7 +113,7 @@ else if(!loading)
 
         if (!userServices.Exists(model => model.DiscordId == id))
         {
-            UserGlobalModel userModel = new UserGlobalModel {DiscordId = id};
+            UserGlobalModel userModel = userServices.Get(id);
             userServices.Upsert(userModel);
         }
         
