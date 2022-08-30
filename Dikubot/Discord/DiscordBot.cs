@@ -93,6 +93,7 @@ namespace Dikubot.Discord
                 scheduler.ScheduleTask(new BackupDatabaseTask());
                 scheduler.ScheduleTask(new ClearExpiredSessionsTask());
                 scheduler.ScheduleTask(new ForceNameChangeTask());
+                scheduler.ScheduleTask(new UpdateVerifiedTask());
                 
                 return Task.CompletedTask;
             };
