@@ -19,7 +19,7 @@ namespace Dikubot.DataLayer.Database
     public abstract class Services<TModel> where TModel : MainModel
     {
         internal readonly IMongoCollection<TModel> _models;
-        private readonly Dictionary<string, bool> indexed = new Dictionary<string, bool>();
+        private static readonly Dictionary<string, bool> indexed = new Dictionary<string, bool>();
         private readonly Dictionary<string,IMongoCollection<TModel>> _allDatabases = new Dictionary<string, IMongoCollection<TModel>>();
         private readonly Dictionary<string,IMongoCollection<TModel>> _userDatabases = new Dictionary<string, IMongoCollection<TModel>>();
         
