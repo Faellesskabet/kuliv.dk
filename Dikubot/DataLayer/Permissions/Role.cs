@@ -97,10 +97,8 @@ namespace Dikubot.DataLayer.Permissions
             }
         }
 
-        private void UpdateVerifyRole(UserGuildModel userGuildModel, ulong verificationRoleId)
+        public void UpdateVerifyRole(UserGuildModel userGuildModel, SocketRole role)
         {
-
-            SocketRole role = guild.GetRole(verificationRoleId);
             // If the role is not set or does not exist, we return
             if (role == null)
             {
@@ -150,7 +148,7 @@ namespace Dikubot.DataLayer.Permissions
             }
             
             //Give the user the verified role if they're verified
-            UpdateVerifyRole(userMainModel, guildSettingsModel.VerifiedRole);
+            UpdateVerifyRole(userMainModel, guild.GetRole(guildSettingsModel.VerifiedRole));
             
             //We get all the user's roles in the database
             HashSet<UserRoleModel> userRoleModels = new HashSet<UserRoleModel>(userMainModel.Roles);
