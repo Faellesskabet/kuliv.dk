@@ -353,38 +353,6 @@ namespace Dikubot.DataLayer.Database
         /// Get the database name of the current service instance
         /// </summary>
         public string DatabaseName => _databaseName;
-
-        /// <Summary>Sets up the unique indexes for the current collection and service.</Summary>
-        /// <param name="collection">The collection where we setup the Unique indexes.</param>
-        /// <return>Void.</return>
-        [Obsolete]
-        private void SetUniqueIndexes(IMongoCollection<TModel> collection)
-        {
-            // It's time for some fun reflection!
-            Type type = typeof(TModel); // Get the type of our model, an example could be UserModel
-            IEnumerable<PropertyInfo> uniques = type.GetProperties().Where(
-                // We retrieve all the functions/properties which have the BsonUnique attribute
-                prop => Attribute.IsDefined(prop, typeof(BsonUniqueAttribute)));
-
-            foreach (PropertyInfo property in uniques) //We loop over our properties
-            {
-                BsonElementAttribute bsonElementAttribute = //We get the BsonElement attribute
-                    (BsonElementAttribute) Attribute.GetCustomAttribute(property, typeof(BsonElementAttribute));
-                if (bsonElementAttribute == null) //Continue if the function doesn't have a BsonElement attribute
-                    continue;
-
-                /*
-                 * We create a unique and sparse index for the element name found in our BsonElement attribute.
-                 */
-                collection.Indexes.CreateOne(
-                    new CreateIndexModel<TModel>(new IndexKeysDefinitionBuilder<TModel>()
-                            .Ascending(bsonElementAttribute.ElementName),
-                        new CreateIndexOptions<TModel>
-                        {
-                            Unique = true,
-                            Sparse = true
-                        }));
-            }
-        }
+        
     }
 }
