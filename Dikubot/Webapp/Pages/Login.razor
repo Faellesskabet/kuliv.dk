@@ -1,0 +1,175 @@
+@page "/connect"
+@using Dikubot.Webapp.Authentication
+@using Microsoft.AspNetCore.Http
+@using Microsoft.Graph
+@using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager;
+@inject IHttpContextAccessor httpContextAccessor;
+
+<link rel="stylesheet" href="css/diku/footer.css"/>
+<link rel="stylesheet" href="css/diku/login.css"/>
+<div class="d-flex align-center gap-8 flex-column justify-center" 
+     style="height: 75vh; margin-left: 5%; margin-right: 5%;">
+    <div class="flex-grow-0" style="margin-top: 10px;">
+        <MudText Typo="Typo.h2" Style="color: #c43a3f;">kuliv.dk</MudText>
+        <MudText Typo="Typo.body1">A hub of Discord communities for The University of Copenhagen</MudText>
+    </div>
+    <div class="@_growState" style="margin-bottom: 10px; margin-top: 10px;">
+        @if (_state == State.ConnectDiscord)
+        {
+            <ConnectDiscord parent="@this"/>
+        }
+        @if (_state == State.ConnectEmail)
+        {
+            <ConnectEmail parent="@this"/>
+        }
+        @if (_state == State.ConnectName)
+        {
+            <ConnectName parent="@this"/>
+        }
+        @if (_state == State.SelectGuild)
+        {
+            <SelectGuild parent="@this"/>
+        }
+        @if (_state == State.NoAccess)
+        {
+            <h1>Du har ikke adgang til KULiv server</h1>
+        }
+    </div>
+</div>
+    <br/>
+<ul class="circles">
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+</ul>
+
+@if (_state != State.SelectGuild)
+{
+    <footer class="footer">
+    <div class="footer__addr">
+        <MudText Typo="Typo.h3" Style="color: gray">kuliv.dk</MudText>
+        <MudText Typo="Typo.body1" Style="color: gray" class="text-justify">
+            Hej og velkommen til Fællesskabet. Vi tilbyder nem adgang til forskellige Discord server, mange af
+            dem drevet af studerende selv. Regler kan variere fra server til server, dertil skal du kontakte den pågældende servers admin/mods.
+            Hjertelig velkommen til fællesskabet!
+        </MudText>
+    </div>
+  
+    <ul class="footer__nav">
+        <li class="nav__item">
+            <h2 class="nav__title" Style="color: gray">For everyone</h2>
+
+            <ul class="nav__ul">
+                <li><MudLink href="">Guide til brugere</MudLink></li>
+                <li><MudLink href="">Kontakt os</MudLink></li>
+                <li><MudLink href="">Bliv frivillig</MudLink></li>
+                <li><MudLink href="">Rapporter fejl</MudLink></li>
+            </ul>
+        </li>
+    
+        <li class="nav__item">
+
+            <h2 class="nav__title" Style="color: gray">Important information</h2>
+            <ul class="nav__ul">
+                <li><MudLink href="">Servicevilkår</MudLink></li>
+                <li><MudLink href="">Software licens og tak</MudLink></li>
+            </ul>
+        </li>
+    
+        <li class="nav__item">
+            <h2 class="nav__title" Style="color: gray">For admins</h2>
+      
+            <ul class="nav__ul">
+                <li><MudLink href="">Tilføj dit fællesskab</MudLink></li>
+                <li><MudLink href="">Guide til admins</MudLink></li>
+            </ul>
+        </li>
+    </ul>
+  
+    <div class="legal">
+        <p Style="color: gray">Developed by kuliv.dk for students</p>
+
+        <div class="legal__links">
+            <div class="d-flex flex-row gap-2">
+                <MudLink><MudIcon Icon="@Icons.Custom.Brands.Facebook" Title="Facebook"/></MudLink>
+                <MudLink><MudIcon Icon="@Icons.Custom.Brands.GitHub" Title="GitHub"/></MudLink>
+                <MudLink><MudIcon Icon="@Icons.Custom.Brands.Discord" Title="Discord"/></MudLink>
+            </div>
+        </div>
+    </div>
+</footer>
+}
+
+
+
+@code {
+    [Parameter]
+    public string AuthCode { get; set; }
+
+    private enum State
+    {
+        ConnectDiscord,
+        ConnectEmail,
+        ConnectName,
+        SelectGuild,
+        NoAccess
+    }
+
+    private State _state;
+    private String _growState = "";
+    private AuthenticationState authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _state = await getState();
+        _growState = _state == State.SelectGuild ? "flex-grow-1 overflow-auto" : "flex-grow-0 overflow-auto";
+    }
+
+    private async Task<State> getState()
+    {
+        authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+
+        if (user?.UserGlobalModel == null)
+        {
+            return State.ConnectDiscord;
+        }
+
+        if (!user.UserGlobalModel.Verified)
+        {
+            return State.ConnectEmail;
+        }
+
+        if (string.IsNullOrWhiteSpace(user.UserGlobalModel.Name))
+        {
+            return State.ConnectName;
+        }
+        
+        return user.UserGlobalModel.IsBanned ? State.NoAccess : State.SelectGuild;
+    }
+
+
+    public async void Update()
+    {
+        authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity) authState.User.Identity;
+        if (user != null && user.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        _state = await getState();
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+}

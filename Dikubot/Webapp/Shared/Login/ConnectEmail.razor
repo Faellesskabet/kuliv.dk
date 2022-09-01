@@ -11,14 +11,13 @@
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Pages
 @using SendGrid.Helpers.Mail
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
 
 
-<link href="css/diku/login.css" rel="stylesheet"/>
-<h1>Velkommen til KULiv</h1>
 @if (String.IsNullOrEmpty(secretPassword))
 {
     <MudCard>
@@ -59,7 +58,7 @@ else
             <MudText Typo="Typo.h5">Vi har sendt en kode til din email: @(email)</MudText>
         </MudCardHeader>
         <MudCardContent>
-        <MudText Typo="Typo.body1">Hvis du ikke har modtaget en email, tjek om den er endt som spam her: <MudLink Href="https://security.microsoft.com/quarantine">https://security.microsoft.com/quarantine</MudLink></MudText>
+        <MudText Typo="Typo.body1">Hvis du ikke har modtaget en email inden for 2 min, så tjek om den er endt som spam her: <MudLink Href="https://security.microsoft.com/quarantine">https://security.microsoft.com/quarantine</MudLink></MudText>
             <MudForm>
                 <MudTextField
                     @bind-Value="passwordInput"
@@ -123,7 +122,7 @@ else
             return;
         }
 
-        secretPassword = Util.SimpleRandomString(12);
+        secretPassword = Util.SimpleRandomStringNumbers(6);
         Console.WriteLine(secretPassword);
         VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
         await EmailService.SendEmail(verification);

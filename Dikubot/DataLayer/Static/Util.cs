@@ -50,6 +50,18 @@ namespace Dikubot.DataLayer.Static
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+        
+        /// <summary>
+        /// SimpleRandomString returns a random string with the specified length. It's called simple because it has removed look-alike characters like O and 0.
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static string SimpleRandomStringNumbers(int length)
+        {
+            const string chars = "123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
 
         public static void UpdateDiscordName(SocketGuildUser socketGuildUser, string name)
         {

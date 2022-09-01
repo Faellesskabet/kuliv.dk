@@ -29,16 +29,12 @@
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Pages
 @using Microsoft.Extensions.Configuration
 @using Color = MudBlazor.Color
 
 @inject NavigationManager Navigation;
 @inject IHttpContextAccessor httpContextAccessor;
-
-<link href="css/diku/login.css" rel="stylesheet"/>
-<h1>Velkommen til KULiv</h1>
-
-
 
 @if ((discordUser == null || !discordUser.HasClaim(claim => claim.Issuer == "Discord")) && !loading)
 {

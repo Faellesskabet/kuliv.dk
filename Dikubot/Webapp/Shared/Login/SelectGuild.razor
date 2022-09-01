@@ -4,6 +4,7 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.Discord
+@using Dikubot.Webapp.Pages
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime;
 
@@ -22,19 +23,6 @@ else
         <h1 class="other-communities">Udforsk andre fællesskaber:</h1>
         <GuildWidgetCollection Guilds="_complementGuilds" EnableJoin="true"></GuildWidgetCollection>
     }
-    <br/>
-    <ul class="circles">
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-    </ul>
 }
 @code {
     [Parameter]

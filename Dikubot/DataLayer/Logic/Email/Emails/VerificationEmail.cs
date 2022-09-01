@@ -36,7 +36,13 @@ namespace Dikubot.DataLayer.Logic.Email.Emails
         /// <returns>string</returns>
         public string GetTextContent()
         {
-            return $"Hej! Her er din kode kuliv.dk email godkendelse: {_password}";
+            return $"Hej {_to.Email}! Velkommen til kuliv.\n" +
+                   $"Her er koden, som du skal bruge til at bekræfte din email adresse: {_password}\n" +
+                   $"\n" +
+                   $"Vi glæder os til at se dig i en af vores mange fællesskaber\n" +
+                   $"\n" +
+                   $"Venlig hilsen,\n" +
+                   "Holdet bag https://kuliv.dk/";
         }
 
         /// <summary>
@@ -45,7 +51,12 @@ namespace Dikubot.DataLayer.Logic.Email.Emails
         /// <returns>string</returns>
         public string GetHtmlContent()
         {
-            return $"Hej! Her er din kode til kuliv.dk email godkendelse: <strong>{_password}</strong>";
+            return $"<p>Hej {_to.Email}! Velkommen til kuliv.dk</p>" +
+                   $"<p>Her er koden, som du skal bruge til at bekræfte din email adresse: <strong>{_password}</strong></p>" +
+                   $"<p>Vi glæder os til at se dig i en af vores mange fællesskaber</p>" +
+                   $"</br>" +
+                   $"<p>Venlig hilsen,</p>" +
+                   "<p><em>Holdet bag <a href='https://kuliv.dk/'>https://kuliv.dk/</a></em></p>";
         }
 
         /// <summary>
@@ -54,7 +65,7 @@ namespace Dikubot.DataLayer.Logic.Email.Emails
         /// <returns>string</returns>
         public string GetSubject()
         {
-            return "KULiv Email Godkendelse";
+            return "Bekræft email";
         }
     }
 }
