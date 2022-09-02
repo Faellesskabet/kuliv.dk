@@ -1,0 +1,60 @@
+<footer class="footer" style="@style">
+    <div class="footer__addr">
+        <MudText Typo="Typo.h3" Style="color: gray">kuliv.dk</MudText>
+        <MudText Typo="Typo.body1" Style="color: gray" class="text-justify">
+            Hej og velkommen til Fællesskabet. Vi tilbyder nem adgang til forskellige Discord server, mange af
+            dem drevet af studerende selv. Regler kan variere fra server til server, dertil skal du kontakte den pågældende servers admin/mods.
+            Hjertelig velkommen til fællesskabet!
+        </MudText>
+    </div>
+  
+    <ul class="footer__nav">
+        <li class="nav__item">
+            <h2 class="nav__title" Style="color: gray">For everyone</h2>
+
+            <ul class="nav__ul">
+                <li><MudLink href="/userguide">Guide til brugere</MudLink></li>
+                <li><MudLink href="/contactus">Kontakt os</MudLink></li>
+                <li><MudLink href="/volunteer">Bliv frivillig</MudLink></li>
+                <li><MudLink href="/contactus">Rapporter fejl</MudLink></li>
+            </ul>
+        </li>
+    
+        <li class="nav__item">
+
+            <h2 class="nav__title" Style="color: gray">Important information</h2>
+            <ul class="nav__ul">
+                <li><MudLink href="/tos">Servicevilkår</MudLink></li>
+                <li><MudLink Href="https://github.com/Faellesskabet/Faellesskabet">Vedtægter</MudLink></li>
+                <li><MudLink Href="https://github.com/Faellesskabet/Referater">Referater</MudLink></li>
+                <li><MudLink href="/acknowledgements">Software licens og tak</MudLink></li>
+            </ul>
+        </li>
+    
+        <li class="nav__item">
+            <h2 class="nav__title" Style="color: gray">For admins</h2>
+      
+            <ul class="nav__ul">
+                <li><MudLink href="/adminguide">Tilføj dit fællesskab</MudLink></li>
+                <li><MudLink href="/adminguide">Guide til admins</MudLink></li>
+            </ul>
+        </li>
+    </ul>
+  
+    <div class="legal">
+        <p Style="color: gray">Developed by students for students</p>
+
+        <div class="legal__links">
+            <div class="d-flex flex-row gap-2">
+                <MudLink Href="https://github.com/Faellesskabet/"><MudIcon Icon="@Icons.Custom.Brands.GitHub" Title="GitHub"/></MudLink>
+                <MudLink Href="https://discord.gg/U7W64PwFeT"><MudIcon Icon="@Icons.Custom.Brands.Discord" Title="Discord"/></MudLink>
+            </div>
+        </div>
+    </div>
+</footer>
+@code {
+
+    [Parameter]
+    public String style { get; set; } = "";
+
+}
