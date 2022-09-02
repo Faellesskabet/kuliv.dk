@@ -3,6 +3,7 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Pages
+@using Microsoft.IdentityModel.Tokens
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
@@ -15,16 +16,37 @@
         <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
             <Found Context="routeData">
                 <AuthorizeView>
+                    <Authorizing><Loading/></Authorizing>
                     <Authorized>
                         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
                     </Authorized>
                     <NotAuthorized>
-                        <Login />
+                        @if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public"))
+                        {
+                            <RouteView RouteData="@routeData" DefaultLayout="typeof(FooterLayout)"></RouteView>
+                        }
+                        else
+                        {
+                            <LayoutView Layout="@typeof(FooterLayout)">
+                                <Login></Login>
+                            </LayoutView>
+                        }
                     </NotAuthorized>
                 </AuthorizeView>
             </Found>
             <NotFound>
-                <RedirectToBase/>
+                <AuthorizeView>
+                    <Authorized>
+                        <LayoutView Layout="@typeof(MainLayout)">
+                            <PageNotFound></PageNotFound>
+                        </LayoutView>
+                    </Authorized>
+                    <NotAuthorized>
+                        <LayoutView Layout="@typeof(FooterLayout)">
+                            <PageNotFound></PageNotFound>
+                        </LayoutView>
+                    </NotAuthorized>
+                </AuthorizeView>
             </NotFound>
         </Router>
     </CascadingAuthenticationState>
