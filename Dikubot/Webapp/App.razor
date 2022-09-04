@@ -4,8 +4,9 @@
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Pages
 @using Microsoft.IdentityModel.Tokens
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NotifyStateService _notifyStateService
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 
 <MudThemeProvider @ref="@ThemeProvider" IsDarkMode="@true" Theme="_theme"/>
@@ -53,15 +54,11 @@
 </LoadingScreen>
 
 @code {
-
-    [Parameter]
-    public string AuthCode { get; set; }
+    
     private bool _isDarkMode = false;
     public static MudThemeProvider ThemeProvider;
-    private Authenticator authenticator;
-    private UserIdentity user;
-    private bool _loaded = false;
-    
+    private bool _test;
+
     private MudTheme _theme = new MudTheme()
     {
         Palette = new Palette()
@@ -113,6 +110,18 @@
             ErrorContrastText = "#680003",**/
         }
     };
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _notifyStateService.UserChange += UserChange;
+    }
+    
+    
+    private void UserChange(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad:true);
+    }
     
 
     /*
