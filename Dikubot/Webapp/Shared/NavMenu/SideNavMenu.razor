@@ -7,19 +7,17 @@
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Webapp.Pages
 @using MudBlazor.Utilities
-@using Syncfusion.Blazor.DropDowns
+@using Data
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
+@inject NotifyStateService _notifyStateService;
 
-
-<div style="background-color:white; height: 30px">
-    <SfComboBox TValue="string" TItem="GuildSettingsModel" AllowFiltering="true" PopupHeight="230px" Placeholder="Skift Fælleskab" @bind-Value="@ComboBoxValue" DataSource="@_guilds">
-        <ComboBoxEvents TValue="string" TItem="GuildSettingsModel" ValueChange="@ChangeGuild"/>
-        <ComboBoxFieldSettings Text="Name" Value="Id"/>
-    </SfComboBox>
-</div>
-
-
+<MudSelect T="ulong" Label="Fællesskab" Value="@_guildId" Variant="Variant.Outlined" ValueChanged="ChangeGuild" AdornmentIcon="@Icons.Filled.People" AdornmentColor="Color.Primary"
+           Text="@(_guilds.FirstOrDefault(model => model.GuildId == User.UserGlobalModel.SelectedGuild)?.Name ?? "Vælg fællesskab")">
+    @foreach (var guild in _guilds)
+    {
+        <MudSelectItem Value="@guild.GuildId">@guild.Name</MudSelectItem>
+    }
+</MudSelect>
 
 
 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Home" Href="/">Forside</MudNavLink>
@@ -50,17 +48,13 @@
 
 @code
 {
-    
-    /*
-<SfDropDownList TItem="GuildSettingsModel" TValue="string"  DataSource="@_guilds">
-    <DropDownListEvents TItem="GuildSettingsModel" TValue="string" OnValueSelect="@ChangeGuild" ></DropDownListEvents>
-    <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
-</SfDropDownList>
-     */
     [Parameter] public UserIdentity User { get; set; }
     [Inject] private IDialogService DialogService { get; set; }
-    public string ComboBoxValue;
     private List<GuildSettingsModel> _guilds;
+    private ulong _guildId;
+    
+    [Parameter]
+    public EventCallback OnUpdate { get; set; }
 
     protected override void OnInitialized()
     {
@@ -68,6 +62,7 @@
         GuildSettingsService guildSettingsService = new GuildSettingsService();
         
         _guilds = new List<GuildSettingsModel>();
+        _guildId = User.UserGlobalModel.SelectedGuild;
         
         foreach (var guild in User.GetJoinedGuilds())
         {
@@ -80,8 +75,9 @@
         
     }
 
-    public async Task ChangeGuild(ChangeEventArgs<string, GuildSettingsModel> args)
+    public async Task ChangeGuild(ulong guildId)
     {
+        _guildId = guildId;
         var authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         
@@ -91,11 +87,16 @@
             return;
         }
 
-        User.UserGlobalModel.SelectedGuild = args.ItemData.GuildId;
+        if (_guildId == User.UserGlobalModel.SelectedGuild)
+        {
+            return;
+        }
+
+        User.UserGlobalModel.SelectedGuild = _guildId;
         new UserGlobalServices().Upsert(User.UserGlobalModel);
         await authenticator.UpdateSession();
-        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
         
-        
+        this.StateHasChanged();
+        _notifyStateService.NotifyUserChange(this);
     }
 }

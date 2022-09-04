@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
-using BlazorLoginDiscord.Data;
+using Data;
 using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AspNet.Security.OAuth.Discord;
 using Microsoft.AspNetCore.DataProtection;
 
-namespace BlazorLoginDiscord.Data
+namespace Data
 
 { 
     [ApiController]
