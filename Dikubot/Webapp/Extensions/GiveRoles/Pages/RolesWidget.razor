@@ -6,55 +6,55 @@
 
 @namespace Dikubot.Roles
 
-                    <MudCard Elevation="25" Class="rounded-lg pb-4">
-                        <MudPaper Height="25px" Width="100%" Style=@($"background-color: {category.Color}")></MudPaper>
-                        <MudCardHeader>
-                            <CardHeaderContent>
-                                <MudText Typo="Typo.h3" Align="Align.Center">@(category.Name.IsNullOrEmpty() ? "Vælg roller" : category.Name)</MudText>
-                            </CardHeaderContent>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <div class="d-flex justify-center">
-                                <MudText Typo="Typo.h4">@category.Decs</MudText>
-                            </div>
-                            <MudList Class="mx-auto mt-4" Style="width:300px;">
-                                @if (category.TextRoles != null)
-                                {
-                                    @foreach (JoinRoleMainModel role in category.TextRoles)
+<MudPaper Elevation="25" Class="rounded-lg pb-4">
+    <MudPaper Height="25px" Width="100%" Style=@($"background-color: {category.Color}")></MudPaper>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h3" Align="Align.Center">@(category.Name.IsNullOrEmpty() ? "Vælg roller" : category.Name)</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <div class="d-flex justify-center">
+            <MudText Typo="Typo.h6">@category.Decs</MudText>
+        </div>
+        <MudList Class="mx-auto mt-4" Style="width:300px;">
+            @if (category.TextRoles != null)
+            {
+                @foreach (JoinRoleMainModel role in category.TextRoles)
+                {
+                    @if (!HasPermissionForRole(role))
+                    {
+                        continue;
+                    }
+                    <MudListItem>
+                        <MudTooltip Text="@role.Desc">
+                            <div class="d-flex gap-4">
+                                <MudPaper Class="flex-none d-flex">
+                                    @if (HasRole(role))
                                     {
-                                        @if (!HasPermissionForRole(role))
-                                        {
-                                            continue;
-                                        }
-                                        <MudListItem>
-                                            <MudTooltip Text="@role.Desc">
-                                                <MudGrid Justify="Justify.Center">
-                                                    <MudItem xs="4">
-                                                        @if (HasRole(role))
-                                                        {
-                                                            <MudButton Color="Color.Error" OnClick="() => LeaveRole(role)">Leave</MudButton>
-                                                        }
-                                                        else
-                                                        {
-                                                            <MudButton Color="Color.Success" OnClick="() => JoinRole(role)">Join</MudButton>
-                                                        }
-                                                    </MudItem>
-                                                    <MudItem xs="8">
-                                                        <MudText Typo="Typo.h6">@role.Emoji @role.Name</MudText>
-                                                    </MudItem>
-                                                </MudGrid>
-                                            </MudTooltip>
-                                            <MudDivider></MudDivider>
-                                        </MudListItem>
+                                        <MudButton Color="Color.Error" OnClick="() => LeaveRole(role)">Leave</MudButton>
                                     }
-                                }
-                            </MudList>
-                        </MudCardContent>
-                        <MudCardActions Class="d-flex justify-center">
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="() => JoinAll(category)">Join alle</MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                
+                                    else
+                                    {
+                                        <MudButton Color="Color.Success" OnClick="() => JoinRole(role)">Join</MudButton>
+                                    }
+                                </MudPaper>
+                                <MudItem Class="flex-auto d-flex">
+                                    <MudText Typo="Typo.h6">@role.Emoji @role.Name</MudText>
+                                </MudItem>
+                            </div>
+                        </MudTooltip>
+                        <MudDivider></MudDivider>
+                    </MudListItem>
+                }
+            }
+        </MudList>
+    </MudCardContent>
+    <MudCardActions Class="d-flex justify-center">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="() => JoinAll(category)">Join alle</MudButton>
+    </MudCardActions>
+</MudPaper>
+
 @code {
 
     [Parameter]
