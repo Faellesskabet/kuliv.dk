@@ -17,7 +17,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
 
-namespace BlazorLoginDiscord.Data
+namespace Data
 {
     public class UserService
     {

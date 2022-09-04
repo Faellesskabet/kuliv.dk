@@ -1,0 +1,127 @@
+﻿@page "/admin/equipment/create"
+@page "/admin/equipment/edit/{uuid}"
+
+@using Dikubot.Webapp.Authentication
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Extensions.Models.Equipment
+@using Dikubot.DataLayer.Database.Guild.Models.User
+@using Dikubot.Discord
+
+@using Dikubot.Extensions.Models.Equipment
+@using Dikubot.Extensions.Models.Equipment.Equipment
+@using Dikubot.Webapp.Shared.Dialog
+@using Microsoft.AspNetCore.Components
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+<h3>Kategori indstillinger @uuid</h3>
+
+@if (!_loading)
+{
+    <MudContainer>
+            <MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5">Sæt din Kalender indstillinger her</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudForm>
+                        <MudTextField @bind-Value="@_category.Subject" Label="Kalenderens navn" Immediate="@true" MaxLength="32"></MudTextField>
+                        <MudTextField @bind-Value="@_category.Description" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+                        <MudDatePicker @bind-Value="@_category.StartTime" Label="Start tid"></MudDatePicker>
+                        <MudDatePicker @bind-Value="@_category.EndTime"  Label="Slut tid"></MudDatePicker>
+                        <MudTextField @bind-Value="@_category.Location" Label="Lokation" Immediate="@true" MaxLength="32"></MudTextField>
+                        <MudSelect Label="Create By" @bind-Value="@_category.CreateBy">
+                            @foreach (var user in _usersInGuild)
+                            {
+                                <MudSelectItem Value="@user.DiscordId">@user.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudSelect Label="Caleder" @bind-Value="@_category.EquiqmentId">
+                                                        @foreach (var role in _roleMainModels)
+                                                        {
+                                                            <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+                                                        }
+                        </MudSelect>
+
+                    </MudForm>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+                </MudCardActions>
+                
+            </MudCard>
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+    [Parameter]
+    public string? uuid { get; set; }
+    
+    [Inject] private IDialogService DialogService { get; set; }
+
+    private MudTable<EquipmentModel> _table;
+    private bool _loading = true;
+    private UserGlobalModel _userGlobalModel;
+    private SocketGuild _guild;
+    private EquipmentServices _joinRoleServices;
+    private EquipmentModel _category;
+    private CalendarServices _roleServices;
+    private List<CalendarModel> _roleMainModels;
+    private List<UserGuildModel> _usersInGuild;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _userGlobalModel.GetSelectedGuild();
+        _joinRoleServices = new EquipmentServices(_guild);
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EquipmentModel() {CreateBy = _userGlobalModel.DiscordId};
+        _roleServices = new CalendarServices(_guild);
+        _roleMainModels = _roleServices.GetAll();
+        var userService = new UserGuildServices(_guild);
+        _usersInGuild = userService.GetAll();
+        _loading = false;
+    }
+    
+    private async void SaveSettings()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        _joinRoleServices.Upsert(_category);
+    }
+
+    
+    private async void DiscardSettings()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Warning);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EquipmentModel();
+        this.StateHasChanged();
+    }
+
+
+
+
+}

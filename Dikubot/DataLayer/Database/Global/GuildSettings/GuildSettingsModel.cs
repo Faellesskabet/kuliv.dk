@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Dikubot.DataLayer.Database;
 using Dikubot.DataLayer.Database.Global.Settings.Tags;
 using Discord.WebSocket;
 using MongoDB.Bson.Serialization.Attributes;
@@ -16,6 +17,9 @@ public class GuildSettingsModel : MainModel
         BannerUrl = guild.BannerUrl;
         Description = guild.Description;
     }
+    
+    public GuildSettingsModel()
+    {}
     
     [BsonElement("GuildId")] [BsonUnique]
     public ulong GuildId { get; set; }
