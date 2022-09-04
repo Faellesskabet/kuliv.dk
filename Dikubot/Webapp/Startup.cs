@@ -12,11 +12,12 @@ using System.Net;
 using System.Threading.Tasks;
 using AspNet.Security.OAuth.Discord;
 using Blazored.LocalStorage;
-using BlazorLoginDiscord.Data;
+using Data;
 using Dikubot.Webapp.Authentication;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using MudBlazor.Services;
 using Syncfusion.Blazor;
 
@@ -65,6 +66,7 @@ namespace Dikubot.Webapp
             
             //Do NICE STUFF - with login :D
             services.AddHttpContextAccessor();
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddMudServices();
             services.AddRazorPages();
@@ -77,6 +79,7 @@ namespace Dikubot.Webapp
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
+            services.AddScoped<NotifyStateService>();
             
             //AddAuthentication
             services.AddSingleton<UserService>();
