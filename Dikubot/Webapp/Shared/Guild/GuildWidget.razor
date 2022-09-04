@@ -10,8 +10,15 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor httpContextAccessor;
+@using Syncfusion.Blazor.Buttons
 
 <MudCard Elevation="25">
+@foreach (var tag in Guild.GetTags())
+                    {
+                        //Kan ikke gøres direkte :(
+                        string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+                        <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
+                    }
     <MudCardHeader>
         <CardHeaderAvatar>
             <MudAvatar Image="@Guild.LogoUrl"></MudAvatar>
@@ -29,7 +36,7 @@
             {
                 <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@GotoGuild">Gå til side</MudButton>
             }
-                    
+
         </CardHeaderActions>
     </MudCardHeader>
     @if (!@Guild.BannerUrl.IsNullOrEmpty())
