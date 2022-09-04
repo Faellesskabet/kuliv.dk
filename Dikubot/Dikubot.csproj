@@ -59,6 +59,7 @@
 
   <ItemGroup>
     <Folder Include="DataLayer\Database\Global\GlobalSettings" />
+    <Folder Include="DataLayer\Database\Global\Settings" />
     <Folder Include="Webapp\wwwroot\js" />
   </ItemGroup>
   
@@ -67,6 +68,8 @@
     <_ContentIncludedByDefault Remove="Webapp\Pages\Account\AccessDenied.cshtml" />
     <_ContentIncludedByDefault Remove="Webapp\Pages\Account\Login.cshtml" />
     <_ContentIncludedByDefault Remove="Webapp\Pages\Account\Logout.cshtml" />
+    <_ContentIncludedByDefault Remove="Webapp\Pages\Admin\AdminRoles\AdminRoles.razor" />
+    <_ContentIncludedByDefault Remove="Webapp\Pages\Admin\AdminRoles\AdminRolesCategory.razor" />
   </ItemGroup>
 
 </Project>

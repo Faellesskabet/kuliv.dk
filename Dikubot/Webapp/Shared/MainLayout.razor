@@ -5,6 +5,7 @@
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using MudBlazor.Utilities
+@using Dikubot.Webapp.Extensions.NavMenu
 @inject AuthenticationStateProvider AuthenticationStateProvider
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
@@ -23,24 +24,11 @@
                 <MudAvatar Image="@_guildSettingsModel.LogoUrl" Size="Size.Large"></MudAvatar>
             }
         </MudDrawerHeader>
-        <MudNavMenu>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Home" Href="/">Forside</MudNavLink>
-            <AuthorizeView Roles="@Permissions.GlobalAdmin">
-                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CrueltyFree" IconColor="Color.Primary" Href="/op">System Admin indstillinger</MudNavLink>
-            </AuthorizeView>
-            <AuthorizeView Roles="@Permissions.GuildAdmin">
-                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Computer" Href="/admin">Admin indstillinger</MudNavLink>
-            </AuthorizeView>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Newspaper" Href="/news">Nyheder</MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/profile">Min Profil</MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.People" Href="/changeguild">Skift Fællesskab</MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.DomainAdd" Href="/addguild">Tilføj dit eget fællesskab</MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.SportsKabaddi" Href="/volunteer">Bliv frivillig</MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Help" Href="/help">Få hjælp</MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Logout" Href="/logout">Log-ud</MudNavLink>
+        <MudNavMenu> 
+            <SideNavMenu User="@user"> </SideNavMenu>
         </MudNavMenu>
     </MudDrawer>
-    <MudMainContent Class="pt-16 px-16">
+    <MudMainContent Class="pt-16">
         <MudContainer Class="mt-6" Style="min-height: 100vh">
             @Body
         </MudContainer>
