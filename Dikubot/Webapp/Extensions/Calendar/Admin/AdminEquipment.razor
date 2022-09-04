@@ -1,0 +1,115 @@
+﻿@page "/admin/equipment"
+
+@using Dikubot.Webapp.Authentication
+@using System.Net.Http.Json
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Extensions.Models.Equipment
+@using Dikubot.Extensions.Models.Equipment.Equipment
+@using Dikubot.Webapp.Shared.Dialog
+@using global::Discord.WebSocket
+@using Microsoft.IdentityModel.Tokens
+
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+
+<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<EquipmentModel>>>(Reload))" @ref="_table"
+          Loading="@_loading">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
+        <MudSpacer />
+        <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Navn</MudTh>
+        <MudTh>Beskrivelse</MudTh>
+        <MudTh>Synlighed</MudTh>
+        <MudTh>Indstillinger</MudTh>
+        <MudTh>Slet</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Navn">@context.Subject</MudTd>
+        <MudTd DataLabel="Beskrivelse">@context.StartTime</MudTd>
+        <MudTd DataLabel="Visible">@context.EndTime</MudTd>
+        <MudTd DataLabel="Indstillinger">
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/admin/equipment/edit/{@context.Id.ToString()}")>Rediger</MudButton>
+        </MudTd>
+        <MudTd DataLabel="Slet">
+            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>Kunne ikke finde nogen elementer</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <Loading></Loading>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+<div class="d-flex flex-wrap mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" Link="/admin/equipment/create">Tilføj ny kategori</MudButton>
+</div>
+
+@code {
+
+    [Inject] private IDialogService DialogService { get; set; }
+    
+    private MudTable<EquipmentModel> _table;
+    private string _searchQuery = "";
+    private UserGlobalModel _userGlobalModel;
+    private SocketGuild _guild;
+    private EquipmentServices _services;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _userGlobalModel.GetSelectedGuild();
+        _services = new EquipmentServices(_guild);
+        _loading = false;
+    }
+
+    private async Task<TableData<EquipmentModel>> Reload(TableState state)
+    {
+        List<EquipmentModel> items;
+        if (!_searchQuery.IsNullOrEmpty())
+        {
+            items = _services.Get(model => model.Subject.Contains(_searchQuery) || model.Description.Contains(_searchQuery),
+                    state.PageSize, state.Page);   
+        }
+        else
+        {
+            items = _services.Get(state.PageSize, state.Page);   
+        }
+
+        return new TableData<EquipmentModel>() { Items = items, TotalItems = (int)_services.EstimatedCount()};
+    }
+    
+    private void OnSearch(string text)
+    {
+        _searchQuery = text;
+        _table.ReloadServerData();
+    }
+
+    private async void DeleteCategory(EquipmentModel joinRoleCategoryMainModel)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
+        parameters.Add("ButtonText", "Slet");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        _services.Remove(joinRoleCategoryMainModel);
+        await _table.ReloadServerData();
+    }
+    
+}

@@ -1,0 +1,101 @@
+@page "/roles"
+@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
+@using Dikubot.DataLayer.Database.Guild.Models.User
+@using Dikubot.DataLayer.Database.Guild.Models.User.SubModels
+@using Dikubot.DataLayer.Permissions
+@using Dikubot.Discord
+@using Microsoft.IdentityModel.Tokens
+@using Dikubot.Roles
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+    @if (_loaded)
+    {
+        <MudAlert Severity="Severity.Normal" Square="true" Class="my-2">Du er ved at vælge roller i fællesskabet @_guildSettingsModel.Name. 
+            Du vil modtage rollerne på fællesskabets Discord med det samme.</MudAlert>
+        <MudGrid>
+            @foreach (JoinRoleCategoryMainModel category in _categories)
+            {
+                @if (!HasPermissionForCategory(category))
+                {
+                    continue;
+                }
+                <MudItem xs="12" sm="6" md="4">
+                    <RolesWidget category="@category"
+                                 _permissionsService="@_permissionsService"
+                                 _userGuildModel="@_userGuildModel"
+                                 _userGuildServices="@_userGuildServices"></RolesWidget>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <Loading></Loading>
+    }
+
+@code {
+    private Authenticator authenticator;
+    private UserIdentity user;
+    private SocketGuild guild;
+    private JoinRoleServices _joinRoleServices;
+    private UserGlobalModel _userGlobalModel;
+    private List<JoinRoleCategoryMainModel> _categories;
+    private GuildSettingsModel _guildSettingsModel;
+    private UserGuildServices _userGuildServices;
+    private UserGuildModel _userGuildModel;
+    private PermissionsService _permissionsService;
+    private bool _loaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity) authState.User.Identity;
+        if (user == null)
+        {
+            return;
+        }
+        _userGlobalModel = user.UserGlobalModel;
+        guild = DiscordBot.Client.GetGuild(_userGlobalModel.SelectedGuild);
+        _joinRoleServices = new JoinRoleServices(guild);
+        _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
+        _userGuildServices = new UserGuildServices(guild);
+        _userGuildModel = _userGuildServices.Get(_userGlobalModel.DiscordId);
+        _permissionsService = new PermissionsService(guild);
+        _categories = _joinRoleServices.GetAll();
+        
+        _loaded = true;
+    }
+
+    protected void JoinAll(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
+    {
+        if (!HasPermissionForCategory(joinRoleCategoryMainModel))
+        {
+            return;
+        }
+        foreach (var joinRoleMainModel in joinRoleCategoryMainModel.TextRoles.Where(HasPermissionForRole))
+        {
+            _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
+        }
+        _userGuildServices.Update(_userGuildModel);
+        _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
+        this.StateHasChanged();
+    }
+    
+    
+    
+
+    protected bool HasPermissionForCategory(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
+    {
+        return joinRoleCategoryMainModel.Permission.IsNullOrEmpty() || joinRoleCategoryMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
+    }
+    
+    protected bool HasPermissionForRole(JoinRoleMainModel joinRoleMainModel)
+    {
+        return joinRoleMainModel.Permission.IsNullOrEmpty() || joinRoleMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
+    }
+}
