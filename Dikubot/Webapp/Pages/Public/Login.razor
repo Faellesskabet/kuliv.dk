@@ -3,9 +3,10 @@
 @using Microsoft.AspNetCore.Http
 @using Microsoft.Graph
 @using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
+@using System.Net
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
-@inject IHttpContextAccessor httpContextAccessor;
+@inject IHttpContextAccessor _httpContextAccessor;
 
 <link rel="stylesheet" href="css/diku/login.css"/>
 <div class="d-flex align-center gap-8 flex-column justify-center" 
@@ -71,6 +72,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (_httpContextAccessor.HttpContext != null && !_httpContextAccessor.HttpContext.Response.HasStarted
+            && _httpContextAccessor.HttpContext.Request.Path.HasValue && !_httpContextAccessor.HttpContext.Request.Path.Value.Equals("/"))
+        {
+            _httpContextAccessor.HttpContext.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+        }
         _state = await getState();
         _growState = _state == State.SelectGuild ? "flex-grow-1 overflow-auto" : "flex-grow-0 overflow-auto";
     }

@@ -3,7 +3,9 @@
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.Discord
+@using Data
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NotifyStateService _notifyStateService
 
     <MudAlert Severity="Severity.Warning" Square="true" Class="my-2">Dette er en åben beta af KULiv.dk. Hvis du finder en fejl, 
         må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues</MudAlert>
@@ -105,6 +107,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await SetData();
+        _loaded = true;
+        _notifyStateService.UserChange += UserChange;
+    }
+
+    private async Task SetData()
+    {
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         user = (UserIdentity) authState.User.Identity;
@@ -114,6 +123,11 @@
         }
         guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
         _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
-        _loaded = true;
+    }
+    
+    private void UserChange(object? sender, EventArgs e)
+    {
+        SetData();
+        StateHasChanged();
     }
 }

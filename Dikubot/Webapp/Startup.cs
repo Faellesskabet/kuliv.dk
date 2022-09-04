@@ -12,7 +12,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AspNet.Security.OAuth.Discord;
 using Blazored.LocalStorage;
-using BlazorLoginDiscord.Data;
+using Data;
 using Dikubot.Webapp.Authentication;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
 using Microsoft.AspNetCore.CookiePolicy;
@@ -79,6 +79,7 @@ namespace Dikubot.Webapp
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
+            services.AddScoped<NotifyStateService>();
             
             //AddAuthentication
             services.AddSingleton<UserService>();
