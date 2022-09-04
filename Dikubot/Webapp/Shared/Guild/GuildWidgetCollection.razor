@@ -1,4 +1,5 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Microsoft.IdentityModel.Tokens
 @inject NavigationManager NavigationManager
 
@@ -7,11 +8,20 @@
         <MudItem lg="12" md="12" sm="12">
             <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
         </MudItem>
+        <MudChipSet @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
+            @foreach (var tag in _tagServices.GetAll())
+                        {
+                            //Kan ikke gøres direkte :(
+                            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+                            <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
+                        }
+        </MudChipSet>
+        
         <MudItem lg="12" md="12" sm="12">
             <MudPaper>
                 @foreach (GuildSettingsModel guild in Guilds)
                 {
-                    @if (string.IsNullOrWhiteSpace(SearchQuery) || (guild.Name?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false) || (guild.Description?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false))
+                    @if (SearchCriteria(guild))
                     {
                         <GuildWidget Guild="guild" EnableJoin="@EnableJoin"></GuildWidget>
                         <MudDivider></MudDivider>
@@ -26,6 +36,23 @@
     [Parameter] public List<GuildSettingsModel> Guilds { get; set; }
     [Parameter] public bool EnableJoin { get; set; }
     private string SearchQuery { get; set; }
+
+    private TagServices _tagServices = new TagServices();
+    
+    MudChip[] selected = new MudChip[]{};
+
+    private bool SearchCriteria(GuildSettingsModel guild)
+    {
+        HashSet<Guid> hasSelected = selected.Select(_ => (_.Value is Guid ? (Guid) _.Value : default) ).ToHashSet();
+        var hashSetGuildTag = guild.Tags;
+        
+        if (!(_tagServices.GetAll().Count == hasSelected.Count || hasSelected.Count ==0) && !hasSelected.IsSubsetOf(hashSetGuildTag) )
+        {
+            return false;
+        }
+        
+        return string.IsNullOrWhiteSpace(SearchQuery) || (guild.Name?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false) || (guild.Description?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false);
+    }
     
     private void GotoAddGuild()
     {
