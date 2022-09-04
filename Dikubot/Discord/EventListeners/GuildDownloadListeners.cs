@@ -13,7 +13,7 @@ namespace Dikubot.Discord.EventListeners
     {
         public async Task DownloadGuildOnBoot()
         {
-            foreach (SocketGuild guild in DiscordBot.Client.Guilds)
+            foreach (SocketGuild guild in DiscordBot.ClientStatic.Guilds)
             {
                 Logger.Debug($"Pulling Discord data into Database for {guild.Name} ({guild.Id.ToString()})");
                 PermissionsService permissionsService = new PermissionsService(guild);

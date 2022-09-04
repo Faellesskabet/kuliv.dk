@@ -1,0 +1,54 @@
+@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages
+@using Dikubot.Discord
+@using Data.Discord
+@using global::Discord
+@using Color = MudBlazor.Color
+@using Dikubot.DataLayer.Caching
+@inject Cache<MessageModel, IMessage> _cache
+@if (_loaded)
+{
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Image="@(_discordMessage.Author.GetAvatarUrl() ?? "")">@_discordMessage.Author.Username</MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body1" Color="Color.Primary">@_discordMessage.Author.Username</MudText>
+                <MudText Typo="Typo.body2">@_discordMessage.Timestamp.ToString()</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudIconButton Icon="@Icons.Material.Filled.ReadMore" Href="@_discordMessage.GetJumpUrl()" Color="Color.Primary"/>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.body1">@_discordMessage.Content</MudText>
+        </MudCardContent>
+    </MudCard>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public MessageModel Message { get; set; }
+    [Parameter, EditorRequired]
+    public SocketGuildDto Guild { get; set; }
+
+    private IMessage _discordMessage;
+
+    private bool _loaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!_cache.ContainsKey(Message))
+        {
+            _cache[Message] = Guild.Guild.GetTextChannel(Convert.ToUInt64(Message.ChannelId))
+                .GetMessageAsync(Convert.ToUInt64(Message.MessageId)).Result;
+        }
+        _discordMessage = _cache[Message];
+        _loaded = true;
+    }
+
+}

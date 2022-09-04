@@ -8,13 +8,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using AspNet.Security.OAuth.Discord;
 using Blazored.LocalStorage;
 using Data;
+using Dikubot.DataLayer.Caching;
+using Dikubot.DataLayer.Cronjob.Cronjobs;
+using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
+using Dikubot.Discord;
 using Dikubot.Webapp.Authentication;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
+using Discord;
+using Discord.WebSocket;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -39,6 +46,12 @@ namespace Dikubot.Webapp
         {
             
             var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
+
+            services.AddScoped<NotifyStateService>();
+            services.AddSingleton<Cache<MessageModel, IMessage>>();
+            services.AddSingleton<CacheNewsMessagesTask>();
+            
+            services.AddSingleton<DiscordBot>();
             
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
            
@@ -79,8 +92,7 @@ namespace Dikubot.Webapp
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
-            services.AddScoped<NotifyStateService>();
-            
+
             //AddAuthentication
             services.AddSingleton<UserService>();
 
@@ -108,6 +120,8 @@ namespace Dikubot.Webapp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.ApplicationServices.GetService<DiscordBot>().Run();
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
