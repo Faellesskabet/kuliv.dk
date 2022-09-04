@@ -54,14 +54,14 @@ else
             return;
         }
         
-        SocketUser socketUser = DiscordBot.Client.GetUser(_discordUser.Id);
+        SocketUser socketUser = DiscordBot.ClientStatic.GetUser(_discordUser.Id);
         _mutualGuilds = new HashSet<SocketGuild>();
         if (socketUser != null)
         {
             _mutualGuilds = socketUser.MutualGuilds.ToHashSet();   
         }
 
-        _complementGuilds = DiscordBot.Client.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => _guildSettingsService.Get(guild)).ToList();
+        _complementGuilds = DiscordBot.ClientStatic.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => _guildSettingsService.Get(guild)).ToList();
         _loaded = true;
         this.StateHasChanged();
     }

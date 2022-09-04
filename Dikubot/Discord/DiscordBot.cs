@@ -14,25 +14,34 @@ namespace Dikubot.Discord
 {
     public class DiscordBot
     {
-        public static DiscordSocketClient Client;
-        public static CommandHandler CommandHandler;
-        public static CommandService CommandService;
+        [Obsolete]
+        public static DiscordSocketClient ClientStatic;
+        [Obsolete]
+        public static CommandHandler CommandHandlerStatic;
+        [Obsolete]
+        public static CommandService CommandServiceStatic;
 
-        public void run()
+        
+        public DiscordSocketClient Client;
+        public CommandHandler CommandHandler;
+        public CommandService CommandService;
+
+        private CacheNewsMessagesTask _cacheNewsMessagesTask;
+
+        public DiscordBot(CacheNewsMessagesTask cacheNewsMessagesTask)
         {
-            Main().GetAwaiter().GetResult();
+            _cacheNewsMessagesTask = cacheNewsMessagesTask;
         }
-
+        
         private Task Log(LogMessage msg)
         {
             #if DEBUG
-            Console.WriteLine(msg.ToString());
+                Console.WriteLine(msg.ToString());
             #endif
-
             return Task.CompletedTask;
         }
 
-        public async Task Main()
+        public async Task Run()
         {
             var config = new DiscordSocketConfig()
             {
@@ -79,10 +88,14 @@ namespace Dikubot.Discord
 
             CommandHandler = new CommandHandler(CommandService, Client);
             await CommandHandler.init();
+            ClientStatic = Client;
+            CommandHandlerStatic = CommandHandler;
+            CommandServiceStatic = CommandService;
+
                 
             Scheduler scheduler = new Scheduler();
 
-            Client.Ready += () =>
+            ClientStatic.Ready += () =>
             {
                     
                 // minus 1 so it doesn't include itself (also too lazy to care about dupes)
@@ -90,10 +103,10 @@ namespace Dikubot.Discord
                 Client.SetGameAsync($"{users.ToString()} users", null, ActivityType.Watching);
                     
                 //scheduler.ScheduleTask(new UpdateUserRolesTask());
-                scheduler.ScheduleTask(new BackupDatabaseTask());
-                scheduler.ScheduleTask(new ClearExpiredSessionsTask());
-                scheduler.ScheduleTask(new ForceNameChangeTask());
-                scheduler.ScheduleTask(new UpdateVerifiedTask());
+                scheduler.ScheduleTask(new BackupDatabaseTask(), false);
+                scheduler.ScheduleTask(new ForceNameChangeTask(), false);
+                scheduler.ScheduleTask(new UpdateVerifiedTask(), true);
+                scheduler.ScheduleTask(_cacheNewsMessagesTask, true);
                 
                 // This is a legacy fix and can be removed after 1 run.
                 new FixForbiddenDuplicatesTask().Action();

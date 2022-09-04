@@ -42,7 +42,7 @@ namespace Dikubot.DataLayer.Logic.WebDiscordBridge
 
         public static SocketGuild GetGuildFromDomain(string domain)
         {
-            return DiscordBot.Client.GetGuild(DomainToDiscordId(domain));
+            return DiscordBot.ClientStatic.GetGuild(DomainToDiscordId(domain));
         }
         
     }

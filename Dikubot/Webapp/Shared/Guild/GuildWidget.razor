@@ -25,7 +25,7 @@
         </CardHeaderAvatar>
         <CardHeaderContent>
             <MudText Typo="Typo.body1">@Guild.Name</MudText>
-            <MudText Typo="Typo.body2">@DiscordBot.Client.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
+            <MudText Typo="Typo.body2">@DiscordBot.ClientStatic.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (EnableJoin)
@@ -100,7 +100,7 @@
         try
         {
             string accessToken = await userService.GetTokenAsync(httpContextAccessor.HttpContext);
-            await DiscordBot.Client.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, accessToken);
+            await DiscordBot.ClientStatic.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, accessToken);
         }
         catch (Exception e)
         {

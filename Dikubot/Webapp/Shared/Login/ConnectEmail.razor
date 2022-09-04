@@ -155,7 +155,7 @@ else
         }
         
         // null if user or no mutual guilds can be found.
-        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.Client.GetUser(user.UserGlobalModel.DiscordIdLong)?.MutualGuilds;
+        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.ClientStatic.GetUser(user.UserGlobalModel.DiscordIdLong)?.MutualGuilds;
 
         user.UserGlobalModel.Email = email;
         user.UserGlobalModel.Verified = true;

@@ -1,0 +1,35 @@
+@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News
+@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages
+@using Data.Discord
+
+@if (_loaded)
+{
+    <MudPaper Class="d-flex flex-column justify-center gap-2" Elevation="0">
+        @foreach (MessageModel message in _messages)
+        {
+            <NewsWidget Message="message" Guild="Guild"></NewsWidget>
+        }
+        @if (_messages.Count == 0)
+        {
+            <MudText Typo="Typo.h3">No news available</MudText>
+        }
+    </MudPaper>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public SocketGuildDto Guild { get; set; }
+    private List<MessageModel> _messages;
+    private bool _loaded;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _messages = new NewsServices(Guild.Guild).Get(10, model => model.TimeStamp);
+        _loaded = true;
+    }  
+
+}
