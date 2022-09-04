@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using BlazorLoginDiscord.Data;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Static;
+using Dikubot.Discord;
+using Discord.WebSocket;
+using Dikubot.DataLayer.Database.Guild.Models.Guild;
+using Dikubot.DataLayer.Database.Guild.Models.User;
 
 namespace Dikubot.Webapp.Authentication
 {
@@ -79,5 +84,50 @@ namespace Dikubot.Webapp.Authentication
         /// Get the SessionModel
         /// </summary>
         public UserService.DiscordUserClaim DiscordUserClaim => _discordUserClaim;
+        
+        
+        /// <summary>
+        /// Get all Guild the user have joined
+        /// </summary>
+        public IReadOnlyCollection<SocketGuild> GetJoinedGuilds()
+        {
+            return DiscordBot.Client.GetUser(this.UserGlobalModel.DiscordIdLong).MutualGuilds;
+            
+        }
+
+        /// <summary>
+        /// Get all guid for roles the user have
+        /// </summary>
+        public HashSet<Guid> GetRolesGuid()
+        {
+            return GetRolesGuid(this.UserGlobalModel.SelectedGuild);
+        }
+        public HashSet<Guid> GetRolesGuid(ulong guildId)
+        {
+            var guild = DiscordBot.Client.GetGuild(guildId);
+            return GetRolesGuid(guild);
+        }
+        
+        public HashSet<Guid> GetRolesGuid(SocketGuild guild)
+        {
+            UserGuildServices userGuildServices = new UserGuildServices(guild);
+            return userGuildServices
+                .Get(model => model.DiscordId.Equals(this.DiscordId))
+                .Roles.Select(model => model.RoleId)
+                .ToHashSet();
+        }
+        
+
+        /// <summary>
+        /// Get all guid for roles the user have
+        /// </summary>
+        public string DiscordId => this.UserGlobalModel.DiscordId;
+        
+        /// <summary>
+        /// Get all guid for roles the user have
+        /// </summary>
+        public ulong DiscordIdLong => this.UserGlobalModel.DiscordIdLong;
+
+        
     }
 }
