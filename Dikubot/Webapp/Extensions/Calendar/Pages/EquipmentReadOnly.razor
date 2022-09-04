@@ -95,7 +95,7 @@
         {
             return;
         }
-        guild = DiscordBot.Client.GetGuild(GuildId);
+        guild = DiscordBot.ClientStatic.GetGuild(GuildId);
         _calendarServices = new CalendarServices(guild);
         _equipmentServices = new EquipmentServices(guild);
         

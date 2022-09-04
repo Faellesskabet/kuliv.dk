@@ -22,10 +22,10 @@ namespace Dikubot.DataLayer.Caching
         /// Initialize a cache. Cached items will be cached for at least swap minutes, and at most 2 times swap minutes
         /// </summary>
         /// <param name="swap">Cached items will be cached for at least swap minutes, and at most 2 times swap minutes</param>
-        public Cache(int minuteSwap)
+        public Cache()
         {
-            _swap = minuteSwap;
-            _cronTask = new CronTask(CronExpression.Parse($"*/{minuteSwap} * * * *"), Swap);
+            _swap = 30;
+            _cronTask = new CronTask(CronExpression.Parse($"*/{_swap} * * * *"), Swap);
 
         }
         
