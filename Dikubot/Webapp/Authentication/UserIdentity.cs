@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using BlazorLoginDiscord.Data;
+using Data;
+using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Static;
@@ -16,6 +17,7 @@ namespace Dikubot.Webapp.Authentication
     public sealed class UserIdentity : ClaimsIdentity
     {
         private readonly UserService.DiscordUserClaim _discordUserClaim;
+        private GuildSettingsService _guildSettingsService;
 
         /// <summary>
         /// Empty UserIdentity
@@ -33,6 +35,8 @@ namespace Dikubot.Webapp.Authentication
         {
             _discordUserClaim = discordUserClaim;
             UserGlobalModel = new UserGlobalServices().Get(discordUserClaim.UserId);
+            _guildSettingsService = new GuildSettingsService();
+
             if (UserGlobalModel == null)
             {
                 return;
@@ -71,7 +75,9 @@ namespace Dikubot.Webapp.Authentication
         /// </summary>
         public override bool IsAuthenticated =>
             UserGlobalModel?.DiscordId != null && UserGlobalModel.Verified && UserGlobalModel.Name != null &&
-            _discordUserClaim != null && _discordUserClaim.UserId != 0 && !UserGlobalModel.IsBanned && UserGlobalModel.SelectedGuild != 0;
+            _discordUserClaim != null && _discordUserClaim.UserId != 0 && !UserGlobalModel.IsBanned
+            && UserGlobalModel.SelectedGuild != 0 &&
+            DiscordBot.Client.Guilds.Any(guild => guild.Id == UserGlobalModel.SelectedGuild);
 
         public string Name => UserGlobalModel == null ? "Intet navn" : UserGlobalModel.Name;
 

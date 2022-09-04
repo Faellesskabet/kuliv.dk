@@ -7,6 +7,7 @@
 @using MudBlazor.Utilities
 @using Dikubot.Webapp.Extensions.NavMenu
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NotifyStateService _notifyStateService
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
@@ -50,7 +51,13 @@
     {
         NavColor = GetColor().Value;
         NavTextColor = GetTextColor().Value;
-        
+        await SetData();
+        _loaded = true;
+        _notifyStateService.UserChange += UserChange;
+    }
+
+    private async Task SetData()
+    {
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         user = (UserIdentity) authState.User.Identity;
@@ -60,9 +67,14 @@
         }
         guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
         _guildSettingsModel = new GuildSettingsService().Get(model => model.GuildId == user.UserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
-        _loaded = true;
     }
-
+    
+    private void UserChange(object? sender, EventArgs e)
+    {
+        SetData();
+        StateHasChanged();
+    }
+    
     void ToggleDrawer()
     {
         open = !open;
