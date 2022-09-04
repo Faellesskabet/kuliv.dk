@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Dikubot.DataLayer.Database;
 using Dikubot.DataLayer.Database.Global.Settings.Tags;
 using Discord.WebSocket;
@@ -87,12 +89,25 @@ public class GuildSettingsModel : MainModel
     /// </summary>
     [BsonElement("WelcomeMessage")] [StringLength(4096)]
     public string WelcomeMessage { get; set; }
-    
+
     /// <summary>
     /// The tags associated with the guild. They're used for searching and filtering
     /// </summary>
     [BsonElement("Tags")]
-    public List<TagsMainModel> Tags { get; set; }
+    public HashSet<Guid> Tags { get; set; } = new HashSet<Guid>();
+    
+    [BsonIgnore]
+    public IEnumerable<Guid> TagsEnumerable { get => Tags; set => Tags = new HashSet<Guid>(value); }
+
+    public List<TagsMainModel> GetTags()
+    {
+        return GetTags(new TagServices());
+    }
+    public List<TagsMainModel> GetTags(TagServices services)
+    {
+        return Tags.Select(t => services.Get(t)).ToList();
+    }
+    
     
     /// <summary>
     /// Indicates whether the guild accept support tickets.
