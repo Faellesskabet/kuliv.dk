@@ -30,7 +30,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
         public HashSet<Guid> Tags { get; set; }
 
         
-        public List<TagsMainModel> getTags()
+        public List<TagsMainModel> GetTags()
         {
             var tagSevice = new TagServices();
             return Tags.Select(t => tagSevice.Get(t)).ToList();
