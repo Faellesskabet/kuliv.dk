@@ -87,7 +87,7 @@ else
         {
             return;
         }
-        guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
+        guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
         _guildSettingsService = new GuildSettingsService();
         _guildSettingsModel = _guildSettingsService.Get(guild);
         _loaded = true;

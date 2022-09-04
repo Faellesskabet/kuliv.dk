@@ -55,7 +55,7 @@ namespace Dikubot.Webapp.Authentication
         
         private async Task<SocketGuild> GetSocketGuild(UserGlobalModel user)
         {
-            return user == null ? null : DiscordBot.Client.GetGuild(user.SelectedGuild);
+            return user == null ? null : DiscordBot.ClientStatic.GetGuild(user.SelectedGuild);
         }
 
         /// <summary>

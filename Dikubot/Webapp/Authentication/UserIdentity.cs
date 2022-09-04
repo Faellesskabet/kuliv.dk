@@ -77,7 +77,7 @@ namespace Dikubot.Webapp.Authentication
             UserGlobalModel?.DiscordId != null && UserGlobalModel.Verified && UserGlobalModel.Name != null &&
             _discordUserClaim != null && _discordUserClaim.UserId != 0 && !UserGlobalModel.IsBanned
             && UserGlobalModel.SelectedGuild != 0 &&
-            DiscordBot.Client.Guilds.Any(guild => guild.Id == UserGlobalModel.SelectedGuild);
+            DiscordBot.ClientStatic.Guilds.Any(guild => guild.Id == UserGlobalModel.SelectedGuild);
 
         public string Name => UserGlobalModel == null ? "Intet navn" : UserGlobalModel.Name;
 
@@ -97,7 +97,7 @@ namespace Dikubot.Webapp.Authentication
         /// </summary>
         public IReadOnlyCollection<SocketGuild> GetJoinedGuilds()
         {
-            return DiscordBot.Client.GetUser(this.UserGlobalModel.DiscordIdLong).MutualGuilds;
+            return DiscordBot.ClientStatic.GetUser(this.UserGlobalModel.DiscordIdLong).MutualGuilds;
             
         }
 
@@ -110,7 +110,7 @@ namespace Dikubot.Webapp.Authentication
         }
         public HashSet<Guid> GetRolesGuid(ulong guildId)
         {
-            var guild = DiscordBot.Client.GetGuild(guildId);
+            var guild = DiscordBot.ClientStatic.GetGuild(guildId);
             return GetRolesGuid(guild);
         }
         

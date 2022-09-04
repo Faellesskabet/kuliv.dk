@@ -65,7 +65,7 @@ else
             return;
         }
         
-        _guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
+        _guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
         _textChannelServices = new TextChannelServices(_guild);
         _textChannelMainModels = _textChannelServices.GetAll();
         _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel.GetValueOrDefault());

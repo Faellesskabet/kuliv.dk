@@ -60,7 +60,7 @@
             return;
         }
         _userGlobalModel = user.UserGlobalModel;
-        guild = DiscordBot.Client.GetGuild(_userGlobalModel.SelectedGuild);
+        guild = DiscordBot.ClientStatic.GetGuild(_userGlobalModel.SelectedGuild);
         _joinRoleServices = new JoinRoleServices(guild);
         _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
         _userGuildServices = new UserGuildServices(guild);
