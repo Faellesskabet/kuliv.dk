@@ -11,12 +11,13 @@ using Dikubot.Discord;
 using Discord.WebSocket;
 using Dikubot.DataLayer.Database.Guild.Models.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.User;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
 
 namespace Dikubot.Webapp.Authentication
 {
     public sealed class UserIdentity : ClaimsIdentity
     {
-        private readonly UserService.DiscordUserClaim _discordUserClaim;
+        private readonly DiscordUserClaim _discordUserClaim;
         private GuildSettingsService _guildSettingsService;
 
         /// <summary>
@@ -31,7 +32,7 @@ namespace Dikubot.Webapp.Authentication
         /// Creates a UserIdentity from a DiscordUserClaim
         /// </summary>
         /// <param name="discordUserClaim"></param>
-        public UserIdentity(UserService.DiscordUserClaim discordUserClaim)
+        public UserIdentity(DiscordUserClaim discordUserClaim)
         {
             _discordUserClaim = discordUserClaim;
             UserGlobalModel = new UserGlobalServices().Get(discordUserClaim.UserId);
@@ -89,7 +90,7 @@ namespace Dikubot.Webapp.Authentication
         /// <summary>
         /// Get the SessionModel
         /// </summary>
-        public UserService.DiscordUserClaim DiscordUserClaim => _discordUserClaim;
+        public DiscordUserClaim DiscordUserClaim => _discordUserClaim;
         
         
         /// <summary>

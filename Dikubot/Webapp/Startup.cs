@@ -91,10 +91,10 @@ namespace Dikubot.Webapp
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
+            
+            // Authentication
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
-
-            //AddAuthentication
-            services.AddSingleton<UserService>();
+            services.AddScoped<UserService>();
 
             services.AddAuthentication(options =>
                 {
