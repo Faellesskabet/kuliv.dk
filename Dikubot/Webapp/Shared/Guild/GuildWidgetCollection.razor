@@ -1,40 +1,39 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Microsoft.IdentityModel.Tokens
+@using Data.Discord
 @inject NavigationManager NavigationManager
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="align-content-md-center align-items-center">
-    <MudGrid Justify="Justify.Center">
-        <MudItem lg="12" md="12" sm="12">
-            <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
-        </MudItem>
-        <MudChipSet @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
-            @foreach (var tag in _tagServices.GetAll())
-                        {
-                            //Kan ikke gøres direkte :(
-                            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
-                            <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
-                        }
-        </MudChipSet>
-        
-        <MudItem lg="12" md="12" sm="12">
-            <MudPaper>
-                @foreach (GuildSettingsModel guild in Guilds)
-                {
-                    @if (SearchCriteria(guild))
-                    {
-                        <GuildWidget Guild="guild" EnableJoin="@EnableJoin"></GuildWidget>
-                        <MudDivider></MudDivider>
-                    }
-                }
-                <MudButton Color="Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
-</MudContainer>
+
+<MudGrid Justify="Justify.Center">
+    <MudItem lg="12" md="12" sm="12">
+        <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
+    </MudItem>
+    <MudChipSet @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
+        @foreach (var tag in _tagServices.GetAll())
+        {
+            //Kan ikke gøres direkte :(
+            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+            <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
+        }
+    </MudChipSet>
+</MudGrid>
+
+<div class="d-flex flex-row gap-16 justify-center flex-wrap" style="margin-top: 20px; max-width: 90%; min-width: 90%;
+margin-left: auto; margin-right: auto;">
+    @foreach (GuildWidgetDto guild in Guilds)
+    {
+        @if (SearchCriteria(guild.GuildSettingsModel))
+        {
+            <GuildWidget GuildWidgetDto="guild"></GuildWidget>
+        }
+    }
+</div>
+
+<MudButton Color="Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
+
 @code {
-    [Parameter] public List<GuildSettingsModel> Guilds { get; set; }
-    [Parameter] public bool EnableJoin { get; set; }
+    [Parameter] public List<GuildWidgetDto> Guilds { get; set; }
     private string SearchQuery { get; set; }
 
     private TagServices _tagServices = new TagServices();
@@ -57,7 +56,6 @@
     private void GotoAddGuild()
     {
         NavigationManager.NavigateTo("/addguild");
-        
     }
     
     
