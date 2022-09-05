@@ -9,6 +9,7 @@ using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Logic.WebDiscordBridge;
 using Dikubot.Discord;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
@@ -23,13 +24,11 @@ namespace Dikubot.Webapp.Authentication
     public class Authenticator : AuthenticationStateProvider
     {
         private IHttpContextAccessor _httpContextAccssor;
-        private UserService _userService;
         private SocketGuild _guild;
 
         public Authenticator(IHttpContextAccessor httpContextAccssor)
         {
             _httpContextAccssor = httpContextAccssor;
-            _userService = new UserService();
         }
         
         /// <summary>
@@ -45,6 +44,22 @@ namespace Dikubot.Webapp.Authentication
         }
         
         /// <summary>
+        /// Gets the user's discord oauth2 access token
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <returns></returns>
+        public async Task<string> GetTokenAsync()
+        {
+            if (!_httpContextAccssor.HttpContext.User.Identity.IsAuthenticated)
+            {
+                return null;
+            }
+
+            var tk = await _httpContextAccssor.HttpContext.GetTokenAsync("Discord", "access_token");
+            return tk;
+        }
+        
+        /// <summary>
         /// Get SocketGuild of the current session
         /// </summary>
         /// <returns></returns>
@@ -55,7 +70,7 @@ namespace Dikubot.Webapp.Authentication
         
         private async Task<SocketGuild> GetSocketGuild(UserGlobalModel user)
         {
-            return user == null ? null : DiscordBot.Client.GetGuild(user.SelectedGuild);
+            return user == null ? null : DiscordBot.ClientStatic.GetGuild(user.SelectedGuild);
         }
 
         /// <summary>
@@ -72,13 +87,45 @@ namespace Dikubot.Webapp.Authentication
             return new GuildSettingsService().Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
         }
 
-        private UserService.DiscordUserClaim GetDiscordUserClaim()
+        private DiscordUserClaim GetDiscordUserClaim()
         {
             if (_httpContextAccssor.HttpContext == null)
             {
                 return null;
             }
-            return _userService.GetInfo(_httpContextAccssor.HttpContext);
+            return GetInfo(_httpContextAccssor.HttpContext);
+        }
+        
+        
+        public DiscordUserClaim GetInfo(HttpContext httpContext)
+        {
+            if (!httpContext.User.Identity?.IsAuthenticated ?? false)
+            {
+                return null;
+            }
+
+            var claims = httpContext.User.Claims;
+            bool? verified;
+            if (bool.TryParse(claims.FirstOrDefault(x => x.Type == "urn:discord:verified")?.Value, out var _verified))
+            {
+                verified = _verified;
+            }
+            else
+            {
+                verified = null;
+            }
+            
+            var userClaim = new DiscordUserClaim
+            {
+                UserId = ulong.Parse(claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value),
+                Name = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value,
+                Discriminator = claims.FirstOrDefault(x => x.Type == "urn:discord:discriminator")?.Value,
+                Avatar = claims.FirstOrDefault(x => x.Type == "urn:discord:avatar")?.Value,
+                Email = claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value,
+                Verified = verified
+            };
+
+            return userClaim;
         }
 
         /// <summary>
@@ -88,7 +135,7 @@ namespace Dikubot.Webapp.Authentication
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             
-            UserService.DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
+            DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
             if (discordUserClaim == null)
             {
                 //Returns an empty UserIdentity, meaning the user isn't authorized to do anything
@@ -107,7 +154,7 @@ namespace Dikubot.Webapp.Authentication
         /// <returns>Task</returns>
         public async Task UpdateSession()
         {
-            UserService.DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
+            DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
             UserIdentity userIdentity =
                 discordUserClaim == null ? new UserIdentity() : new UserIdentity(discordUserClaim);
             NotifyAuthenticationStateChanged(

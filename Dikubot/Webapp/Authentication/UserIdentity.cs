@@ -11,12 +11,13 @@ using Dikubot.Discord;
 using Discord.WebSocket;
 using Dikubot.DataLayer.Database.Guild.Models.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.User;
+using Dikubot.Webapp.Authentication.Discord.OAuth2;
 
 namespace Dikubot.Webapp.Authentication
 {
     public sealed class UserIdentity : ClaimsIdentity
     {
-        private readonly UserService.DiscordUserClaim _discordUserClaim;
+        private readonly DiscordUserClaim _discordUserClaim;
         private GuildSettingsService _guildSettingsService;
 
         /// <summary>
@@ -31,7 +32,7 @@ namespace Dikubot.Webapp.Authentication
         /// Creates a UserIdentity from a DiscordUserClaim
         /// </summary>
         /// <param name="discordUserClaim"></param>
-        public UserIdentity(UserService.DiscordUserClaim discordUserClaim)
+        public UserIdentity(DiscordUserClaim discordUserClaim)
         {
             _discordUserClaim = discordUserClaim;
             UserGlobalModel = new UserGlobalServices().Get(discordUserClaim.UserId);
@@ -77,7 +78,7 @@ namespace Dikubot.Webapp.Authentication
             UserGlobalModel?.DiscordId != null && UserGlobalModel.Verified && UserGlobalModel.Name != null &&
             _discordUserClaim != null && _discordUserClaim.UserId != 0 && !UserGlobalModel.IsBanned
             && UserGlobalModel.SelectedGuild != 0 &&
-            DiscordBot.Client.Guilds.Any(guild => guild.Id == UserGlobalModel.SelectedGuild);
+            DiscordBot.ClientStatic.Guilds.Any(guild => guild.Id == UserGlobalModel.SelectedGuild);
 
         public string Name => UserGlobalModel == null ? "Intet navn" : UserGlobalModel.Name;
 
@@ -89,7 +90,7 @@ namespace Dikubot.Webapp.Authentication
         /// <summary>
         /// Get the SessionModel
         /// </summary>
-        public UserService.DiscordUserClaim DiscordUserClaim => _discordUserClaim;
+        public DiscordUserClaim DiscordUserClaim => _discordUserClaim;
         
         
         /// <summary>
@@ -97,7 +98,7 @@ namespace Dikubot.Webapp.Authentication
         /// </summary>
         public IReadOnlyCollection<SocketGuild> GetJoinedGuilds()
         {
-            return DiscordBot.Client.GetUser(this.UserGlobalModel.DiscordIdLong).MutualGuilds;
+            return DiscordBot.ClientStatic.GetUser(this.UserGlobalModel.DiscordIdLong).MutualGuilds;
             
         }
 
@@ -110,7 +111,7 @@ namespace Dikubot.Webapp.Authentication
         }
         public HashSet<Guid> GetRolesGuid(ulong guildId)
         {
-            var guild = DiscordBot.Client.GetGuild(guildId);
+            var guild = DiscordBot.ClientStatic.GetGuild(guildId);
             return GetRolesGuid(guild);
         }
         
