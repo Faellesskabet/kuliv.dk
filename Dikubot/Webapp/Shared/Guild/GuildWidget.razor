@@ -11,15 +11,26 @@
 @inject IHttpContextAccessor httpContextAccessor;
 @inject UserService _userService
 @using Syncfusion.Blazor.Buttons
+@using Data.Discord
 
-<MudCard Elevation="25">
-@foreach (var tag in Guild.GetTags())
-                    {
-                        //Kan ikke gøres direkte :(
-                        string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
-                        <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
-                    }
-    <MudCardHeader>
+<MudCard Elevation="25" Style="min-width: 420px; max-width: 420px; max-height: 340px; min-height: 340px;">
+        @if (!@Guild.BannerUrl.IsNullOrEmpty())
+        {
+            <MudCardMedia Image="@Guild.BannerUrl" Style="object-fit: cover; height: 60px; min-height: 60px; width: 100%;"/>
+        }
+        else
+        {
+            <MudCardMedia Image="../images/placeholder-banner.png" Style="object-fit: cover; height: 60px; min-height: 60px; width: 100%;"/>
+        }
+        <div style="min-height: 28px; max-height: 28px;" class="d-flex justify-start flex-wrap overflow-scroll">
+            @foreach (var tag in Guild.GetTags())
+            {
+                    //Kan ikke gøres direkte :(
+                string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+                <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
+            }
+        </div>
+        <MudCardHeader>
         <CardHeaderAvatar>
             <MudAvatar Image="@Guild.LogoUrl"></MudAvatar>
         </CardHeaderAvatar>
@@ -27,33 +38,28 @@
             <MudText Typo="Typo.body1">@Guild.Name</MudText>
             <MudText Typo="Typo.body2">@DiscordBot.ClientStatic.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
         </CardHeaderContent>
-        <CardHeaderActions>
-            @if (EnableJoin)
-            {
-                <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@JoinGuild">Join fællesskab</MudButton>
-            }
-            else
-            {
-                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@GotoGuild">Gå til side</MudButton>
-            }
-
-        </CardHeaderActions>
     </MudCardHeader>
-    @if (!@Guild.BannerUrl.IsNullOrEmpty())
-    {
-        <MudCardMedia Image="@Guild.BannerUrl" Height="250" />
-    }
-    <MudCardContent Style="max-height: 200px; overflow: scroll;">
+    <MudCardContent Style="max-height: 27%; min-height: 27%; overflow: scroll;">
         <MudText>@Guild.Description</MudText>
     </MudCardContent>
     <MudCardActions>
+        @if (GuildWidgetDto.IsUserMember)
+        {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@GotoGuild">Gå til side</MudButton>
+        }
+        else
+        {
+            <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@JoinGuild">Join fællesskab</MudButton>
+        }
     </MudCardActions>
 </MudCard>
 
+
 @code {
     [Inject] private IDialogService DialogService { get; set; }
-    [Parameter] public GuildSettingsModel Guild { get; set; }
-    [Parameter] public bool EnableJoin { get; set; }
+    [Parameter] public GuildWidgetDto GuildWidgetDto { get; set; }
+    
+    public GuildSettingsModel Guild{get => GuildWidgetDto.GuildSettingsModel;}
 
     private async Task GotoGuild()
     {

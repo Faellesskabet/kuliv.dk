@@ -5,11 +5,10 @@
 @using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.Discord
 @using Dikubot.Webapp.Pages
+@using Data.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime;
 
-
-<link href="css/diku/selectguild.css" rel="stylesheet"/>
 @if (!_loaded)
 {
     <Loading/>
@@ -17,12 +16,7 @@
 else
 {
     <h1>Dine fællesskaber:</h1>
-    <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList()"></GuildWidgetCollection>
-    @if (_complementGuilds.Count > 0)
-    {
-        <h1 class="other-communities">Udforsk andre fællesskaber:</h1>
-        <GuildWidgetCollection Guilds="_complementGuilds" EnableJoin="true"></GuildWidgetCollection>
-    }
+    <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList().Concat(_complementGuilds).ToList()"></GuildWidgetCollection>
 }
 @code {
     [Parameter]
@@ -32,7 +26,7 @@ else
     private Authenticator _authenticator;
     private UserIdentity _user;
     private HashSet<SocketGuild> _mutualGuilds; // we use a hashmap because it's faster:)
-    private List<GuildSettingsModel> _complementGuilds; // guilds that are not mutual
+    private List<GuildWidgetDto> _complementGuilds; // guilds that are not mutual
     private IUser _discordUser;
     private GuildSettingsService _guildSettingsService = new GuildSettingsService();
     private string _mutualSearchQuery = "";
@@ -61,15 +55,15 @@ else
             _mutualGuilds = socketUser.MutualGuilds.ToHashSet();   
         }
 
-        _complementGuilds = DiscordBot.ClientStatic.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => _guildSettingsService.Get(guild)).ToList();
+        _complementGuilds = DiscordBot.ClientStatic.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => new GuildWidgetDto(_guildSettingsService.Get(guild), false)).ToList();
         _loaded = true;
         this.StateHasChanged();
     }
 
-    private GuildSettingsModel SocketToModelGuild(SocketGuild guild)
+    private GuildWidgetDto SocketToModelGuild(SocketGuild guild)
     {
         GuildSettingsService guildSettingsService = new GuildSettingsService();
         GuildSettingsModel guildSettingsModel = guildSettingsService.Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
-        return guildSettingsModel;
+        return new GuildWidgetDto(guildSettingsModel, true);
     }
 }
