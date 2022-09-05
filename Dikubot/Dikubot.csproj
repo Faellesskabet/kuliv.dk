@@ -60,6 +60,7 @@
   <ItemGroup>
     <Folder Include="DataLayer\Database\Global\GlobalSettings" />
     <Folder Include="DataLayer\Database\Global\Settings" />
+    <Folder Include="Webapp\Extensions\Sponsorater" />
     <Folder Include="Webapp\wwwroot\js" />
   </ItemGroup>
   
