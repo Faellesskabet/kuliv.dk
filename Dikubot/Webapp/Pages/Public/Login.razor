@@ -10,7 +10,7 @@
 
 <link rel="stylesheet" href="css/diku/login.css"/>
 <div class="d-flex align-center gap-8 flex-column justify-center" 
-     style="height: 75vh; margin-left: 5%; margin-right: 5%;">
+     style="margin-left: 5%; margin-right: 5%; margin-top: 5vh;">
     <div class="flex-grow-0" style="margin-top: 10px;">
         <MudText Typo="Typo.h2" Style="color: #c43a3f;">kuliv.dk</MudText>
         <MudText Typo="Typo.body1">A hub of Discord communities for The University of Copenhagen</MudText>
@@ -78,7 +78,7 @@
             _httpContextAccessor.HttpContext.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
         }
         _state = await getState();
-        _growState = _state == State.SelectGuild ? "flex-grow-1 overflow-auto" : "flex-grow-0 overflow-auto";
+        _growState = _state == State.SelectGuild ? "flex-grow-1" : "flex-grow-0";
     }
 
     private async Task<State> getState()
