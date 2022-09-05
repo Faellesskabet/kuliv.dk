@@ -1,9 +1,10 @@
 @page "/"
 @using Dikubot.Webapp.Authentication
-@using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.Discord
-@using Data
+@using Dikubot.Webapp.Shared.News
+@using global::Discord.WebSocket
+@using Data.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService
 
@@ -81,7 +82,9 @@
             </MudCard>
         </MudItem>
         <MudItem xs="12" sm="8" md="8">
-            <MudPaper Style="height: 100%"></MudPaper>
+            <MudPaper Style="max-height: 708px; min-height: 708px;" Class="overflow-scroll">
+                <NewsList Guild="new SocketGuildDto(guild)"></NewsList>
+            </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="4">
             <MudGrid>
@@ -121,7 +124,7 @@
         {
             return;
         }
-        guild = DiscordBot.Client.GetGuild(user.UserGlobalModel.SelectedGuild);
+        guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
         _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
     }
     

@@ -20,7 +20,7 @@ public class UpdateVerifiedTask : CronTask
     private static void Update()
     {
         Logger.Debug("Updating all verified user roles");
-        foreach (var guild in DiscordBot.Client.Guilds)
+        foreach (var guild in DiscordBot.ClientStatic.Guilds)
         {
             PermissionsService permissionsService = new PermissionsService(guild);
             UserGuildServices userGuildServices = new UserGuildServices(guild);

@@ -104,14 +104,17 @@ namespace Dikubot.DataLayer.Database
 
             return null;
         }
-
+        
         /// <summary>
         /// Get the nth first elements.
         /// </summary>
         /// <param name="count">The maximal amount of elements that will be returned.</param>
         /// <returns></returns>
         public List<TModel> Get(int count) =>
-            Get(_ => true, count, 0);
+            Get(_ => true, count, 0, null);
+        
+        public List<TModel> Get(int count, Expression<Func<TModel, object>> sortBy) =>
+            Get(_ => true, count, 0, sortBy);
 
         /// <summary>
         /// Get the nth first element of page count. The pages have the size of count. So if page = 3, and count = 10, then it'll skip the 30 first elements.
@@ -120,7 +123,10 @@ namespace Dikubot.DataLayer.Database
         /// <param name="page">The page specifies how many elements will be skipped. Page size is page number multiplied by count.</param>
         /// <returns></returns>
         public List<TModel> Get(int count, int page) =>
-            Get(_ => true, count, page);
+            Get(_ => true, count, page, null);
+        
+        public List<TModel> Get(int count, int page, Expression<Func<TModel, object>> sortBy) =>
+            Get(_ => true, count, page, sortBy);
 
         /// <summary>
         /// Get the nth first elements that matches the filter.
@@ -130,7 +136,10 @@ namespace Dikubot.DataLayer.Database
         /// <param name="count">The maximal amount of elements that will be returned. The method will only return as many elements as fit the filter.</param>
         /// <returns></returns>
         public List<TModel> Get(Expression<Func<TModel, bool>> filter, int count) => 
-            Get(filter, count, 0);
+            Get(filter, count, 0, null);
+        
+        public List<TModel> Get(Expression<Func<TModel, bool>> filter, int count, Expression<Func<TModel, object>> sortBy) => 
+            Get(filter, count, 0, sortBy);
 
         /// <summary>
         /// Get the nth first element of page count that matches the filter.
@@ -141,10 +150,16 @@ namespace Dikubot.DataLayer.Database
         /// <param name="count">The maximal amount of elements that will be returned. The method will only return as many elements as fit the filter.</param>
         /// <param name="page">The page specifies how many elements will be skipped. Page size is page number multiplied by count.</param>
         /// <returns></returns>
-        public List<TModel> Get(Expression<Func<TModel, bool>> filter, int count, int page)
+        public List<TModel> Get(Expression<Func<TModel, bool>> filter, int count, int page) =>
+            Get(filter, count, page, null);
+        public List<TModel> Get(Expression<Func<TModel, bool>> filter, int count, int page, Expression<Func<TModel, object>> sortBy)
         {
             try
             {
+                if (sortBy != null)
+                {
+                    return _models.Find(filter).SortByDescending(sortBy).Skip(count * page).Limit(count).ToList();
+                }
                 return _models.Find(filter).Skip(count * page).Limit(count).ToList();
             }
             catch (Exception e)

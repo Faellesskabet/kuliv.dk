@@ -6,10 +6,10 @@
 @using Dikubot.Webapp.Authentication
 @using Microsoft.AspNetCore.Http
 @using Microsoft.IdentityModel.Tokens
-@using Data
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor httpContextAccessor;
+@inject UserService _userService
 @using Syncfusion.Blazor.Buttons
 
 <MudCard Elevation="25">
@@ -25,7 +25,7 @@
         </CardHeaderAvatar>
         <CardHeaderContent>
             <MudText Typo="Typo.body1">@Guild.Name</MudText>
-            <MudText Typo="Typo.body2">@DiscordBot.Client.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
+            <MudText Typo="Typo.body2">@DiscordBot.ClientStatic.GetGuild(Guild.GuildId).MemberCount Medlemmere</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (EnableJoin)
@@ -83,9 +83,7 @@
             await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
-
-
-        UserService userService = new UserService();
+        
         
         bool? result = await DialogService.ShowMessageBox(
             "Bekræft", 
@@ -99,8 +97,8 @@
         
         try
         {
-            string accessToken = await userService.GetTokenAsync(httpContextAccessor.HttpContext);
-            await DiscordBot.Client.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, accessToken);
+            string accessToken = await _userService.GetTokenAsync();
+            await DiscordBot.ClientStatic.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, accessToken);
         }
         catch (Exception e)
         {

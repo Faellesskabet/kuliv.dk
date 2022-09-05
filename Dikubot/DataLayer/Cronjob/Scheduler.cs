@@ -17,15 +17,20 @@ namespace Dikubot.DataLayer.Cronjob
         /// <param name="action"></param>
         public void ScheduleTask(CronExpression cronExpression, Action action)
         {
-            ScheduleTask(new CronTask(cronExpression, action));
+            ScheduleTask(new CronTask(cronExpression, action), false);
         }
         
         /// <summary>
         /// Adds a CronTask to the Scheduler
         /// </summary>
         /// <param name="task">The CronTask that will be added</param>
-        public void ScheduleTask(CronTask task)
+        /// <param name="runInitially">Should it run when started too</param>
+        public void ScheduleTask(CronTask task, bool runInitially)
         {
+            if (runInitially)
+            {
+                task.Action.Invoke();
+            }
             Timer timer = new Timer();
             timer.Elapsed += (sender, args) =>
             {

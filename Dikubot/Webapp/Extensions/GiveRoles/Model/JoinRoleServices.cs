@@ -15,7 +15,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.JoinRole
         {
         }
         
-        public JoinRoleServices(string guidId) : base("JoinRole", DiscordBot.Client.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
+        public JoinRoleServices(string guidId) : base("JoinRole", DiscordBot.ClientStatic.Guilds?.FirstOrDefault(g => g.Id.ToString().Equals(guidId)))
         {
         }
         
