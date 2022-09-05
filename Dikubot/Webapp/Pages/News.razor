@@ -1,6 +1,26 @@
+@using Dikubot.Webapp.Shared.News
+@using global::Discord.WebSocket
+@using Data.Discord
+@inject UserService _userService;
 @page "/news"
-<h3>News</h3>
+
+<MudText Typo="Typo.h3">Nyheder</MudText>
+@if (_loaded)
+{
+    <NewsList Guild="@(new SocketGuildDto(_guild))"></NewsList>
+}
+else
+{
+    <Loading></Loading>
+}
 
 @code {
+    private bool _loaded;
+    private SocketGuild _guild;
     
+    protected override async Task OnInitializedAsync()
+    {
+        _guild = _userService.getGuild();
+        _loaded = true;
+    }
 }
