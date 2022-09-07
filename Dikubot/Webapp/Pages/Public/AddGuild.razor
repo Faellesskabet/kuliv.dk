@@ -13,7 +13,7 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.Discord
 @using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
-
+@inject UserService _userService;
 
 @if (!_loading)
 {
@@ -62,18 +62,17 @@ Vi tager backup af vores database, og hvis din server er i vores backup, vil den
     public string permissions { get; set; } = "";
     private string error { get; set; } = "";
     private string error_description { get; set; } = "";
-
-    private UserIdentity user;
+    
     private Authenticator authenticator;
 
     
     protected override async void OnInitialized()
     {
+
+
+        var test = _userService?.IsRegistered() ?? false;
         
-        authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity) authState.User.Identity;
-        if (user == null || !user.IsAuthenticated )
+        if (!_userService?.IsRegistered() ?? true)
         {
             _navigationManager.NavigateTo("/", forceLoad:true);
             return;
@@ -105,10 +104,11 @@ Vi tager backup af vores database, og hvis din server er i vores backup, vil den
     private async Task GoToAdminSetting()
     {
         var authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
         
-        if (guild_id != null) user.UserGlobalModel.SelectedGuild = Convert.ToUInt64(guild_id);
-        new UserGlobalServices().Upsert(user.UserGlobalModel);
+        var user = _userService.GetUserGlobalModel();
+        if (guild_id != null) user.SelectedGuild = Convert.ToUInt64(guild_id);
+        
+        new UserGlobalServices().Upsert(user);
         await authenticator.UpdateSession();
         
         _navigationManager.NavigateTo("/admin/settings", forceLoad:true);
