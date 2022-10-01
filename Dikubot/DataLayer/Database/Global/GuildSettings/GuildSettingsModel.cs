@@ -91,6 +91,18 @@ public class GuildSettingsModel : MainModel
     public string WelcomeMessage { get; set; }
 
     /// <summary>
+    /// Facebook Side, some uniouns still use a facebook side :(
+    /// </summary>
+    [BsonElement("FacebookUrl")]
+    public string FacebookUrl { get; set; }
+    
+    /// <summary>
+    /// Webpage for a union
+    /// </summary>
+    [BsonElement("Webpage")]
+    public string Webpage { get; set; }
+
+    /// <summary>
     /// The tags associated with the guild. They're used for searching and filtering
     /// </summary>
     [BsonElement("Tags")]
