@@ -1,0 +1,140 @@
+﻿@using Microsoft.IdentityModel.Tokens
+@inject UserService _userService
+@inject NavigationManager NavigationManager
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.Webapp.Extensions.Discovery.Request
+@namespace Dikubot.Webapp.Extensions.Discovery.Links
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IDialogService DialogService
+
+<MudCard Elevation="25" Style="min-width: 340px; max-width: 340px; max-height: 250px; min-height: 250px;">
+    <div style="min-height: 28px; max-height: 28px;" class="d-flex justify-start flex-wrap">
+        <AuthorizeView Roles="@Permissions.GlobalAdmin">
+            @if (Union.Discord.IsNullOrEmpty())
+            {
+                <MudIconButton Icon="@Icons.Filled.Edit" aria-label="Edit" OnClick="GoToEdit" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+            }
+            else
+            {
+                
+            }
+            
+        </AuthorizeView>
+        @foreach (var tag in Union.GetTags())
+        {
+            //Kan ikke gøres direkte :(
+            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+            <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
+        }
+    </div>
+    <MudCardHeader Style="padding-bottom: 0">
+        <CardHeaderAvatar>
+            <MudAvatar Size="Size.Large" Image="@Union.LogoUrl"></MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body1">@Union.Title</MudText>
+            <MudText Typo="Typo.body2"> @if (!string.IsNullOrWhiteSpace(Union.Href))
+                                               {
+                                                   <MudIconButton Icon="@Icons.Filled.Link" aria-label="Webpage" Target="_blank" Link="@Union.Href" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+                                               }
+                                               @if (!string.IsNullOrWhiteSpace(Union.Facebook))
+                                               {
+                                                   <MudIconButton Icon="@Icons.Custom.Brands.Facebook" aria-label="Facebook"  Link="@Union.Facebook" Target="_blank" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+                                               }
+                                               @if (!string.IsNullOrWhiteSpace(Union.Discord))
+                                               {
+                                                   <MudIconButton Icon="@Icons.Custom.Brands.Discord" aria-label="Discord" OnClick="GoToDiscord" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+                                               }
+                </MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent Style="max-height: 30%; min-height: 30%; overflow: scroll; padding-top: 0; padding-bottom: 0">
+        <MudText>@Union.Decs</MudText>
+    </MudCardContent>
+    <MudCardActions>
+        <AuthorizeView>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="ShowMore">Learn More</MudButton>
+        </AuthorizeView>
+        @if (!_userService.IsRegistered())
+        {
+            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="ShowMore">Login</MudButton>
+        }
+
+    </MudCardActions>
+</MudCard>
+
+<AuthorizeView>
+
+<MudDialog @bind-IsVisible="visible" Options="dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudAvatar Size="Size.Large" Image="@Union.LogoUrl"></MudAvatar>
+            @Union.Title
+            @if (Union.Discord.IsNullOrEmpty())
+            {
+                <MudIconButton Icon="@Icons.Filled.Edit" aria-label="Edit" OnClick="MakeRequest" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+            }
+        </MudText>
+        @foreach (var tag in Union.GetTags())
+        {
+            //Kan ikke gøres direkte :(
+            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+            <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
+        }
+    </TitleContent>
+    <DialogContent>
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+            <MudTabPanel Text="Beskrivelse">
+                <MudText>@Union.Decs</MudText>
+            </MudTabPanel>
+            <MudTabPanel Text="Kontakt">
+                <MudText>Mail:@Union.Mail</MudText>
+                <MudText>Hjemmeside: <MudLink Href="@Union.Href"> @Union.Href</MudLink> </MudText>
+                <MudText>Facebook: <MudLink Href="@Union.Facebook"> @Union.Facebook</MudLink></MudText>
+            </MudTabPanel>
+        </MudTabs>
+        
+    </DialogContent>
+    <DialogActions>
+        @if (!Union.Discord.IsNullOrEmpty())
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Submit" Class="px-10">Join</MudButton>
+        }
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Class="px-10">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+</AuthorizeView>
+
+@code {
+    [Parameter] public UnionModel Union{ get; set; }
+    
+    private void GoToEdit()
+    {
+        NavigationManager.NavigateTo("/Op/Union/edit/"+Union.Id);
+    }
+
+    private void MakeRequest()
+    {
+        UnionRequestService _requestService = new UnionRequestService();
+        RequestModel<UnionModel> requestModel = new RequestModel<UnionModel>();
+        requestModel.RequestItem = Union;
+        requestModel.Status = RequestModel<UnionModel>.StatusEmun.change;
+        requestModel = _requestService.Upsert(requestModel);
+        NavigationManager.NavigateTo("/Request/Union/edit/"+requestModel.Id);
+    }
+
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+    
+    private bool visible;
+    private DialogOptions dialogOptions = new() { FullWidth = true };
+    
+    private void ShowMore() => visible = true;
+    void Submit() => visible = false;
+
+    private void GoToDiscord()
+    {
+        NavigationManager.NavigateTo("/Op/Links/edit/"+Union.Id);
+    }
+
+}

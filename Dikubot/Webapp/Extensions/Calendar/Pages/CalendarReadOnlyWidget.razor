@@ -1,0 +1,189 @@
+﻿@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
+
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+
+@using Dikubot.DataLayer.Database.Models
+
+@using Dikubot.Discord
+@using Dikubot.Extensions.Models.Equipment
+@using Dikubot.Extensions.Models.Equipment.Equipment
+
+@using Syncfusion.Blazor
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+
+@using Syncfusion.Blazor.Schedule
+@using Syncfusion.Blazor.Data
+
+@namespace Dikubot.Extensions.Calender
+
+@using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
+
+  @if (true)
+    {
+<div class="control-section">
+    <SfSchedule @ref="scheduleObj" ID="schedule" TValue="EventModel" Width="100%" Height="650px" @bind-SelectedDate="@CurrentDate">
+        <ScheduleEventSettings TValue="EventModel" DataSource="@ArrangementData">
+        </ScheduleEventSettings>
+        <ScheduleViews>
+            <ScheduleView Option="View.Month" DisplayDate="DateTime.Today"></ScheduleView>
+        </ScheduleViews>
+        <ScheduleQuickInfoTemplates>
+                    <HeaderTemplate>
+                        <div class="quick-info-header">
+                            <div class="quick-info-title">
+                                    @(((EventModel) context).Id == Guid.Empty ? "Add Appointment" : "Appointment Details")
+                                </div>
+                        </div>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                       @if (((EventModel) context).Id == Guid.Empty )
+                                       {
+                                       }
+                                       else
+                                       {
+                                           EventModel Data = context as EventModel;
+                                           <div class="event-content">
+                                               <div class="meeting-type-wrap">
+                                                   <label>Subject</label>:
+                                                   <span>@(Data.Subject)</span>
+                                               </div>
+                                               <div class="notes-wrap">
+                                                   <label>Notes</label>:
+                                                   <span>@(Data.Description)</span>
+                                               </div>
+                                           </div>
+                                       }
+                    </ContentTemplate>
+            <FooterTemplate>
+                @if (((EventModel) context).Id == Guid.Empty )
+                {
+
+                }
+                else
+                {
+                   
+                }
+            </FooterTemplate>
+                </ScheduleQuickInfoTemplates>
+    </SfSchedule>
+</div>
+    }else
+    {
+        <Loading></Loading>
+}
+
+@code{
+    ///            <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+    //// https://github.com/syncfusion/blazor-showcase-appointment-planner/blob/master/server-side/AppointmentPlanner/Pages/Schedule/Schedule.razor
+    //// https://github.com/SyncfusionExamples/google-calendar-synchronization-with-blazor-scheduler/blob/main/Pages/Index.razor
+    ///             <SfDataManager AdaptorInstance="@typeof(EquipmentAdaptor)" Adaptor="Adaptors.CustomAdaptor" Key="test" ></SfDataManager> 
+    [Parameter]
+    public ulong? GuildId { get; set; }
+
+    [Inject] 
+    protected IJSRuntime JsRuntime { get; set; }
+
+    SfSchedule<EventModel> scheduleObj { get; set; }
+
+    bool editUpcoming = true;
+    
+    private int CurrentYear;
+    public List<CalendarModel> ResourceDatasource = new List<CalendarModel>();
+    public List<EventModel> ArrangementData = new List<EventModel>();
+    private string[] groupData = { "Resources" };
+    private DateTime CurrentDate { get; set; } = DateTime.Today;
+    private SocketGuild guild;
+
+
+    private CalendarServices _calendarServices;
+    private EventsServices _EventsServices;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        
+        if (GuildId.HasValue)
+        {
+            guild = DiscordBot.ClientStatic.GetGuild(GuildId ?? new ulong());
+            _calendarServices = new CalendarServices(guild);
+            _EventsServices = new EventsServices(guild);
+        }
+        else
+        {
+            guild = DiscordBot.ClientStatic.Guilds.First();
+            _calendarServices = new CalendarServices(guild);
+            _EventsServices = new EventsServices(guild);
+        }
+        
+        
+        ResourceDatasource = GetCalendarModels();
+        ArrangementData = GetEvents(CurrentDate);
+        
+    }
+    
+    
+    public void OnCellClick(CellClickEventArgs args)
+    {
+        args.Cancel = true;
+    }
+    public void OnActionBegin(ActionEventArgs<EventModel> args)
+    {
+        if (args.ActionType == ActionType.EventCreate && args.AddedRecords.Count > 0)
+        {
+            foreach(EventModel Data in args.AddedRecords)
+            {
+                Data.Id = _EventsServices.Upsert(Data).Id;
+            }
+        }
+    }
+
+    private List<CalendarModel> GetCalendarModels()
+    {
+        return _calendarServices.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Equipment)
+            .FindAll(model => model.Visible != CalendarModel.EnumAvailable.Privat);
+        
+    }
+    
+    private List<EventModel> GetEvents(DateTime CurrentDate)
+    {
+        return GetEvents(new DateTime(CurrentDate.Year,CurrentDate.Month, 1), 
+            new DateTime(CurrentDate.Year,CurrentDate.Month, 
+                DateTime.DaysInMonth(CurrentDate.Year,CurrentDate.Month),
+                23,59,59));
+    }
+
+    private List<EventModel> GetEvents(DateTime startTime, DateTime endTime)
+    {
+
+        List<EventModel> result =
+            _EventsServices.GetAll(model => model.StartTime.CompareTo(startTime) >= 0 ||
+                                               model.StartTime.CompareTo(endTime) <= 0
+                                               ||
+                                               (model.EndTime.CompareTo(startTime) >= 0
+                                                && model.EndTime.CompareTo(endTime) <= 0)
+                ).Select(m =>
+                {
+                    m.IsReadonly
+                        = true;
+                    return m; }).ToList();
+    //.FindAll(EMmodel => ResourceDatasource
+    //                .Exists(RDmodel => RDmodel.View.Contains(EMmodel.EquiqmentId) ||
+    //                                   RDmodel.Permission.Contains(EMmodel.EquiqmentId)));
+        
+        
+        return result;
+    }
+    
+    
+    private void OnActionCompleted(ActionEventArgs<EventModel> args)
+    {
+    }
+    
+     
+    
+    
+}

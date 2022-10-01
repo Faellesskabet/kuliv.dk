@@ -1,0 +1,45 @@
+﻿@using Dikubot.DataLayer.Static
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@namespace Dikubot.DataLayer.Database.Global.Settings.Tags
+
+                        <MudSelect MultiSelection="true" 
+                                   Label="Tags" 
+                                   HelperText="Så Folk lettere kan finde din server"
+                                   @bind-SelectedValues="Value"
+                                   MultiSelectionTextFunc="list => GetTagsString()" Text="@GetTagsString()"
+                                   OnClose="OnValueChanged">
+                            @foreach (var tag in _tagServices.GetAll())
+                            {
+                                <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
+                            }
+                        </MudSelect>
+
+
+@code {
+    [Parameter]
+    public  IEnumerable<Guid> Value { get; set; }
+
+    [Parameter]
+    public EventCallback<IEnumerable<Guid>> ValueChanged { get; set; }
+    
+    private readonly TagServices _tagServices = new TagServices();
+    
+
+    private async Task OnValueChanged()
+    {
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    public List<TagsMainModel> GetTags()
+    {
+        return Value.Select(t => _tagServices.Get(t)).ToList();
+    }
+    
+    private string GetTagsString()
+    {
+        return Util.ConcatListToString(GetTags().Select(tag => tag?.Name ?? "").ToList());
+    }
+    
+    
+    
+}

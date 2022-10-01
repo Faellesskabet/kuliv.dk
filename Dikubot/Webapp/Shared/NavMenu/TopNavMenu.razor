@@ -1,0 +1,34 @@
+﻿@namespace Dikubot.Webapp.Extensions.NavMenu
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Discord
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Webapp.Pages
+@using MudBlazor.Utilities
+@using Data
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NotifyStateService _notifyStateService;
+
+<MudAppBar Elevation="1" Color="Color.Primary">
+
+    <MudButton Variant="Variant.Text"
+                Href="/"
+               > <MudText Typo="Typo.h5" > KULiv.dk</MudText> </MudButton>
+    <MudButton Variant="Variant.Text"
+               Href="/Discovery/Unions">Foreninger</MudButton>
+    <MudButton Variant="Variant.Text"
+               Href="/contactus">Kontakt Os</MudButton>
+    <MudButton Variant="Variant.Text"
+               Href="/Discovery/Events">Kalender</MudButton>
+    <MudButton Variant="Variant.Text"
+               Href="/connect">Login</MudButton>
+    <MudSpacer/>
+    <MudButton Variant="Variant.Text" Href="/volunteer"> volunteer </MudButton>
+
+    <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
+</MudAppBar>
+
+@code {
+    
+}

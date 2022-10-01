@@ -1,0 +1,13 @@
+﻿@page "/Calendar"
+@inject UserService _userService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Dikubot.Webapp.Authentication
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+<h3>Calendar</h3>
+
+<CalendarWidget GuildId="@_userService.GetUserGlobalModel().SelectedGuild"></CalendarWidget>
+
+
+@code {
+    
+}

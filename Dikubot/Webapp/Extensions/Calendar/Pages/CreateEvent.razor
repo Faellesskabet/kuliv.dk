@@ -1,18 +1,21 @@
-﻿@page "/admin/equipment/create"
-@page "/admin/equipment/edit/{uuid}"
+﻿@page "/admin/Event/create"
+@page "/admin/Event/edit/{uuid}"
 
 @using Dikubot.Webapp.Authentication
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.Extensions.Models.Equipment
 @using Dikubot.DataLayer.Database.Guild.Models.User
+@using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 
 @using Dikubot.Extensions.Models.Equipment
 @using Dikubot.Extensions.Models.Equipment.Equipment
 @using Dikubot.Webapp.Shared.Dialog
 @using Microsoft.AspNetCore.Components
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
 <h3>Kategori indstillinger @uuid</h3>
@@ -26,23 +29,40 @@
                 </MudCardHeader>
                 <MudCardContent>
                     <MudForm>
-                        <MudTextField @bind-Value="@_category.Subject" Label="Kalenderens navn" Immediate="@true" MaxLength="32"></MudTextField>
-                        <MudTextField @bind-Value="@_category.Description" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
-                        <MudDatePicker @bind-Value="@_category.StartTime" Label="Start tid"></MudDatePicker>
-                        <MudDatePicker @bind-Value="@_category.EndTime"  Label="Slut tid"></MudDatePicker>
-                        <MudTextField @bind-Value="@_category.Location" Label="Lokation" Immediate="@true" MaxLength="32"></MudTextField>
-                        <MudSelect Label="Create By" @bind-Value="@_category.CreateBy">
+                        <MudTextField @bind-Value="@_model.Subject" Label="Kalenderens navn" Immediate="@true" MaxLength="32"></MudTextField>
+                        <MudTextField @bind-Value="@_model.Description" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+                        <MudDatePicker @bind-Value="@_model.StartTime" Label="Start tid"></MudDatePicker>
+                        <MudDatePicker @bind-Value="@_model.EndTime"  Label="Slut tid"></MudDatePicker>
+                        <MudTextField @bind-Value="@_model.Location" Label="Lokation" Immediate="@true" MaxLength="32"></MudTextField>
+                        <MudSelect Label="Create By" @bind-Value="@_model.CreateBy">
                             @foreach (var user in _usersInGuild)
                             {
                                 <MudSelectItem Value="@user.DiscordId">@user.Name</MudSelectItem>
                             }
                         </MudSelect>
-                        <MudSelect Label="Calendar" @bind-Value="@_category.EquiqmentId">
-                                                        @foreach (var role in _roleMainModels)
-                                                        {
-                                                            <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
-                                                        }
+                        <MudSelect MultiSelection="true" 
+                                   Label="Calenderer" 
+                                   HelperText="Så Folk lettere kan finde din server"
+                                   @bind-SelectedValues="_model.HostServersEnumerable"
+                                   MultiSelectionTextFunc="list => GetHostsString()" Text="@GetHostsString()">
+                            @foreach (var tag in _CalendarServices.GetAll())
+                            {
+                                <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
+                            }
                         </MudSelect>
+                        
+                        <MudSelect MultiSelection="true" 
+                                   Label="Tags" 
+                                   HelperText="Så Folk lettere kan finde din server"
+                                   @bind-SelectedValues="_model.TagsEnumerable"
+                                   MultiSelectionTextFunc="list => GetTagsString()" Text="@GetTagsString()">
+                            @foreach (var tag in _tagServices.GetAll())
+                            {
+                                <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
+                            }
+                        </MudSelect>
+                        
+                        
 
                     </MudForm>
                 </MudCardContent>
@@ -65,25 +85,35 @@ else
     
     [Inject] private IDialogService DialogService { get; set; }
 
-    private MudTable<EquipmentModel> _table;
+    private MudTable<EventModel> _table;
     private bool _loading = true;
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
-    private EquipmentServices _joinRoleServices;
-    private EquipmentModel _category;
-    private CalendarServices _roleServices;
-    private List<CalendarModel> _roleMainModels;
+    private EventsServices _joinRoleServices;
+    private EventModel _model;
+    private CalendarServices _CalendarServices;
+    private TagServices _tagServices;
     private List<UserGuildModel> _usersInGuild;
+    
+    private string GetHostsString()
+    {
+        return Util.ConcatListToString(_model.GetHostServers(_guild.Id.ToString()).Select(tag => tag?.Name ?? "").ToList());
+    }
+    
+    private string GetTagsString()
+    {
+        return Util.ConcatListToString(_model.GetTags().Select(tag => tag?.Name ?? "").ToList());
+    }
     
     protected override async Task OnInitializedAsync()
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _joinRoleServices = new EquipmentServices(_guild);
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EquipmentModel() {CreateBy = _userGlobalModel.DiscordId};
-        _roleServices = new CalendarServices(_guild);
-        _roleMainModels = _roleServices.GetAll();
+        _joinRoleServices = new EventsServices(_guild);
+        _model = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EventModel() {CreateBy = _userGlobalModel.DiscordId};
+        _CalendarServices = new CalendarServices(_guild);
         var userService = new UserGuildServices(_guild);
+        _tagServices = new TagServices();
         _usersInGuild = userService.GetAll();
         _loading = false;
     }
@@ -100,7 +130,7 @@ else
         {
             return;
         }
-        _joinRoleServices.Upsert(_category);
+        _joinRoleServices.Upsert(_model);
     }
 
     
@@ -117,7 +147,7 @@ else
             return;
         }
         
-        _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EquipmentModel();
+        _model = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EventModel();
         this.StateHasChanged();
     }
 
