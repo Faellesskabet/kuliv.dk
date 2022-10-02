@@ -27,14 +27,14 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         //[DisplayFormat(DataFormatString = "{0:dddd, dd-MM-yyyy, HH:mm}")]
         [Required]
-        public DateTime StartTime { get; set; } = new DateTime();
+        public DateTime StartTime { get; set; } = DateTime.Now;
 
         [BsonElement("EndTime")]
         [Required]
         [BsonRepresentation(BsonType.DateTime)]
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         //[DisplayFormat(DataFormatString = "{0:dddd, dd-MM-yyyy, HH:mm}")]
-        public DateTime EndTime {get; set; } = new DateTime();
+        public DateTime EndTime {get; set; } = DateTime.Now;
         
         [BsonElement("RecurrenceRule")] 
         public string RecurrenceRule { get; set; }
@@ -45,7 +45,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         [BsonElement("IsAllDay")]
         public bool IsAllDay { get; set; }
 
-        [BsonElement("CreateBy")] public string CreateBy { get; set; }
+        [BsonElement("CreateBy")] public string CreateBy { get; set; } = "";
 
         [BsonIgnore]
         public bool IsReadonly { get; set; } = true;

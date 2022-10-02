@@ -1,0 +1,30 @@
+﻿@namespace Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Static
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+
+@foreach (var tag in TagsList)
+{
+    //Kan ikke gøres direkte :(
+    string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+    <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
+}
+@code {
+
+    [Parameter]
+    public List<TagsMainModel> TagsList { get; set; } = new List<TagsMainModel>();
+
+    [Parameter]
+    public HashSet<Guid> Tags { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        if (TagsList.Count == 0)
+        {
+            TagServices services = new TagServices();
+            TagsList = Tags.Select(t => services.Get(t)).ToList();
+        }
+        base.OnInitialized();
+    }
+
+    
+}
