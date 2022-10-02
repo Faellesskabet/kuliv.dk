@@ -6,65 +6,24 @@
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
-@using Dikubot.Extensions.Models.Equipment
+
 @using Dikubot.DataLayer.Database.Guild.Models.User
 @using Dikubot.DataLayer.Static
-@using Dikubot.Discord
-
-@using Dikubot.Extensions.Models.Equipment
-@using Dikubot.Extensions.Models.Equipment.Equipment
 @using Dikubot.Webapp.Shared.Dialog
 @using Microsoft.AspNetCore.Components
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@attribute [Authorize(Roles = Permissions.GuildAdmin)]
-<h3>Kategori indstillinger @uuid</h3>
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
 
 @if (!_loading)
 {
     <MudContainer>
             <MudCard>
                 <MudCardHeader>
-                    <MudText Typo="Typo.h5">Sæt din Kalender indstillinger her</MudText>
+                    <MudText Typo="Typo.h5">Eventet: @_model.Subject</MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <MudForm>
-                        <MudTextField @bind-Value="@_model.Subject" Label="Kalenderens navn" Immediate="@true" MaxLength="32"></MudTextField>
-                        <MudTextField @bind-Value="@_model.Description" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
-                        <MudDatePicker @bind-Value="@_model.StartTime" Label="Start tid"></MudDatePicker>
-                        <MudDatePicker @bind-Value="@_model.EndTime"  Label="Slut tid"></MudDatePicker>
-                        <MudTextField @bind-Value="@_model.Location" Label="Lokation" Immediate="@true" MaxLength="32"></MudTextField>
-                        <MudSelect Label="Create By" @bind-Value="@_model.CreateBy">
-                            @foreach (var user in _usersInGuild)
-                            {
-                                <MudSelectItem Value="@user.DiscordId">@user.Name</MudSelectItem>
-                            }
-                        </MudSelect>
-                        <MudSelect MultiSelection="true" 
-                                   Label="Calenderer" 
-                                   HelperText="Så Folk lettere kan finde din server"
-                                   @bind-SelectedValues="_model.HostServersEnumerable"
-                                   MultiSelectionTextFunc="list => GetHostsString()" Text="@GetHostsString()">
-                            @foreach (var tag in _CalendarServices.GetAll())
-                            {
-                                <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
-                            }
-                        </MudSelect>
-                        
-                        <MudSelect MultiSelection="true" 
-                                   Label="Tags" 
-                                   HelperText="Så Folk lettere kan finde din server"
-                                   @bind-SelectedValues="_model.TagsEnumerable"
-                                   MultiSelectionTextFunc="list => GetTagsString()" Text="@GetTagsString()">
-                            @foreach (var tag in _tagServices.GetAll())
-                            {
-                                <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
-                            }
-                        </MudSelect>
-                        
-                        
-
-                    </MudForm>
+                    <EventInput @bind-Value="_model"></EventInput>
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
@@ -95,15 +54,11 @@ else
     private TagServices _tagServices;
     private List<UserGuildModel> _usersInGuild;
     
-    private string GetHostsString()
-    {
-        return Util.ConcatListToString(_model.GetHostServers(_guild.Id.ToString()).Select(tag => tag?.Name ?? "").ToList());
-    }
+   
     
-    private string GetTagsString()
-    {
-        return Util.ConcatListToString(_model.GetTags().Select(tag => tag?.Name ?? "").ToList());
-    }
+    
+
+    
     
     protected override async Task OnInitializedAsync()
     {

@@ -76,5 +76,10 @@
     <_ContentIncludedByDefault Remove="Webapp\Pages\Admin\AdminRoles\AdminRolesCategory.razor" />
     <_ContentIncludedByDefault Remove="Webapp\Extensions\Discovery\Request\ContactInput.razor" />
   </ItemGroup>
+  
+
+  <ItemGroup>
+    <AdditionalFiles Include="Webapp\Extensions\Calendar\Request\RequestUnion.razor" />
+  </ItemGroup>
 
 </Project>

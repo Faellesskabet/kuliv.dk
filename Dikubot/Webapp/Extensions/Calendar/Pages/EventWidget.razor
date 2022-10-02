@@ -1,6 +1,129 @@
-﻿<h3>EventWidget</h3>
+﻿@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.Webapp.Extensions.Discovery.Request
+@inject UserService _user;
+@inject NavigationManager _navigationManager;
+@namespace Dikubot.Extensions.Calender
+
+<MudCard>
+    @if (ShowTitle)
+    {<MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">@Model.Subject</MudText>
+        </CardHeaderContent>
+         
+         <CardHeaderActions>
+         @if (_user.GetUserGlobalModel().IsAdmin)
+         {<MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" OnClick="Edit" />
+         }else if(_user.GetUserGlobalModel().Verified){
+             <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" OnClick="Request"/>
+         }
+         </CardHeaderActions>
+     </MudCardHeader>
+    }
+    <MudCardContent>
+        <TagDisplay Tags="Model.Tags"/>
+        <MudText Typo="Typo.body2">
+            <MudIcon Icon="@Icons.Filled.AccessTime" Title="Time"/> @Model.Time()
+        </MudText>
+        <MudText Typo="Typo.body2">
+            <MudIcon Icon="@Icons.Filled.Place" Title="Time"/> @Model.Location
+        </MudText>
+        <MudText Typo="Typo.body2">
+            <MudIcon Icon="@Icons.Filled.People" Title="Deltagere"/> @Model.Accepted.Count.ToString()
+        </MudText>
+    </MudCardContent>
+    <MudText>Beskrivelse</MudText>
+    <MudCardContent Style="max-height: 150px; min-height: 150px; overflow: scroll; padding-top: 0; padding-bottom: 0">
+        <MudText Typo="Typo.body2">
+            @(Model.Description)
+        </MudText>
+    </MudCardContent>
+    <AuthorizeView>
+        <MudCardActions>
+            <MudButton Color="JoinColor" Disabled="@_processing" OnClick="JoinEvent">
+                @if (_processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                        <MudText Class="ms-2">Processing</MudText>
+                    }
+                    else
+                    {
+                        <MudText>@JoinText</MudText>
+                    }
+                
+            </MudButton>
+            <MudButton OnClick="ShowMore"> Show More </MudButton>
+        </MudCardActions>
+    </AuthorizeView>
+            @if (!_user.IsRegistered())
+            {
+                <MudCardActions>
+                    <MudButton> login </MudButton>
+                </MudCardActions>
+            }
+    
+    
+</MudCard>
+
 
 @code {
     [Parameter]
+    public EventModel Model { get; set; }
+
+    [Parameter]
+    public bool ShowTitle { get; set; } = true;
+        
+    [Parameter]
     public ulong GuildId { get; set; }
+
+    
+    private bool HasJoined => Model.Accepted.Contains(_user.GetUserGlobalModel().DiscordId);
+    private Color JoinColor => HasJoined ?  Color.Error : Color.Success ;
+    private string JoinText => HasJoined ?  "Decline" : "Join" ;
+    private bool _processing = false;
+
+    private async void JoinEvent()
+    {
+        _processing = true;
+        EventsServices eventsServices = new EventsServices();
+
+        EventModel eventModel = eventsServices.Get(Model.Id);
+        if (HasJoined)
+        {
+            eventModel.Declined.Add(_user.GetUserGlobalModel().DiscordId);
+            eventModel.Accepted.Remove(_user.GetUserGlobalModel().DiscordId);
+        }
+        else
+        {
+            eventModel.Accepted.Add(_user.GetUserGlobalModel().DiscordId);
+            eventModel.Declined.Remove(_user.GetUserGlobalModel().DiscordId);
+        }
+
+        Model = eventsServices.Upsert(eventModel);
+        _processing = false;
+    }
+
+    private void ShowMore()
+    {
+        _navigationManager.NavigateTo($"/Discovery/Events/{Model.Id}");
+    }
+
+    private void Edit()
+    {
+        _navigationManager.NavigateTo($"/admin/Event/edit/{Model.Id}");
+    }
+
+    private void Request()
+    {
+        EventRequestService _requestService = new EventRequestService();
+        RequestModel<EventModel> requestModel = new RequestModel<EventModel>();
+        requestModel.RequestItem = Model;
+        requestModel.Status = RequestModel<EventModel>.StatusEmun.change;
+        requestModel = _requestService.Upsert(requestModel);
+        _navigationManager.NavigateTo($"/Request/Event/edit/{requestModel.Id}");
+    }
+     
+    
 }

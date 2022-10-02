@@ -12,11 +12,15 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
     {
         private string _calendar;
         
-        public EventsServices(SocketGuild guild, string calendar = null) : base("Events")
+        public EventsServices(SocketGuild guildId, string calendar = null) : base("Events")
         {
             _calendar = calendar;
         }
         
+        public EventsServices(string guildId = null, string calendar = null) : base("Events")
+        {
+            _calendar = calendar;
+        }
         
         public override List<EventModel> Get()
         {

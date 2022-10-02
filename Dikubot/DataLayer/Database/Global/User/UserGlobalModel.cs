@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Dikubot.DataLayer.Database.Guild.Models.User;
 using Dikubot.Discord;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dikubot.DataLayer.Database.Global.User
@@ -75,6 +78,44 @@ namespace Dikubot.DataLayer.Database.Global.User
         
         [BsonElement("DarkTheme")]
         public bool DarkTheme { get; set; }
+
+
+        /// <summary>
+        /// Get all guids the user
+        /// </summary>
+        [BsonIgnore]
+        public HashSet<SocketGuild> Guilds
+        {
+            get => DiscordId.IsNullOrEmpty()
+                ? new HashSet<SocketGuild>()
+                : DiscordBot.ClientStatic.GetUser(this.DiscordIdLong).MutualGuilds.ToHashSet();
+        }
+        
+        
+        /// <summary>
+        /// Get all guid for roles the user have
+        /// </summary>
+        public HashSet<Guid> GetRolesGuid()
+        {
+            HashSet<Guid> result = Guilds.SelectMany(model => GetRolesGuid(model.Id)).ToHashSet();
+            return result;
+        }
+        public HashSet<Guid> GetRolesGuid(ulong guildId)
+        {
+            
+            var guild = DiscordBot.ClientStatic.GetGuild((ulong) guildId);
+            return GetRolesGuid(guild);
+        }
+        
+        public HashSet<Guid> GetRolesGuid(SocketGuild guild)
+        {
+            UserGuildServices userGuildServices = new UserGuildServices(guild);
+            return userGuildServices
+                .Get(model => model.DiscordId.Equals(this.DiscordId))
+                .Roles.Select(model => model.RoleId)
+                .ToHashSet();
+        }
+        
         
     }
 }

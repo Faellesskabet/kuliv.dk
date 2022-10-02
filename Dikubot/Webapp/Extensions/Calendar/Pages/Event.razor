@@ -1,0 +1,21 @@
+﻿@page "/Discovery/Events/{uuid}"
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.Extensions.Calender
+<h3>Event</h3>
+
+<EventWidget Model="Model"></EventWidget>
+
+@code {
+    [Parameter]
+    public string? uuid { get; set; }
+
+    private EventModel Model { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        EventsServices services = new EventsServices();
+        Model = Guid.TryParse(uuid, out Guid guid) ? services.Get(guid) : new EventModel() {};
+        base.OnInitialized();
+    }
+
+}

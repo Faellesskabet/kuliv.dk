@@ -18,31 +18,35 @@
     }
 </MudSelect>
 
-
-<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Home" Href="/">Forside</MudNavLink>
-
-<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Newspaper" Href="/news">Nyheder</MudNavLink>
-<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/roles">Tilmeld roller</MudNavLink>
-<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CalendarMonth" Href="/equipment">Udstyrliste</MudNavLink>
-
-<MudDivider Class="my-2" />
-
-<AuthorizeView Roles="@Permissions.GlobalAdmin">
-    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CrueltyFree" IconColor="Color.Primary" Href="/op">System Admin indstillinger</MudNavLink>
-<MudDivider Class="my-2" />
-    </AuthorizeView>
-
-<AuthorizeView Roles="@Permissions.GuildAdmin">
-    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Computer" Href="/admin">Admin indstillinger</MudNavLink>
-    <MudDivider Class="my-2" />
-</AuthorizeView>
-
+<MudNavGroup Expanded="true" Title="Serveren">
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Home" Href="/">Forside</MudNavLink>
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Newspaper" Href="/news">Nyheder</MudNavLink>
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/roles">Tilmeld roller</MudNavLink>
+</MudNavGroup>
+<MudNavGroup Expanded="true" Title="Discovery">
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.People" Href="/Discovery/Unions">Foreninger</MudNavLink>
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CalendarMonth" Href="/Discovery/Events">Events</MudNavLink>
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CalendarMonth" Href="/equipment">Udstyrliste <MudChip Size="Size.Small" Color="Color.Info"> beta</MudChip></MudNavLink>
+</MudNavGroup>
 
 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.DomainAdd" Href="/addguild">Tilføj dit eget fællesskab</MudNavLink>
 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.SportsKabaddi" Href="/volunteer">Bliv frivillig</MudNavLink>
-<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Help" Href="/help">Få hjælp</MudNavLink>
-<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/profile">Min Profil</MudNavLink>
-<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Logout" Href="/logout">Log-ud</MudNavLink>
+<MudNavGroup Title="Settings" Icon="@Icons.Filled.Settings">
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/profile">Min Profil</MudNavLink>
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Help" Href="/help">Få hjælp</MudNavLink>
+    <AuthorizeView Roles="@Permissions.GlobalAdmin">
+        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CrueltyFree" IconColor="Color.Primary" Href="/op">System Admin indstillinger</MudNavLink>
+        <MudDivider Class="my-2"/>
+    </AuthorizeView>
+    <AuthorizeView Roles="@Permissions.GuildAdmin">
+        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Computer" Href="/admin">Admin indstillinger</MudNavLink>
+
+        <MudDivider Class="my-2"/>
+    </AuthorizeView>
+    
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Logout" Href="/logout">Log-ud</MudNavLink>
+</MudNavGroup>
+
 
 
 @code

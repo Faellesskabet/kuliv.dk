@@ -1,4 +1,4 @@
-﻿@page "/Op/Union/Request"
+﻿@page "/Op/Event/Request"
 
 @using Dikubot.Webapp.Authentication
 @attribute [Authorize(Roles = Permissions.GlobalAdmin)]
@@ -9,16 +9,19 @@
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.Discord
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using Dikubot.Webapp.Extensions.Discovery.Request
 @using Dikubot.Webapp.Shared.Dialog
 @using global::Discord.WebSocket
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Razor.TagHelpers
 @using Microsoft.IdentityModel.Tokens
+@using MudBlazor
 
 
-<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<UnionModel>>>>(Reload))" @ref="_table"
+<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<EventModel>>>>(Reload))" @ref="_table"
           Loading="@_loading">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
@@ -39,9 +42,9 @@
             <MudIconButton Icon="@Icons.Filled.NotInterested" OnClick="()=>Denied(context)" Color="Color.Error"></MudIconButton>
         </MudTd>
         <MudTd DataLabel="Navn">@context.Contact.Name</MudTd>
-        <MudTd DataLabel="Beskrivelse">@context.RequestItem.Title</MudTd>
+        <MudTd DataLabel="Beskrivelse">@context.RequestItem.Subject</MudTd>
         <MudTd DataLabel="Indstillinger">
-            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Request/Union/edit/{@context.Id.ToString()}")>Rediger</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Request/Event/edit/{@context.Id.ToString()}")>Rediger</MudButton>
         </MudTd>
         <MudTd DataLabel="Slet">
             <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
@@ -58,32 +61,32 @@
     </PagerContent>
 </MudTable>
 <div class="d-flex flex-wrap mt-4">
-    <MudButton Color="Color.Primary" Variant="Variant.Filled" Link="/Request/Union/create">Tilføj ny kategori</MudButton>
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" Link="/Request/event/create">Tilføj ny kategori</MudButton>
 </div>
 
 @code {
 
     [Inject] private IDialogService DialogService { get; set; }
     
-    private MudTable<RequestModel<UnionModel>> _table;
+    private MudTable<RequestModel<EventModel>> _table;
     private string _searchQuery = "";
-    private UnionRequestService _services;
+    private EventRequestService _services;
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
 
-        _services = new UnionRequestService();
+        _services = new EventRequestService();
         _loading = false;
     }
 
-    private async Task<TableData<RequestModel<UnionModel>>> Reload(TableState state)
+    private async Task<TableData<RequestModel<EventModel>>> Reload(TableState state)
     {
-        List<RequestModel<UnionModel>> items;
+        List<RequestModel<EventModel>> items;
         if (!_searchQuery.IsNullOrEmpty())
         {
-            items = _services.Get(model => model.RequestItem.Title.Contains(_searchQuery) 
-                                           || model.RequestItem.Decs.Contains(_searchQuery)
+            items = _services.Get(model => model.RequestItem.Subject.Contains(_searchQuery) 
+                                           || model.RequestItem.Description.Contains(_searchQuery)
                                             || model.Contact.Name.Contains(_searchQuery),
                     state.PageSize, state.Page);   
         }
@@ -92,7 +95,7 @@
             items = _services.Get(state.PageSize, state.Page);   
         }
 
-        return new TableData<RequestModel<UnionModel>>() { Items = items, TotalItems = (int)_services.EstimatedCount()};
+        return new TableData<RequestModel<EventModel>>() { Items = items, TotalItems = (int)_services.EstimatedCount()};
     }
     
     private void OnSearch(string text)
@@ -101,7 +104,7 @@
         _table.ReloadServerData();
     }
 
-    private async void DeleteCategory(RequestModel<UnionModel> joinRoleCategoryMainModel)
+    private async void DeleteCategory(RequestModel<EventModel> joinRoleCategoryMainModel)
     {
         var parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
@@ -118,7 +121,7 @@
         await _table.ReloadServerData();
     }
     
-    private async void Approve(RequestModel<UnionModel> model)
+    private async void Approve(RequestModel<EventModel> model)
     {
         var parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil godkende Unionen");
@@ -131,15 +134,15 @@
             return;
         }
 
-        UnionServices unionServices = new UnionServices();
-        model.RequestItem = unionServices.Upsert(model.RequestItem);
-        model.Status = RequestModel<UnionModel>.StatusEmun.approved;
+        EventsServices EventsServices = new EventsServices();
+        model.RequestItem = EventsServices.Upsert(model.RequestItem);
+        model.Status = RequestModel<EventModel>.StatusEmun.approved;
         
         _services.Upsert(model);
 
         await _table.ReloadServerData();
     }
-    private async void Denied(RequestModel<UnionModel> model)
+    private async void Denied(RequestModel<EventModel> model)
     {
         var parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du ikke vil godkende Unionen");
@@ -152,7 +155,7 @@
             return;
         }
         
-        model.Status = RequestModel<UnionModel>.StatusEmun.denied;
+        model.Status = RequestModel<EventModel>.StatusEmun.denied;
         _services.Upsert(model);
 
         await _table.ReloadServerData();
