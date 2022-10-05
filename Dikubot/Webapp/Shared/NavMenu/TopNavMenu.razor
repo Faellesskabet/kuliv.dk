@@ -9,28 +9,39 @@
 @using Data
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService;
+@inject BrowserService _browserService
 
-<MudAppBar Elevation="1" Color="Color.Transparent">
+@if (_dimensions.Width > 600)
+{
+    <MudAppBar Elevation="1" Color="Color.Transparent">
 
-    <MudButton Variant="Variant.Text" 
-                Href="/"
-               > <MudText Typo="Typo.h5" Color="Color.Primary" > kuliv.dk</MudText></MudButton>
-    <MudButton Variant="Variant.Text"
-               Href="/Discovery/Unions">Foreninger</MudButton>
-    <MudButton Variant="Variant.Text"
-               Href="/contactus">Kontakt</MudButton>
-    <MudButton Variant="Variant.Text"
-               Href="/Discovery/Events">Kalender</MudButton>
-    
-               <MudButton Variant="Variant.Text" Href="/volunteer"> volunteer </MudButton>
-    <MudSpacer/>
-    
-    <MudButton Variant="Variant.Text"
-               Href="/connect">Login</MudButton>
-    
-    <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
-</MudAppBar>
+        <MudButton Variant="Variant.Text"
+                   Href="/"> <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText></MudButton>
+        <MudButton Variant="Variant.Text"
+                   Href="/Discovery/Unions">Foreninger</MudButton>
+        <MudButton Variant="Variant.Text"
+                   Href="/contactus">Kontakt</MudButton>
+        <MudButton Variant="Variant.Text"
+                   Href="/Discovery/Events">Kalender</MudButton>
+
+        <MudButton Variant="Variant.Text" Href="/volunteer"> volunteer </MudButton>
+        <MudSpacer/>
+
+        <MudButton Variant="Variant.Text"
+                   Href="/connect">Login</MudButton>
+
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
+    </MudAppBar>
+}
 
 @code {
+
+    private BrowserDimension _dimensions = new BrowserDimension();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _dimensions = await _browserService.GetDimensions();
+        StateHasChanged();
+    }
     
 }

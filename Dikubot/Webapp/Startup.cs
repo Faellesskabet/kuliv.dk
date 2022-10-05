@@ -95,6 +95,7 @@ namespace Dikubot.Webapp
             // Authentication
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
             services.AddScoped<UserService>();
+            services.AddScoped<BrowserService>();
 
             services.AddAuthentication(options =>
                 {
