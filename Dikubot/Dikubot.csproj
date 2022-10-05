@@ -64,7 +64,6 @@
     <Folder Include="Webapp\Extensions\Announcements\Op" />
     <Folder Include="Webapp\Extensions\Union\Pages" />
     <Folder Include="Webapp\Extensions\Sponsorater" />
-    <Folder Include="Webapp\wwwroot\js" />
   </ItemGroup>
   
 
