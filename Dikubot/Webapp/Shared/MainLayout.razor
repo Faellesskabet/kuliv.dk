@@ -31,7 +31,12 @@
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent Class="pt-16">
-        <MudBreadcrumbs Items="_breadcrumbItems" MaxItems="6"></MudBreadcrumbs>
+        <MudBreadcrumbs Items="_breadcrumbItems" MaxItems="6">
+            <ItemTemplate Context="item">
+                <MudLink Href="@item.Href" Color="Color.Primary">@item.Text</MudLink>
+            </ItemTemplate>
+            
+        </MudBreadcrumbs>
         <MudContainer Class="mt-6" Style="min-height: 100vh">
             @Body
         </MudContainer>
@@ -63,7 +68,7 @@
         foreach (string uri in thisUri)
         {   
             href += "/" + uri;
-            _breadcrumbItems.Add(new BreadcrumbItem(uri.ToUpperInvariant(),href,thisUri.Last().Equals(uri)));
+            _breadcrumbItems.Add(new BreadcrumbItem(string.IsNullOrWhiteSpace(uri) ? "" : string.Concat(uri[0].ToString().ToUpper(), uri.AsSpan(1)),href,thisUri.Last().Equals(uri)));
         }
         base.OnParametersSet();
     }
