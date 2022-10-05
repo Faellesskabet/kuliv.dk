@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Components
+@using Dikubot.Webapp.Extensions.Discovery.Request
+@using Microsoft.IdentityModel.Tokens
+@inject UserService _userService;
+@namespace Dikubot.Webapp.Extensions.Discovery.Request
+
+
+            <MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5">Dine Kontakt oplysninger</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudForm FieldChanged="OnValueChanged">
+                        <MudTextField @bind-Value="@Value.Name" Label="Dit Navn" Immediate="@true" MaxLength="64"></MudTextField>
+                        <MudTextField @bind-Value="@Value.Number" Label="Dit Telefonnummer" Immediate="@true" MaxLength="64" ></MudTextField>
+                        <MudTextField @bind-Value="@Value.Mail" Label="Din Mail" Immediate="@true" MaxLength="64"></MudTextField>
+                    </MudForm>
+                </MudCardContent>
+            </MudCard>
+
+
+@code {
+    [Parameter]
+    public ContactModel Value { get; set; }
+
+    [Parameter]
+    public EventCallback<ContactModel> ValueChanged { get; set; }
+
+                protected override void OnInitialized()
+                {
+                    if (Value.Name.IsNullOrEmpty())
+                    {
+                        Value.Name = _userService?.GetUserGlobalModel()?.Name;
+                    }
+                    if (Value.Mail.IsNullOrEmpty())
+                    {
+                        Value.Mail = _userService?.GetUserGlobalModel()?.Email;
+                    }
+                    
+                    base.OnInitialized();
+                }
+
+                private async Task OnValueChanged()
+    {
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

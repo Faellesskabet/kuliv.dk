@@ -4,6 +4,8 @@
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Pages
 @using Microsoft.IdentityModel.Tokens
+@using System.Reflection
+@using Microsoft.Graph
 @inject NotifyStateService _notifyStateService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -22,7 +24,9 @@
                         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
                     </Authorized>
                     <NotAuthorized>
-                        @if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public"))
+                        
+                        @if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public") ||
+                             !routeData.PageType.GetCustomAttributes(typeof(AllowAnonymousAttribute)).IsNullOrEmpty())
                         {
                             <RouteView RouteData="@routeData" DefaultLayout="typeof(FooterLayout)"></RouteView>
                         }

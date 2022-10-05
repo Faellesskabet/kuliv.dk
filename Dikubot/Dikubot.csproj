@@ -60,6 +60,9 @@
   <ItemGroup>
     <Folder Include="DataLayer\Database\Global\GlobalSettings" />
     <Folder Include="DataLayer\Database\Global\Settings" />
+    <Folder Include="Webapp\Extensions\Announcements\Admin" />
+    <Folder Include="Webapp\Extensions\Announcements\Op" />
+    <Folder Include="Webapp\Extensions\Union\Pages" />
     <Folder Include="Webapp\Extensions\Sponsorater" />
     <Folder Include="Webapp\wwwroot\js" />
   </ItemGroup>
@@ -71,6 +74,12 @@
     <_ContentIncludedByDefault Remove="Webapp\Pages\Account\Logout.cshtml" />
     <_ContentIncludedByDefault Remove="Webapp\Pages\Admin\AdminRoles\AdminRoles.razor" />
     <_ContentIncludedByDefault Remove="Webapp\Pages\Admin\AdminRoles\AdminRolesCategory.razor" />
+    <_ContentIncludedByDefault Remove="Webapp\Extensions\Discovery\Request\ContactInput.razor" />
+  </ItemGroup>
+  
+
+  <ItemGroup>
+    <AdditionalFiles Include="Webapp\Extensions\Calendar\Request\RequestUnion.razor" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,86 @@
+﻿@page "/Discovery/Unions"
+
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Global.GuildSettings;
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using System.Reflection
+@attribute [AllowAnonymous]
+@inject NavigationManager NavigationManager
+
+
+<MudGrid Justify="Justify.Center">
+    <MudItem lg="12" md="12" sm="12">
+        <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
+    </MudItem>
+    <MudChipSet @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
+        @foreach (var tag in _tagServices.GetAll())
+        {
+            //Kan ikke gøres direkte :(
+            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+            <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
+        }
+    </MudChipSet>
+</MudGrid>
+
+<div class="d-flex flex-row gap-8 justify-center flex-wrap" style="margin-top: 20px;
+margin-left: auto; margin-right: auto;">
+    @foreach (var link in _models)
+    {
+        @if (SearchCriteria(link))
+        {
+            <UnionWidget Union="link"></UnionWidget>
+        }
+       
+    }
+    
+</div>
+
+<MudButton Color="Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
+
+@code {
+
+    public GuildSettingsService _GuildSettingsService = new GuildSettingsService();
+    
+    public List<UnionModel> _models { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var list = _services.GetAll();
+        
+        var list2 = _GuildSettingsService.Get().Where(model => model.IsPublic).Select(model => new UnionModel(model));
+        list.AddRange(list2);
+        
+        _models = list.OrderBy(model => model.Title).ToList();
+        
+        base.OnInitialized();
+    }
+
+    private string SearchQuery { get; set; }
+
+    private TagServices _tagServices = new TagServices();
+    
+    MudChip[] selected = new MudChip[]{};
+
+    readonly UnionServices _services = new UnionServices();
+    
+    private bool SearchCriteria(UnionModel guild)
+    {
+        HashSet<Guid> hasSelected = selected.Select(_ => (_.Value is Guid ? (Guid) _.Value : default) ).ToHashSet();
+        var hashSetGuildTag = guild.Tags;
+        
+        if (!(_tagServices.GetAll().Count == hasSelected.Count || hasSelected.Count ==0) && !hasSelected.IsSubsetOf(hashSetGuildTag) )
+        {
+            return false;
+        }
+        
+        return string.IsNullOrWhiteSpace(SearchQuery) || (guild.Title?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false) || (guild.Decs?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false);
+    }
+    
+    private void GotoAddGuild()
+    {
+        NavigationManager.NavigateTo("/Request/Union/create");
+    }
+    
+    
+}
+

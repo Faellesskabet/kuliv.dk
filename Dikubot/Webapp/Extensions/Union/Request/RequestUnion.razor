@@ -1,0 +1,107 @@
+﻿@page "/Request/Union/create"
+@page "/Request/Union/edit/{uuid}"
+
+
+@using Dikubot.Webapp.Shared.Dialog
+@using Microsoft.AspNetCore.Components
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.Webapp.Extensions.Discovery.Request
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@attribute [AllowAnonymous]
+
+<h3>Tip en forening</h3>
+
+@if (!_loading)
+{
+    <MudContainer>
+        <ContactInput @bind-Value="@_Request.Contact" ></ContactInput>
+        <UnionInput @bind-Value="@_Request.RequestItem"></UnionInput>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="AddOneMore">Tilføj en ny</MudButton>
+            </MudCardActions>
+        
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+    [Parameter]
+    public string? uuid { get; set; }
+    [Inject] private IDialogService DialogService { get; set; }
+    private MudTable<UnionModel> _table;
+    private bool _loading = true;
+    private UnionRequestService _services;
+    private RequestModel<UnionModel> _Request;
+
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        _services = new UnionRequestService();
+        _Request = Guid.TryParse(uuid, out Guid guid) ? _services.Get(guid) : new RequestModel<UnionModel>();
+        _loading = false;
+    }
+    
+    
+    private async void SaveSettings()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _Request = _services.Upsert(_Request);
+        NavigationManager.NavigateTo("/Request/Union/edit/"+_Request.Id.ToString());
+    }
+
+    
+    private async void DiscardSettings()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Warning);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        _Request = Guid.TryParse(uuid, out Guid guid) ? _services.Get(guid) : new RequestModel<UnionModel>();
+        this.StateHasChanged();
+    }
+    
+    private async void AddOneMore()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Add one more", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        NavigationManager.NavigateTo("/Request/Union/create", forceLoad:true);
+    }
+    
+
+
+
+
+}

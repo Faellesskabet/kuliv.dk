@@ -1,0 +1,232 @@
+﻿@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
+
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.DataLayer.Database.Models
+@using Dikubot.Discord
+@using Dikubot.Extensions.Models.Equipment
+@using Dikubot.Extensions.Models.Equipment.Equipment
+@using Microsoft.IdentityModel.Tokens
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Schedule
+@using Syncfusion.Blazor.Data
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserService _userService;
+
+@namespace Dikubot.Extensions.Calender
+
+
+  @if (true)
+    {
+<div class="control-section">
+    <SfSchedule @ref="ScheduleObj" 
+                ID="schedule" 
+                TValue="EventModel"
+                Width="100%" 
+                Height="650px" 
+                @bind-SelectedDate="@CurrentDate"
+                Readonly="ReadOnly"
+                ShowWeekNumber="true"
+                FirstDayOfWeek="1">
+        <ScheduleEventSettings TValue="EventModel" DataSource="@ArrangementData">
+            <ScheduleEvents TValue="EventModel" ActionCompleted="OnActionCompleted"></ScheduleEvents>
+        </ScheduleEventSettings>
+        <ScheduleViews>
+            <ScheduleView Option="View.Month"></ScheduleView>
+        </ScheduleViews>
+        <ScheduleQuickInfoTemplates>
+            <ContentTemplate>
+                       @if (((EventModel) context).Id == Guid.Empty )
+                                       {
+                                       }
+                                       else
+                                       {
+                                           EventModel Data = context as EventModel;
+                                           <EventWidget Model="@Data" ShowTitle="false"></EventWidget>
+                                           
+                                       }
+                    </ContentTemplate>
+
+                </ScheduleQuickInfoTemplates>
+    </SfSchedule>
+</div>
+    }else
+    {
+        <Loading></Loading>
+}
+
+@code{
+    ///            <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+    //// https://github.com/syncfusion/blazor-showcase-appointment-planner/blob/master/server-side/AppointmentPlanner/Pages/Schedule/Schedule.razor
+    //// https://github.com/SyncfusionExamples/google-calendar-synchronization-with-blazor-scheduler/blob/main/Pages/Index.razor
+    ///             <SfDataManager AdaptorInstance="@typeof(EquipmentAdaptor)" Adaptor="Adaptors.CustomAdaptor" Key="test" ></SfDataManager> 
+    [Parameter]
+    public ulong? GuildId { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; } = true;
+    
+    [Parameter]
+    public List<CalendarModel> ResourceDatasource { get; set; } = new List<CalendarModel>();
+    [Parameter]
+    public List<EventModel> ArrangementData { get; set; } = new List<EventModel>();
+    
+    
+    [Inject] 
+    protected IJSRuntime JsRuntime { get; set; }
+    
+    SfSchedule<EventModel> ScheduleObj { get; set; }
+    
+    
+    private DateTime CurrentDate { get; set; } = DateTime.Today;
+    
+    private SocketGuild guild;
+    private UserGlobalModel _user;
+    
+    
+    private CalendarServices _calendarServices;
+    private EventsServices _eventsServices;
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        _user = _userService.GetUserGlobalModel();
+        if (!ReadOnly)
+        {
+            ReadOnly = !_user.Verified;
+        }
+        
+        if (_user == null)
+        {
+            return;
+        }
+        _eventsServices = new EventsServices(GuildId?.ToString());
+        
+        if (GuildId.HasValue)
+        {
+            guild = DiscordBot.ClientStatic.GetGuild(GuildId ?? new ulong());
+            _calendarServices = new CalendarServices(guild);
+        }
+        else
+        {
+            ///TODO Fjern Guild, når den ikke skal bruges her...
+            guild = DiscordBot.ClientStatic.Guilds.First();
+            _calendarServices = new CalendarServices(guild);
+        }
+        
+        ResourceDatasource = GetCalendarModels();
+        ArrangementData = GetEvents(CurrentDate);
+        
+    }
+    
+    
+    public void OnCellClick(CellClickEventArgs args)
+    {
+        args.Cancel = true;
+    }
+    public void OnActionBegin(ActionEventArgs<EventModel> args)
+    {
+        if (args.ActionType == ActionType.EventCreate && args.AddedRecords.Count > 0)
+        {
+            foreach(EventModel Data in args.AddedRecords)
+            {
+                Data.Id = _eventsServices.Upsert(Data).Id;
+            }
+        }
+    }
+
+    private List<CalendarModel> GetCalendarModels()
+    {
+        var roles = GuildId.HasValue ? _user.GetRolesGuid(guild) : _user.GetRolesGuid();
+        
+        return _calendarServices.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Equipment)
+            .FindAll(model => model.Visible != CalendarModel.EnumAvailable.Privat 
+                              || model.Permission.Overlaps(roles)
+                              || model.View.Overlaps(roles));
+        
+    }
+    
+    private List<EventModel> GetEvents(DateTime CurrentDate)
+    {
+        return GetEvents(new DateTime(CurrentDate.Year,CurrentDate.Month, 1), 
+            new DateTime(CurrentDate.Year,CurrentDate.Month, 
+                DateTime.DaysInMonth(CurrentDate.Year,CurrentDate.Month),
+                23,59,59));
+    }
+
+    private List<EventModel> GetEvents(DateTime startTime, DateTime endTime)
+    {
+        var roles = GuildId.HasValue ? _user.GetRolesGuid(guild) : _user.GetRolesGuid();
+        
+        
+        
+        List<EventModel> result = _user.DiscordId.IsNullOrEmpty() ? 
+            _eventsServices.GetAll(model => model.StartTime.CompareTo(startTime) >= 0 || 
+                                            model.StartTime.CompareTo(endTime) <= 0 
+                                            || (model.EndTime.CompareTo(startTime) >= 0 
+                                                && model.EndTime.CompareTo(endTime) <= 0)
+            ).Select(m => { m.IsReadonly = true; return m; })
+            .ToList() :
+            _eventsServices.GetAll(model => model.StartTime.CompareTo(startTime) >= 0 ||
+                                               model.StartTime.CompareTo(endTime) <= 0
+                                               ||
+                                               (model.EndTime.CompareTo(startTime) >= 0
+                                                && model.EndTime.CompareTo(endTime) <= 0)
+                ).Select(m => { m.IsReadonly 
+                    = !m.CreateBy.IsNullOrEmpty() && !(m?.CreateBy  == _user?.DiscordId 
+                        || ResourceDatasource.First(rd => rd.Id == m.Id)
+                            .Permission.Overlaps(roles)); return m; })
+                .ToList()
+        ;
+    //.FindAll(EMmodel => ResourceDatasource
+    //                .Exists(RDmodel => RDmodel.View.Contains(EMmodel.EquiqmentId) ||
+    //                                   RDmodel.Permission.Contains(EMmodel.EquiqmentId)));
+        
+        
+        return result;
+    }
+    
+    
+    private void OnActionCompleted(ActionEventArgs<EventModel> args)
+    {
+        if (args.ActionType == ActionType.DateNavigate || args.ActionType == ActionType.EventCreate || args.ActionType == ActionType.EventChange || args.ActionType == ActionType.EventRemove)
+        {
+            if (args.AddedRecords != null && args.AddedRecords.Count > 0)
+            {
+                foreach (EventModel eventData in args.AddedRecords)
+                {
+                    eventData.CreateBy = _user.DiscordId;
+                    _eventsServices.Upsert(eventData);
+                }
+            }
+            if (args.ChangedRecords != null && args.ChangedRecords.Count > 0)
+            {
+                foreach (EventModel eventData in args.ChangedRecords)
+                {
+                    if (!eventData.IsReadonly)
+                    {
+                        _eventsServices.Upsert(eventData);
+                    }
+                }
+            }
+            if (args.DeletedRecords != null && args.DeletedRecords.Count > 0)
+            {
+                foreach (EventModel eventData in args.DeletedRecords)
+                {if (!eventData.IsReadonly)
+                {
+                    _eventsServices.Remove(eventData);
+                }
+                }
+            }
+            this.ArrangementData = GetEvents(CurrentDate);
+        }
+    }
+    
+     
+    
+    
+}

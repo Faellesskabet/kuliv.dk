@@ -7,6 +7,7 @@
 @using MudBlazor.Utilities
 @using Dikubot.Webapp.Extensions.NavMenu
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager _navigationManager;
 @inject NotifyStateService _notifyStateService
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
@@ -30,6 +31,7 @@
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent Class="pt-16">
+        <MudBreadcrumbs Items="_breadcrumbItems" MaxItems="6"></MudBreadcrumbs>
         <MudContainer Class="mt-6" Style="min-height: 100vh">
             @Body
         </MudContainer>
@@ -46,6 +48,26 @@
     private bool _loaded = false;
     private string NavColor = "";
     private string NavTextColor = "";
+    
+    private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>();
+
+    protected override void OnParametersSet()
+    {
+        var thisUri = _navigationManager.ToBaseRelativePath(_navigationManager.Uri).Split("/");
+
+        string href = "";
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Home", href: "")
+        };
+        foreach (string uri in thisUri)
+        {   
+            href += "/" + uri;
+            _breadcrumbItems.Add(new BreadcrumbItem(uri.ToUpperInvariant(),href,thisUri.Last().Equals(uri)));
+        }
+        base.OnParametersSet();
+    }
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,6 +76,10 @@
         await SetData();
         _loaded = true;
         _notifyStateService.UserChange += UserChange;
+
+        
+        
+        
     }
 
     private async Task SetData()
