@@ -1,0 +1,66 @@
+﻿@page "/Op/ChangeLog"
+@using global::Discord.WebSocket
+@using Data.Discord
+@using Dikubot.Discord
+@using Dikubot.Webapp.Authentication
+@using  Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel
+@inject UserService _userService;
+
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+
+<h3>Announcements</h3>
+<MudText Typo="Typo.body1"> Denne besked bliver sendt til alle serveres PublicUpdatesChannel, hvis de har en </MudText>
+
+<MudInputString Label="Besked" Variant="Variant.Outlined"  Lines="3" @bind-Value="_message"></MudInputString>
+
+<MudButton OnClick="SendMessage"> test :D </MudButton>
+
+
+
+@code {
+    private string _message = "";
+    private UserIdentity user;
+    private SocketGuild _guild;
+    private TextChannelServices _textChannelServices;
+    
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _guild = _userService.getGuild();
+        _textChannelServices = new TextChannelServices(_guild);
+    }
+    
+    public async Task SendMessage()
+    {
+        var guilds = DiscordBot.ClientStatic.Guilds;
+
+        foreach (var guild in guilds)
+        {
+            try
+            {
+                if ( guild?.PublicUpdatesChannel != null)
+                {
+                    await guild.PublicUpdatesChannel.SendMessageAsync(_message);   
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        
+        
+        /*
+        var test2 = _textChannelServices.Get().FindAll(model => model.IsNewsChannel ?? false);
+        
+        foreach (var textChannel in test2 ?? new List<TextChannelMainModel>())
+        {
+            var channel = _guild.GetTextChannel( Convert.ToUInt64(textChannel.DiscordId)); // channel id
+            await channel.SendMessageAsync(_message);
+        }
+        */
+    }
+}
