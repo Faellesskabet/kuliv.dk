@@ -8,7 +8,7 @@
                                    @bind-SelectedValues="Value"
                                    MultiSelectionTextFunc="list => GetTagsString()" Text="@GetTagsString()"
                                    OnClose="OnValueChanged">
-                            @foreach (var tag in _tagServices.GetAll())
+                            @foreach (var tag in Tags)
                             {
                                 <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
                             }
@@ -22,6 +22,11 @@
     [Parameter]
     public EventCallback<IEnumerable<Guid>> ValueChanged { get; set; }
     
+    [Parameter]
+    public TagsMainModel.enumTagType TagType { get; set; } = TagsMainModel.enumTagType.tag;
+    
+    private List<TagsMainModel> Tags => _tagServices.GetAll().Where(t => t.TagType == TagType).ToList();
+    
     private readonly TagServices _tagServices = new TagServices();
     
 
@@ -32,7 +37,8 @@
 
     public List<TagsMainModel> GetTags()
     {
-        return Value.Select(t => _tagServices.Get(t)).ToList();
+        return Value.Select(t => _tagServices.Get(t))
+            .ToList();
     }
     
     private string GetTagsString()

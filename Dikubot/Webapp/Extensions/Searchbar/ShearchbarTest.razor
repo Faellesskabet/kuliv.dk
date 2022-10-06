@@ -1,22 +1,22 @@
-﻿@page "/Discovery/Unions"
-
-@using Dikubot.Extensions.search
+﻿@page "/ShearchbarTest"
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.DataLayer.Database.Global.GuildSettings;
+@using Dikubot.Extensions.search
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using System.Reflection
-@attribute [AllowAnonymous]
+
 @inject NavigationManager NavigationManager
 
 
-
+    
 <div class="d-flex flex-row gap-8 justify-center flex-wrap" style="margin-top: 20px;
 margin-left: auto; margin-right: auto;">
-    <Searchbar Items="_models" Context="UnionModel">
-        <TemplateRow Context="unionModel" >
-            <UnionWidget Union="unionModel"></UnionWidget>
-        </TemplateRow>
-    </Searchbar>
+<Searchbar Items="_models" Context="UnionModel">
+    <TemplateRow Context="unionModel" >
+        <UnionWidget Union="unionModel"></UnionWidget>
+    </TemplateRow>
+</Searchbar>
 </div>
 
 <MudButton Color="Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
@@ -47,4 +47,3 @@ margin-left: auto; margin-right: auto;">
     
     
 }
-
