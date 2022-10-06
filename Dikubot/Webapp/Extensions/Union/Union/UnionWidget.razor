@@ -4,6 +4,7 @@
 @using Dikubot.Webapp.Authentication
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using Dikubot.Webapp.Extensions.Discovery.Request
+@using Dikubot.Extensions.Guild
 @namespace Dikubot.Webapp.Extensions.Discovery.Links
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IDialogService DialogService
@@ -58,7 +59,7 @@
         </AuthorizeView>
         @if (!_userService.IsRegistered())
         {
-            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="ShowMore">Login</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Success" Href="/connect">Login</MudButton>
         }
 
     </MudCardActions>
@@ -99,7 +100,8 @@
     <DialogActions>
         @if (!Union.Discord.IsNullOrEmpty())
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Submit" Class="px-10">Join</MudButton>
+            <JoinGuild GuildID="Convert.ToUInt64(Union.Discord)"></JoinGuild>
+            
         }
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Class="px-10">Close</MudButton>
     </DialogActions>
@@ -108,7 +110,7 @@
 
 @code {
     [Parameter] public UnionModel Union{ get; set; }
-    
+
     private void GoToEdit()
     {
         NavigationManager.NavigateTo("/Op/Union/edit/"+Union.Id);
@@ -134,7 +136,9 @@
 
     private void GoToDiscord()
     {
-        NavigationManager.NavigateTo("/Op/Links/edit/"+Union.Id);
+        ShowMore();
+        
+        //NavigationManager.NavigateTo("/");
     }
 
 }
