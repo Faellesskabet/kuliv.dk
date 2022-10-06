@@ -5,7 +5,11 @@
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using Dikubot.Webapp.Extensions.Discovery.Request
 @using Dikubot.Extensions.Guild
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+
 @namespace Dikubot.Webapp.Extensions.Discovery.Links
+
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IDialogService DialogService
 
@@ -22,12 +26,8 @@
             }
             
         </AuthorizeView>
-        @foreach (var tag in Union.GetTags())
-        {
-            //Kan ikke gøres direkte :(
-            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
-            <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
-        }
+        <TagDisplay Tags="Union.Tags"></TagDisplay>
+
     </div>
     <MudCardHeader Style="padding-bottom: 0">
         <CardHeaderAvatar>
@@ -77,12 +77,7 @@
                 <MudIconButton Icon="@Icons.Filled.Edit" aria-label="Edit" OnClick="MakeRequest" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
             }
         </MudText>
-        @foreach (var tag in Union.GetTags())
-        {
-            //Kan ikke gøres direkte :(
-            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
-            <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
-        }
+        <TagDisplay Tags="Union.Tags"></TagDisplay>
     </TitleContent>
     <DialogContent>
         <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
