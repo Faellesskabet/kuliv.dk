@@ -20,7 +20,7 @@ namespace Dikubot.Webapp.Extensions.Discovery.Links
         {
             Title = settingsModel.Name;
             Decs = settingsModel.Description;
-            Discord = settingsModel.Id.ToString();
+            Discord = settingsModel.GuildId.ToString();
             TagsEnumerable = settingsModel.TagsEnumerable;
             LogoUrl = settingsModel.LogoUrl;
             Facebook = settingsModel.FacebookUrl;
