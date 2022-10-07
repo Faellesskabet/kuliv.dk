@@ -1,6 +1,6 @@
 ﻿
-@page "/Op/Tags/create"
-@page "/Op/Tags/edit/{uuid}"
+@page "/op/tags/create"
+@page "/op/tags/edit/{uuid}"
 
 @using Dikubot.Webapp.Authentication
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar
@@ -24,13 +24,19 @@
                 </MudCardHeader>
                 <MudCardContent>
                     <MudForm>
-                        <MudTextField @bind-Value="@_category.Name" Label="Kalenderens navn" Immediate="@true" MaxLength="32"></MudTextField>
+                        <MudTextField @bind-Value="@_category.Name" Label="Tags navn" Immediate="@true" MaxLength="32"></MudTextField>
                         <MudTextField @bind-Value="@_category.Decs" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
                         <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
                         <MudSelect @bind-Value="@_category.TextColor">
                             <MudSelectItem Value="@TagsMainModel.enumTextColor.black"> black </MudSelectItem>
                             <MudSelectItem Value="@TagsMainModel.enumTextColor.white"> white </MudSelectItem>
                         </MudSelect>
+                        
+                        <MudSelect @bind-Value="@_category.TagType">
+                            <MudSelectItem Value="@TagsMainModel.enumTagType.tag"> Tag </MudSelectItem>
+                            <MudSelectItem Value="@TagsMainModel.enumTagType.category"> category </MudSelectItem>
+                        </MudSelect>
+                        <TagsInput @bind-Value="@_category.CategoryEnumerable" TagType="@TagsMainModel.enumTagType.category"></TagsInput>
                     </MudForm>
                 </MudCardContent>
                 <MudCardActions>

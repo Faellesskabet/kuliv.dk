@@ -27,5 +27,15 @@ namespace Dikubot.DataLayer.Database
         {
             return this.Id.GetHashCode();
         }
+
+        public virtual List<string> GetSearchContent()
+        {
+            return new List<string>();
+        }
+
+        public virtual HashSet<Guid> GetTags()
+        {
+            return new HashSet<Guid>();
+        }
     }
 }
