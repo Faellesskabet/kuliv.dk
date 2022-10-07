@@ -25,11 +25,12 @@ else
     public SocketGuildDto Guild { get; set; }
     private List<MessageModel> _messages;
     private bool _loaded;
-    
-    protected override async Task OnInitializedAsync()
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         _messages = new NewsServices(Guild.Guild).Get(10, model => model.TimeStamp);
         _loaded = true;
-    }  
+        StateHasChanged();
+    }
 
 }
