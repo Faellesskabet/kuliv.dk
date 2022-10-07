@@ -31,7 +31,7 @@
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent Class="pt-16">
-        <MudBreadcrumbs Items="_breadcrumbItems" MaxItems="6">
+        <MudBreadcrumbs Items="_breadcrumbItems" MaxItems="6" Style="height: 0px;">
             <ItemTemplate Context="item">
                 <MudLink Href="@item.Href" Color="Color.Primary">@item.Text</MudLink>
             </ItemTemplate>
