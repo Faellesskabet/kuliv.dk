@@ -10,25 +10,25 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService;
 
-<MudHidden Breakpoint="Breakpoint.SmAndUp" Invert="true">
-   <MudAppBar Elevation="1" Color="Color.Transparent" >
+@if (_isSmall)
+{
+    <MudAppBar Elevation="1" Style="background-color: #231b2f">
+        <MudButton Variant="Variant.Text"
+                   Href="/"> <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText></MudButton>
+        <MudButton Variant="Variant.Text"
+                   Href="/discovery/unions">Foreninger</MudButton>
+        <MudButton Variant="Variant.Text"
+                   Href="/discovery/events">Kalender</MudButton>
+        <MudSpacer/>
+        <MudButton Variant="Variant.Text"
+                   Href="/connect">Login</MudButton>
    
-           <MudButton Variant="Variant.Text"
-                      Href="/"> <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText></MudButton>
-           <MudButton Variant="Variant.Text"
-                      Href="/Discovery/Unions">Foreninger</MudButton>
-       <MudButton Variant="Variant.Text"
-                      Href="/Discovery/Events">Kalender</MudButton>
-       <MudSpacer/>
-   
-           <MudButton Variant="Variant.Text"
-                      Href="/connect">Login</MudButton>
-   
-           <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
-       </MudAppBar>
-</MudHidden>
-<MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
-   <MudAppBar Elevation="1" Color="Color.Transparent">
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
+    </MudAppBar>
+}
+
+<MudHidden Breakpoint="Breakpoint.Xs" @bind-IsHidden="@_isSmall" Invert="true">
+   <MudAppBar Elevation="1" Style="background-color: #231b2f">
            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
            <MudSpacer />
            <MudButton Variant="Variant.Text"
@@ -39,23 +39,43 @@
         
            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
            </MudAppBar>
-       <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Temporary">
+       <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Temporary" Style="@($"background-color: {NavColor}; color: {NavTextColor};")">
            <MudDrawerHeader>
                <MudText Typo="Typo.h6">KULiv.dk</MudText>
            </MudDrawerHeader>
            <MudNavMenu>
-               <MudNavLink Match="NavLinkMatch.All" Href="/Discovery/Unions">Foreninger</MudNavLink>
-               <MudNavLink Match="NavLinkMatch.All" Href="/Discovery/Events">Kalender</MudNavLink>
+               <MudNavLink Match="NavLinkMatch.All" Href="/discovery/enions">Foreninger</MudNavLink>
+               <MudNavLink Match="NavLinkMatch.All" Href="/discovery/events">Kalender</MudNavLink>
            </MudNavMenu>
        </MudDrawer>
 </MudHidden>
 
 @code {
+
+    bool _isSmall = true;
     bool open = false;
-    
+    private string NavColor = "";
+    private string NavTextColor = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        NavColor = GetColor().Value;
+        NavTextColor = GetTextColor().Value;
+    }
+
     void ToggleDrawer()
     {
         open = !open;
+    }
+    
+    private MudColor GetColor()
+    {
+        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.Background : App.ThemeProvider.Theme.Palette.Background;
+    }
+
+    private MudColor GetTextColor()
+    {
+        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.TextPrimary : App.ThemeProvider.Theme.Palette.TextPrimary;
     }
 
 }
