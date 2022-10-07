@@ -40,7 +40,7 @@ else
 
     private bool _loaded;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!_cache.ContainsKey(Message))
         {
@@ -49,6 +49,7 @@ else
         }
         _discordMessage = _cache[Message];
         _loaded = true;
+        StateHasChanged();
     }
 
 }
