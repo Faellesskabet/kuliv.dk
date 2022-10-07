@@ -1,0 +1,118 @@
+﻿@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using System.Diagnostics.CodeAnalysis
+@using Dikubot.DataLayer.Database
+@using Microsoft.AspNetCore.Components
+@namespace Dikubot.Extensions.search
+@typeparam TMainModel
+
+
+<MudGrid Justify="Justify.Center">
+    @if (ShowSearchbar)
+        {
+            <MudItem lg="12" md="12" sm="12">
+                <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
+            </MudItem>
+        }
+    @if (ShowTags)
+    {
+        <MudChipSet @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
+           @foreach (var cat in _Categories)
+           {
+
+               
+               <MudButton OnClick="() => {var test = NotShowCategories.Contains(cat.Id) ? NotShowCategories.Remove(cat.Id) : NotShowCategories.Add(cat.Id); }">
+                    @cat.Name
+               </MudButton>
+               
+               @if (!NotShowCategories.Contains(cat.Id))
+               {
+                   @foreach (var tag in _Tags.Where(tag => tag.Category.Contains(cat.Id)))
+                   {
+                       //Kan ikke gøres direkte :(
+                       string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+                       <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
+                   } 
+               }
+           }
+            
+        </MudChipSet>
+    }
+</MudGrid>
+<MudGrid Justify="Justify.Center">
+    <MudPagination Color="Color.Primary" Count="_count" @bind-Selected="@_selected" Class="mt-4" />
+</MudGrid>
+
+@foreach (var item in ItemList.Skip((_selected-1)*NumberOfItems).Take(NumberOfItems))
+        {
+           
+            if (TemplateRow is not null)
+            {
+                @TemplateRow(item);
+            }
+            
+        }
+<MudGrid Justify="Justify.Center">
+        <MudPagination Color="Color.Primary" Count="_count" @bind-Selected="@_selected" Class="mt-4" />
+</MudGrid>
+
+@code {
+    private int _selected = 1;
+    private int _count => ItemList.Count / NumberOfItems+1;
+    
+    [Parameter] public int NumberOfItems { get; set; } = 9;
+    
+    
+    
+    [Parameter]
+    public string SearchQuery { get; set; }
+
+    [Parameter]
+    public bool ShowTags { get; set; } = true;
+
+    [Parameter]
+    public bool ShowSearchbar { get; set; } = true;
+    
+    [Parameter]
+    public RenderFragment<TMainModel>? TemplateRow { get; set; }
+
+    private HashSet<TagsMainModel> _Tags { set; get; } = _tagServices.GetAll().Where(t => t.TagType == TagsMainModel.enumTagType.tag).ToHashSet();
+    private List<TagsMainModel> _Categories { set; get;  } = _tagServices.GetAll().Where(t => t.TagType == TagsMainModel.enumTagType.category).ToList();
+    private HashSet<Guid> NotShowCategories { get; set; } = new HashSet<Guid>();
+    
+    
+    [Parameter, AllowNull]
+    public IReadOnlyList<TMainModel> Items { get; set; }
+    
+    //SearchCriteria((item as MainModel).GetSearchContent(),(item as MainModel).GetTags())
+    public List<TMainModel> ItemList => Items.Where(item =>
+        SearchCriteria((item as MainModel).GetSearchContent(), (item as MainModel).GetTags())).ToList();
+    
+    
+    private static TagServices _tagServices = new TagServices();
+    
+    MudChip[] selected = new MudChip[]{};
+
+    public bool SearchCriteria(List<string> items = null,  HashSet<Guid> tags = null )
+    {
+        if (tags != null)
+        {
+            HashSet<Guid> hasSelected = selected.Select(_ => (_.Value is Guid ? (Guid) _.Value : default) ).ToHashSet();
+            if (!(_Tags.Count == hasSelected.Count || hasSelected.Count ==0) && !hasSelected.IsSubsetOf(tags) )
+            {
+                return false;
+            }
+        }
+
+        if (items != null)
+        {
+            return string.IsNullOrWhiteSpace(SearchQuery) 
+                   || items.Exists(s => s?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false);
+        }
+
+        return true;
+    }
+    
+    
+    
+    
+}

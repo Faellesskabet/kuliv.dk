@@ -26,8 +26,20 @@ namespace Dikubot.Webapp.Extensions.Discovery.Links
             Facebook = settingsModel.FacebookUrl;
             Href = settingsModel.Webpage;
         }
-        
-        
+
+        public override List<string> GetSearchContent()
+        {
+            return new List<string>()
+            {
+                Title, Decs
+            };
+        }
+
+        public override HashSet<Guid> GetTags()
+        {
+            return Tags;
+        }
+
         [BsonElement("Title")] 
         public string Title { get; set; }
         
@@ -59,11 +71,7 @@ namespace Dikubot.Webapp.Extensions.Discovery.Links
     
         [BsonIgnore]
         public IEnumerable<Guid> TagsEnumerable { get => Tags; set => Tags = new HashSet<Guid>(value); }
-
-        public List<TagsMainModel> GetTags()
-        {
-            return GetTags(new TagServices());
-        }
+        
         public List<TagsMainModel> GetTags(TagServices services)
         {
             return Tags.Select(t => services.Get(t)).ToList();
