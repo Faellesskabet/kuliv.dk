@@ -20,9 +20,7 @@
         <MudButton Variant="Variant.Text"
                    Href="/discovery/events">Kalender</MudButton>
         <MudSpacer/>
-        <MudButton Variant="Variant.Text"
-                   Href="/connect">Login</MudButton>
-   
+
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
     </MudAppBar>
 }
@@ -34,14 +32,12 @@
            <MudButton Variant="Variant.Text"
                       Href="/"> <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText></MudButton>
            <MudSpacer />
-     <MudButton Variant="Variant.Text"
-                           Href="/connect">Login</MudButton>
-        
+
            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
            </MudAppBar>
        <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Temporary" Style="@($"background-color: {NavColor}; color: {NavTextColor};")">
            <MudDrawerHeader>
-               <MudText Typo="Typo.h6">KULiv.dk</MudText>
+               <MudText Typo="Typo.h6">kuLiv.dk</MudText>
            </MudDrawerHeader>
            <MudNavMenu>
                <MudNavLink Match="NavLinkMatch.All" Href="/discovery/unions">Foreninger</MudNavLink>
