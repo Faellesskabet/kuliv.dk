@@ -8,9 +8,12 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService
 
+<MudHidden Breakpoint="Breakpoint.Sm">
     <MudAlert Severity="Severity.Warning" Square="true" Class="my-2">Dette er en åben beta af KULiv.dk. Hvis du finder en fejl, 
-        må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues</MudAlert>
-    <MudGrid>
+            må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues</MudAlert>
+</MudHidden>
+<MudGrid>
+    <MudHidden Breakpoint="Breakpoint.Sm">
         <MudItem xs="36" sm="18" md="12">
             <MudCarousel Style="height:100px;" ShowArrows="@false" ShowBullets="@false" AutoCycle="@true" TData="object">
                 <MudCarouselItem Transition="Transition.Slide" Color="@Color.Primary">
@@ -30,7 +33,8 @@
                 </MudCarouselItem>
             </MudCarousel>
         </MudItem>
-        <MudItem xs="12" sm="12" md="4">
+</MudHidden>
+    <MudItem xs="12" sm="12" md="4">
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 <MudCardHeader>
                     <MudIcon Icon="@Icons.Filled.Group" Color="Color.Info"></MudIcon>
