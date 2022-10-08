@@ -23,6 +23,8 @@ else
             <MudCardContent>
                 <MudTextField @bind-Value="_guildSettingsModel.Name" Label="Navn" HelperText="Hvad skal dit fællesskab hedde i vores system?" Immediate="@true"></MudTextField>
                 <MudSwitch @bind-Checked="_guildSettingsModel.IsPublic" Color="Color.Success" Label="Offentlig - Skal folk der ikke er en del af dit fællesskab kunne se den i vores system?"></MudSwitch>
+                <MudSwitch @bind-Checked="_guildSettingsModel.ForceVerified" Color="Color.Success" Label="Skal man være verified for at se dit fællesskab i vores system? (Overskrives af Offentlig)"></MudSwitch>
+                
                 <MudTextField @bind-Value="_guildSettingsModel.LogoUrl" Label="Logo url" HelperText="Skal være et link" Immediate="@true"></MudTextField>
                 <MudTextField @bind-Value="_guildSettingsModel.BannerUrl" Label="Banner url" HelperText="Skal være et link" Immediate="@true"></MudTextField>
                 <MudSelect MultiSelection="true" 
@@ -42,7 +44,6 @@ else
                 
 
                 <MudSwitch @bind-Checked="_guildSettingsModel.ForceNameChange" Color="Color.Success" Label="Skal vi tvinge alle til at bruge deres rigtige navn? Kan ikke fortrydes"></MudSwitch>
-                <MudSwitch @bind-Checked="_guildSettingsModel.ForceVerified" Color="Color.Success" Label="Skal man være verified for at se dit fællesskab i vores system?"></MudSwitch>
                 <MudSelect Label="Verified Rolle" HelperText="Skal folk få en rolle når de er verified? Indsæt rollens ID her!" @bind-Value="_guildSettingsModel.VerifiedRole"
                            Text="@(guild.Roles.FirstOrDefault(role => role.Id == _guildSettingsModel.VerifiedRole)?.Name ?? "")">
                     @foreach (var socketRole in guild.Roles)

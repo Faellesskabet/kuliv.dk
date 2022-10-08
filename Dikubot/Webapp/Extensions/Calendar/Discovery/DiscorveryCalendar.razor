@@ -1,0 +1,25 @@
+﻿@page "/discovery/calendar"
+
+@inject UserService _userService;
+@inject NavigationManager _navigationManager;
+@using Dikubot.Extensions.Calender;
+@attribute [AllowAnonymous]
+
+<MudIconButton Icon="@Icons.Filled.AddBox" OnClick="Request" Color="Color.Inherit"></MudIconButton>
+<CalendarWidget ReadOnly="readOnly"> </CalendarWidget>
+
+@code {
+   private bool readOnly = true;
+   protected override void OnInitialized()
+   {
+      readOnly =  _userService?.GetUserGlobalModel()?.IsAdmin.Equals(false) ?? true ;
+      base.OnInitialized();
+   }
+
+   private void Request()
+   {
+      _navigationManager.NavigateTo($"/Request/Event/create");
+   }
+
+   
+}
