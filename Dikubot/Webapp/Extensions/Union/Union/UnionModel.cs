@@ -25,6 +25,7 @@ namespace Dikubot.Webapp.Extensions.Discovery.Links
             LogoUrl = settingsModel.LogoUrl;
             Facebook = settingsModel.FacebookUrl;
             Href = settingsModel.Webpage;
+            BannerUrl = settingsModel.BannerUrl;
         }
 
         public override List<string> GetSearchContent()
@@ -49,6 +50,9 @@ namespace Dikubot.Webapp.Extensions.Discovery.Links
         
         [BsonElement("LogoUrl")] 
         public string LogoUrl { get; set; }
+
+        [BsonElement("BannerUrl")]
+        public string BannerUrl { get; set; }
 
         [BsonElement("Href")] 
         public string Href { get; set; }

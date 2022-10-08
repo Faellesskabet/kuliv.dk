@@ -34,12 +34,22 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
         
         [BsonIgnore]
         public IEnumerable<Guid> TagsEnumerable { get => Tags; set => Tags = new HashSet<Guid>(value); }
-        public List<TagsMainModel> GetTags()
+
+        public override HashSet<Guid> GetTags()
         {
-            var tagSevice = new TagServices();
-            return Tags.Select(t => tagSevice.Get(t)).ToList();
+            return Tags;
         }
-        
+
+        public override List<string> GetSearchContent()
+        {
+            return new List<string>()
+            {
+                Subject,
+                Description,
+                Location
+            };
+        }
+
         [BsonElement("Accepted")]
         public HashSet<string> Accepted { get; set; } = new HashSet<string>();
 

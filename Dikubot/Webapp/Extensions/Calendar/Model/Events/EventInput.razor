@@ -13,18 +13,19 @@
             <MudSwitch @bind-Checked="@Value.IsAllDay" Color="Color.Primary" Label="All Day"/>
             <TagsInput @bind-Value="Value.TagsEnumerable"></TagsInput>
         
-            <div class="d-flex align-center justify-space-between">
-                <div>
+            <MudGrid>
+                <MudItem xs="12" sm="6">
                     <MudText> Start:</MudText>
                     <MudTimePicker Label="24 hours" @bind-Time="startTimeSpan" Disabled="Value.IsAllDay"/>
                     <MudDatePicker Label="Start tid" @bind-Date="startTime" DisableToolbar="true"/>
-                </div>
-                <div>
+                </MudItem>
+                <MudItem xs="12" sm="6">
                     <MudText> End:</MudText>
                     <MudTimePicker Label="24 hours" @bind-Time="endTimeSpan" Disabled="Value.IsAllDay"/>
                     <MudDatePicker Label="Slut tid" @bind-Date="endTime" DisableToolbar="true"/>
-                </div>
-            </div>
+                </MudItem>
+            </MudGrid>
+            
         
             <MudTextField @bind-Value="@Value.Description" Label="Kategori beskrivelse" Immediate="@true" Lines="5" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
         
