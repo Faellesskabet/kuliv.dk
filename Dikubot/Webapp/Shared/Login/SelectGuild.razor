@@ -8,6 +8,20 @@
 @using Data.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime;
+@inject UserService _userService;
+
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Microsoft.IdentityModel.Tokens
+@using Data.Discord
+@inject NavigationManager NavigationManager
+
+@using Dikubot.Extensions.search
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Global.GuildSettings;
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using System.Reflection
+@using Color = MudBlazor.Color
 
 @if (!_loaded)
 {
@@ -15,55 +29,54 @@
 }
 else
 {
-    <h1>Dine fællesskaber:</h1>
-    <GuildWidgetCollection Guilds="_mutualGuilds.Select(SocketToModelGuild).ToList().Concat(_complementGuilds).ToList()"></GuildWidgetCollection>
+    <Searchbar Items="_models" Context="UnionModel">
+        <TemplateRow Context="unionModel" >
+            <MudItem xs="12" sm="6" >
+                <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"></UnionWidget>
+            </MudItem>
+        </TemplateRow>
+    </Searchbar>
+    <MudButton Color="@Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
 }
+   
 @code {
     [Parameter]
     public Login parent { get; set; }
 
     private bool _loaded = false;
-    private Authenticator _authenticator;
-    private UserIdentity _user;
-    private HashSet<SocketGuild> _mutualGuilds; // we use a hashmap because it's faster:)
-    private List<GuildWidgetDto> _complementGuilds; // guilds that are not mutual
-    private IUser _discordUser;
-    private GuildSettingsService _guildSettingsService = new GuildSettingsService();
-    private string _mutualSearchQuery = "";
-    private string _complementSearchQuery = "";
     
+    [Parameter] public List<GuildWidgetDto> Guilds { get; set; }
     
-    // this code is terribly optimized
-    protected override async Task OnInitializedAsync()
-    {
-        _authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await _authenticator.GetAuthenticationStateAsync();
-        _user = (UserIdentity) authState.User.Identity;
+    public GuildSettingsService _GuildSettingsService = new GuildSettingsService();
+    
+    public List<UnionModel> _models { get; set; }
 
-        _discordUser = _user?.UserGlobalModel.DiscordUser;
-        if (_discordUser == null)
-        {
-            // this shouldn't really happen but if it does alert the user: 
-            await JsRuntime.InvokeVoidAsync("alert", "Der er problemer med din bruger. Prøv at clear dine cookies og refresh, eller kontakt en Administrator");
-            return;
-        }
+    protected override void OnInitialized()
+    {
+        var userGuilds = _userService.GetUserGlobalModel().Guilds.Select(model => model.Id).ToHashSet();
         
-        SocketUser socketUser = DiscordBot.ClientStatic.GetUser(_discordUser.Id);
-        _mutualGuilds = new HashSet<SocketGuild>();
-        if (socketUser != null)
-        {
-            _mutualGuilds = socketUser.MutualGuilds.ToHashSet();   
-        }
+        var list = _GuildSettingsService.Get()
+            .Where(model => model.IsPublic 
+                            || model.ForceVerified ||
+                userGuilds.Contains(model.GuildId))
+            .OrderBy(model => userGuilds.Contains(model.GuildId))
+            .ThenBy(model => model.Name)
+            .Select(model => new UnionModel(model)).ToList();
 
-        _complementGuilds = DiscordBot.ClientStatic.Guilds.Where(guild => !_mutualGuilds.Contains(guild)).Select(guild => new GuildWidgetDto(_guildSettingsService.Get(guild), false)).ToList();
+
+        _models = list;
+
         _loaded = true;
-        this.StateHasChanged();
+        base.OnInitialized();
     }
-
-    private GuildWidgetDto SocketToModelGuild(SocketGuild guild)
+    
+    
+   
+    
+    private void GotoAddGuild()
     {
-        GuildSettingsService guildSettingsService = new GuildSettingsService();
-        GuildSettingsModel guildSettingsModel = guildSettingsService.Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
-        return new GuildWidgetDto(guildSettingsModel, true);
+        NavigationManager.NavigateTo("/addguild");
     }
+    
+    
 }

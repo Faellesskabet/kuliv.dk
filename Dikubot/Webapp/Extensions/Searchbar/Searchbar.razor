@@ -8,40 +8,58 @@
 
 <MudGrid Justify="Justify.Center">
     @if (ShowSearchbar)
-        {
-            <MudItem lg="12" md="12" sm="12">
-                <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
-            </MudItem>
-        }
+    {
+        <MudItem lg="12" md="12" sm="12">
+            <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
+        </MudItem>
+    }
     @if (ShowTags)
     {
         <MudChipSet @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
-           @foreach (var cat in _Categories)
-           {
-
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false" Style="height: 55px">
+                @foreach (var cat in _Categories)
+                {
+                    @if (!ShowCategories.Contains(cat.Id))
+                    {
+                        <div style="margin-top: auto;">
+                            <MudTooltip Text="@cat.Decs">
+                                <MudButton OnClick="() => ShowCategories.Add(cat.Id)"
+                                           Style="height: 49px"
+                                           Variant="Variant.Outlined"
+                                           EndIcon="@Icons.TwoTone.ExpandMore">
+                                    @cat.Name
+                                </MudButton>
+                            </MudTooltip>
+                       
+                        </div>
+                    }
                
-               <MudButton OnClick="() => {var test = NotShowCategories.Contains(cat.Id) ? NotShowCategories.Remove(cat.Id) : NotShowCategories.Add(cat.Id); }">
-                    @cat.Name
-               </MudButton>
-               
-               @if (!NotShowCategories.Contains(cat.Id))
-               {
-                   @foreach (var tag in _Tags.Where(tag => tag.Category.Contains(cat.Id)))
-                   {
-                       //Kan ikke gøres direkte :(
-                       string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
-                       <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
-                   } 
-               }
-           }
-            
+                    @if (ShowCategories.Contains(cat.Id))
+                    {
+                        <MudField Label="@cat.Name" Variant="Variant.Outlined" InnerPadding="false"
+                                  AdornmentIcon="@Icons.Filled.Close"
+                                  Adornment="Adornment.End"
+                                  AdornmentColor="Color.Primary" 
+                                  OnAdornmentClick="() =>ShowCategories.Remove(cat.Id) ">
+                            @foreach (var tag in _Tags.Where(tag => tag.Category.Contains(cat.Id)))
+                            {
+                                //Kan ikke gøres direkte :(
+                                string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+                                <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
+                            }
+                        </MudField>
+                    }
+                }
+            </MudButtonGroup>
         </MudChipSet>
     }
 </MudGrid>
-<MudGrid Justify="Justify.Center">
-    <MudPagination Color="Color.Primary" Count="_count" @bind-Selected="@_selected" Class="mt-4" />
+<MudItem xs="12">
+<MudGrid Justify="Justify.Center" Style="margin-top: 12px; margin-bottom: 12px">
+    <MudPagination Color="Color.Primary" Count="_count" @bind-Selected="@_selected" Class="mt-4"/>
 </MudGrid>
-
+</MudItem>
+<MudGrid>
 @foreach (var item in ItemList.Skip((_selected-1)*NumberOfItems).Take(NumberOfItems))
         {
            
@@ -51,7 +69,8 @@
             }
             
         }
-<MudGrid Justify="Justify.Center">
+</MudGrid>
+<MudGrid Justify="Justify.Center" Style="margin-bottom: 12px">
         <MudPagination Color="Color.Primary" Count="_count" @bind-Selected="@_selected" Class="mt-4" />
 </MudGrid>
 
@@ -77,7 +96,7 @@
 
     private HashSet<TagsMainModel> _Tags { set; get; } = _tagServices.GetAll().Where(t => t.TagType == TagsMainModel.enumTagType.tag).ToHashSet();
     private List<TagsMainModel> _Categories { set; get;  } = _tagServices.GetAll().Where(t => t.TagType == TagsMainModel.enumTagType.category).ToList();
-    private HashSet<Guid> NotShowCategories { get; set; } = new HashSet<Guid>();
+    private HashSet<Guid> ShowCategories { get; set; } = new HashSet<Guid>();
     
     
     [Parameter, AllowNull]
