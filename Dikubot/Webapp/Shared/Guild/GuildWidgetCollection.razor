@@ -4,54 +4,48 @@
 @using Data.Discord
 @inject NavigationManager NavigationManager
 
+@using Dikubot.Extensions.search
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Global.GuildSettings;
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using System.Reflection
 
-<MudGrid Justify="Justify.Center">
-    <MudItem lg="12" md="12" sm="12">
-        <MudTextField @bind-Value="SearchQuery" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" Immediate="@true"/>
-    </MudItem>
-    <MudChipSet @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
-        @foreach (var tag in _tagServices.GetAll())
-        {
-            //Kan ikke gøres direkte :(
-            string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
-            <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
-        }
-    </MudChipSet>
-</MudGrid>
 
-<div class="d-flex flex-row gap-16 justify-center flex-wrap" style="margin-top: 20px; max-width: 90%; min-width: 90%;
-margin-left: auto; margin-right: auto;">
-    @foreach (GuildWidgetDto guild in Guilds)
-    {
-        @if (SearchCriteria(guild.GuildSettingsModel))
-        {
-            <GuildWidget GuildWidgetDto="guild"></GuildWidget>
-        }
-    }
-</div>
+    <Searchbar Items="_models" Context="UnionModel">
+        <TemplateRow Context="unionModel" >
+           <MudItem xs="12" sm="6" md="4" lg="3" >
+           <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"></UnionWidget>
+           </MudItem>
+        </TemplateRow>
+    </Searchbar>
+
 
 <MudButton Color="Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
 
 @code {
     [Parameter] public List<GuildWidgetDto> Guilds { get; set; }
-    private string SearchQuery { get; set; }
-
-    private TagServices _tagServices = new TagServices();
     
-    MudChip[] selected = new MudChip[]{};
+    public GuildSettingsService _GuildSettingsService = new GuildSettingsService();
+    readonly UnionServices _services = new UnionServices();
+    
+    public List<UnionModel> _models { get; set; }
 
-    private bool SearchCriteria(GuildSettingsModel guild)
+    protected override void OnInitialized()
     {
-        HashSet<Guid> hasSelected = selected.Select(_ => (_.Value is Guid ? (Guid) _.Value : default) ).ToHashSet();
-        var hashSetGuildTag = guild.Tags;
+        var list = _services.GetAll();
         
-        if (!(_tagServices.GetAll().Count == hasSelected.Count || hasSelected.Count ==0) && !hasSelected.IsSubsetOf(hashSetGuildTag) )
-        {
-            return false;
-        }
+        var list2 = _GuildSettingsService.Get()
+            .Where(model => model.IsPublic)
+            .Select(model => new UnionModel(model));
+        list.AddRange(list2);
         
-        return string.IsNullOrWhiteSpace(SearchQuery) || (guild.Name?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false) || (guild.Description?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false);
+        _models = list.OrderBy(model => model.Title).ToList();
+        
+        base.OnInitialized();
     }
+    
+    
+   
     
     private void GotoAddGuild()
     {

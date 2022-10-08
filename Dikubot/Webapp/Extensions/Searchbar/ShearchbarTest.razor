@@ -31,7 +31,6 @@ margin-left: auto; margin-right: auto;">
     protected override void OnInitialized()
     {
         var list = _services.GetAll();
-        
         var list2 = _GuildSettingsService.Get().Where(model => model.IsPublic).Select(model => new UnionModel(model));
         list.AddRange(list2);
         
