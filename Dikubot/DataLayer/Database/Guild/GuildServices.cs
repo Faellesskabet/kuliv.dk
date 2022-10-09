@@ -20,5 +20,8 @@ namespace Dikubot.DataLayer.Database.Guild
         {
             Guild = guild;
         }
+        
+        
+        
     }
 }
