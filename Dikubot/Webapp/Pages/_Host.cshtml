@@ -22,7 +22,7 @@
     <link href="https://cdn.syncfusion.com/blazor/19.4.48/styles/material.css" rel="stylesheet"/>
     <script src="https://cdn.syncfusion.com/blazor/19.4.48/syncfusion-blazor.min.js" type="text/javascript"></script>
     
-    <title>kuliv.dk</title>
+    <title>kuliv.dk - An online community for students</title>
     <base href="~/"/>
     <link href="/css/site.css" rel="stylesheet"/>
     <link rel="stylesheet" href="/Dikubot.styles.css"/>
@@ -69,7 +69,12 @@
         document.body.style.backgroundColor = "";
         document.getElementById("loading-host").remove();
         Blazor.start();
+        
+        if (window.location.pathname != "/") {
+            document.title = "kuliv.dk" + window.location.pathname + " - An online community for students";    
+        }
       });
+      
       console.log("### Welcome to kuliv.dk! ###\nInstead of creeping through the console, come help us make this platform even better at https://github.com/Faellesskabet/Discord-Botten");
     </script>
 </body>
