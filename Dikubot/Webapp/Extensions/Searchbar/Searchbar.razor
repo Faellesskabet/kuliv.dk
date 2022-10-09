@@ -56,11 +56,18 @@
 </MudGrid>
 <MudItem xs="12">
 <MudGrid Justify="Justify.Center" Style="margin-top: 12px; margin-bottom: 12px">
-    <MudPagination Color="Color.Primary" Count="_count" @bind-Selected="@_selected" Class="mt-4"/>
+       @if (TemplatePagination is null)
+       {
+           <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4"/>
+       }
+       else
+       {
+           @TemplatePagination <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4" />
+       }
 </MudGrid>
 </MudItem>
 <MudGrid>
-@foreach (var item in ItemList.Skip((_selected-1)*NumberOfItems).Take(NumberOfItems))
+@foreach (var item in ItemList.Skip((Selected-1)*NumberOfItems).Take(NumberOfItems))
         {
            
             if (TemplateRow is not null)
@@ -71,12 +78,23 @@
         }
 </MudGrid>
 <MudGrid Justify="Justify.Center" Style="margin-bottom: 12px">
-        <MudPagination Color="Color.Primary" Count="_count" @bind-Selected="@_selected" Class="mt-4" />
+    @if (TemplatePagination is null)
+    {
+        <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4" />
+    }
+    else
+    {
+        @TemplatePagination <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4" />
+    }
+    
 </MudGrid>
 
 @code {
-    private int _selected = 1;
-    private int _count => ItemList.Count / NumberOfItems+1;
+
+    [Parameter]
+    public int Selected { get; set; } = 1;
+
+    private int Count => ItemList.Count / NumberOfItems+1;
     
     [Parameter] public int NumberOfItems { get; set; } = 9;
     
@@ -93,14 +111,19 @@
     
     [Parameter]
     public RenderFragment<TMainModel>? TemplateRow { get; set; }
-
+    
+    [Parameter]
+    public RenderFragment? TemplatePagination { get; set; }
+    
+    
+    
     private HashSet<TagsMainModel> _Tags { set; get; } = _tagServices.GetAll().Where(t => t.TagType == TagsMainModel.enumTagType.tag).ToHashSet();
     private List<TagsMainModel> _Categories { set; get;  } = _tagServices.GetAll().Where(t => t.TagType == TagsMainModel.enumTagType.category).ToList();
     private HashSet<Guid> ShowCategories { get; set; } = new HashSet<Guid>();
     
     
     [Parameter, AllowNull]
-    public IReadOnlyList<TMainModel> Items { get; set; }
+    public List<TMainModel> Items { get; set; }
     
     //SearchCriteria((item as MainModel).GetSearchContent(),(item as MainModel).GetTags())
     public List<TMainModel> ItemList => Items.Where(item =>

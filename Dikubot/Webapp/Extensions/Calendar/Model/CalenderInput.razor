@@ -1,0 +1,55 @@
+﻿@using Dikubot.DataLayer.Static
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using global::Discord.WebSocket
+
+@namespace Dikubot.Extensions.Calender
+
+@inject UserService _userService;
+
+
+<MudSelect MultiSelection="true" 
+           Label="Calenderer" 
+           HelperText="Hvilke kalendere begivenheden er inde under"
+           @bind-SelectedValues="Value"
+           MultiSelectionTextFunc="list => GetTagsString()" Text="@GetTagsString()"
+           OnClose="OnValueChanged">
+    @foreach (var tag in ListModel.SelectMany(m => m.Item2))
+    {
+        <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
+    }
+</MudSelect>
+
+
+
+@code {
+    [Parameter]
+    public  IEnumerable<Guid> Value { get; set; }
+
+    [Parameter]
+    public EventCallback<IEnumerable<Guid>> ValueChanged { get; set; }
+    
+    [Parameter]
+    public CalendarModel.EnumCalendarType TagType { get; set; } = CalendarModel.EnumCalendarType.Event;
+    
+    private List<(SocketGuild,List<CalendarModel>)> ListModel => CalendarServices.GetAllPermisionsCalendars(TagType, _userService.GetUserGlobalModel() ); 
+        
+
+    private async Task OnValueChanged()
+    {
+        await ValueChanged.InvokeAsync(Value);
+
+    }
+    
+    
+    private string GetTagsString()
+    {
+        var test = Value
+            .Select(tag =>
+                ListModel.SelectMany(m => m.Item2)
+                    .First(model => model.Id == tag).Name ?? "").ToList();
+        return Util.ConcatListToString(test);
+            
+
+    }
+}

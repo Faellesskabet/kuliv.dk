@@ -11,12 +11,12 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 {
     public class EventModel : EventsAttributes
     {
-        
-        [BsonElement("Calendars")] 
-        public string Calendars{ get; set; }
 
-        [BsonElement("Hosts")] 
-        public HashSet<string> Hosts{ get; set; }
+        [BsonElement("Calendars")] public HashSet<Guid> Calendars { get; set; } = new HashSet<Guid>();
+        [BsonIgnore]
+        public IEnumerable<Guid> CalendarsEnumerable { get => Calendars; set => Calendars = new HashSet<Guid>(value); }
+
+        [BsonElement("Hosts")] public HashSet<string> Hosts { get; set; } = new HashSet<string>();
 
         [BsonElement("HostServers")]
         public HashSet<Guid> HostServers{ get; set; } = new HashSet<Guid>();
@@ -66,8 +66,8 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
                     return $"{StartTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)} - " +
                            $"{EndTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
                 }
-                return $"{StartTime.ToString("HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)} - " +
-                       $"{EndTime.ToString("HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+                return $"{StartTime.ToString("'Kl.'HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)} - " +
+                       $"{EndTime.ToString("'Kl.'HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
             } if(!StartTime.Month.Equals(EndTime.Month))
             {
                 if (IsAllDay)
@@ -75,8 +75,8 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
                     return $"{StartTime.ToString("'d.'dd/MM", CultureInfo.InvariantCulture)} - " +
                            $"{EndTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
                 }
-                return $"{StartTime.ToString("HH:mm 'd.'dd/MM", CultureInfo.InvariantCulture)} - " +
-                       $"{EndTime.ToString("HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+                return $"{StartTime.ToString("'Kl.'HH:mm 'd.'dd/MM", CultureInfo.InvariantCulture)} - " +
+                       $"{EndTime.ToString("'Kl.'HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
             }
             if(!StartTime.Day.Equals(EndTime.Day))
             {
@@ -85,15 +85,15 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
                     return $"{StartTime.ToString("'d.'dd", CultureInfo.InvariantCulture)} - " +
                            $"{EndTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
                 }
-                return $"{StartTime.ToString("HH:mm 'd.'dd", CultureInfo.InvariantCulture)} - " +
-                       $"{EndTime.ToString("HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+                return $"{StartTime.ToString("'Kl.'HH:mm 'd.'dd", CultureInfo.InvariantCulture)} - " +
+                       $"{EndTime.ToString("'Kl.'HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
             }
             if (IsAllDay)
             {
                 return $"{StartTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
             }
-            return $"{StartTime.ToString("HH:mm", CultureInfo.InvariantCulture)} - " +
-                   $"{EndTime.ToString("HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+            return $"{StartTime.ToString("'Kl.'HH:mm", CultureInfo.InvariantCulture)} - " +
+                   $"{EndTime.ToString("'Kl.'HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
             
                 
         }

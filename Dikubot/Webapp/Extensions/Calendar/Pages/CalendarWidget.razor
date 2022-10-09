@@ -64,19 +64,21 @@
     //// https://github.com/SyncfusionExamples/google-calendar-synchronization-with-blazor-scheduler/blob/main/Pages/Index.razor
     ///             <SfDataManager AdaptorInstance="@typeof(EquipmentAdaptor)" Adaptor="Adaptors.CustomAdaptor" Key="test" ></SfDataManager> 
     [Parameter]
-    public ulong? GuildId { get; set; }
+    public static ulong? GuildId { get; set; }
 
     [Parameter]
     public bool ReadOnly { get; set; } = true;
     
     [Parameter]
     public List<CalendarModel> ResourceDatasource { get; set; } = new List<CalendarModel>();
-    [Parameter]
-    public List<EventModel> ArrangementData { get; set; } = new List<EventModel>();
-    
+   
     
     [Inject] 
     protected IJSRuntime JsRuntime { get; set; }
+
+
+    public List<EventModel> ArrangementData => _eventsServices.Get(CurrentDate, _userService);
+        
     
     SfSchedule<EventModel> ScheduleObj { get; set; }
     
@@ -84,43 +86,22 @@
     private DateTime CurrentDate { get; set; } = DateTime.Today;
     
     private SocketGuild guild;
-    private UserGlobalModel _user;
+    private UserGlobalModel _user => _userService.GetUserGlobalModel();
     
     
-    private CalendarServices _calendarServices;
-    private EventsServices _eventsServices;
+    
+    private EventsServices _eventsServices = new EventsServices(GuildId?.ToString());
     
     
     protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
-        _user = _userService.GetUserGlobalModel();
         if (!ReadOnly)
         {
             ReadOnly = !_user.Verified;
         }
+        base.OnInitialized();
         
-        if (_user == null)
-        {
-            return;
-        }
-        _eventsServices = new EventsServices(GuildId?.ToString());
-        
-        if (GuildId.HasValue)
-        {
-            guild = DiscordBot.ClientStatic.GetGuild(GuildId ?? new ulong());
-            _calendarServices = new CalendarServices(guild);
-        }
-        else
-        {
-            ///TODO Fjern Guild, når den ikke skal bruges her...
-            guild = DiscordBot.ClientStatic.Guilds.First();
-            _calendarServices = new CalendarServices(guild);
-        }
-        
-        ResourceDatasource = GetCalendarModels();
-        ArrangementData = GetEvents(CurrentDate);
-        
+
     }
     
     
@@ -138,57 +119,7 @@
             }
         }
     }
-
-    private List<CalendarModel> GetCalendarModels()
-    {
-        var roles = GuildId.HasValue ? _user.GetRolesGuid(guild) : _user.GetRolesGuid();
-        
-        return _calendarServices.GetAll(model => model.CalendarType == CalendarModel.EnumCalendarType.Equipment)
-            .FindAll(model => model.Visible != CalendarModel.EnumAvailable.Privat 
-                              || model.Permission.Overlaps(roles)
-                              || model.View.Overlaps(roles));
-        
-    }
     
-    private List<EventModel> GetEvents(DateTime CurrentDate)
-    {
-        return GetEvents(new DateTime(CurrentDate.Year,CurrentDate.Month, 1), 
-            new DateTime(CurrentDate.Year,CurrentDate.Month, 
-                DateTime.DaysInMonth(CurrentDate.Year,CurrentDate.Month),
-                23,59,59));
-    }
-
-    private List<EventModel> GetEvents(DateTime startTime, DateTime endTime)
-    {
-        var roles = GuildId.HasValue ? _user.GetRolesGuid(guild) : _user.GetRolesGuid();
-        
-        
-        
-        List<EventModel> result = _user.DiscordId.IsNullOrEmpty() ? 
-            _eventsServices.GetAll(model => model.StartTime.CompareTo(startTime) >= 0 || 
-                                            model.StartTime.CompareTo(endTime) <= 0 
-                                            || (model.EndTime.CompareTo(startTime) >= 0 
-                                                && model.EndTime.CompareTo(endTime) <= 0)
-            ).Select(m => { m.IsReadonly = true; return m; })
-            .ToList() :
-            _eventsServices.GetAll(model => model.StartTime.CompareTo(startTime) >= 0 ||
-                                               model.StartTime.CompareTo(endTime) <= 0
-                                               ||
-                                               (model.EndTime.CompareTo(startTime) >= 0
-                                                && model.EndTime.CompareTo(endTime) <= 0)
-                ).Select(m => { m.IsReadonly 
-                    = !m.CreateBy.IsNullOrEmpty() && !(m?.CreateBy  == _user?.DiscordId 
-                        || ResourceDatasource.First(rd => rd.Id == m.Id)
-                            .Permission.Overlaps(roles)); return m; })
-                .ToList()
-        ;
-    //.FindAll(EMmodel => ResourceDatasource
-    //                .Exists(RDmodel => RDmodel.View.Contains(EMmodel.EquiqmentId) ||
-    //                                   RDmodel.Permission.Contains(EMmodel.EquiqmentId)));
-        
-        
-        return result;
-    }
     
     
     private void OnActionCompleted(ActionEventArgs<EventModel> args)
@@ -222,7 +153,7 @@
                 }
                 }
             }
-            this.ArrangementData = GetEvents(CurrentDate);
+            
         }
     }
     

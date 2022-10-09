@@ -25,7 +25,7 @@
 </MudNavGroup>
 <MudNavGroup Expanded="true" Title="Discovery">
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.People" Href="/discovery/unions">Foreninger</MudNavLink>
-    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CalendarMonth" Href="/discovery/events">Events</MudNavLink>
+    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Event" Href="/discovery/events">Events</MudNavLink>
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CalendarMonth" Href="/discovery/calendar">Kalender</MudNavLink>
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CalendarMonth" Href="/equipment">Udstyrliste <MudChip Size="Size.Small" Color="Color.Info"> beta</MudChip></MudNavLink>
 </MudNavGroup>
@@ -47,7 +47,10 @@
     
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Logout" Href="/logout">Log-ud</MudNavLink>
 </MudNavGroup>
-
+@if (User.UserGlobalModel.IsAdmin)
+{
+    
+}
 
 
 @code

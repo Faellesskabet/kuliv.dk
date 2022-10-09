@@ -26,15 +26,15 @@
         <div style="height: 32px; overflow: hidden">
             <TagDisplay Tags="Model.Tags"/>
         </div>
-        <MudText Typo="Typo.body2">
-            <MudIcon Icon="@Icons.Filled.AccessTime" Title="Time"/> @Model.Time()
-        </MudText>
-        <MudText Typo="Typo.body2">
-            <MudIcon Icon="@Icons.Filled.Place" Title="Time"/> @Model.Location
-        </MudText>
-        <MudText Typo="Typo.body2">
-            <MudIcon Icon="@Icons.Filled.People" Title="Deltagere"/> @Model.Accepted.Count.ToString()
-        </MudText>
+        <MudField Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.AccessTime">
+            @Model.Time()
+        </MudField>
+        <MudField AdornmentIcon="@Icons.Filled.Place" Adornment="Adornment.Start">
+            @Model.Location
+        </MudField>
+        <MudField AdornmentIcon="@Icons.Filled.People" Adornment="Adornment.Start">
+            @Model.Accepted.Count.ToString()
+        </MudField>
     </MudCardContent>
     <MudField Label="Beskrivelse" Variant="Variant.Outlined">
         <MudCardContent Style="max-height: 150px; min-height: 150px; overflow: scroll; padding-top: 0; padding-bottom: 0">
