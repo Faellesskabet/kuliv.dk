@@ -1,6 +1,8 @@
 ﻿@namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.DataLayer.Static
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.Extensions.Calender
 
 <MudCard>
     <MudCardHeader>
@@ -12,7 +14,8 @@
             <MudTextField @bind-Value="@Value.Location" Label="Lokation" Immediate="@true" MaxLength="32"></MudTextField>
             <MudSwitch @bind-Checked="@Value.IsAllDay" Color="Color.Primary" Label="All Day"/>
             <TagsInput @bind-Value="Value.TagsEnumerable"></TagsInput>
-        
+            <CalenderInput @bind-Value="Value.CalendarsEnumerable">
+            </CalenderInput>
             <MudGrid>
                 <MudItem xs="12" sm="6">
                     <MudText> Start:</MudText>

@@ -6,49 +6,31 @@
 @using Dikubot.Extensions.search
 @attribute [AllowAnonymous]
 
-<Searchbar Items="_models" Context="item">
-        <TemplateRow Context="item">
-           <MudItem xs="12" sm="4"><EventWidget Model="item"></EventWidget></MudItem>
-        </TemplateRow>
+<Searchbar Items="Models" Context="item">
+    <TemplateRow Context="item">
+        <MudItem xs="12" sm="4"><EventWidget Model="item"></EventWidget></MudItem>
+    </TemplateRow>
+    <TemplatePagination>
+        <MudIconButton Icon="@Icons.Filled.Add" Color="Color.Inherit" OnClick="() => {StartTime = StartTime.Subtract(TimeSpan.FromDays(30));}"> </MudIconButton>
+    </TemplatePagination>
     </Searchbar>
     <MudButton Color="@Color.Primary" FullWidth="@true" OnClick="@Request" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit event til KULiv.dk</MudButton>
 
 @code
 {
-    public List<EventModel> _models { get; set; }
-    private EventsServices _services = new EventsServices();
+    public List<EventModel> Models { get => Services.Get(StartTime, DateTime.MaxValue, _userService);}
     
+    private static readonly EventsServices Services = new EventsServices();
+    
+    private DateTime StartTime { get; set; } = DateTime.Today;
+
     protected override void OnInitialized()
     {
-        _models = GetEvents(DateTime.Today);
+        
         base.OnInitialized();
     }
     
-    private List<EventModel> GetEvents(DateTime CurrentDate)
-    {
-        return GetEvents(new DateTime(CurrentDate.Year,CurrentDate.Month, 1), 
-            new DateTime(CurrentDate.Year,CurrentDate.Month, 
-                DateTime.DaysInMonth(CurrentDate.Year,CurrentDate.Month),
-                23,59,59));
-    }
-
-    private List<EventModel> GetEvents(DateTime startTime, DateTime endTime)
-    {
-        
-        List<EventModel> result = _services.GetAll(model => model.StartTime.CompareTo(startTime) >= 0 ||
-                                                            model.StartTime.CompareTo(endTime) <= 0
-                                                            || (model.EndTime.CompareTo(startTime) >= 0
-                                                                && model.EndTime.CompareTo(endTime) <= 0)
-            ).Select(m =>
-            {
-                m.IsReadonly = true;
-                return m;
-            })
-            .ToList();
-            
-        
-        return result;
-    }
+    
     
     private void Request()
     {
