@@ -45,14 +45,19 @@
                                 <MudSelectItem Value="@(item)" />
                             }
                         </MudSelect>
+                        <MudSelect Disabled="_category.Visible == CalendarModel.EnumAvailable.Public || _category.Visible == CalendarModel.EnumAvailable.Externt" 
+                                   Label="View roller" Lines="2" MultiSelection="true" HelperText="Brugeren skal have mindst en af disse roller for at se begivenheden" @bind-SelectedValues="_category.ViewEnumerable"
+                                   MultiSelectionTextFunc="list => GetViewRolesString(_category)" Text="@GetViewRolesString(_category)">
+                            @foreach (var role in _roleMainModels)
+                            {
+                                <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+                            }
+                        </MudSelect>
                         
-
-
-
                         <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
                         
                         
-                        <MudSelect Label="Påkrævet roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne lave begivenheder" @bind-SelectedValues="_category.PermissionEnumerable"
+                        <MudSelect Label="Permission roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne lave begivenheder i denne kalender" @bind-SelectedValues="_category.PermissionEnumerable"
                                    MultiSelectionTextFunc="list => GetPermissionRolesString(_category)" Text="@GetPermissionRolesString(_category)">
                             @foreach (var role in _roleMainModels)
                             {
@@ -60,13 +65,7 @@
                             }
                         </MudSelect>
                         
-                        <MudSelect Label="View roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne lave begivenheder" @bind-SelectedValues="_category.ViewEnumerable"
-                                   MultiSelectionTextFunc="list => GetViewRolesString(_category)" Text="@GetViewRolesString(_category)">
-                            @foreach (var role in _roleMainModels)
-                            {
-                                <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
-                            }
-                        </MudSelect>
+                        
                         
                         
                     </MudForm>

@@ -18,9 +18,6 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
         /// <Summary>Who can see the calendar.</Summary>
         [BsonElement("Visible")]
         public EnumAvailable Visible { get; set; }
-
-        
-        
         
         
         /// <Summary>Who can made events in the the Calaendar</Summary>
