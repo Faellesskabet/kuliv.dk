@@ -5,7 +5,7 @@
 @using Dikubot.Extensions.Calender;
 @attribute [AllowAnonymous]
 
-<MudIconButton Icon="@Icons.Filled.AddBox" OnClick="Request" Color="Color.Inherit"></MudIconButton>
+<MudButton Color="Color.Inherit" OnClick="Request" StartIcon="@Icons.Filled.Add"> Tilføj en begivenhed </MudButton>
 <CalendarWidget ReadOnly="readOnly"> </CalendarWidget>
 
 @code {
