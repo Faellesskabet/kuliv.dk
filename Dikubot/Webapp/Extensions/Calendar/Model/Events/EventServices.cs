@@ -63,12 +63,12 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
                 ? new CalendarServices(this.guildId)
                 .Get(CalendarModel.EnumCalendarType.Event, userService.GetUserGlobalModel()) : new List<CalendarModel>();
 
-            HashSet<Guid> ViewCalenders = CalendarServices
-                .GetAllViewCalenders(CalendarModel.EnumCalendarType.Event, userService.GetUserGlobalModel())
+            HashSet<Guid> ViewCalenders = userService.GetUserGlobalModel()
+                .GetAllViewCalenders(CalendarModel.EnumCalendarType.Event).Result
                 .SelectMany(m => m.Item2).Select(m => m.Id).ToHashSet();
             
-            HashSet<Guid> PermisionsCalenders = CalendarServices
-                .GetAllPermisionsCalendars(CalendarModel.EnumCalendarType.Event, userService.GetUserGlobalModel())
+            HashSet<Guid> PermisionsCalenders = userService.GetUserGlobalModel()
+                .GetAllPermisionsCalendars(CalendarModel.EnumCalendarType.Event).Result
                 .SelectMany(m => m.Item2).Select(m => m.Id).ToHashSet(); 
             
             List<EventModel> result = GetAll(model => (model.StartTime.CompareTo(startTime) >= 0 &&

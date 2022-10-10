@@ -19,7 +19,7 @@
 @namespace Dikubot.Extensions.Calender
 
 
-  @if (true)
+  @if (_loaded)
     {
 <div class="control-section">
     <SfSchedule @ref="ScheduleObj" 
@@ -71,11 +71,11 @@
     
     [Parameter]
     public List<CalendarModel> ResourceDatasource { get; set; } = new List<CalendarModel>();
-   
     
     [Inject] 
     protected IJSRuntime JsRuntime { get; set; }
 
+    private bool _loaded = false;
 
     public List<EventModel> ArrangementData => _eventsServices.Get(CurrentDate, _userService);
         
@@ -88,8 +88,6 @@
     private SocketGuild guild;
     private UserGlobalModel _user => _userService.GetUserGlobalModel();
     
-    
-    
     private EventsServices _eventsServices = new EventsServices(GuildId?.ToString());
     
     
@@ -99,9 +97,9 @@
         {
             ReadOnly = !_user.Verified;
         }
+        _loaded = true;
         base.OnInitialized();
         
-
     }
     
     

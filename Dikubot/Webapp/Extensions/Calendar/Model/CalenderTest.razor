@@ -6,7 +6,7 @@
 @attribute [AllowAnonymous]
 
 
-@foreach (var test in CalendarServices.GetAllPermisionsCalendars(CalendarModel.EnumCalendarType.Event, _userService.GetUserGlobalModel()))
+@foreach (var test in _userService.GetUserGlobalModel().GetAllPermisionsCalendars(CalendarModel.EnumCalendarType.Event).Result)
 {
     <MudText Typo="Typo.h4">
          @test.Item1.Name
@@ -18,7 +18,7 @@
         
     }
 }
-@foreach (var test in CalendarServices.GetAllViewCalenders(CalendarModel.EnumCalendarType.Event, _userService.GetUserGlobalModel()))
+@foreach (var test in _userService.GetUserGlobalModel().GetAllViewCalenders(CalendarModel.EnumCalendarType.Event).Result)
 {
     <MudText Typo="Typo.h4">
         @test.Item1.Name

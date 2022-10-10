@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Dikubot.DataLayer.Database.Guild.Models.Calendar;
 using Dikubot.DataLayer.Database.Guild.Models.User;
 using Dikubot.Discord;
 using Discord;
@@ -117,5 +119,57 @@ namespace Dikubot.DataLayer.Database.Global.User
         }
         
         
+        async public Task<List<(SocketGuild, List<CalendarModel>)>> GetAllViewCalenders(CalendarModel.EnumCalendarType calendarType)
+        {
+            var roles = GetRolesGuid() ?? new HashSet<Guid>();
+
+            List<(SocketGuild,List<CalendarModel>)> result = new List<(SocketGuild, List<CalendarModel>)>();
+            
+            foreach (var socketGuild in DiscordBot.ClientStatic.Guilds)
+            {
+                var service = new CalendarServices(socketGuild);
+            
+                List<CalendarModel> value = service.GetAll(model => model.CalendarType == calendarType).Where(model => 
+                    model.Visible == CalendarModel.EnumAvailable.Public 
+                    || (Verified && model.Visible == CalendarModel.EnumAvailable.Externt)
+                    || (Guilds.Contains(socketGuild) && model.Visible == CalendarModel.EnumAvailable.Internt)
+                    || model.Permission.Overlaps(roles)
+                    || model.View.Overlaps(roles)).ToList();
+                result.Add((socketGuild,value));
+            }
+            return result;
+        }
+        
+        
+        
+        async public Task<List<(SocketGuild, List<CalendarModel>)>> GetAllPermisionsCalendars(CalendarModel.EnumCalendarType calendarType)
+        {
+            
+            if (Verified is false)
+            {
+                return new List<(SocketGuild, List<CalendarModel>)>();
+            }
+            
+            var roles = GetRolesGuid();
+
+            List<(SocketGuild,List<CalendarModel>)> result = new List<(SocketGuild, List<CalendarModel>)>();
+            
+            
+            foreach (var socketGuild in Guilds)
+            {
+                var service = new CalendarServices(socketGuild.Id.ToString());
+            
+                
+                List<CalendarModel> value = service.GetAll(model => model.CalendarType == calendarType).Where(model => model.Permission.Overlaps(roles)).ToList();
+                result.Add((socketGuild,value));
+                 
+                
+            }
+
+            return result;
+
+        }
+        
     }
+    
 }
