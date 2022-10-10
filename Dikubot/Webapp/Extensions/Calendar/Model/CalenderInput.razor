@@ -32,7 +32,7 @@
     [Parameter]
     public CalendarModel.EnumCalendarType TagType { get; set; } = CalendarModel.EnumCalendarType.Event;
     
-    private List<(SocketGuild,List<CalendarModel>)> ListModel => CalendarServices.GetAllPermisionsCalendars(TagType, _userService.GetUserGlobalModel() ); 
+    private List<(SocketGuild,List<CalendarModel>)> ListModel => _userService.GetUserGlobalModel().GetAllPermisionsCalendars(TagType).Result; 
         
 
     private async Task OnValueChanged()
