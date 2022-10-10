@@ -58,8 +58,7 @@
   
 
   <ItemGroup>
-    <Folder Include="DataLayer\Database\Global\GlobalSettings" />
-    <Folder Include="DataLayer\Database\Global\Settings" />
+    <Folder Include="DataLayer\Database\Global\ConfirmEmail" />
     <Folder Include="Webapp\Extensions\Announcements\Admin" />
     <Folder Include="Webapp\Extensions\Announcements\Op" />
     <Folder Include="Webapp\Extensions\Union\Pages" />
