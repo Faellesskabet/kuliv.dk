@@ -49,8 +49,8 @@
     private UserGuildModel _userGuildModel;
     private PermissionsService _permissionsService;
     private bool _loaded = false;
-
-    protected override async Task OnInitializedAsync()
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
@@ -67,8 +67,9 @@
         _userGuildModel = _userGuildServices.Get(_userGlobalModel.DiscordId);
         _permissionsService = new PermissionsService(guild);
         _categories = _joinRoleServices.GetAll();
-        
+
         _loaded = true;
+        StateHasChanged();
     }
 
     protected void JoinAll(JoinRoleCategoryMainModel joinRoleCategoryMainModel)

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AspNet.Security.OAuth.Discord;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -22,5 +23,11 @@ namespace Dikubot.Webapp.Authentication
         [HttpPost("/logout")]
         public async Task<SignOutResult> LogOut(string returnUrl = "/") => this.SignOut(new AuthenticationProperties { RedirectUri = returnUrl },
             CookieAuthenticationDefaults.AuthenticationScheme);
+        
+        [HttpGet("/confirm_email/{uuid}")]
+        public RedirectToPageResult ConfirmEmail(Guid uuid)
+        {
+            return RedirectToPage("/");
+        }
     }
 }
