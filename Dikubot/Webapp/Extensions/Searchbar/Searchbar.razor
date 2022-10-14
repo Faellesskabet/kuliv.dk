@@ -16,7 +16,7 @@
     @if (ShowTags)
     {
         <MudChipSet @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
-            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false" Style="height: 55px">
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false">
                 @foreach (var cat in _Categories)
                 {
                     @if (!ShowCategories.Contains(cat.Id))
@@ -40,7 +40,7 @@
                                   AdornmentIcon="@Icons.Filled.Close"
                                   Adornment="Adornment.End"
                                   AdornmentColor="Color.Primary" 
-                                  OnAdornmentClick="() =>ShowCategories.Remove(cat.Id) ">
+                                  OnAdornmentClick="() => ShowCategories.Remove(cat.Id)">
                             @foreach (var tag in _Tags.Where(tag => tag.Category.Contains(cat.Id)))
                             {
                                 //Kan ikke gøres direkte :(
@@ -52,6 +52,7 @@
                 }
             </MudButtonGroup>
         </MudChipSet>
+        
     }
 </MudGrid>
 <MudItem xs="12">

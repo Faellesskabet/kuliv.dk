@@ -26,6 +26,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
             guildId = Convert.ToUInt64(guidId);
         }
 
+        /*
         public List<EventModel> GetEvents(Expression<Func<CalendarModel, bool>> calFilter = null,
             Expression<Func<EventModel, bool>> eventFilter = null)
         {
@@ -44,7 +45,8 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
 
             return res;
         }
-
+        */
+        
         public List<CalendarModel> Get(CalendarModel.EnumCalendarType calendarType, UserGlobalModel user)
         {
             var roles = guildId.HasValue ? user.GetRolesGuid((ulong) guildId) : user.GetRolesGuid();
@@ -54,6 +56,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
                                   || model.Permission.Overlaps(roles)
                                   || model.View.Overlaps(roles));
         }
+        
 
     }
 

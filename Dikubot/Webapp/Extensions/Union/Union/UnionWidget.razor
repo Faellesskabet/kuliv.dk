@@ -44,7 +44,7 @@
             <MudAvatar Size="Size.Large" Image="@Union.LogoUrl"></MudAvatar>
         </CardHeaderAvatar>
         <CardHeaderContent>
-            <MudText Typo="Typo.body1">@Union.Title</MudText>
+            <MudText Typo="Typo.body1" Class="overflow-hidden">@Union.Title</MudText>
              @if (IsChangeGuild)
                             {
                                 <MudText Typo="Typo.body2">
@@ -58,10 +58,8 @@
                      @if (!string.IsNullOrWhiteSpace(Union.Discord))
                      {
                          <MudIconButton Icon="@Icons.Custom.Brands.Discord" aria-label="Discord" OnClick="GoToDiscord" Color="Color.Primary" Size="Size.Medium">
-                       
                          </MudIconButton>
-
-
+                         
                      }
                      @if (!string.IsNullOrWhiteSpace(Union.Href))
                      {
