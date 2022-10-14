@@ -2,10 +2,12 @@
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using Dikubot.Webapp.Extensions.Discovery.Request
+@using Orientation = MudBlazor.Orientation
 @inject UserService _user;
 @inject NavigationManager _navigationManager;
 @namespace Dikubot.Extensions.Calender
 
+@if(Orientation == Orientation.Portrait){
 <MudCard>
     @if (ShowTitle)
     {<MudCardHeader>
@@ -70,9 +72,79 @@
                 <MudSpacer/>
                 </MudCardActions>
             }
-    
-    
 </MudCard>
+} else if (Orientation == Orientation.Landscape)
+{
+    <MudCard>
+        <MudCardContent>
+            <div class="d-flex flex-grow-1 gap-4" style="width: 100%">
+                <div Class="flex-shrink-1 py-8" style="width: 100%" Elevation="0"> 
+            
+                    <MudTabs Outlined="true"
+                             Position="Position.Start"
+                             Rounded="true" Border="true"
+                             ApplyEffectsToContainer="true"
+                             PanelClass="flex-shrink-1"
+                             HeaderPosition="TabHeaderPosition.Before">
+                        <Header>
+                            <MudText Typo="Typo.h5">@Model.Subject</MudText>
+                        </Header>
+
+                        <ChildContent>
+                            <MudTabPanel Text="Details">
+                                <ChildContent>
+                                    <div style="height: 32px; overflow: hidden">
+                                        <TagDisplay Tags="Model.Tags"/>
+                                    </div>
+
+                                    <MudField Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.AccessTime">
+                                        @Model.Time()
+                                    </MudField>
+                                    <MudField AdornmentIcon="@Icons.Filled.Place" Adornment="Adornment.Start">
+                                        @Model.Location
+                                    </MudField>
+                                    <MudField AdornmentIcon="@Icons.Filled.People" Adornment="Adornment.Start">
+                                        @Model.Accepted.Count.ToString()
+                                    </MudField>
+                                </ChildContent>
+
+                            </MudTabPanel>
+                            <MudTabPanel Text="Beskrivelse">
+                                <MudField Label="Beskrivelse" Variant="Variant.Outlined">
+                                    <MudCardContent Style="width: 100%; max-height: 150px; min-height: 150px; overflow: scroll; padding-top: 0; padding-bottom: 0">
+
+                                        <MudText Typo="Typo.body2">
+                                            @(Model.Description)
+                                        </MudText>
+
+                                    </MudCardContent>
+                                </MudField>
+                            </MudTabPanel>
+                        </ChildContent>
+                    </MudTabs>
+                </div>
+                <div Class="flex-none py-8" Width="64px" Elevation="0"> 
+                    <MudButton Color="JoinColor" Disabled="@_processing" OnClick="JoinEvent" Variant="Variant.Filled">
+                        @if (_processing)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                            <MudText Class="ms-2">Processing</MudText>
+                        }
+                        else
+                        {
+                            <MudText>@JoinText</MudText>
+                        }
+                    </MudButton>
+                </div>
+            </div>
+            
+    
+        </MudCardContent>
+           
+        
+    </MudCard>
+    
+}
 
 
 @code {
@@ -85,7 +157,9 @@
     [Parameter]
     public ulong GuildId { get; set; }
 
-    
+    [Parameter]
+    public Orientation Orientation { get; set; } = Orientation.Portrait;
+
     private bool HasJoined => Model.Accepted.Contains(_user.GetUserGlobalModel().DiscordId);
     private Color JoinColor => HasJoined ?  Color.Error : Color.Success ;
     private string JoinText => HasJoined ?  "Decline" : "Join" ;
@@ -94,7 +168,7 @@
     private async void JoinEvent()
     {
         _processing = true;
-        EventsServices eventsServices = new EventsServices();
+        EventsServices eventsServices = new EventsServices(_user);
 
         EventModel eventModel = eventsServices.Get(Model.Id);
         if (HasJoined)

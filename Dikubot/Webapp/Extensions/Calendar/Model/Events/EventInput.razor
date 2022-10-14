@@ -3,19 +3,17 @@
 @using Dikubot.DataLayer.Static
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar
 @using Dikubot.Extensions.Calender
+@inject UserService _user
 
 <MudCard>
-    <MudCardHeader>
-        <MudText Typo="Typo.h5">Event: @Value.Subject</MudText>
-        </MudCardHeader>
     <MudCardContent>
         <MudForm FieldChanged="OnValueChanged">
             <MudTextField @bind-Value="@Value.Subject" Label="Eventets navn" Immediate="@true" MaxLength="32"></MudTextField>
             <MudTextField @bind-Value="@Value.Location" Label="Lokation" Immediate="@true" MaxLength="32"></MudTextField>
-            <MudSwitch @bind-Checked="@Value.IsAllDay" Color="Color.Primary" Label="All Day"/>
             <TagsInput @bind-Value="Value.TagsEnumerable"></TagsInput>
             <CalenderInput @bind-Value="Value.CalendarsEnumerable">
             </CalenderInput>
+            <MudSwitch @bind-Checked="@Value.IsAllDay" Color="Color.Primary" Label="All Day"/>
             <MudGrid>
                 <MudItem xs="12" sm="6">
                     <MudText> Start:</MudText>
@@ -28,10 +26,12 @@
                     <MudDatePicker Label="Slut tid" @bind-Date="endTime" DisableToolbar="true"/>
                 </MudItem>
             </MudGrid>
-            
-        
-            <MudTextField @bind-Value="@Value.Description" Label="Kategori beskrivelse" Immediate="@true" Lines="5" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
-        
+
+            @if (!QuickInfo)
+            {
+                <MudTextField @bind-Value="@Value.Description" Label="Kategori beskrivelse" Immediate="@true" Lines="5" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+            }
+
         </MudForm>
     </MudCardContent>
 </MudCard>
@@ -42,11 +42,24 @@
 
     [Parameter]
     public EventCallback<EventModel> ValueChanged { get; set; }
-    
+
+    [Parameter]
+    public bool QuickInfo { get; set; } = false;
+
     private async Task OnValueChanged()
     {
         await ValueChanged.InvokeAsync(Value);
     }
+
+    protected override void OnInitialized()
+    {
+        if (Value.Id == Guid.Empty && _user.IsRegistered())
+        {
+            Value.Hosts.Add(_user.GetUserGlobalModel().DiscordId);
+        }
+        base.OnInitialized();
+    }
+
     /*
     private string GetHostsString()
     {

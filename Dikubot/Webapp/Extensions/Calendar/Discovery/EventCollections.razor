@@ -4,11 +4,16 @@
 @using Dikubot.Extensions.Calender;
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.Extensions.search
+@using Orientation = MudBlazor.Orientation
+@inject UserService _user
 @attribute [AllowAnonymous]
+
+<MudButton OnClick="() => Orientation = MudBlazor.Orientation.Landscape"> Landskab </MudButton>
+<MudButton OnClick="() => Orientation = MudBlazor.Orientation.Portrait"> Protrat </MudButton>
 
 <Searchbar Items="Models" Context="item">
     <TemplateRow Context="item">
-        <MudItem xs="12" sm="4"><EventWidget Model="item"></EventWidget></MudItem>
+        <MudItem xs="12" sm="12"><EventWidget Model="item" Orientation="@Orientation"></EventWidget></MudItem>
     </TemplateRow>
     <TemplatePagination>
         <MudButton Color="Color.Inherit" OnClick="() => { StartTime = StartTime.Subtract(TimeSpan.FromDays(30)); }"> Vis Tidligere </MudButton>
@@ -18,15 +23,17 @@
 
 @code
 {
-    public List<EventModel> Models { get => Services.Get(StartTime, DateTime.MaxValue, _userService);}
+    public List<EventModel> Models { get => Services.Get(StartTime, DateTime.MaxValue);}
+
+    public Orientation Orientation = Orientation.Portrait;
     
-    private static readonly EventsServices Services = new EventsServices();
+    private EventsServices Services;
     
     private DateTime StartTime { get; set; } = DateTime.Today;
 
     protected override void OnInitialized()
     {
-        
+        Services =  new EventsServices(_user);
         base.OnInitialized();
     }
     
