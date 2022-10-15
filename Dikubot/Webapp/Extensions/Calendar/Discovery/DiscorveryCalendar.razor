@@ -3,9 +3,11 @@
 @inject UserService _userService;
 @inject NavigationManager _navigationManager;
 @using Dikubot.Extensions.Calender; 
+@using Dikubot.Extensions.search
 @attribute [AllowAnonymous]
 
 <MudButton Color="Color.Inherit" OnClick="Request" StartIcon="@Icons.Filled.Add"> Tilføj en begivenhed </MudButton>
+
 <CalendarWidget ReadOnly="readOnly"> </CalendarWidget>
 
 @code {

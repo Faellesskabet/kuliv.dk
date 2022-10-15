@@ -12,6 +12,7 @@
 @using Dikubot.Webapp.Shared.Dialog
 @using Microsoft.AspNetCore.Components
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
+@inject UserService _user
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize(Roles = Permissions.GlobalAdmin)]
 
@@ -64,7 +65,7 @@ else
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _joinRoleServices = new EventsServices(_guild);
+        _joinRoleServices = new EventsServices(_user,_guild);
         _model = Guid.TryParse(uuid, out Guid guid) ? _joinRoleServices.Get(guid) : new EventModel() {CreateBy = _userGlobalModel.DiscordId};
         _CalendarServices = new CalendarServices(_guild);
         var userService = new UserGuildServices(_guild);
