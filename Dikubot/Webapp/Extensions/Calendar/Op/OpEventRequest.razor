@@ -19,6 +19,7 @@
 @using Microsoft.AspNetCore.Razor.TagHelpers
 @using Microsoft.IdentityModel.Tokens
 @using MudBlazor
+@inject UserService _user
 
 
 <MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<EventModel>>>>(Reload))" @ref="_table"
@@ -134,7 +135,7 @@
             return;
         }
 
-        EventsServices EventsServices = new EventsServices();
+        EventsServices EventsServices = new EventsServices(_user);
         model.RequestItem = EventsServices.Upsert(model.RequestItem);
         model.Status = RequestModel<EventModel>.StatusEmun.approved;
         

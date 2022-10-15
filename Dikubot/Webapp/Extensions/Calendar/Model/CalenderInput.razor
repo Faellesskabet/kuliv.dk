@@ -1,6 +1,7 @@
 ﻿@using Dikubot.DataLayer.Static
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.Webapp.Extensions.Calendar.Model
 @using global::Discord.WebSocket
 
 @namespace Dikubot.Extensions.Calender
@@ -8,19 +9,33 @@
 @inject UserService _userService;
 
 
-<MudSelect MultiSelection="true" 
-           Label="Calenderer" 
+<MudSelect MultiSelection="true"
+           Label="Calenderer"
            HelperText="Hvilke kalendere begivenheden er inde under"
            @bind-SelectedValues="Value"
            MultiSelectionTextFunc="list => GetTagsString()" Text="@GetTagsString()"
            OnClose="OnValueChanged">
-    @foreach (var tag in ListModel.SelectMany(m => m.Item2))
+    @foreach (var listmodel in ListModel)
     {
-        <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
+        @foreach (var tag in listmodel.Item2)
+        {
+            <MudSelectItem Value="tag.Id">@tag.Name - @tag.Decs</MudSelectItem>
+        }
     }
+    @foreach (var id in NotInList)
+            {
+                @if (_calendarLogic.Get(id).Id != Guid.Empty)
+                {
+                    CalendarModel tag = _calendarLogic.Get(id);;
+                    <MudSelectItem Value="tag.Id">@tag.Name</MudSelectItem>
+                }
+                else
+                {
+                    <MudSelectItem Value="id"> Delete me </MudSelectItem>
+                }
+            }
+    
 </MudSelect>
-
-
 
 @code {
     [Parameter]
@@ -31,9 +46,19 @@
     
     [Parameter]
     public CalendarModel.EnumCalendarType TagType { get; set; } = CalendarModel.EnumCalendarType.Event;
+
+    private CalendarLogic _calendarLogic;
     
-    private List<(SocketGuild,List<CalendarModel>)> ListModel => _userService.GetUserGlobalModel().GetAllPermisionsCalendars(TagType).Result; 
-        
+    private List<(SocketGuild,List<CalendarModel>)> ListModel => _calendarLogic.GetAllPermisionsCalendars(TagType).Result;
+    private List<Guid> NotInList;
+    
+    protected override void OnInitialized()
+    {
+        _calendarLogic = new CalendarLogic(_userService.GetUserGlobalModel());
+        var test = ListModel.SelectMany(m => m.Item2).Select(m => m.Id);
+        NotInList = Value.Where(v => !test.Contains(v)).ToList();
+        base.OnInitialized();
+    }
 
     private async Task OnValueChanged()
     {
@@ -44,12 +69,6 @@
     
     private string GetTagsString()
     {
-        var test = Value
-            .Select(tag =>
-                ListModel.SelectMany(m => m.Item2)
-                    .First(model => model.Id == tag).Name ?? "").ToList();
-        return Util.ConcatListToString(test);
-            
-
+        return Util.ConcatListToString(Value.Select(tag => _calendarLogic.Get(tag).Name ?? "").ToList());
     }
 }
