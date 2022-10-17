@@ -1,6 +1,7 @@
 ﻿@page "/discovery/events/{uuid}"
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.Extensions.Calender
+@inject UserService _user
 <h3>Event</h3>
 
 <EventWidget Model="Model"></EventWidget>
@@ -13,7 +14,7 @@
     
     protected override void OnInitialized()
     {
-        EventsServices services = new EventsServices();
+        EventsServices services = new EventsServices(_user);
         Model = Guid.TryParse(uuid, out Guid guid) ? services.Get(guid) : new EventModel() {};
         base.OnInitialized();
     }

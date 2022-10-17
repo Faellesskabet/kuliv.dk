@@ -5,6 +5,7 @@ using Data;
 using Dikubot.DataLayer.Database.Global;
 using Dikubot.DataLayer.Database.Global.Settings.Tags;
 using Dikubot.Discord;
+using Dikubot.Webapp.Extensions.Calendar.Model;
 using Discord.WebSocket;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -12,22 +13,31 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 {
+    
     public class EventsServices : GlobalServices<EventModel>
     {
         private readonly Guid? _calendar;
         private string guildId;
-
-        public EventsServices(SocketGuild guildId, Guid? calendar =null) : base("Events")
+        private CalendarLogic _calendarLogic;
+        private UserService _user;
+        
+        
+        public EventsServices(UserService userService, SocketGuild guildId, Guid? calendar =null) : base("Events")
         {
             _calendar = calendar;
             this.guildId = guildId?.Id.ToString();
 
+            _calendarLogic = new CalendarLogic(userService.GetUserGlobalModel());
+            _user = userService;
+
         }
         
-        public EventsServices(string guildId = null, Guid? calendar = null) : base("Events")
+        public EventsServices(UserService userService, string guildId = null, Guid? calendar = null) : base("Events")
         {
             _calendar = calendar;
             this.guildId = guildId;
+            _calendarLogic = new CalendarLogic(userService.GetUserGlobalModel());
+            _user = userService;
         }
         
         public override List<EventModel> Get()
@@ -40,35 +50,22 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
         }
 
 
-        public List<EventModel> Get(DateTime currentDate, UserService userService = null)
+        public List<EventModel> Get(DateTime currentDate)
         {
             return Get(new DateTime(currentDate.Year,currentDate.Month, 1), 
                 new DateTime(currentDate.Year,currentDate.Month, 
                     DateTime.DaysInMonth(currentDate.Year,currentDate.Month),
-                    23,59,59), 
-                userService);
+                    23,59,59));
         }
         
-        public List<EventModel> Get(DateTime startTime, DateTime endTime, UserService userService = null)
+        public List<EventModel> Get(DateTime startTime, DateTime endTime)
         {
-            HashSet<Guid> roles = new HashSet<Guid>();
-            if (userService != null)
-            {
-                roles = !guildId.IsNullOrEmpty()
-                    ? userService.GetUserGlobalModel().GetRolesGuid(Convert.ToUInt64(guildId))
-                    : userService.GetUserGlobalModel().GetRolesGuid();
-            }
-
-            List<CalendarModel> calendarModels = !guildId.IsNullOrEmpty()
-                ? new CalendarServices(this.guildId)
-                .Get(CalendarModel.EnumCalendarType.Event, userService.GetUserGlobalModel()) : new List<CalendarModel>();
-
-            HashSet<Guid> ViewCalenders = CalendarServices
-                .GetAllViewCalenders(CalendarModel.EnumCalendarType.Event, userService.GetUserGlobalModel())
+            
+            HashSet<Guid> ViewCalenders = _calendarLogic.GetAllViewCalenders(CalendarModel.EnumCalendarType.Event).Result
                 .SelectMany(m => m.Item2).Select(m => m.Id).ToHashSet();
             
-            HashSet<Guid> PermisionsCalenders = CalendarServices
-                .GetAllPermisionsCalendars(CalendarModel.EnumCalendarType.Event, userService.GetUserGlobalModel())
+            HashSet<Guid> PermisionsCalenders = _calendarLogic
+                .GetAllPermisionsCalendars(CalendarModel.EnumCalendarType.Event).Result
                 .SelectMany(m => m.Item2).Select(m => m.Id).ToHashSet(); 
             
             List<EventModel> result = GetAll(model => (model.StartTime.CompareTo(startTime) >= 0 &&
@@ -77,16 +74,16 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
                                                                     && model.EndTime.CompareTo(endTime) <= 0) ||
                                                                 (model.StartTime.CompareTo(startTime) <= 0 && 
                                                                  model.EndTime.CompareTo(endTime) >= 0)
-                ).Where(model => model.Calendars.Count == 0
+                ).Where(model => model.Hosts.Contains(_user.GetUserGlobalModel().DiscordId)
                                  || PermisionsCalenders.Overlaps(model.Calendars) ||
                                  ViewCalenders.Overlaps(model.Calendars)
                                  ).Select(m =>
                 {
-                    m.IsReadonly = userService != null && !( m.Hosts.Contains(userService.GetUserGlobalModel().DiscordId) 
-                                                           || PermisionsCalenders.Overlaps(m.Calendars));
+                    m.IsReadonly = !(PermisionsCalenders.Overlaps(m.Calendars) || m.Hosts.Contains(_user.GetUserGlobalModel().DiscordId));
                     return m;
                 })
                 .ToList();
+            
             result.Sort((x, y) => DateTime.Compare(x.StartTime, y.StartTime));
 
             return result;
