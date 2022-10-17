@@ -10,29 +10,34 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService;
 
-
-
-
-<MudAppBar Elevation="1" Style="background-color: #231b2f">
-    <MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer"/>
-        <MudSpacer/>
-    </MudHidden>
-    <MudButton Variant="Variant.Text"
-               Href="/"> <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText></MudButton>
-    
-    <MudHidden Breakpoint="Breakpoint.SmAndUp" Invert="true">
+@if (_isSmall)
+{
+    <MudAppBar Elevation="1" Style="background-color: #231b2f">
+        <MudButton Variant="Variant.Text"
+                   Href="/"> <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText></MudButton>
         <MudButton Variant="Variant.Text"
                    Href="/discovery/unions">Foreninger</MudButton>
         <MudButton Variant="Variant.Text"
                    Href="/discovery/events">Events</MudButton>
         <MudButton Variant="Variant.Text"
                    Href="/discovery/calendar">Kalender</MudButton>
-    </MudHidden>
-                <MudSpacer/>
-                <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
+        <MudSpacer/>
+        
 
-</MudAppBar>
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
+    </MudAppBar>
+}
+
+<MudHidden Breakpoint="Breakpoint.Xs" @bind-IsHidden="@_isSmall" Invert="true">
+   <MudAppBar Elevation="1" Style="background-color: #231b2f">
+           <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+           <MudSpacer />
+           <MudButton Variant="Variant.Text"
+                      Href="/"> <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText></MudButton>
+           <MudSpacer />
+
+           <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
+           </MudAppBar>
        <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Temporary" Style="@($"background-color: {NavColor}; color: {NavTextColor};")">
            <MudDrawerHeader>
                <MudText Typo="Typo.h6">kuLiv.dk</MudText>
@@ -43,10 +48,11 @@
                <MudNavLink Match="NavLinkMatch.All" Href="/discovery/calendar">Kalender</MudNavLink>
            </MudNavMenu>
        </MudDrawer>
-
+</MudHidden>
 
 @code {
-    
+
+    bool _isSmall = true;
     bool open = false;
     private string NavColor = "";
     private string NavTextColor = "";
