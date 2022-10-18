@@ -7,6 +7,12 @@
 @inject NavigationManager _navigationManager;
 @namespace Dikubot.Extensions.Calender
 
+<style>
+    .w-100{
+    width: 100% !important;
+    }
+</style>
+
 @if(Orientation == Orientation.Portrait){
 <MudCard>
     @if (ShowTitle)
@@ -76,71 +82,76 @@
 } else if (Orientation == Orientation.Landscape)
 {
     <MudCard>
-        <MudCardContent>
-            <div class="d-flex flex-grow-1 gap-4" style="width: 100%">
-                <div Class="flex-shrink-1 py-8" style="width: 100%" Elevation="0"> 
-            
-                    <MudTabs Outlined="true"
-                             Position="Position.Start"
-                             Rounded="true" Border="true"
-                             ApplyEffectsToContainer="true"
-                             PanelClass="flex-shrink-1"
-                             HeaderPosition="TabHeaderPosition.Before">
-                        <Header>
-                            <MudText Typo="Typo.h5">@Model.Subject</MudText>
-                        </Header>
+        <MudCardHeader Style="padding-bottom: 0">
+            <CardHeaderContent>
+                <div style="height: 32px; overflow: hidden">
+                    <TagDisplay Tags="Model.Tags"/>
+                </div>
+                <MudText Typo="Typo.h6">@Model.Subject</MudText>
+            </CardHeaderContent>
+                 
+            <CardHeaderActions>
+                @if (_user.GetUserGlobalModel().IsAdmin)
+                {<MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="Edit" />
+                }else if(_user.GetUserGlobalModel().Verified){
+                    <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="Request"/>
+                }
+                <MudButton Color="JoinColor" Disabled="@_processing" OnClick="JoinEvent" Variant="Variant.Filled">
+                    @if (_processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                        <MudText Class="ms-2">Processing</MudText>
+                    }
+                    else
+                    {
+                        <MudText>@JoinText</MudText>
+                    }
+                </MudButton>
+            </CardHeaderActions>
+        </MudCardHeader>
+        
+        <MudCardContent Style="padding-top: 0">
+            <MudTabs Outlined="true"
+                     Position="Position.Top"
+                     Rounded="true" Border="true"
+                     ApplyEffectsToContainer="true"
+                     PanelClass="flex-shrink-1 w-100"
+                     HeaderPosition="TabHeaderPosition.Before">
+                <ChildContent>
 
-                        <ChildContent>
-                            <MudTabPanel Text="Details">
-                                <ChildContent>
-                                    <div style="height: 32px; overflow: hidden">
-                                        <TagDisplay Tags="Model.Tags"/>
-                                    </div>
-
-                                    <MudField Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.AccessTime">
-                                        @Model.Time()
-                                    </MudField>
-                                    <MudField AdornmentIcon="@Icons.Filled.Place" Adornment="Adornment.Start">
-                                        @Model.Location
-                                    </MudField>
-                                    <MudField AdornmentIcon="@Icons.Filled.People" Adornment="Adornment.Start">
-                                        @Model.Accepted.Count.ToString()
-                                    </MudField>
-                                </ChildContent>
-
-                            </MudTabPanel>
-                            <MudTabPanel Text="Beskrivelse">
-                                <MudField Label="Beskrivelse" Variant="Variant.Outlined">
-                                    <MudCardContent Style="width: 100%; max-height: 150px; min-height: 150px; overflow: scroll; padding-top: 0; padding-bottom: 0">
-
-                                        <MudText Typo="Typo.body2">
-                                            @(Model.Description)
-                                        </MudText>
-
-                                    </MudCardContent>
+                    <MudTabPanel Text="Details" >
+                        <MudField Label="Details" Variant="Variant.Outlined">
+                            <MudCardContent Style="width: 100%; max-height: 160px; min-height: 160px; overflow: scroll; padding-top: 0; padding-bottom: 0">
+                                <MudField Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.AccessTime"
+                                          Style="margin-top: 0">
+                                    @Model.Time()
                                 </MudField>
-                            </MudTabPanel>
-                        </ChildContent>
-                    </MudTabs>
-                </div>
-                <div Class="flex-none py-8" Width="64px" Elevation="0"> 
-                    <MudButton Color="JoinColor" Disabled="@_processing" OnClick="JoinEvent" Variant="Variant.Filled">
-                        @if (_processing)
-                        {
-                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
-                            <MudText Class="ms-2">Processing</MudText>
-                        }
-                        else
-                        {
-                            <MudText>@JoinText</MudText>
-                        }
-                    </MudButton>
-                </div>
-            </div>
+                                <MudField AdornmentIcon="@Icons.Filled.Place" Adornment="Adornment.Start">
+                                    @Model.Location
+                                </MudField>
+                                <MudField AdornmentIcon="@Icons.Filled.People" Adornment="Adornment.Start">
+                                    @Model.Accepted.Count.ToString()
+                                </MudField>
+                                                        
+                            </MudCardContent>
+                        </MudField>
+                    </MudTabPanel>
+                    <MudTabPanel Text="Beskrivelse">
+                        <MudField Label="Beskrivelse" Variant="Variant.Outlined">
+                            <MudCardContent Style="width: 100%; max-height: 160px; min-height: 160px; overflow: scroll; padding-top: 0; padding-bottom: 0">
             
-    
+                                <MudText Typo="Typo.body2">
+                                    @(Model.Description)
+                                </MudText>
+            
+                            </MudCardContent>
+                        </MudField>
+                    </MudTabPanel>
+                </ChildContent>
+            </MudTabs>
+
+
         </MudCardContent>
-           
         
     </MudCard>
     

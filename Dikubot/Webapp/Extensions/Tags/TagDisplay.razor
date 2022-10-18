@@ -26,6 +26,7 @@
             TagServices services = new TagServices();
             TagsList = Tags.Select(t => services.Get(t)).ToList();
         }
+        
         base.OnInitialized();
     }
 

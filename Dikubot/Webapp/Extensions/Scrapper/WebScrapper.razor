@@ -1,0 +1,201 @@
+﻿@page "/WebScrapper"
+@using System;
+@using System.Collections
+@using System.Net
+@using System.Net.Http;
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.Extensions.search
+@using Microsoft.Graph
+@using Newtonsoft.Json
+
+<h3>WebScrapper</h3>
+
+    <Searchbar Items="_unionModels" Context="UnionModel" NumberOfItems="12">
+        <TemplateRow Context="unionModel" >
+           <MudItem xs="12" sm="6" md="4" lg="3" >
+           <UnionWidget Union="unionModel"></UnionWidget>
+           </MudItem>
+        </TemplateRow>
+    </Searchbar>
+
+
+
+@code {
+
+ public string FORENINGSLIVKU(int n){
+        return "https://www.foreningsliv-ku.dk/wp-json/buddypress/v1/groups?per_page=12&page="+n;
+}
+
+
+    UnionServices _services = new UnionServices();
+    List<UnionModel> _unionModels = new List<UnionModel>();
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            HttpClient client = new HttpClient();
+
+            string content = client.GetStringAsync(FORENINGSLIVKU(1)).Result;
+            List<test2> myDeserializedClass = JsonConvert.DeserializeObject<List<test2>>(content);
+            string res = "";
+                    
+            foreach (var VARIABLE in myDeserializedClass)
+            {
+    //string response = client.GetStringAsync(VARIABLE.link).Result;
+                if (!_services.Exists(model => model.Title == VARIABLE.name))
+                {
+                    String facebook = "";
+                    String hjemmeside = "";
+                    String Mail = "";
+                    try
+                    {
+                        HttpClient httpClient = new HttpClient();
+                        string url = VARIABLE.link.Replace("%c3%a6", "æ").Replace("%c3%a5", "å").Replace("%c3%b8", "ø");
+                        
+                        HttpResponseMessage response = client.GetAsync(url).Result;
+                        
+                        if(!response.IsSuccessStatusCode)
+                        {
+                            Console.WriteLine(response.StatusCode + ": "+ url);
+                            Console.WriteLine(response.Headers);
+                            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                
+                                
+                            }
+                        }
+                        else
+                        {
+
+                            string itemContent = client.GetStringAsync(url).Result;
+
+                            string key = "";
+                            int pFrom = 0;
+                            int pTo = 0;
+                            if (!itemContent.Contains("<td class=\"label\" title=\"Link til Facebook\">Facebook</td><td class=\"data\"><i>Ikke angivet</i></td>"))
+                            {
+                                key = "\">Facebook</td><td class=\"data\"><a target=\"_new\" href=\"";
+                                pFrom = itemContent.IndexOf(key) + key.Length;
+                                pTo = itemContent.IndexOf("\">", pFrom);
+
+                                facebook = itemContent.Substring(pFrom, pTo - pFrom);
+                            }
+
+                            if (!itemContent.Contains("<td class=\"label\" title=\"Link til hjemmeside\">Web</td><td class=\"data\"><i>Ikke angivet"))
+                            {
+                                key = "Web</td><td class=\"data\"><a target=\"_new\" href=\"";
+                                pFrom = itemContent.IndexOf(key) + key.Length;
+                                pTo = itemContent.IndexOf("\">", pFrom);
+
+                                hjemmeside = itemContent.Substring(pFrom, pTo - pFrom);
+                            }
+
+                            if (!itemContent.Contains("E-mail</td><td class=\"data\"><i>Ikke angivet</i>"))
+                            {
+                                key = "<td class=\"label\" title=\"\">E-mail</td><td class=\"data\"><a target=\"_new\" href=\"mailto:";
+                                pFrom = itemContent.IndexOf(key) + key.Length;
+                                pTo = itemContent.IndexOf("\" target=\"_new", pFrom);
+                                Mail = itemContent.Substring(pFrom, pTo - pFrom);
+                            }
+
+                        }
+
+
+
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        
+                    }
+                    
+                    
+                    UnionModel unionModel = new UnionModel()
+                    {
+                        Title = VARIABLE.name,
+                        Decs = VARIABLE.description.raw,
+                        LogoUrl = VARIABLE.avatar_urls.thumb,
+                        Facebook = facebook,
+                        Href = hjemmeside,
+                        Mail = Mail,
+                    }; 
+                    _unionModels.Add(unionModel);
+                }
+  
+            }
+            _unionModels.Sort((x,y)=>x.Title.CompareTo(y));
+            
+        }
+        catch (Exception e)
+        {
+    //ignored
+        }
+        
+        base.OnInitialized();
+    }
+
+    
+    
+    public class AvatarUrls
+    {
+        public string full { get; set; }
+        public string thumb { get; set; }
+    }
+
+    public class Collection
+    {
+        public string href { get; set; }
+    }
+
+    public class Description
+    {
+        public string raw { get; set; }
+        public string rendered { get; set; }
+    }
+
+    public class Links
+    {
+        public List<Self> self { get; set; }
+        public List<Collection> collection { get; set; }
+        public List<User> user { get; set; }
+    }
+
+    public class test2
+    {
+        public int id { get; set; }
+        public int creator_id { get; set; }
+        public int parent_id { get; set; }
+        public DateTime date_created { get; set; }
+        public DateTime date_created_gmt { get; set; }
+        public string created_since { get; set; }
+        public Description description { get; set; }
+        public bool enable_forum { get; set; }
+        public string link { get; set; }
+        public string name { get; set; }
+        public string slug { get; set; }
+        public string status { get; set; }
+        public List<string> types { get; set; }
+        public object total_member_count { get; set; }
+        public object last_activity { get; set; }
+        public object last_activity_diff { get; set; }
+        public AvatarUrls avatar_urls { get; set; }
+        public Links _links { get; set; }
+    }
+
+    public class Self
+    {
+        public string href { get; set; }
+    }
+
+    public class User
+    {
+        public bool embeddable { get; set; }
+        public string href { get; set; }
+    }
+}
