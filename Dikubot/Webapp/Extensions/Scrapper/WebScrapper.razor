@@ -1,5 +1,6 @@
-﻿@page "/WebScrapper"
+﻿@page "/op/union/webScrapper/"
 @using System;
+@using System.IO
 @using System.Collections
 @using System.Net
 @using System.Net.Http;
@@ -7,15 +8,26 @@
 @using Dikubot.Extensions.search
 @using Microsoft.Graph
 @using Newtonsoft.Json
+@using Microsoft.AspNetCore.Components
+@using Dikubot.Webapp.Authentication
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
 
 <h3>WebScrapper</h3>
 
-    <Searchbar Items="_unionModels" Context="UnionModel" NumberOfItems="12">
-        <TemplateRow Context="unionModel" >
-           <MudItem xs="12" sm="6" md="4" lg="3" >
-           <UnionWidget Union="unionModel"></UnionWidget>
-           </MudItem>
-        </TemplateRow>
+<MudButton OnClick="SaveAll" Variant="Variant.Filled" Color="Color.Success"> SCAP ALL </MudButton>
+
+<MudButton OnClick="Scrapper" Variant="Variant.Filled" Color="Color.Default"> START SCARPING :D</MudButton>
+
+
+<Searchbar Items="_unionModels" Context="UnionModel" NumberOfItems="12">
+    <TemplateRow Context="unionModel" >
+        <MudItem xs="12" sm="6" md="4" lg="3" >
+            <UnionWidget Union="unionModel"></UnionWidget>
+            <MudButton OnClick="() => removeItem(unionModel)" Variant="Variant.Outlined" Color="Color.Error"> REMOVE </MudButton>
+            <MudButton OnClick="() => _services.Upsert(unionModel)" Variant="Variant.Outlined" Color="Color.Success"> ADD </MudButton>
+        </MudItem>
+    </TemplateRow>
     </Searchbar>
 
 
@@ -23,42 +35,90 @@
 @code {
 
  public string FORENINGSLIVKU(int n){
-        return "https://www.foreningsliv-ku.dk/wp-json/buddypress/v1/groups?per_page=12&page="+n;
+        return "https://www.foreningsliv-ku.dk/wp-json/buddypress/v1/groups?per_page=100&page="+n;
 }
 
-
+    private void removeItem(UnionModel model)
+    {
+        _unionModels = _unionModels.Where(unionModel => unionModel.Title != model.Title ).ToList();
+    }
+    
     UnionServices _services = new UnionServices();
     List<UnionModel> _unionModels = new List<UnionModel>();
 
-    protected override Task OnInitializedAsync()
+    private void SaveAll()
     {
-        return base.OnInitializedAsync();
+        foreach (var sModel in _unionModels)
+        {
+            if (!_services.Exists(model => model.Title == sModel.Title))
+            {
+                _unionModels.Add(sModel);
+            }
+        }
+        
+        
     }
+    
 
-    protected override void OnInitialized()
+    private void Scrapper()
     {
+        
+        _unionModels = new List<UnionModel>();
         try
         {
-            HttpClient client = new HttpClient();
+            List<GroupsForeningsLivKU> myDeserializedClass = new List<GroupsForeningsLivKU>();
 
-            string content = client.GetStringAsync(FORENINGSLIVKU(1)).Result;
-            List<test2> myDeserializedClass = JsonConvert.DeserializeObject<List<test2>>(content);
+            int n = 1;
+            while (true)
+            {
+                HttpClient client = new HttpClient();
+                string content = client.GetStringAsync(FORENINGSLIVKU(n)).Result;
+                n++;
+                List<GroupsForeningsLivKU> elemensts = JsonConvert.DeserializeObject<List<GroupsForeningsLivKU>>(content);
+                
+                foreach (var group in elemensts)
+                {
+                    if (!myDeserializedClass.Contains(group))
+                    {
+                        if (!_services.Exists(model => model.Title == group.name))
+                        {
+                            myDeserializedClass.AddRange(elemensts);
+                        }
+                    }
+                }
+                if (elemensts.Count < 100)
+                {
+                 break;   
+                }
+            }
+            
             string res = "";
                     
-            foreach (var VARIABLE in myDeserializedClass)
+            foreach (var group in myDeserializedClass)
             {
+                
     //string response = client.GetStringAsync(VARIABLE.link).Result;
-                if (!_services.Exists(model => model.Title == VARIABLE.name))
+                if (!_services.Exists(model => model.Title == group.name))
                 {
                     String facebook = "";
                     String hjemmeside = "";
                     String Mail = "";
                     try
                     {
-                        HttpClient httpClient = new HttpClient();
-                        string url = VARIABLE.link.Replace("%c3%a6", "æ").Replace("%c3%a5", "å").Replace("%c3%b8", "ø");
+                        HttpClientHandler clientHandler = new HttpClientHandler
+                        {
+                            AllowAutoRedirect = true,
+                            MaxAutomaticRedirections = 5,
+                        };
                         
-                        HttpResponseMessage response = client.GetAsync(url).Result;
+                        HttpClient httpClient = new HttpClient(clientHandler);
+                        
+                       
+                        Uri url = new Uri(group.link, new UriCreationOptions{DangerousDisablePathAndQueryCanonicalization = true});
+                        
+                        
+                        HttpResponseMessage response = httpClient.GetAsync(url).Result;
+                        
                         
                         if(!response.IsSuccessStatusCode)
                         {
@@ -66,14 +126,12 @@
                             Console.WriteLine(response.Headers);
                             if (response.StatusCode == HttpStatusCode.Unauthorized)
                             {
-                                
-                                
                             }
                         }
                         else
                         {
-
-                            string itemContent = client.GetStringAsync(url).Result;
+                            //https://html-agility-pack.net/ - når vi skal opdaterer til noget smartere
+                            string itemContent = httpClient.GetStringAsync(url).Result;
 
                             string key = "";
                             int pFrom = 0;
@@ -105,8 +163,19 @@
                             }
 
                         }
-
-
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        
+                    }
+                    string hashCode = String.Format("{0:X}", group.id.GetHashCode());
+                    string localFileName = "thumps/"+hashCode+".jpg";
+                    try
+                    {
+                        WebClient webClient = new WebClient();
+                        
+                        webClient.DownloadFile(group.avatar_urls.full, "Webapp/wwwroot/"+localFileName);
 
                     }
                     catch (Exception e)
@@ -115,29 +184,28 @@
                         
                     }
                     
-                    
                     UnionModel unionModel = new UnionModel()
                     {
-                        Title = VARIABLE.name,
-                        Decs = VARIABLE.description.raw,
-                        LogoUrl = VARIABLE.avatar_urls.thumb,
+                        Title = group.name,
+                        Decs = group.description.raw,
+                        LogoUrl = localFileName,
                         Facebook = facebook,
                         Href = hjemmeside,
                         Mail = Mail,
-                    }; 
-                    _unionModels.Add(unionModel);
+                    };
+                    if (!_services.Exists(model => model.Title == unionModel.Title))
+                    {
+                        _unionModels.Add(unionModel);
+                    }
+                    
                 }
   
             }
-            _unionModels.Sort((x,y)=>x.Title.CompareTo(y));
-            
         }
         catch (Exception e)
         {
     //ignored
         }
-        
-        base.OnInitialized();
     }
 
     
@@ -166,7 +234,7 @@
         public List<User> user { get; set; }
     }
 
-    public class test2
+    public class GroupsForeningsLivKU
     {
         public int id { get; set; }
         public int creator_id { get; set; }

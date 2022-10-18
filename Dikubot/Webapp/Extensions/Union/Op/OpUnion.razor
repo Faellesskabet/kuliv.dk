@@ -1,0 +1,64 @@
+﻿@page "/op/union"
+@using Dikubot.Webapp.Authentication
+@using Microsoft.AspNetCore.Components
+@using Syncfusion.Blazor.Buttons
+
+@using Dikubot.Webapp.Authentication
+@using System.Net.Http.Json
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.Discord
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.Webapp.Extensions.Discovery.Request
+@using Dikubot.Webapp.Shared.Dialog
+@using global::Discord.WebSocket
+@using Microsoft.AspNetCore.Razor.TagHelpers
+@using Microsoft.IdentityModel.Tokens
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+<h3>OpUnion</h3>
+
+<MudButton Variant="Variant.Filled" OnClick="RemoveDuplicates" Color="Color.Error"> Remove Dupblicates </MudButton>
+<MudText Typo="Typo.body2"> UnionModels: @UnionModels.Count  </MudText>
+<MudText Typo="Typo.body2"> UnionModels:@Duplicates.Count  </MudText>
+
+
+@code {
+
+    public UnionServices Services = new UnionServices();
+
+    public List<UnionModel> UnionModels = new List<UnionModel>();
+    public List<UnionModel> Duplicates = new List<UnionModel>();
+    
+    protected override void OnInitialized()
+    {
+        UnionModels = Services.Get();
+        foreach (var item in UnionModels)
+        {
+            var dupModel = UnionModels.Find(model => model.Title == item.Title && model.Id != item.Id);
+            if (dupModel != null)
+            {
+                if (!Duplicates.Any(model => model.Title == item.Title))
+                {
+                    Duplicates.Add(item);
+                }
+                
+                
+            }
+        }
+        
+        base.OnInitialized();
+    }
+
+    public void RemoveDuplicates()
+    {
+        foreach (var VARIABLE in Duplicates)
+        {
+            Services.Remove(VARIABLE);
+        }
+        
+    }
+    
+    
+}
