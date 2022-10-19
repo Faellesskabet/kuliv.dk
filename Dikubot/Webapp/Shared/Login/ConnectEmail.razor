@@ -24,13 +24,33 @@
         <MudCardHeader>
             @if (incorrectPassword)
             {
-                <MudAlert Severity="Severity.Error">Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</MudAlert>
+                <MudAlert Severity="Severity.Error">
+                    <Localization>
+                        <Danish>Koden du indtastede er desværre ikke korrekt, du bedes derfor indtaste din email igen.</Danish>
+                        <English> Unfortunately, the code you entered is not correct, so please enter your email again. </English>
+                    </Localization>
+                </MudAlert>
             }
             @if (emailTaken)
             {
-                <MudAlert Severity="Severity.Error">Emailen @(email) er allerede i brug. Log ind på din anden Discord profil eller kontakt en administrator</MudAlert>
+                <MudAlert Severity="Severity.Error">
+                    <Localization>
+                        <Danish>Emailen @(email) er allerede i brug. Log ind på din anden Discord profil eller kontakt en administrator: <MudField> Support@kuliv.dk </MudField>.</Danish>
+                        <English>The email @(email) is already in use. Log in to your other Discord profile or contact an administrator: <MudField> Support@kuliv.dk </MudField>.</English>
+                        </Localization>
+                    
+                </MudAlert>
             }
-            <MudText Typo="Typo.h6">Bekræft din KU-mail</MudText>
+            <MudText Typo="Typo.h6">
+                <Localization>
+                    <Danish>
+                        Bekræft din KU-mail
+                    </Danish>
+                    <English>
+                        Confirm your KU email
+                    </English>
+                </Localization>
+            </MudText>
         </MudCardHeader>
         <MudCardContent>
             <MudForm>
@@ -55,10 +75,26 @@ else
 {
     <MudCard>
         <MudCardHeader>
-            <MudText Typo="Typo.h5">Vi har sendt en kode til din email: @(email)</MudText>
+            <MudText Typo="Typo.h5">
+                <Localization>
+                    <Danish>Vi har sendt en kode til din email: @(email)</Danish>
+                    <English>We have sent a code to your email: @(email)</English>
+                </Localization>
+            </MudText>
         </MudCardHeader>
         <MudCardContent>
-        <MudText Typo="Typo.body1">Hvis du ikke har modtaget en email inden for 2 min, så tjek om den er endt som spam her: <MudLink Href="https://security.microsoft.com/quarantine" Target="_blank">https://security.microsoft.com/quarantine</MudLink></MudText>
+            <MudText Typo="Typo.body1">
+                <Localization>
+                    <Danish>
+                        Hvis du ikke har modtaget en email inden for 2 min, så tjek om den er endt som spam her: <MudLink Href="https://security.microsoft.com/quarantine" Target="_blank">https://security.microsoft.com/quarantine</MudLink>.
+                        Hvis du stadig ikke har modtaget en email med en kode, så skriv en mail fra din KU mail til <MudField> Support@kuliv.dk </MudField>.
+                    </Danish>
+                    <English>
+                        If you have not received an email within 2 minutes, check whether it has ended up as spam here: <MudLink Href="https://security.microsoft.com/quarantine" Target="_blank">https://security.microsoft.com/quarantine</MudLink>.
+                        If you still haven't received an email with a code, write an email from your KU email to <MudField> Support@kuliv.dk </MudField>.
+                    </English>
+                </Localization>
+            </MudText>
             <MudForm>
                 <MudTextField
                     @bind-Value="passwordInput"

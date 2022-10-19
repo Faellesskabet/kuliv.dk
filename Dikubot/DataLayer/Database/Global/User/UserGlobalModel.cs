@@ -81,6 +81,8 @@ namespace Dikubot.DataLayer.Database.Global.User
         [BsonElement("DarkTheme")]
         public bool DarkTheme { get; set; }
 
+        [BsonElement("CultureInfo")] 
+        public string CultureInfo { get; set; } = "en-US";
 
         /// <summary>
         /// Get all guids the user

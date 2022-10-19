@@ -2,9 +2,18 @@
     <div class="footer__addr">
         <MudLink Href="/"><MudText Typo="Typo.h3">kuliv.dk</MudText></MudLink>
         <MudText Typo="Typo.body1" Style="color: gray" class="text-justify">
-            Hej og velkommen til Fællesskabet. Vi tilbyder nem adgang til forskellige Discord server, mange af
-            dem drevet af studerende selv. Regler kan variere fra server til server, dertil skal du kontakte den pågældende servers admin/mods.
-            Hjertelig velkommen til fællesskabet!
+            <Localization>
+                <Danish>
+                    Hej og velkommen til Fællesskabet. Vi tilbyder nem adgang til forskellige Discord server, mange af
+                    dem drevet af studerende selv. Regler kan variere fra server til server, dertil skal du kontakte den pågældende servers admin/mods.
+                    Hjertelig velkommen til fællesskabet!
+                </Danish>
+                <English>
+                    Hello and welcome to the Community. We offer easy access to different Discord servers, many of them
+                    those run by students themselves. Rules may vary from server to server, for that you must contact the respective server's admin/mods.
+                    A warm welcome to the community!
+                </English>
+            </Localization>
         </MudText>
     </div>
   
@@ -13,10 +22,43 @@
             <h2 class="nav__title" Style="color: gray">For everyone</h2>
 
             <ul class="nav__ul">
-                <li><MudLink href="/userguide">Guide til brugere</MudLink></li>
-                <li><MudLink href="/contactus">Kontakt os</MudLink></li>
-                <li><MudLink href="/volunteer">Bliv frivillig</MudLink></li>
-                <li><MudLink href="/contactus">Rapporter fejl</MudLink></li>
+                <li><MudLink href="/userguide">
+                    <Localization>
+                        <Danish>
+                            Guide til brugere
+                        </Danish>
+                        <English>
+                            User Guide
+                        </English>
+                    </Localization>
+                </MudLink></li>
+                <li><MudLink href="/contactus">
+                    <Localization>
+                        <Danish>
+                            Kontakt
+                        </Danish>
+                        <English>
+                            Contact
+                        </English>
+                    </Localization>
+                    
+                </MudLink></li>
+                <li><MudLink href="/volunteer">
+                    <Localization>
+                        <Danish>Bliv frivillig</Danish>
+                        <English>Become Volunteer </English>
+                    </Localization>
+                </MudLink></li>
+                <li><MudLink href="/contactus">
+                    <Localization>
+                        <Danish>
+                            Rapporter fejl
+                        </Danish>
+                        <English>
+                            Report bug
+                        </English>
+                    </Localization>
+                </MudLink></li>
             </ul>
         </li>
     
@@ -24,11 +66,36 @@
 
             <h2 class="nav__title" Style="color: gray">Important information</h2>
             <ul class="nav__ul">
-                <li><MudLink href="/tos">Servicevilkår</MudLink></li>
+                <li><MudLink href="/tos">
+                    <Localization>
+                        <Danish>Servicevilkår</Danish>
+                        <English>Terms of Service</English>
+                    </Localization>
+                </MudLink></li>
                 <li><MudLink href="/gdpr">GDPR</MudLink></li>
-                <li><MudLink Href="https://github.com/Faellesskabet/Faellesskabet">Vedtægter</MudLink></li>
-                <li><MudLink Href="https://github.com/Faellesskabet/Referater">Referater</MudLink></li>
-                <li><MudLink href="/acknowledgements">Software licens og tak</MudLink></li>
+                <li><MudLink Href="https://github.com/Faellesskabet/Faellesskabet">
+                    <Localization> <Danish>Vedtægter</Danish> <English>
+                        Statutes
+                    </English> </Localization>
+                </MudLink></li>
+                <li><MudLink Href="https://github.com/Faellesskabet/Referater">
+                    <Localization><Danish>
+                        Referater
+                    </Danish>
+                        <English>
+                            Summary
+                        </English>
+                        </Localization>
+                </MudLink></li>
+                <li><MudLink href="/acknowledgements">
+                    <Localization><Danish>
+                        Software licens og tak
+                    </Danish>
+                        <English>
+                            Software license and Acknowledgements
+                        </English>
+                        </Localization>
+                </MudLink></li>
             </ul>
         </li>
     
@@ -36,13 +103,33 @@
             <h2 class="nav__title" Style="color: gray">For admins</h2>
       
             <ul class="nav__ul">
-                <li><MudLink href="/adminguide">Tilføj dit fællesskab</MudLink></li>
-                <li><MudLink href="/adminguide">Guide til admins</MudLink></li>
+                <li><MudLink href="/adminguide"><Localization>
+                    <Danish>Tilføj dit fællesskab</Danish>
+                    <English>Add your Community</English>
+                </Localization></MudLink></li>
+                <li><MudLink href="/adminguide">
+                    <Localization><Danish>
+                        Guide til admins
+                    </Danish>
+                        <English>
+                             Admin guides
+                        </English></Localization>
+                </MudLink></li>
             </ul>
             
-            <h2 class="nav__title" Style="color: gray">Sammenarbejdespartner</h2>
+            <h2 class="nav__title" Style="color: gray">
+                <Localization>
+                    <Danish>Sammenarbejdespartner</Danish>
+                    <English>Collaboration partner</English>
+                </Localization>
+            </h2>
             <ul class="nav__ul">
-                <li><MudLink href="/sponsorater">Indgå sammenarbejde</MudLink></li>
+                <li><MudLink href="/sponsorater">
+                    <Localization>
+                        <Danish>Indgå sammenarbejde</Danish>
+                        <English>Enter into cooperation</English>
+                    </Localization>
+                </MudLink></li>
             </ul>
 
         </li>
