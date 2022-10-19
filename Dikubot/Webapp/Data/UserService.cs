@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.Discord;
 using Dikubot.Webapp.Authentication;
@@ -41,8 +43,13 @@ namespace Data
         {
             return await _authenticator.GetTokenAsync();
         }
+
+        public IEnumerable<Claim> Claims()
+        {
+            return _user?.Claims ?? new List<Claim>();
+        }
+ 
         
-        
-        
+
     }
 }
