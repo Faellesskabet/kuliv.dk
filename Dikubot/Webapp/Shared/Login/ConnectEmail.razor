@@ -86,12 +86,15 @@ else
             <MudText Typo="Typo.body1">
                 <Localization>
                     <Danish>
-                        Hvis du ikke har modtaget en email inden for 2 min, så tjek om den er endt som spam her: <MudLink Href="https://security.microsoft.com/quarantine" Target="_blank">https://security.microsoft.com/quarantine</MudLink>.
-                        Hvis du stadig ikke har modtaget en email med en kode, så skriv en mail fra din KU mail til <MudField> Support@kuliv.dk </MudField>.
+                        Hvis du ikke har modtaget en email inden for 2 min, så følg denne guide:
+                        <MudButton OnClick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+                            Quarantine Center Guide.
+                        </MudButton>
                     </Danish>
                     <English>
-                        If you have not received an email within 2 minutes, check whether it has ended up as spam here: <MudLink Href="https://security.microsoft.com/quarantine" Target="_blank">https://security.microsoft.com/quarantine</MudLink>.
-                        If you still haven't received an email with a code, write an email from your KU email to <MudField> Support@kuliv.dk </MudField>.
+                        If you have not received an email within 2 minutes, try our guide: <MudButton OnClick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+                                                                                                                                         Quarantine Center Guide.
+                                                                                                                                     </MudButton>
                     </English>
                 </Localization>
             </MudText>
@@ -114,10 +117,33 @@ else
 }
 
 
+<MudDialog @bind-IsVisible="visible" Options="dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            How To Comfirm your Email
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudContainer Style="max-height:300px; overflow-y: scroll">
+            <HowToComfirmEmail></HowToComfirmEmail>
+        </MudContainer> 
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Class="px-10">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
 @code {
      [Parameter]
     public Login parent { get; set; }
+    
+    private bool visible;
+    private int rating;
+    private void OpenDialog() => visible = true;
+    void Submit() => visible = false;
 
+    private DialogOptions dialogOptions = new() { FullWidth = true, MaxWidth = MaxWidth.Large};
 
     private KUEmailValidation _kuEmailValidation = new KUEmailValidation();
     private Authenticator authenticator;
