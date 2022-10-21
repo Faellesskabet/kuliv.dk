@@ -23,8 +23,6 @@
 <MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<UnionModel>>>>(Reload))" @ref="_table"
           Loading="@_loading">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
-        <MudSpacer/>
         <MudSelect T="RequestModel<UnionModel>.StatusEmun" Label="Status" MultiSelection="true" @bind-SelectedValues="options" OnClose="o => _table.ReloadServerData()">
             <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.ongoing"></MudSelectItem>
             <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.change"></MudSelectItem>

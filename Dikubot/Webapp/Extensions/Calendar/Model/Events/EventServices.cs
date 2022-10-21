@@ -6,6 +6,7 @@ using Dikubot.DataLayer.Database.Global;
 using Dikubot.DataLayer.Database.Global.Settings.Tags;
 using Dikubot.Discord;
 using Dikubot.Webapp.Extensions.Calendar.Model;
+using Dikubot.Webapp.Extensions.Discovery.Links;
 using Discord.WebSocket;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -20,7 +21,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
         private string guildId;
         private CalendarLogic _calendarLogic;
         private UserService _user;
-        
+        private UnionModel? _Union; 
         
         public EventsServices(UserService userService, SocketGuild guildId, Guid? calendar =null) : base("Events")
         {
@@ -29,13 +30,19 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 
             _calendarLogic = new CalendarLogic(userService.GetUserGlobalModel());
             _user = userService;
-
         }
         
         public EventsServices(UserService userService, string guildId = null, Guid? calendar = null) : base("Events")
         {
             _calendar = calendar;
             this.guildId = guildId;
+            _calendarLogic = new CalendarLogic(userService.GetUserGlobalModel());
+            _user = userService;
+        }
+
+        public EventsServices(UserService userService, UnionModel union) : base("Events")
+        {
+            _Union = union;
             _calendarLogic = new CalendarLogic(userService.GetUserGlobalModel());
             _user = userService;
         }
@@ -60,6 +67,21 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
         
         public List<EventModel> Get(DateTime startTime, DateTime endTime)
         {
+            List<EventModel> result = GetAll(model => (model.StartTime.CompareTo(startTime) >= 0 &&
+                                                       model.StartTime.CompareTo(endTime) <= 0)
+                                                      || (model.EndTime.CompareTo(startTime) >= 0
+                                                          && model.EndTime.CompareTo(endTime) <= 0) ||
+                                                      (model.StartTime.CompareTo(startTime) <= 0 &&
+                                                       model.EndTime.CompareTo(endTime) >= 0)
+            );
+            
+            if (_Union is not null)
+            {
+                result = result.Where(model => model.HostServers.Contains(_Union.Id)).ToList();
+                result.Sort((x, y) => DateTime.Compare(x.StartTime, y.StartTime));
+                return result;
+            }
+            
             
             HashSet<Guid> ViewCalenders = _calendarLogic.GetAllViewCalenders(CalendarModel.EnumCalendarType.Event).Result
                 .SelectMany(m => m.Item2).Select(m => m.Id).ToHashSet();
@@ -68,15 +90,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
                 .GetAllPermisionsCalendars(CalendarModel.EnumCalendarType.Event).Result
                 .SelectMany(m => m.Item2).Select(m => m.Id).ToHashSet(); 
             
-            List<EventModel> result = GetAll(model => (model.StartTime.CompareTo(startTime) >= 0 &&
-                                                                model.StartTime.CompareTo(endTime) <= 0)
-                                                                || (model.EndTime.CompareTo(startTime) >= 0
-                                                                    && model.EndTime.CompareTo(endTime) <= 0) ||
-                                                                (model.StartTime.CompareTo(startTime) <= 0 && 
-                                                                 model.EndTime.CompareTo(endTime) >= 0)
-                ).Where(model => model.Hosts.Contains(_user.GetUserGlobalModel().DiscordId)
-                                 || PermisionsCalenders.Overlaps(model.Calendars) ||
-                                 ViewCalenders.Overlaps(model.Calendars)
+            result.Where(model => model.Hosts.Contains(_user.GetUserGlobalModel().DiscordId)
+                                  || PermisionsCalenders.Overlaps(model.Calendars) ||
+                                  ViewCalenders.Overlaps(model.Calendars)
                                  ).Select(m =>
                 {
                     m.IsReadonly = !(PermisionsCalenders.Overlaps(m.Calendars) || m.Hosts.Contains(_user.GetUserGlobalModel().DiscordId));

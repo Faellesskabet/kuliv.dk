@@ -18,6 +18,7 @@ namespace Dikubot.Webapp.Extensions.Discovery.Links
 
         public UnionModel(GuildSettingsModel settingsModel)
         {
+            Id = settingsModel.Id;
             Title = settingsModel.Name;
             Decs = settingsModel.Description;
             Discord = settingsModel.GuildId.ToString();
