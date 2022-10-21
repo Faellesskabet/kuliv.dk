@@ -1,4 +1,5 @@
 ﻿@page "/request/event/create"
+@page "/request/event/create/{unionID}"
 @page "/request/event/edit/{uuid}"
 
 
@@ -33,6 +34,9 @@ else
     [Parameter]
     public string? uuid { get; set; }
     
+    [Parameter]
+    public string? unionID { get; set; }
+    
     [Inject] private IDialogService DialogService { get; set; }
     private bool _loading = true;
     private EventRequestService _services;
@@ -43,6 +47,11 @@ else
     {
         _services = new EventRequestService();
         _request = Guid.TryParse(uuid, out Guid guid) ? _services.Get(guid) : new RequestModel<EventModel>();
+        if (Guid.TryParse(unionID, out Guid UnionGuid))
+        {
+            _request.RequestItem.HostServers.Add(UnionGuid);
+        }
+        
         _loading = false;
     }
     

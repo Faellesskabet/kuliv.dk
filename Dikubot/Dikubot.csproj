@@ -61,7 +61,6 @@
     <Folder Include="DataLayer\Database\Global\ConfirmEmail" />
     <Folder Include="Webapp\Extensions\Announcements\Admin" />
     <Folder Include="Webapp\Extensions\Announcements\Op" />
-    <Folder Include="Webapp\Extensions\Union\Pages" />
     <Folder Include="Webapp\Extensions\Sponsorater" />
   </ItemGroup>
   

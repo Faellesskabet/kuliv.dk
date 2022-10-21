@@ -1,0 +1,21 @@
+﻿@page "/discovery/union/{uuid}"
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.Extensions.Calender
+@using Dikubot.Webapp.Extensions.Discovery.Links
+
+<UnionWidget Union="Model"></UnionWidget>
+
+@code {
+    [Parameter]
+    public string? uuid { get; set; }
+
+    private UnionModel Model { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        UnionServices services = new UnionServices();
+        Model = Guid.TryParse(uuid, out Guid guid) ? services.Get(guid) : new UnionModel() {};
+        base.OnInitialized();
+    }
+
+}

@@ -56,28 +56,52 @@
     }
 </MudGrid>
 <MudItem xs="12">
-<MudGrid Justify="Justify.Center" Style="margin-top: 12px; margin-bottom: 12px">
-       @if (TemplatePagination is null)
-       {
-           <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4"/>
-       }
-       else
-       {
-           @TemplatePagination <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4" />
-       }
-</MudGrid>
-</MudItem>
-<MudGrid>
-@foreach (var item in ItemList.Skip((Selected-1)*NumberOfItems).Take(NumberOfItems))
+    <MudGrid Justify="Justify.Center" Style="margin-top: 12px; margin-bottom: 12px">
+        @if (TemplatePagination is null)
         {
-           
-            if (TemplateRow is not null)
-            {
-                @TemplateRow(item);
-            }
-            
+            <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4"/>
         }
-</MudGrid>
+        else
+        {
+            @TemplatePagination <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4" />
+        }
+    </MudGrid>
+</MudItem>
+@if (SelectedStyle is null && TemplateRow is not null)
+{
+    <MudGrid>
+        @foreach (var item in ItemList.Skip((Selected - 1) * NumberOfItems).Take(NumberOfItems))
+        {
+            @TemplateRow(item)
+        }
+    </MudGrid>
+}
+@if(TemplateRow is not null && SelectedStyle is VariantStyle.Grid){
+    <MudGrid>
+        
+        @foreach (var item in ItemList.Skip((Selected - 1) * NumberOfItems).Take(NumberOfItems))
+        {
+            <MudItem xs="12" sm="4">
+                @TemplateRow(item)
+            </MudItem>
+
+        }
+    </MudGrid>
+} else if(TemplateExpansionPanel is not null && (SelectedStyle is null or VariantStyle.ExpansionPanel ))
+    {
+        <MudGrid>
+            @foreach (var item in ItemList.Skip((Selected-1)*NumberOfItems).Take(NumberOfItems))
+            {
+                <MudItem xs="12" Style="padding: 0; margin: 0">
+                    <MudDivider Style="background-color: transparent"></MudDivider>
+                    @TemplateExpansionPanel(item)
+                    <MudDivider Style="background-color: transparent"></MudDivider>
+                </MudItem>
+               
+            }
+        </MudGrid>
+    }
+
 <MudGrid Justify="Justify.Center" Style="margin-bottom: 12px">
     @if (TemplatePagination is null)
     {
@@ -98,9 +122,12 @@
     private int Count => ItemList.Count / NumberOfItems+1;
     
     [Parameter] public int NumberOfItems { get; set; } = 9;
+
+    [Parameter]
+    public VariantStyle? SelectedStyle { get; set; }
+
     
-    
-    
+
     [Parameter]
     public string SearchQuery { get; set; }
 
@@ -112,7 +139,10 @@
     
     [Parameter]
     public RenderFragment<TMainModel>? TemplateRow { get; set; }
-    
+
+    [Parameter]
+    public RenderFragment<TMainModel>? TemplateExpansionPanel { get; set; }
+
     [Parameter]
     public RenderFragment? TemplatePagination { get; set; }
     
