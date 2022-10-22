@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Data;
 using Dikubot.DataLayer.Database.Global;
@@ -47,9 +48,11 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
             _user = userService;
         }
         
+        
+        
         public override List<EventModel> Get()
         {
-            if (_calendar != null)
+            if (_calendar == null)
             {
                 return base.Get();
             }
@@ -67,6 +70,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
         
         public List<EventModel> Get(DateTime startTime, DateTime endTime)
         {
+            long start = Stopwatch.GetTimestamp();
+            Console.WriteLine("GET STARTED");
+            
             List<EventModel> result = GetAll(model => (model.StartTime.CompareTo(startTime) >= 0 &&
                                                        model.StartTime.CompareTo(endTime) <= 0)
                                                       || (model.EndTime.CompareTo(startTime) >= 0
@@ -75,20 +81,31 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
                                                        model.EndTime.CompareTo(endTime) >= 0)
             );
             
+            long end = Stopwatch.GetTimestamp();
+            
+            Console.WriteLine("GetAll Elapsed Time is {0} ticks", (end - start));
+            
             if (_Union is not null)
             {
                 result = result.Where(model => model.HostServers.Contains(_Union.Id)).ToList();
                 result.Sort((x, y) => DateTime.Compare(x.StartTime, y.StartTime));
                 return result;
             }
+
+            var viewAndPermissions = _calendarLogic.GetAllListViewAndPermissionsCalenders(CalendarModel.EnumCalendarType.Event);
             
+            end = Stopwatch.GetTimestamp();
+            Console.WriteLine("ViewCalenders Elapsed Time is {0} ticks", (end - start));
+
+            HashSet<Guid> ViewCalenders = viewAndPermissions.Result.Item1.Select(cm => cm.Id).ToHashSet();
             
-            HashSet<Guid> ViewCalenders = _calendarLogic.GetAllViewCalenders(CalendarModel.EnumCalendarType.Event).Result
-                .SelectMany(m => m.Item2).Select(m => m.Id).ToHashSet();
+            end = Stopwatch.GetTimestamp();
+            Console.WriteLine("ViewCalenders Elapsed Time is {0} ticks", (end - start));
             
-            HashSet<Guid> PermisionsCalenders = _calendarLogic
-                .GetAllPermisionsCalendars(CalendarModel.EnumCalendarType.Event).Result
-                .SelectMany(m => m.Item2).Select(m => m.Id).ToHashSet(); 
+            HashSet<Guid> PermisionsCalenders = viewAndPermissions.Result.Item2.Select(cm => cm.Id).ToHashSet();
+            
+            end = Stopwatch.GetTimestamp();
+            Console.WriteLine("PermisionsCalenders Elapsed Time is {0} ticks", (end - start));
             
             result.Where(model => model.Hosts.Contains(_user.GetUserGlobalModel().DiscordId)
                                   || PermisionsCalenders.Overlaps(model.Calendars) ||
@@ -100,8 +117,13 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
                 })
                 .ToList();
             
+            end = Stopwatch.GetTimestamp();
+            Console.WriteLine("Elapsed Time is {0} ticks", (end - start));
+            
             result.Sort((x, y) => DateTime.Compare(x.StartTime, y.StartTime));
 
+            end = Stopwatch.GetTimestamp();
+            Console.WriteLine("Elapsed Time is {0} ticks", (end - start));
             return result;
         }
         

@@ -8,8 +8,8 @@
 @inject UserService _user
 @attribute [AllowAnonymous]
 
-<MudButton OnClick="() => Orientation = VariantStyle.ExpansionPanel"> Landskab </MudButton>
-<MudButton OnClick="() => Orientation = VariantStyle.Grid"> Protrat </MudButton>
+<MudButton OnClick="() => _orientation = VariantStyle.ExpansionPanel"> Landskab </MudButton>
+<MudButton OnClick="() => _orientation = VariantStyle.Grid"> Protrat </MudButton>
 
 <style>
 .mud-expand-panel .mud-expand-panel-header{
@@ -24,7 +24,7 @@ padding-left: 0px;
     
 </style>
 
-<Searchbar Items="Models" Context="item" SelectedStyle="Orientation">
+<Searchbar Items="Models" Context="item" SelectedStyle="_orientation">
     <TemplateRow Context="item">
         <EventWidget Model="item" Orientation="VariantStyle.Grid"></EventWidget>
     </TemplateRow>
@@ -39,21 +39,19 @@ padding-left: 0px;
 
 @code
 {
-    public List<EventModel> Models { get => Services.Get(StartTime, DateTime.MaxValue);}
+    private List<EventModel> Models { get => _services.Get(StartTime, DateTime.MaxValue);}
 
-    public VariantStyle Orientation = VariantStyle.Grid;
+    private VariantStyle _orientation = VariantStyle.Grid;
     
-    private EventsServices Services;
+    private EventsServices _services;
     
     private DateTime StartTime { get; set; } = DateTime.Today;
 
     protected override void OnInitialized()
     {
-        Services =  new EventsServices(_user);
+        _services =  new EventsServices(_user);
         base.OnInitialized();
     }
-    
-    
     
     private void Request()
     {
