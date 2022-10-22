@@ -3,6 +3,7 @@
 @using Dikubot.Extensions.Calender
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Global.GuildSettings;
 @using Dikubot.Extensions.search
 @inject NavigationManager _navigationManager;
 @inject UserService _user;
@@ -80,9 +81,8 @@
         <MudItem xs="12" sm="4">
             <MudCard>        
                 <CalendarWidget 
-                    EventsServices="new EventsServices(_user, Model)" 
-                    ShowEventsList="true"
-                    WidgdetHeight="300px"
+                    EventsServices="new EventsServices(_user, Model)"
+                    View="@View.MonthAgenda"
                     />
     </MudCard>
         </MudItem>
@@ -103,7 +103,10 @@
     protected override void OnInitialized()
     {
         UnionServices services = new UnionServices();
-        Model = Guid.TryParse(uuid, out Guid guid) ? services.Get(guid) : new UnionModel() {};
+        GuildSettingsService guildSettingsService = new GuildSettingsService();
+        
+        Model = Guid.TryParse(uuid, out Guid guid) ? services?.Get(guid) ?? new UnionModel(guildSettingsService.Get(guid)) : new UnionModel() {};
+        
         base.OnInitialized();
     }
     

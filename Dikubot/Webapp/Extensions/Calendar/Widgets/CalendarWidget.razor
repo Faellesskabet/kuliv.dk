@@ -36,7 +36,7 @@
                  <ScheduleEvents TValue="EventModel" ActionCompleted="OnActionCompleted" ></ScheduleEvents>
              </ScheduleEventSettings>
              <ScheduleViews>
-                 <ScheduleView Option="View.Month"></ScheduleView>
+                 <ScheduleView Option="@View"></ScheduleView>
              </ScheduleViews>
              <ScheduleQuickInfoTemplates>
                  <ContentTemplate>
@@ -59,30 +59,6 @@
              </ScheduleTemplates>
          </SfSchedule>
      </div>
-   
-     @if (ShowEventsList)
-     {
-         <style>
-.mud-expand-panel .mud-expand-panel-header{
-    padding: 0;
-}
-.mud-expand-panel .mud-expand-panel-content{
-padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 16px;
-    
-}
-    
-</style>
-         <MudContainer Style="max-height: 500px; overflow-y: scroll; padding:0">
-             @foreach (var item in ArrangementData)
-             {
-                 <EventWidget Model="item" Orientation="VariantStyle.ExpansionPanel"></EventWidget>
-             }
-         </MudContainer>
-     }
-
-   
      
     }else
     {
@@ -100,14 +76,14 @@ padding-left: 0px;
 
     [Parameter]
     public EventsServices EventsServices { get; set; }
-
-    [Parameter]
-    public bool ShowEventsList { get; set; } = false;
-
+    
     [Parameter]
     public string WidgdetHeight { get; set; } = "100%";
     [Parameter]
     public string WidgdetWidth { get; set; } = "100%";
+
+    [Parameter]
+    public View View { get; set; } = View.Month;
 
     private bool _loaded;
 
