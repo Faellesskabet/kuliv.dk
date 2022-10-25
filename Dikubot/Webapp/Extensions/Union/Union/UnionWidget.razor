@@ -26,7 +26,9 @@
 padding-left: 0px;
     padding-right: 0px;
     padding-bottom: 16px;
-    
+}
+.mud-card-header .mud-card-header-content{
+width: 50%;
 }
     
 </style>
@@ -62,7 +64,8 @@ padding-left: 0px;
             <MudAvatar Size="Size.Large" Image="@Union.LogoUrl"></MudAvatar>
         </CardHeaderAvatar>
         <CardHeaderContent>
-            <MudText Typo="Typo.body1" Class="overflow-hidden">@Union.Title</MudText>
+            <MudText Typo="Typo.body1" 
+                     Style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis">@Union.Title</MudText>
              @if (IsChangeGuild)
                             {
                                 <MudText Typo="Typo.body2">
@@ -71,7 +74,7 @@ padding-left: 0px;
                             }
              else
              {
-                 <MudText Typo="Typo.body2">
+                 <MudText Typo="Typo.body2" Style="white-space: nowrap;">
                
                      @if (!string.IsNullOrWhiteSpace(Union.Discord))
                      {
@@ -127,7 +130,7 @@ padding-left: 0px;
                         <MudAvatar Size="Size.Large" Image="@Union.LogoUrl"></MudAvatar>
                     </CardHeaderAvatar>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">@Union.Title</MudText>
+                        <MudText Typo="Typo.h6" Style="text-overflow: ellipsis ">@Union.Title</MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
                         <MudIconButton OnClick="Submit" Color="Color.Primary" Icon="@Icons.Filled.Close"/>

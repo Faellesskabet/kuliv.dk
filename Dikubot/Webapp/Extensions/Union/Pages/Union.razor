@@ -45,7 +45,7 @@
                         </MudCardContent>
                     </MudCard>
         </MudItem>
-        <MudItem xs="12">
+        <MudItem xs="12" Style="padding-top: 12px">
             <MudGrid>
                 <MudItem xs="12" sm="6">
                                 <MudCard>
@@ -63,13 +63,13 @@
                                         <MudText Typo="Typo.h4"> Contact </MudText>
                                     </MudCardHeader>
                                     <MudCardContent>
-                                        <MudField Label="Mail" Variant="Variant.Outlined">
+                                        <MudField Label="Mail" Variant="Variant.Outlined" Style=" text-overflow: ellipsis">
                                             @Model.Mail
                                         </MudField>
-                                        <MudField Label="Hjemmeside" Variant="Variant.Outlined">
+                                        <MudField Label="Hjemmeside" Variant="Variant.Outlined"  Style=" text-overflow: ellipsis">
                                             <MudLink Href="@Model.Href"> @Model.Href</MudLink>
                                         </MudField>
-                                        <MudField Label="Facebook" Variant="Variant.Outlined">
+                                        <MudField Label="Facebook" Variant="Variant.Outlined"  Style=" text-overflow: ellipsis">
                                             <MudLink Href="@Model.Facebook"> @Model.Facebook</MudLink>
                                         </MudField>
                                     </MudCardContent>
@@ -80,6 +80,8 @@
     </MudItem>
         <MudItem xs="12" sm="4">
             <MudCard>        
+                <MudButton Color="Color.Inherit" OnClick="RequestCreateEvent" Variant="Variant.Outlined" StartIcon="@Icons.Filled.Add"> Tilføj en begivenhed </MudButton>
+
                 <CalendarWidget 
                     EventsServices="new EventsServices(_user, Model)"
                     View="@View.MonthAgenda"
@@ -110,7 +112,7 @@
         base.OnInitialized();
     }
     
-    private void Request()
+    private void RequestCreateEvent()
     {
         _navigationManager.NavigateTo($"/Request/Event/create/"+Model.Id);
     }
