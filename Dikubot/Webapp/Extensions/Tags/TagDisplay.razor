@@ -16,9 +16,10 @@
 
     [Parameter]
     public HashSet<Guid> Tags { get; set; }
-    
-    
-    
+
+    [Parameter]
+    public TagServices services { get; set; } = new TagServices();
+
     protected override void OnInitialized()
     {
         if (TagsList.Count == 0)
@@ -31,14 +32,13 @@
 
     protected override void OnParametersSet()
     {
-        if (TagsList.Count == 0)
-        {
-            TagServices services = new TagServices();
-            TagsList = Tags.Select(t => services.Get(t)).ToList();
-        }
+        
+        TagsList = Tags.Select(t => services.Get(t)).ToList();
        
         base.OnParametersSet();
     }
+    
+    
 
 
 }
