@@ -44,6 +44,14 @@
         </MudButton>
     </MudHidden>
     <MudSpacer/>
+    <MudButton Variant="Variant.Text"
+               Href="/connect">
+        <Localization>
+            <Danish>Login</Danish>
+            <English>Login</English>
+        </Localization>
+    </MudButton>
+    
     <Localization>
         <Danish>
             <MudButton OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)">
@@ -70,6 +78,7 @@
                <MudNavLink Match="NavLinkMatch.All" Href="/discovery/unions">Foreninger</MudNavLink>
                <MudNavLink Match="NavLinkMatch.All" Href="/discovery/events">Events</MudNavLink>
                <MudNavLink Match="NavLinkMatch.All" Href="/discovery/calendar">Kalender</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Href="/connect">Login</MudNavLink>
            </MudNavMenu>
        </MudDrawer>
 
