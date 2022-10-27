@@ -1,16 +1,21 @@
 @inherits LayoutComponentBase
 @using Dikubot.Webapp.Extensions.NavMenu;
 
+
+
 <MudLayout>
     <TopNavMenu></TopNavMenu>
-        <MudMainContent Class="pt-16">
-            <MudContainer Class="mt-6" Style="min-height: 70vh">
-                @Body
+        <MudMainContent Style="padding-right: 0; padding-left: 0">
+            <MudContainer Class="mt-6" Style="min-height: 70vh;">
+                    @Body
             </MudContainer>
         </MudMainContent>
     <Footer style="margin-top: 15px; min-height: 30vh;"></Footer>
 </MudLayout>
 
 @code {
-    
+
+    [Parameter]
+    public string Width { get; set; } = "100";
+
 }
