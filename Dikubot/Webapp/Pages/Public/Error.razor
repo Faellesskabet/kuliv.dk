@@ -1,0 +1,83 @@
+@page "/error/{permissions}"
+@page "/error"
+
+@using Microsoft.AspNetCore.Http
+@using Microsoft.Graph
+@using Dikubot.Webapp.Authentication
+@using Dikubot.DataLayer.Database.Global.User
+@inject NavigationManager _navigationManager
+@inject IHttpContextAccessor httpContextAccessor;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.Discord
+@using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
+@inject UserService _userService;
+
+@if (!_loading)
+{
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <MudCard>
+        <MudCardHeader>
+             <MudText Typo="Typo.h5"> ERROR </MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText>
+                You have either cancel the the login atempt or there is another error.
+                So try agian :)
+            </MudText>
+        </MudCardContent>
+    </MudCard>
+}
+
+    <Login/>
+}
+@code
+{
+    private bool _loading = true;
+    
+    private string? code { get; set; } = "";
+    private string? guild_id { get; set; } = "";
+    [ParameterAttribute]
+    public string permissions { get; set; } = "";
+    private string error { get; set; } = "";
+    private string error_description { get; set; } = "";
+    
+    private Authenticator authenticator;
+
+    
+    protected override async void OnInitialized()
+    {
+        
+
+        if (_navigationManager.Uri.Contains("error"))
+        {
+            var header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?')+1);
+            var Request = header.Split('&','=').ToList();
+            
+            error = Request[Request.FindIndex(x => x.Equals("error"))+1];
+            error_description = Request[Request.FindIndex(x => x.Equals("error"))+1];
+        }
+        
+        if (_navigationManager.Uri.Contains("code")&&_navigationManager.Uri.Contains("permissions")&&_navigationManager.Uri.Contains("guild_id") )
+        {
+            var header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?')+1);
+            var Request = header.Split('&','=').ToList();
+            
+            //error=access_denied&error_description=The+resource+owner+or+authorization+server+denied+the+request
+            permissions = Request[Request.FindIndex(x => x.Equals("permissions"))+1];
+            code = Request[Request.FindIndex(x => x.Equals("code"))+1];
+            guild_id = Request[Request.FindIndex(x => x.Equals("guild_id"))+1];
+        }
+
+        _loading = false;
+    }
+
+    
+    
+   
+
+}
+
