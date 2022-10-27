@@ -7,6 +7,7 @@
 @using Dikubot.Extensions.Guild
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.DataLayer.Database.Models
 @using Dikubot.Extensions.Calender
 @using Dikubot.Extensions.search
 @inject UserService _user
@@ -51,10 +52,10 @@ width: 50%;
 
         
         <CardHeaderActions>
-            @if (_userService.GetUserGlobalModel().IsAdmin)
+            @if (_userService.GetUserGlobalModel().IsAdmin && Union.Discord is not null)
             {<MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="GoToEdit"/>
             }
-            else if (_userService.GetUserGlobalModel().Verified)
+            else if (_userService.GetUserGlobalModel().Verified && Union.Discord is not null)
             {
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Inherit" OnClick="GoToMakeRequest"/>
             }
@@ -103,13 +104,11 @@ width: 50%;
         @if (IsChangeGuild)
         {
             <JoinGuild GuildID="Convert.ToUInt64(Union.Discord)"></JoinGuild>
-
-        }else if(_userService.GetUserGlobalModel().Verified)
-        {
-            <MudSpacer/>
-            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="ShowMore">Learn More</MudButton>
-            <MudSpacer/>
-        } else
+        }
+        <MudSpacer/>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ShowMore">Learn More</MudButton>
+        <MudSpacer/>
+        @if(!_userService.GetUserGlobalModel().Verified)
         {
             <MudSpacer/>
             <MudButton Variant="Variant.Outlined" Color="Color.Success" Href="/connect">Login</MudButton>
@@ -120,8 +119,6 @@ width: 50%;
 </MudCard>
 
 
-@if (_userService.GetUserGlobalModel().Verified)
-{
     <MudDialog @bind-IsVisible="visible" Options="dialogOptions" ContentStyle="padding: 0" Style="">
         <TitleContent>
             <MudCard>
@@ -193,7 +190,7 @@ width: 50%;
 
         </DialogActions>
 </MudDialog>
-}
+
 
 @code {
     [Parameter] public UnionModel Union{ get; set; }
@@ -206,12 +203,14 @@ width: 50%;
     
     public List<EventModel> EventModels { get => _eventsServices.Get(DateTime.Today, DateTime.MaxValue);}
     private EventsServices _eventsServices;
+    
 
-    protected override void OnInitialized()
+    protected override void OnAfterRender(bool firstRender)
     {
         _eventsServices = new EventsServices(_user, Union);
-        base.OnInitialized();
+        base.OnAfterRender(firstRender);
     }
+
 
     private void GoToEdit()
     {
