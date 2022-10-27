@@ -1,0 +1,17 @@
+﻿
+
+#https://twemoji.twitter.com
+
+import os
+
+path = "[User path to svg]\\svg\\"
+files_path = [os.path.join(r,file) for r,d,f in os.walk(path) for file in f]
+print(files_path)
+
+
+for fp in files_path:
+    f = open(fp, "r")
+    with open('somefile.txt', 'a') as the_file:
+            name = fp[len(path)+1:len(fp)-4]
+            the_file.write("public const string E" + name.replace("-","_") + " = @\""+f.read().replace("\"","\"\"")+"\";\n")
+
