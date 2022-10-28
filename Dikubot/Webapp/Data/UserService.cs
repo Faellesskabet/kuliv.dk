@@ -24,6 +24,8 @@ namespace Data
             _discordBot = discordBot;
         }
 
+        public string id => _user?.DiscordId;
+        
         public bool IsRegistered()
         {
             return _user?.UserGlobalModel != null;
