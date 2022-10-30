@@ -128,7 +128,7 @@ namespace Dikubot.Webapp.Authentication
         /// <summary>
         /// Get all guid for roles the user have
         /// </summary>
-        public string DiscordId => this.UserGlobalModel.DiscordId;
+        public string DiscordId => this.UserGlobalModel?.DiscordId;
         
         /// <summary>
         /// Get all guid for roles the user have
