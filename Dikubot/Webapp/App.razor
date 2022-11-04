@@ -6,127 +6,134 @@
 @using Microsoft.IdentityModel.Tokens
 @using System.Reflection
 @using Microsoft.Graph
+@using MudBlazor.ThemeManager
 @inject NotifyStateService _notifyStateService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _user;
 
-<MudThemeProvider @ref="@ThemeProvider" IsDarkMode="@true" Theme="_theme"/>
+<MudThemeProvider  IsDarkMode="@false" Theme="ThemeManager.Theme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <LoadingScreen>
     <CascadingAuthenticationState>
-        <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
-            <Found Context="routeData">
-                <AuthorizeView>
-                    <Authorizing><Loading/></Authorizing>
-                    <Authorized>
-                        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-                    </Authorized>
-                    <NotAuthorized>
-                        @if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
-                        {
-                            if (_user?.id is not null)
+        <CascadingValue Value="@this">
+        <CascadingValue Value="@ThemeManager">
+            <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
+                <Found Context="routeData">
+                    <AuthorizeView>
+                        <Authorizing><Loading/></Authorizing>
+                        <Authorized>
+                            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                        </Authorized>
+                        <NotAuthorized>
+                            @if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
+                            {
+                                if (_user?.id is not null)
+                                {
+                                    <LayoutView Layout="@typeof(FooterLayout)">
+                                        <Login/>
+                                    </LayoutView>
+                                }
+                                else
+                                {
+                                    <LayoutView Layout="@typeof(FooterLayout)">
+                                        <HomePageNotLogin/>
+                                    </LayoutView>
+                                }
+
+                            }
+                            else if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public") ||
+                                     !routeData.PageType.GetCustomAttributes(typeof(AllowAnonymousAttribute)).IsNullOrEmpty())
+                            {
+                                <RouteView RouteData="@routeData" DefaultLayout="typeof(FooterLayout)"></RouteView>
+                            }
+                            else
                             {
                                 <LayoutView Layout="@typeof(FooterLayout)">
-                                    <Login/>
-                                </LayoutView>
-                            } else 
-                            {
-                                <LayoutView Layout="@typeof(FooterLayout)">
-                                    <HomePageNotLogin/>
+                                    <Login></Login>
                                 </LayoutView>
                             }
-                            
-                        } else if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public") ||
-                             !routeData.PageType.GetCustomAttributes(typeof(AllowAnonymousAttribute)).IsNullOrEmpty())
-                        {
-                            <RouteView RouteData="@routeData" DefaultLayout="typeof(FooterLayout)"></RouteView>
-                        }
-                        else
-                        {
-                            <LayoutView Layout="@typeof(FooterLayout)">
-                                <Login></Login>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </Found>
+                <NotFound>
+                    <AuthorizeView>
+                        <Authorized>
+                            <LayoutView Layout="@typeof(MainLayout)">
+                                <PageNotFound></PageNotFound>
                             </LayoutView>
-                        }
-                    </NotAuthorized>
-                </AuthorizeView>
-            </Found>
-            <NotFound>
-                <AuthorizeView>
-                    <Authorized>
-                        <LayoutView Layout="@typeof(MainLayout)">
-                            <PageNotFound></PageNotFound>
-                        </LayoutView>
-                    </Authorized>
-                    <NotAuthorized>
-                        <LayoutView Layout="@typeof(FooterLayout)">
-                            <PageNotFound></PageNotFound>
-                        </LayoutView>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </NotFound>
-        </Router>
-    </CascadingAuthenticationState>
+                        </Authorized>
+                        <NotAuthorized>
+                            <LayoutView Layout="@typeof(FooterLayout)">
+                                <PageNotFound></PageNotFound>
+                            </LayoutView>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </NotFound>
+            </Router>
+        </CascadingValue>
+        </CascadingValue>
+        </CascadingAuthenticationState>
+    
+    
 </LoadingScreen>
 
 @code {
     
-    private bool _isDarkMode = false;
+    private bool _isDarkMode = true;
     public static MudThemeProvider ThemeProvider;
-    private bool _test;
-
-    private MudTheme _theme = new MudTheme()
+    
+    public static ThemeManagerTheme ThemeManager = new ThemeManagerTheme()
     {
-        Palette = new Palette()
+        
+        Theme = new MudTheme()
         {
+            Typography = new Typography()
+            {
+                
+            },
+            Palette = new Palette()
+            {
             
-            Background = "#f5f5f5",
-            Surface = "#FFFFFF",
+                Background = "#f5f5f5",
+                Surface = "#FFFFFF",
 
-            Primary = "#AE3030",
-            PrimaryLighten = "#FFDAD5",
-            PrimaryDarken = "#410003",
-            PrimaryContrastText = "#FFFFFF",
-            Secondary = "#775653",
-            SecondaryLighten = "#FFDAD7",
-            SecondaryDarken = "#2C1513",
-            SecondaryContrastText = "#FFFFFF",
-            Tertiary = "#725B2E",
-            TertiaryLighten = "#FFDEA6",
-            TertiaryDarken = "#271900",
-            TertiaryContrastText = "#FFFFFF",
-            Error = "#BA1B1B",
-            ErrorLighten = "#FFDAD4",
-            ErrorDarken = "#410001",
-            ErrorContrastText = "#FFFFFF",
-        },
-        PaletteDark = new Palette()
-        {
-            Background = "#1a1a27",
-            Surface = "#32333d",
-            TextPrimary = "#FFFFFF",
-            TextSecondary = "#9f9f9f",
-            TextDisabled = "#767676",
-    /**
-            Primary = "#FFB3AC",
-            PrimaryLighten = "#8C161B",
-            PrimaryDarken = "#FFDAD5",
-            PrimaryContrastText = "#690009",
-            Secondary = "#E7BDB9",
-            SecondaryLighten = "#5D3F3D",
-            SecondaryDarken = "#FFDAD7",
-            SecondaryContrastText = "#442927",
-            Tertiary = "#E1C28C",
-            TertiaryLighten = "#584319",
-            TertiaryDarken = "#FFDEA6",
-            TertiaryContrastText = "#402D05",
-            Error = "#FFB4A9",
-            ErrorLighten = "#930006",
-            ErrorDarken = "#FFDAD4",
-            ErrorContrastText = "#680003",**/
+                Primary = "#AE3030",
+                PrimaryLighten = "#FFDAD5",
+                PrimaryDarken = "#410003",
+                PrimaryContrastText = "#FFFFFF",
+                Secondary = "#775653",
+                SecondaryLighten = "#FFDAD7",
+                SecondaryDarken = "#2C1513",
+                SecondaryContrastText = "#FFFFFF",
+                Tertiary = "#725B2E",
+                TertiaryLighten = "#FFDEA6",
+                TertiaryDarken = "#271900",
+                TertiaryContrastText = "#FFFFFF",
+                Error = "#BA1B1B",
+                ErrorLighten = "#FFDAD4",
+                ErrorDarken = "#410001",
+                ErrorContrastText = "#FFFFFF",
+            },
+            PaletteDark = new Palette()
+            {
+                Background = "#1a1a27",
+                Surface = "#32333d",
+                TextPrimary = "#FFFFFF",
+                TextSecondary = "#9f9f9f",
+                TextDisabled = "#767676",
+            }
         }
     };
+    
+
+    public void ChangeTheme(ThemeManagerTheme value)
+    {
+        ThemeManager = value;
+        StateHasChanged();
+    }
+
     
     protected override async Task OnInitializedAsync()
     {
