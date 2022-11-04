@@ -52,7 +52,7 @@
             <English>Login</English>
         </Localization>
     </MudButton>
-   
+    
     <Localization>
         <Danish>
             <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)"/>
@@ -88,8 +88,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        NavColor = GetColor().Value;
-        NavTextColor = GetTextColor().Value;
+        //NavColor = GetColor().Value;
+        //NavTextColor = GetTextColor().Value;
     }
 
     void ToggleDrawer()
@@ -97,6 +97,7 @@
         open = !open;
     }
     
+    /*
     private MudColor GetColor()
     {
         return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.Background : App.ThemeProvider.Theme.Palette.Background;
@@ -106,5 +107,5 @@
     {
         return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.TextPrimary : App.ThemeProvider.Theme.Palette.TextPrimary;
     }
-
+  */
 }

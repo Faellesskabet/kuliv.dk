@@ -7,13 +7,19 @@
 @using Dikubot.Extensions.EmojiSelector
 @using MudBlazor.Utilities
 @using Dikubot.Webapp.Extensions.NavMenu
+@using MudBlazor.ThemeManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager _navigationManager;
 @inject UserService _user
 @inject NotifyStateService _notifyStateService
+
+
+
+
 <MudLayout>
-    <MudAppBar Elevation="1" Color="Color.Primary">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        
+    <MudAppBar Elevation="@ThemeManager.AppBarElevation">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer"/>
         @if (_loaded)
         {
             <MudText Typo="Typo.h5">
@@ -22,31 +28,38 @@
                         @_guildSettingsModel.Name fællesskabet
                     </Danish>
                     <English>
-                         @_guildSettingsModel.Name community
+                        @_guildSettingsModel.Name community
                     </English>
                 </Localization>
-               
+
             </MudText>
         }
-        <MudSpacer />
-    <Localization>
-        <Danish>
-            <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)"/>
+        <MudSpacer/>
+
+        <Localization>
+            <Danish>
+                <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)"/>
             </Danish>
-        <English>
-            <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1ec_1f1e7" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.Danish)"/>
+            <English>
+                <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1ec_1f1e7" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.Danish)"/>
             </English>
-    </Localization>
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank" />
+        </Localization>
+        @if (_user.GetUserGlobalModel().IsAdmin)
+        {
+            <MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))" />
+            <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="ThemeManager" ThemeChanged="UpdateTheme" />
+        }
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
     </MudAppBar>
-    <MudDrawer @bind-Open="@open" Elevation="1" Style="@($"background-color: {NavColor}; color: {NavTextColor};")">
+    <MudDrawer @bind-Open="@open" Elevation="1" ClipMode="ThemeManager.DrawerClipMode">
+               
         <MudDrawerHeader>
             @if (_loaded)
             {
                 <MudAvatar Image="@_guildSettingsModel.LogoUrl" Size="Size.Large"></MudAvatar>
             }
         </MudDrawerHeader>
-        <MudNavMenu> 
+        <MudNavMenu>
             <SideNavMenu User="@user"> </SideNavMenu>
         </MudNavMenu>
     </MudDrawer>
@@ -55,7 +68,7 @@
             <ItemTemplate Context="item">
                 <MudLink Href="@item.Href" Color="Color.Primary">@item.Text</MudLink>
             </ItemTemplate>
-            
+
         </MudBreadcrumbs>
         <MudContainer Class="mt-6" Style="min-height: 100vh">
             @Body
@@ -96,12 +109,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        NavColor = GetColor().Value;
-        NavTextColor = GetTextColor().Value;
         await SetData();
         _loaded = true;
         _notifyStateService.UserChange += UserChange;
-
+        StateHasChanged();
     }
 
     private async Task SetData()
@@ -122,21 +133,45 @@
         SetData();
         StateHasChanged();
     }
+
+    #region ThemManger
+    
+    [CascadingParameter] 
+    protected App App { get; set; }
+    
+    [CascadingParameter]
+    protected ThemeManagerTheme? ThemeManager { get; set; }
+    
+    [Parameter] 
+    public Action<ThemeManagerTheme> OnThemeManagerChange { get; set; }
+    
+    
+    
+    private bool _themeManagerOpen = false;
+    void OpenThemeManager(bool value)
+    {
+        _themeManagerOpen = value;
+    }
+
+     void UpdateTheme(ThemeManagerTheme value)
+     {
+         this.App.ChangeTheme(value);
+         //OnThemeManagerChange?.Invoke(value);
+         StateHasChanged();
+         
+    }
+    
+    #endregion
+    
+    
+    
     
     void ToggleDrawer()
     {
         open = !open;
     }
 
-    private MudColor GetColor()
-    {
-        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.Background : App.ThemeProvider.Theme.Palette.Background;
-    }
-
-    private MudColor GetTextColor()
-    {
-        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.TextPrimary : App.ThemeProvider.Theme.Palette.TextPrimary;
-    }
+   
     
 }
 
