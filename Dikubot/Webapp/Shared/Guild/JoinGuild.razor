@@ -34,7 +34,9 @@
         _user.GetUserGlobalModel().SelectedGuild = GuildID;
         new UserGlobalServices().Upsert(_user.GetUserGlobalModel());
         await ((Authenticator) AuthenticationStateProvider).UpdateSession();
-        NavigationManager.NavigateTo("/", forceLoad:true);
+        
+        
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad:true);
         
     }
     
