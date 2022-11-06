@@ -5,73 +5,76 @@
 @using Dikubot.Webapp.Pages
 @using Microsoft.IdentityModel.Tokens
 @using System.Reflection
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Discord
 @using Microsoft.Graph
+@using Dikubot.Webapp.Shared.Layouts.Layout;
 @using MudBlazor.ThemeManager
 @inject NotifyStateService _notifyStateService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _user;
 
-<MudThemeProvider  IsDarkMode="@false" Theme="ThemeManager.Theme"/>
+<MudThemeProvider  IsDarkMode="@_isDarkMode" Theme="ThemeManager.Theme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <LoadingScreen>
     <CascadingAuthenticationState>
         <CascadingValue Value="@this">
         <CascadingValue Value="@ThemeManager">
-            <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
-                <Found Context="routeData">
-                    <AuthorizeView>
-                        <Authorizing><Loading/></Authorizing>
-                        <Authorized>
-                            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-                        </Authorized>
-                        <NotAuthorized>
-                            @if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
-                            {
-                                if (_user?.id is not null)
+            <CascadingValue Value="@Guild">
+                <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
+                    <Found Context="routeData">
+                        <AuthorizeView>
+                            <Authorizing><Loading/></Authorizing>
+                            <Authorized>
+                                @if (Guild == null)
+                                {
+                                    <LayoutView Layout="@typeof(ChangeGuildLayout)">
+                                        <GuildWidgetCollection/>
+                                    </LayoutView>
+                                }else
+                                {
+                                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                                }
+                            </Authorized>
+                            <NotAuthorized>
+                                @if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
                                 {
                                     <LayoutView Layout="@typeof(FooterLayout)">
-                                        <Login/>
-                                    </LayoutView>
+                                            <HomePageNotLogin/>
+                                        </LayoutView>
+                                }
+                                else if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public") ||
+                                         !routeData.PageType.GetCustomAttributes(typeof(AllowAnonymousAttribute)).IsNullOrEmpty())
+                                {
+                                    <RouteView RouteData="@routeData" DefaultLayout="typeof(FooterLayout)"></RouteView>
                                 }
                                 else
                                 {
                                     <LayoutView Layout="@typeof(FooterLayout)">
-                                        <HomePageNotLogin/>
+                                        <Login></Login>
                                     </LayoutView>
                                 }
-
-                            }
-                            else if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public") ||
-                                     !routeData.PageType.GetCustomAttributes(typeof(AllowAnonymousAttribute)).IsNullOrEmpty())
-                            {
-                                <RouteView RouteData="@routeData" DefaultLayout="typeof(FooterLayout)"></RouteView>
-                            }
-                            else
-                            {
-                                <LayoutView Layout="@typeof(FooterLayout)">
-                                    <Login></Login>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </Found>
+                    <NotFound>
+                        <AuthorizeView>
+                            <Authorized>
+                                <LayoutView Layout="@typeof(MainLayout)">
+                                    <PageNotFound></PageNotFound>
                                 </LayoutView>
-                            }
-                        </NotAuthorized>
-                    </AuthorizeView>
-                </Found>
-                <NotFound>
-                    <AuthorizeView>
-                        <Authorized>
-                            <LayoutView Layout="@typeof(MainLayout)">
-                                <PageNotFound></PageNotFound>
-                            </LayoutView>
-                        </Authorized>
-                        <NotAuthorized>
-                            <LayoutView Layout="@typeof(FooterLayout)">
-                                <PageNotFound></PageNotFound>
-                            </LayoutView>
-                        </NotAuthorized>
-                    </AuthorizeView>
-                </NotFound>
-            </Router>
+                            </Authorized>
+                            <NotAuthorized>
+                                <LayoutView Layout="@typeof(FooterLayout)">
+                                    <PageNotFound></PageNotFound>
+                                </LayoutView>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </NotFound>
+                </Router>
+            </CascadingValue>
         </CascadingValue>
         </CascadingValue>
         </CascadingAuthenticationState>
@@ -81,10 +84,82 @@
 
 @code {
     
-    private bool _isDarkMode = true;
-    public static MudThemeProvider ThemeProvider;
+    private bool _isDarkMode;
+    private GuildSettingsModel Guild;
     
-    public static ThemeManagerTheme ThemeManager = new ThemeManagerTheme()
+
+    protected override void OnInitialized()
+    {
+        _isDarkMode = _user?.GetUserGlobalModel()?.DarkTheme ?? false;
+        base.OnInitialized();
+    }
+
+    public void ChangeTheme(ThemeManagerTheme value)
+    {
+        ThemeManager = value;
+        StateHasChanged();
+    }
+
+    public void DarkMode()
+    {
+        _isDarkMode = !_isDarkMode;
+        //ToDo: Update Users
+        
+        StateHasChanged();
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (_user?.GetUserGlobalModel()?.SelectedGuild is null or 0 
+            || !DiscordBot.ClientStatic.Guilds.Any(guild => guild.Id == _user.GetUserGlobalModel().SelectedGuild))
+        {
+            Guild = null;
+        }
+        else
+        {
+            Guild = new GuildSettingsModel(_user?.GetUserGlobalModel()?.GetSelectedGuild());
+            
+        }
+        
+        _notifyStateService.UserChange += UserChange;
+    }
+
+    public void UserHasChange()
+    {
+        if (_user?.GetUserGlobalModel()?.SelectedGuild is null or 0 
+            || !DiscordBot.ClientStatic.Guilds.Any(guild => guild.Id == _user.GetUserGlobalModel().SelectedGuild))
+        {
+            Guild = null;
+        }
+        else
+        {
+            Guild = new GuildSettingsModel(_user?.GetUserGlobalModel()?.GetSelectedGuild());
+            
+        }
+        
+        StateHasChanged();
+    }
+    
+    
+    private void UserChange(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad:true);
+    }
+    
+
+    /*
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+        _isDarkMode = await _themeProvider.GetSystemPreference();
+        StateHasChanged();
+    }*/
+    
+    public ThemeManagerTheme ThemeManager = new()
     {
         
         Theme = new MudTheme()
@@ -116,48 +191,22 @@
                 ErrorDarken = "#410001",
                 ErrorContrastText = "#FFFFFF",
             },
+            
             PaletteDark = new Palette()
             {
                 Background = "#1a1a27",
                 Surface = "#32333d",
+                
                 TextPrimary = "#FFFFFF",
                 TextSecondary = "#9f9f9f",
                 TextDisabled = "#767676",
+
+                DrawerBackground = "#1a1a27",
+                DrawerText = "#FFFFFF",
+                DrawerIcon = "rgb(87,87,87)",
+                
             }
         }
     };
-    
-
-    public void ChangeTheme(ThemeManagerTheme value)
-    {
-        ThemeManager = value;
-        StateHasChanged();
-    }
-
-    
-    protected override async Task OnInitializedAsync()
-    {
-        _notifyStateService.UserChange += UserChange;
-    }
-    
-    
-    private void UserChange(object? sender, EventArgs e)
-    {
-        InvokeAsync(StateHasChanged);
-        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad:true);
-    }
-    
-
-    /*
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-        _isDarkMode = await _themeProvider.GetSystemPreference();
-        StateHasChanged();
-    }*/
-    
 
 }
