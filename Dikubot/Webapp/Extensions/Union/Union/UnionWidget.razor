@@ -10,6 +10,7 @@
 @using Dikubot.DataLayer.Database.Models
 @using Dikubot.Extensions.Calender
 @using Dikubot.Extensions.search
+@using MudBlazor.Services
 @inject UserService _user
 
 @namespace Dikubot.Webapp.Extensions.Discovery.Links
@@ -52,10 +53,11 @@ width: 50%;
 
         
         <CardHeaderActions>
-            @if (_userService.GetUserGlobalModel().IsAdmin && Union.Discord is not null)
-            {<MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="GoToEdit"/>
+            @if (_userService.GetUserGlobalModel().IsAdmin && Union.Discord is null)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="GoToEdit"/>
             }
-            else if (_userService.GetUserGlobalModel().Verified && Union.Discord is not null)
+            else if (_userService.GetUserGlobalModel().Verified && Union.Discord is null)
             {
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Inherit" OnClick="GoToMakeRequest"/>
             }
@@ -226,7 +228,7 @@ width: 50%;
         _navigationManager.NavigateTo($"/Request/Event/create/"+Union.Id);
     }
 
-    public int MembersCount(ulong GuildId) => Discord.DiscordBot.ClientStatic.GetGuild(GuildId).MemberCount;
+    public int MembersCount(ulong GuildId) => Discord.DiscordBot.ClientStatic?.GetGuild(GuildId)?.MemberCount ?? 0;
     
     private void GoToMakeRequest()
     {
@@ -235,7 +237,10 @@ width: 50%;
 
     
     private bool visible;
-    private DialogOptions dialogOptions = new() { FullScreen  = true };
+    
+    [Inject] IBreakpointService BreakpointListener { get; set; }
+
+    private DialogOptions dialogOptions = new() {FullScreen = true};
     
     private void ShowMore() => visible = true;
     void Submit() => visible = false;

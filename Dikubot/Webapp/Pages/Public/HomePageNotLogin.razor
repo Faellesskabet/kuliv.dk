@@ -1,91 +1,24 @@
-﻿
+﻿@layout FooterLayoutNoWidth
 
 <MudCarousel Class="mud-width-full align-content-center" Style="height:calc( 100vh - 150px );" TData="object" AutoCycle="false">
-                <MudCarouselItem Color="@Color.Secondary" Transition="Transition.Fade" Class="align-content-center">
-                    <MudPaper Class="d-flex align-content-center flex-wrap flex-grow-1 gap-4" 
-                              Width="100%" Height="100%" Elevation="0" Style="background-image:url('./images/pexels-buro-millennial-1438072.jpg')">
-                        <MudSpacer/>
-                        <MudItem xs="12" md="6">
-                            <MudCard Style="background-color: rgba(139, 0, 0, 0.6)"> 
-                                <MudCardHeader>
-                                    <MudText Typo="Typo.h5">
-                                        Velkommen til dit foreningsliv på KU!
-                                    </MudText>
-                                </MudCardHeader>
-                                <MudCardContent>
-                                    <MudText Typo="Typo.body2">
-                                        Her kan du søge inspiration og socialt samvær gennem de mange studenterforeninger på KU.
-                                    </MudText>
-                                </MudCardContent>
-                                <MudCardActions>
-                                    <MudSpacer/>
-                                    <MudButton Variant="Variant.Outlined" Href="/discovery/unions">
-                                        Find din forening
-                                    </MudButton>
-                                    <MudSpacer/>
-                                </MudCardActions>
-                            </MudCard>
-                        </MudItem>
-                        <MudSpacer/>
-                    </MudPaper>
-                    
-                </MudCarouselItem>
-                <MudCarouselItem Color="@Color.Secondary" Transition="Transition.Fade" Class="align-content-center">
-                    <MudPaper Class="d-flex align-content-center flex-wrap flex-grow-1 gap-4" 
-                              Width="100%" Height="100%" Elevation="0" Style="background-image:url('./images/pexels-ketut-subiyanto-4623506.jpg')">
-                        <MudSpacer/>
-                        <MudItem xs="12" md="6">
-                            <MudCard Style="background-color: rgba(139, 0, 0, 0.6)">
-                                <MudCardHeader>
-                                    <MudText Typo="Typo.h5">
-                                        Find et arrangement tæt på dig
-                                    </MudText>
-                                </MudCardHeader>
-                                <MudCardContent>
-                                    <MudText Typo="Typo.body2">
-                                        Lad dig inspirere af én eller flere af de mange studenterforeninger på KU!
-                                    </MudText>
-                                </MudCardContent>
-                                <MudCardActions>
-                                    <MudSpacer/>
-                                    <MudButton Variant="Variant.Outlined" Href="/discovery/events">
-                                        Find et event
-                                    </MudButton>
-                                    <MudSpacer/>
-                                </MudCardActions>
-                            </MudCard>
-                        </MudItem>
-                        <MudSpacer/>
-                    </MudPaper>
-                </MudCarouselItem>
-    <MudCarouselItem Color="@Color.Secondary" Transition="Transition.Fade" Class="align-content-center">
-        <MudPaper Class="d-flex align-content-center flex-wrap flex-grow-1 gap-4" 
-                  Width="100%" Height="100%" Elevation="0" Style="background-image:url('./images/pexels-steve-johnson-1509534.jpg')">
-            <MudSpacer/>
-            <MudItem xs="12" md="6">
-                <MudCard Style="background-color: rgba(139, 0, 0, 0.6)">
-                    <MudCardHeader>
-                        <MudText Typo="Typo.h5">
-                            Bliv frivillig
-                        </MudText>
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudText Typo="Typo.body2">
-                            Hjælp os med at gøre KULiv.dk endnu bedre!
-                        </MudText>
-                    </MudCardContent>
-                    <MudCardActions>
-                        <MudSpacer/>
-                        <MudButton Variant="Variant.Outlined" Href="/volunteer">
-                            Bliv frivillig
-                        </MudButton>
-                        <MudSpacer/>
-                    </MudCardActions>
-                </MudCard>
-            </MudItem>
-            <MudSpacer/>
-        </MudPaper>
-    </MudCarouselItem>
+    @{ var hero1 = new List<(string,string)>() {("Find din forening","/discovery/unions")};}
+    <CarouselHeroItem HeaderText="Velkommen til KULIV.dk"
+                      BackgroundImageUrl="./images/pexels-buro-millennial-1438072.jpg"
+                      ContentText="Her kan du finde en oversigt over foreninger på KU og finde et fælleskab for dig!"
+                      ActionsDictionary="@hero1"/>
+
+    @{var hero2 = new List<(string,string)>() {("Find et event","/discovery/events")};}
+        <CarouselHeroItem HeaderText="Find et arrangement tæt på dig"
+                          BackgroundImageUrl="./images/pexels-ketut-subiyanto-4623506.jpg"
+                          ContentText="Her kan du se en oversigt over forskellige events på Københavns Universitet"
+                          ActionsDictionary="@hero2"/>
+
+    @{var hero3 = new List<(string,string)>() {("Bliv frivillig","/volunteer")};}
+           <CarouselHeroItem HeaderText="Bliv frivillig"
+                             BackgroundImageUrl="./images/pexels-steve-johnson-1509534.jpg"
+                             ContentText="Vi kunne godt bruge din Hjælp - så hjælp os med at gøre KULiv.dk endnu bedre!"
+                             ActionsDictionary="@hero3"/>
+    
 </MudCarousel>
 @code {
     

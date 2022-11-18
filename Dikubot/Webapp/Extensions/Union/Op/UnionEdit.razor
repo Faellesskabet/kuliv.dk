@@ -39,6 +39,9 @@ else
 @code {
     [Parameter]
     public string? uuid { get; set; }
+    
+    
+    
     [Inject] private IDialogService DialogService { get; set; }
     private MudTable<UnionModel> _table;
     private bool _loading = true;

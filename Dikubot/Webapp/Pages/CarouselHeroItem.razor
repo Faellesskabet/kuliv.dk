@@ -1,0 +1,60 @@
+﻿@using MudBlazor.Utilities
+
+ <MudCarouselItem Color="@Color.Secondary" Transition="Transition.Fade" Class="align-content-center">
+                    <MudPaper Class="d-flex align-content-center flex-wrap flex-grow-1 gap-4" 
+                              Width="100%" Height="100%" Elevation="0" Style="@ImageStyle">
+                        <MudSpacer/>
+                        <MudItem xs="12" md="6">
+                            <MudCard Style="@CardStyle" > 
+                                <MudCardHeader>
+                                    <MudText Typo="Typo.h4" Style="color: #FAFAFA">
+                                        @HeaderText
+                                    </MudText>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudText Typo="Typo.h6" Style="color: #FAFAFA">
+                                       @ContentText
+                                    </MudText>
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudSpacer/>
+                                        @foreach (var action in ActionsDictionary)
+                                    {
+                                        <MudButton Variant="Variant.Outlined" Href="@action.Item2" Style="color: #FAFAFA">
+                                            @action.Item1
+                                        </MudButton>
+                                        <MudSpacer/>
+                                    }
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                        <MudSpacer/>
+                    </MudPaper>
+                    
+                </MudCarouselItem>
+
+@code {
+
+    [Parameter]
+    public string BackgroundImageUrl { get; set; }
+
+    private string ImageStyle => $"background-image:url({BackgroundImageUrl})";
+    
+    [Parameter]
+    public string HeaderText { get; set; }
+    
+    [Parameter]
+    public string ContentText { get; set; }
+    
+    [Parameter]
+    public string BackGroundColor { get; set; } = "rgba(139, 0, 0, 0.8)";
+
+    private string CardStyle => $"background-color: {BackGroundColor}";
+    
+    
+    [Parameter]
+    public List<(string,string)> ActionsDictionary { set; get; }
+
+    
+    
+}
