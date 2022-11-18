@@ -1,0 +1,155 @@
+﻿@inherits LayoutComponentBase
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Discord
+@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.Extensions.EmojiSelector
+
+@using MudBlazor.Utilities
+@using Dikubot.Webapp.Extensions.NavMenu
+@using MudBlazor.ThemeManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager _navigationManager;
+@inject UserService _user
+@inject NotifyStateService _notifyStateService
+
+
+<MudLayout>
+    <MudDrawerContainer Class="mud-height-full">
+        <SideNavMenu/>
+        <TopNavMenu/>
+        
+        <MudMainContent Class="">
+        <div style="position: relative;">
+                    <MudImage Src="@HeaderImage"
+                              Style="height: 80vh; width: 100%"
+                              ObjectPosition="ObjectPosition.Center"
+                              ObjectFit="ObjectFit.Cover">
+                    </MudImage>
+                    <MudText Typo="Typo.h1" 
+                             Style="position: absolute;
+                                    top: 80px;
+                                    left: 16px;">
+                        @HeaderTitle
+                    </MudText>
+                    <MudText Typo="Typo.h2" 
+                             Style="position: absolute;
+                                    top: 160px;
+                                    left: 16px;">
+                        @HeaderSubTitle
+                    </MudText>
+                    <MudText Typo="Typo.h4" 
+                             Style="position: absolute;
+                             bottom: 80px;
+                             left: 16px;">
+                        @HeaderContent
+                    </MudText>
+                </div>
+        <MudBreadcrumbs Items="_breadcrumbItems" MaxItems="6" Style="height: 0px;">
+            <ItemTemplate Context="item">
+                <MudLink Href="@item.Href" Color="Color.Primary">@item.Text</MudLink>
+            </ItemTemplate>
+        </MudBreadcrumbs>
+        <MudContainer Class="" Style="min-height: 100vh">
+            <CascadingValue Value="this">
+                @Body
+            </CascadingValue>
+        </MudContainer>
+        <MudItem xs="12">
+            <Footer style="margin-top: 15px;"></Footer>
+        </MudItem>
+
+    </MudMainContent>
+
+        
+        
+        
+    </MudDrawerContainer>
+
+</MudLayout>
+
+@code{
+   
+    private bool _loaded = false;
+
+    private string HeaderTitle { get; set; } = "ENHEDSLISTEN";
+    private string HeaderSubTitle { get; set; } = "";
+    private string HeaderContent { get; set; } = "";
+    private string HeaderImage { get; set; } = @"/enhedslisten/Images/omEnhedslisten.jpg";
+    
+    public void UpdateContext(string title = null,
+                        string subTitle = null, 
+                        string content = null, 
+                        string image = null)
+    {
+        HeaderTitle = title ?? HeaderTitle;
+        HeaderSubTitle = subTitle ?? HeaderSubTitle;
+        HeaderContent = content ?? HeaderContent;
+        HeaderImage = image ?? HeaderImage;
+        StateHasChanged();
+    }
+    
+    bool open = false;
+    
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
+    
+    
+    private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>();
+
+    protected override void OnParametersSet()
+    {
+        var thisUri = _navigationManager.ToBaseRelativePath(_navigationManager.Uri).Split("/");
+
+        string href = "";
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Home", href: "")
+        };
+        foreach (string uri in thisUri)
+        {   
+            href += "/" + uri;
+            _breadcrumbItems.Add(new BreadcrumbItem(string.IsNullOrWhiteSpace(uri) ? "" : string.Concat(uri[0].ToString().ToUpper(), uri.AsSpan(1)),href,thisUri.Last().Equals(uri)));
+        }
+        base.OnParametersSet();
+    }
+
+    #region ThemManger
+    
+    [CascadingParameter] 
+    protected App App { get; set; }
+    
+    [CascadingParameter]
+    protected ThemeManagerTheme? ThemeManager { get; set; }
+    
+    [Parameter] 
+    public Action<ThemeManagerTheme> OnThemeManagerChange { get; set; }
+    
+    private bool _themeManagerOpen = false;
+    void OpenThemeManager(bool value)
+    {
+        _themeManagerOpen = value;
+    }
+
+     void UpdateTheme(ThemeManagerTheme value)
+     {
+         this.App.ChangeTheme(value);
+         //OnThemeManagerChange?.Invoke(value);
+         StateHasChanged();
+         
+    }
+
+    
+    
+    #endregion
+    
+    
+   
+
+   
+    
+}
+

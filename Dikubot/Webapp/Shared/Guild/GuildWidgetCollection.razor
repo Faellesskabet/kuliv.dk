@@ -8,13 +8,14 @@
 @using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.DataLayer.Database.Global.GuildSettings;
 @using Dikubot.Webapp.Extensions.Discovery.Links
+@inject UserService _user;
 @using System.Reflection
 
 
     <Searchbar Items="_models" Context="UnionModel">
         <TemplateRow Context="unionModel" >
            <MudItem xs="12" sm="6" md="4" lg="3" >
-           <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"></UnionWidget>
+               <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"/>
            </MudItem>
         </TemplateRow>
     </Searchbar>
@@ -25,6 +26,7 @@
 @code {
     [Parameter] public List<GuildWidgetDto> Guilds { get; set; }
     
+
     public GuildSettingsService _GuildSettingsService = new GuildSettingsService();
     readonly UnionServices _services = new UnionServices();
     
@@ -32,12 +34,11 @@
 
     protected override void OnInitialized()
     {
-        var list = _services.GetAll();
         
-        var list2 = _GuildSettingsService.Get()
-            .Where(model => model.IsPublic)
+        var serverList = _user.GetUserGlobalModel().Guilds.Select(g => g.Id);
+        var list = _GuildSettingsService.Get()
+            .Where(model => model.IsPublic || serverList.Contains(model.GuildId))
             .Select(model => new UnionModel(model));
-        list.AddRange(list2);
         
         _models = list.OrderBy(model => model.Title).ToList();
         
@@ -45,7 +46,8 @@
     }
     
     
-   
+    
+    
     
     private void GotoAddGuild()
     {

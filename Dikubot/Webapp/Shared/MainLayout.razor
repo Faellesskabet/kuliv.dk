@@ -4,50 +4,77 @@
 @using Dikubot.Discord
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Extensions.EmojiSelector
 @using MudBlazor.Utilities
 @using Dikubot.Webapp.Extensions.NavMenu
+@using MudBlazor.ThemeManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager _navigationManager;
 @inject UserService _user
 @inject NotifyStateService _notifyStateService
+
+
+
+
 <MudLayout>
-    <MudAppBar Elevation="1" Color="Color.Primary">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        
+    <MudAppBar Elevation="@ThemeManager.AppBarElevation">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer"/>
         @if (_loaded)
         {
             <MudText Typo="Typo.h5">
                 <Localization>
                     <Danish>
-                        @_guildSettingsModel.Name fællesskabet
+                        @Guild.Name fællesskabet
                     </Danish>
                     <English>
-                         @_guildSettingsModel.Name community
+                        @Guild.Name community
                     </English>
                 </Localization>
-               
+
             </MudText>
         }
-        <MudSpacer />
-    <Localization>
-        <Danish>
-            <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)"/>
+        <MudSpacer/>
+
+        <Localization>
+            <Danish>
+                <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)"/>
             </Danish>
-        <English>
-            <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1ec_1f1e7" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.Danish)"/>
+            <English>
+                <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1ec_1f1e7" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.Danish)"/>
             </English>
-    </Localization>
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank" />
+        </Localization>
+        <MudIconButton Size="Size.Medium" Icon="@Icons.Filled.WbSunny" OnClick="() => App.DarkMode()"/> 
+        
+        @if (_user.GetUserGlobalModel().IsAdmin)
+        {
+            <MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))" />
+            <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="ThemeManager" ThemeChanged="UpdateTheme" />
+        }
+        
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
     </MudAppBar>
-    <MudDrawer @bind-Open="@open" Elevation="1" Style="@($"background-color: {NavColor}; color: {NavTextColor};")">
+    <MudDrawer @bind-Open="@open" Elevation="1" ClipMode="ThemeManager.DrawerClipMode">
+               
         <MudDrawerHeader>
             @if (_loaded)
             {
-                <MudAvatar Image="@_guildSettingsModel.LogoUrl" Size="Size.Large"></MudAvatar>
+                <MudAvatar Image="@Guild.LogoUrl" Size="Size.Large"></MudAvatar>
             }
+            
         </MudDrawerHeader>
-        <MudNavMenu> 
-            <SideNavMenu User="@user"> </SideNavMenu>
+        <MudNavMenu>
+            <MudSelect T="ulong" Label="Fællesskab" Value="@_guildId" Variant="Variant.Outlined" ValueChanged="ChangeGuild" AdornmentIcon="@Icons.Filled.People" AdornmentColor="Color.Primary"
+                       Text="@(_guilds.FirstOrDefault(model => model.GuildId == _user?.GetUserGlobalModel().SelectedGuild)?.Name ?? "Vælg fællesskab")">
+                @foreach (var guild in _guilds)
+                {
+                    <MudSelectItem Value="@guild.GuildId">@guild.Name</MudSelectItem>
+                }
+            </MudSelect>
+            
+                <SideNavMenu/> 
+            
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent Class="pt-16">
@@ -55,24 +82,30 @@
             <ItemTemplate Context="item">
                 <MudLink Href="@item.Href" Color="Color.Primary">@item.Text</MudLink>
             </ItemTemplate>
-            
+
         </MudBreadcrumbs>
-        <MudContainer Class="mt-6" Style="min-height: 100vh">
+        <MudContainer Class="mt-6" Style="@_style">
             @Body
         </MudContainer>
     </MudMainContent>
-    <Footer style="margin-top: 15px;"></Footer>
+    <Footer style="margin-top: 16px; min-height: 30vh;"></Footer>
 </MudLayout>
 
 @code{
+    
+    private string _background => (string)(App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.Background : App.ThemeManager.Theme.Palette.Background);
+    private string _style => $"min-height: 70vh; background-color: {_background}; padding-top: 24px; padding-bottom: 24px;";
+    
     bool open = true;
     private Authenticator authenticator;
     private UserIdentity user;
     private SocketGuild guild;
-    private GuildSettingsModel _guildSettingsModel;
+    
     private bool _loaded = false;
     private string NavColor = "";
     private string NavTextColor = "";
+    private List<GuildSettingsModel> _guilds;
+    private ulong _guildId;
     
     private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>();
 
@@ -96,12 +129,25 @@
 
     protected override async Task OnInitializedAsync()
     {
-        NavColor = GetColor().Value;
-        NavTextColor = GetTextColor().Value;
         await SetData();
         _loaded = true;
         _notifyStateService.UserChange += UserChange;
+        
+        GuildSettingsService guildSettingsService = new GuildSettingsService();
+        
+        _guilds = new List<GuildSettingsModel>();
+        _guildId = _user.GetUserGlobalModel().SelectedGuild;
+        
+        foreach (var guild in _user.GetUserGlobalModel().Guilds)
+        {
+            _guilds.Add(guildSettingsService.Get(guild));
+        }
 
+        GuildSettingsModel ShowMore = new GuildSettingsModel(){Name = "Show More", Id = Guid.Empty};
+        _guilds.Add(ShowMore);
+        base.OnInitialized();
+        
+        StateHasChanged();
     }
 
     private async Task SetData()
@@ -114,7 +160,7 @@
             return;
         }
         guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
-        _guildSettingsModel = new GuildSettingsService().Get(model => model.GuildId == user.UserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
+        Guild = new GuildSettingsService().Get(model => model.GuildId == user.UserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
     }
     
     private void UserChange(object? sender, EventArgs e)
@@ -122,21 +168,62 @@
         SetData();
         StateHasChanged();
     }
+
+    #region ThemManger
+    
+    [CascadingParameter] 
+    protected App App { get; set; }
+    
+    [CascadingParameter] 
+    protected GuildSettingsModel Guild { get; set; }
+    
+    [CascadingParameter]
+    protected ThemeManagerTheme? ThemeManager { get; set; }
+    
+    [Parameter] 
+    public Action<ThemeManagerTheme> OnThemeManagerChange { get; set; }
+    
+    private bool _themeManagerOpen = false;
+    
+    void OpenThemeManager(bool value)
+    {
+        _themeManagerOpen = value;
+    }
+
+     void UpdateTheme(ThemeManagerTheme value)
+     {
+         this.App.ChangeTheme(value);
+         StateHasChanged();
+         
+    }
+    
+    #endregion
+    
+    public async Task ChangeGuild(ulong guildId)
+    {
+        _guildId = guildId;
+        
+        if (_guildId == _user.GetUserGlobalModel().SelectedGuild)
+        {
+            return;
+        }
+
+        _user.GetUserGlobalModel().SelectedGuild = _guildId;
+        new UserGlobalServices().Upsert(_user.GetUserGlobalModel());
+        
+        App.UserHasChange();
+        
+        this.StateHasChanged();
+        
+    }
+    
     
     void ToggleDrawer()
     {
         open = !open;
     }
 
-    private MudColor GetColor()
-    {
-        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.Background : App.ThemeProvider.Theme.Palette.Background;
-    }
-
-    private MudColor GetTextColor()
-    {
-        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.TextPrimary : App.ThemeProvider.Theme.Palette.TextPrimary;
-    }
+   
     
 }
 

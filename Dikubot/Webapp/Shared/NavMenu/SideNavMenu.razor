@@ -7,16 +7,11 @@
 @using Dikubot.Webapp.Pages
 @using MudBlazor.Utilities
 @using Data
-@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+@inject UserService _user;
 @inject NotifyStateService _notifyStateService;
 
-<MudSelect T="ulong" Label="Fællesskab" Value="@_guildId" Variant="Variant.Outlined" ValueChanged="ChangeGuild" AdornmentIcon="@Icons.Filled.People" AdornmentColor="Color.Primary"
-           Text="@(_guilds.FirstOrDefault(model => model.GuildId == User.UserGlobalModel.SelectedGuild)?.Name ?? "Vælg fællesskab")">
-    @foreach (var guild in _guilds)
-    {
-        <MudSelectItem Value="@guild.GuildId">@guild.Name</MudSelectItem>
-    }
-</MudSelect>
 
 <MudNavGroup Expanded="true" Title="Serveren">
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Home" Href="/">
@@ -88,15 +83,15 @@
     
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Logout" Href="/logout">Log-ud</MudNavLink>
 </MudNavGroup>
-@if (User.HasClaim(m => m.Value == Permissions.GuildAdmin || m.Value == Permissions.GlobalAdmin)  )
+@if (_user.Claims().Any(m => m.Value == Permissions.GuildAdmin || m.Value == Permissions.GlobalAdmin)  )
 {<MudDivider Class="my-2"/>
     <MudNavGroup Title="Admin" Icon="@Icons.Filled.Settings">
-        @if (User.HasClaim(m => m.Value == Permissions.GlobalAdmin))
+        @if (_user.Claims().Any(m => m.Value == Permissions.GlobalAdmin))
         {
             <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CrueltyFree" IconColor="Color.Primary" Href="/op">System Admin indstillinger</MudNavLink>
             
         }
-        @if (User.HasClaim(m => m.Value == Permissions.GuildAdmin))
+        @if (_user.Claims().Any(m => m.Value == Permissions.GuildAdmin))
         {
             <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Computer" Href="/admin">Admin indstillinger</MudNavLink>
         }
@@ -106,55 +101,10 @@
 
 @code
 {
-    [Parameter] public UserIdentity User { get; set; }
     [Inject] private IDialogService DialogService { get; set; }
-    private List<GuildSettingsModel> _guilds;
-    private ulong _guildId;
     
-    [Parameter]
-    public EventCallback OnUpdate { get; set; }
-
-    protected override void OnInitialized()
-    {
-        
-        GuildSettingsService guildSettingsService = new GuildSettingsService();
-        
-        _guilds = new List<GuildSettingsModel>();
-        _guildId = User.UserGlobalModel.SelectedGuild;
-        
-        foreach (var guild in User.GetJoinedGuilds())
-        {
-            _guilds.Add(guildSettingsService.Get(guild));
-        }
-
-        GuildSettingsModel ShowMore = new GuildSettingsModel(){Name = "Show More", Id = Guid.Empty};
-        _guilds.Add(ShowMore);
-        base.OnInitialized();
-        
-    }
-
-    public async Task ChangeGuild(ulong guildId)
-    {
-        _guildId = guildId;
-        var authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        
-        if (User == null)
-        {
-            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
-            return;
-        }
-
-        if (_guildId == User.UserGlobalModel.SelectedGuild)
-        {
-            return;
-        }
-
-        User.UserGlobalModel.SelectedGuild = _guildId;
-        new UserGlobalServices().Upsert(User.UserGlobalModel);
-        await authenticator.UpdateSession();
-        
-        this.StateHasChanged();
-        _notifyStateService.NotifyUserChange(this);
-    }
+    
+    
+    
+    
 }
