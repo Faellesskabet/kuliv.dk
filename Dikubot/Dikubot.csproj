@@ -64,6 +64,7 @@
     <Folder Include="Webapp\Extensions\Announcements\Admin" />
     <Folder Include="Webapp\Extensions\Announcements\Op" />
     <Folder Include="Webapp\Extensions\Sponsorater" />
+    <Folder Include="Webapp\wwwroot\thumps" />
   </ItemGroup>
   
 

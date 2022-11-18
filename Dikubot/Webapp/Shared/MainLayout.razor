@@ -84,14 +84,18 @@
             </ItemTemplate>
 
         </MudBreadcrumbs>
-        <MudContainer Class="mt-6" Style="min-height: 100vh">
+        <MudContainer Class="mt-6" Style="@_style">
             @Body
         </MudContainer>
     </MudMainContent>
-    <Footer style="margin-top: 15px;"></Footer>
+    <Footer style="margin-top: 16px; min-height: 30vh;"></Footer>
 </MudLayout>
 
 @code{
+    
+    private string _background => (string)(App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.Background : App.ThemeManager.Theme.Palette.Background);
+    private string _style => $"min-height: 70vh; background-color: {_background}; padding-top: 24px; padding-bottom: 24px;";
+    
     bool open = true;
     private Authenticator authenticator;
     private UserIdentity user;

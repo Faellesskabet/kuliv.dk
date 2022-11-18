@@ -24,7 +24,8 @@
     
     <MudHidden Breakpoint="Breakpoint.SmAndUp" Invert="true">
         <MudButton Variant="Variant.Text"
-                   Href="/discovery/unions">
+                   Href="/discovery/unions"
+                   Style="@NavTextStyleColor">
             <Localization>
                 <Danish>
                     Foreninger
@@ -34,10 +35,11 @@
                 </English>
             </Localization>
         </MudButton>
-        <MudButton Variant="Variant.Text"
+        <MudButton Variant="Variant.Text" Style="@NavTextStyleColor"
                    Href="/discovery/events">Events</MudButton>
         <MudButton Variant="Variant.Text"
-                   Href="/discovery/calendar">
+                   Href="/discovery/calendar"
+                   Style="@NavTextStyleColor">
             <Localization>
                 <Danish>Kalender</Danish>
                 <English>Calendar</English>
@@ -45,14 +47,14 @@
         </MudButton>
     </MudHidden>
     <MudSpacer/>
-    <MudButton Variant="Variant.Text"
+    <MudButton Variant="Variant.Text" Style="@NavTextStyleColor"
                Href="/connect">
         <Localization>
             <Danish>Login</Danish>
             <English>Login</English>
         </Localization>
     </MudButton>
-    
+    <MudIconButton Size="Size.Medium" Color="Color.Inherit" Icon="@Icons.Filled.WbSunny" OnClick="() => App.DarkMode()"/> 
     <Localization>
         <Danish>
             <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)"/>
@@ -64,26 +66,32 @@
     <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
 
 </MudAppBar>
-       <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Temporary" Style="@($"background-color: {NavColor}; color: {NavTextColor};")">
+       <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Temporary">
            <MudDrawerHeader>
-               <MudText Typo="Typo.h6">kuLiv.dk</MudText>
+               <MudText Typo="Typo.h6" Color="Color.Primary" >KULiv.dk</MudText>
            </MudDrawerHeader>
            <MudNavMenu>
                <MudNavLink Match="NavLinkMatch.All" Href="/discovery/unions">Foreninger</MudNavLink>
                <MudNavLink Match="NavLinkMatch.All" Href="/discovery/events">Events</MudNavLink>
                <MudNavLink Match="NavLinkMatch.All" Href="/discovery/calendar">Kalender</MudNavLink>
-               <MudNavLink Match="NavLinkMatch.All" Href="/connect">Login</MudNavLink>
            </MudNavMenu>
        </MudDrawer>
 
 
 @code {
     
-    
-    
     bool open = false;
-    private string NavColor = "";
-    private string NavTextColor = "";
+    private string NavColor => (string) (App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.AppbarBackground : App.ThemeManager.Theme.Palette.AppbarBackground);
+    private string NavStyleColor => $"color: {NavColor}";
+    
+    private string NavTextColor => (string)(App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.AppbarText : App.ThemeManager.Theme.Palette.AppbarText);
+    private string NavTextStyleColor => $"color: {NavTextColor}";
+    
+    private string DrawTextColor => (string)(App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.AppbarText : App.ThemeManager.Theme.Palette.AppbarText);
+    private string DrawTextStyleColor => $"color: {DrawTextColor}";
+    
+    [Parameter]
+    public App App { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,7 +107,7 @@
     /*
     private MudColor GetColor()
     {
-        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.Background : App.ThemeProvider.Theme.Palette.Background;
+        return 
     }
 
     private MudColor GetTextColor()

@@ -3,8 +3,10 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dikubot.Webapp.Extensions.Discovery.Request
 {
-    public class RequestModel<Tmodel> : MainModel where Tmodel : MainModel, new()
+    public class RequestModel<TModel> : MainModel where TModel : MainModel, new()
     {
+        
+        
         /// <summary>
         /// Contact info on the one who made the request 
         /// </summary>
@@ -13,7 +15,7 @@ namespace Dikubot.Webapp.Extensions.Discovery.Request
         /// <summary>
     /// The Requset Item, 
     /// </summary>
-    public Tmodel RequestItem { get; set; } = new Tmodel();
+    public TModel RequestItem { get; set; } = new TModel();
 
         /// <summary>
         /// The Requestet item status 
