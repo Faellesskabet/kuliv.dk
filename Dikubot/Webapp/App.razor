@@ -15,7 +15,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _user;
 
-<MudThemeProvider  IsDarkMode="@_isDarkMode" Theme="ThemeManager.Theme"/>
+<MudThemeProvider  IsDarkMode="@IsDarkMode" Theme="ThemeManager.Theme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <LoadingScreen>
@@ -41,7 +41,7 @@
                             <NotAuthorized>
                                 @if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
                                 {
-                                    <LayoutView Layout="@typeof(FooterLayout)">
+                                    <LayoutView Layout="@typeof(FooterLayoutNoWidth)">
                                             <HomePageNotLogin/>
                                         </LayoutView>
                                 }
@@ -84,13 +84,13 @@
 
 @code {
     
-    private bool _isDarkMode;
+    public bool IsDarkMode;
     private GuildSettingsModel Guild;
     
 
     protected override void OnInitialized()
     {
-        _isDarkMode = _user?.GetUserGlobalModel()?.DarkTheme ?? false;
+        IsDarkMode = _user?.GetUserGlobalModel()?.DarkTheme ?? false;
         base.OnInitialized();
     }
 
@@ -102,7 +102,7 @@
 
     public void DarkMode()
     {
-        _isDarkMode = !_isDarkMode;
+        IsDarkMode = !IsDarkMode;
         //ToDo: Update Users
         
         StateHasChanged();
@@ -190,6 +190,8 @@
                 ErrorLighten = "#FFDAD4",
                 ErrorDarken = "#410001",
                 ErrorContrastText = "#FFFFFF",
+                
+                AppbarText = "#FFFFFF",
             },
             
             PaletteDark = new Palette()
