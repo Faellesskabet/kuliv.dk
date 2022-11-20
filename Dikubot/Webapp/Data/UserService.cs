@@ -26,6 +26,11 @@ namespace Data
 
         public string id => _user?.DiscordId;
         
+        
+        /// <summary>
+        /// This do only check if the use is Registered, hence
+        /// if _user?.UserGlobalModel != null
+        /// </summary>
         public bool IsRegistered()
         {
             return _user?.UserGlobalModel != null;

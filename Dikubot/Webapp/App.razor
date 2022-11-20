@@ -9,19 +9,18 @@
 @using Dikubot.Discord
 @using Microsoft.Graph
 @using Dikubot.Webapp.Shared.Layouts.Layout;
-@using MudBlazor.ThemeManager
 @inject NotifyStateService _notifyStateService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _user;
 
-<MudThemeProvider  IsDarkMode="@IsDarkMode" Theme="ThemeManager.Theme"/>
+<MudThemeProvider  @bind-IsDarkMode="@IsDarkMode" Theme="Theme" />
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <LoadingScreen>
     <CascadingAuthenticationState>
         <CascadingValue Value="@this">
-        <CascadingValue Value="@ThemeManager">
+        <CascadingValue Value="@Theme">
             <CascadingValue Value="@Guild">
                 <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
                     <Found Context="routeData">
@@ -31,7 +30,7 @@
                                 @if (Guild == null)
                                 {
                                     <LayoutView Layout="@typeof(ChangeGuildLayout)">
-                                        <GuildWidgetCollection/>
+                                        <Login/>
                                     </LayoutView>
                                 }else
                                 {
@@ -39,11 +38,16 @@
                                 }
                             </Authorized>
                             <NotAuthorized>
-                                @if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
+                                @if (_user.IsRegistered())
+                                {
+                                    <LayoutView Layout="@typeof(ChangeGuildLayout)">
+                                        <Login/>
+                                    </LayoutView>
+                                } else if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
                                 {
                                     <LayoutView Layout="@typeof(FooterLayoutNoWidth)">
-                                            <HomePageNotLogin/>
-                                        </LayoutView>
+                                        <HomePageNotLogin/>
+                                    </LayoutView>
                                 }
                                 else if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public") ||
                                          !routeData.PageType.GetCustomAttributes(typeof(AllowAnonymousAttribute)).IsNullOrEmpty())
@@ -53,7 +57,7 @@
                                 else
                                 {
                                     <LayoutView Layout="@typeof(FooterLayout)">
-                                        <Login></Login>
+                                        <Login/>
                                     </LayoutView>
                                 }
                             </NotAuthorized>
@@ -84,7 +88,7 @@
 
 @code {
     
-    public bool IsDarkMode;
+    public bool IsDarkMode = true;
     private GuildSettingsModel Guild;
     
 
@@ -93,19 +97,41 @@
         IsDarkMode = _user?.GetUserGlobalModel()?.DarkTheme ?? false;
         base.OnInitialized();
     }
+    
 
-    public void ChangeTheme(ThemeManagerTheme value)
-    {
-        ThemeManager = value;
-        StateHasChanged();
-    }
-
-    public void DarkMode()
+    public void ToggleDarkMode()
     {
         IsDarkMode = !IsDarkMode;
-        //ToDo: Update Users
+
+        if (_user?.GetUserGlobalModel() is not null)
+        {
+            UserGlobalServices userGlobalServices = new UserGlobalServices();
+            UserGlobalModel user = _user.GetUserGlobalModel();
+            user.DarkTheme = IsDarkMode;
+            userGlobalServices.Upsert(user);
+        }
+       
+        StateHasChanged();
+    }
+    
+    public void ChangeLanuage(ChangeLocalization.Language language)
+    {
+        if (language == ChangeLocalization.Language.Danish)
+        {
+            _user.GetUserGlobalModel().CultureInfo = "da-DK";
+        }
+        else
+        {
+            _user.GetUserGlobalModel().CultureInfo = "en-US";
+        }
+        
+        if (_user?.GetUserGlobalModel() is not null)
+        {
+            new UserGlobalServices().Upsert(_user.GetUserGlobalModel());
+        }
         
         StateHasChanged();
+            
     }
     
     protected override async Task OnInitializedAsync()
@@ -147,68 +173,62 @@
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad:true);
     }
     
-
-    /*
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-        _isDarkMode = await _themeProvider.GetSystemPreference();
-        StateHasChanged();
-    }*/
     
-    public ThemeManagerTheme ThemeManager = new()
+
+
+    public readonly MudTheme Theme = new MudTheme()
     {
-        
-        Theme = new MudTheme()
+        Typography = new Typography()
         {
-            Typography = new Typography()
-            {
-                
-            },
-            Palette = new Palette()
-            {
-            
-                Background = "#f5f5f5",
-                Surface = "#FFFFFF",
 
-                Primary = "#AE3030",
-                PrimaryLighten = "#FFDAD5",
-                PrimaryDarken = "#410003",
-                PrimaryContrastText = "#FFFFFF",
-                Secondary = "#775653",
-                SecondaryLighten = "#FFDAD7",
-                SecondaryDarken = "#2C1513",
-                SecondaryContrastText = "#FFFFFF",
-                Tertiary = "#725B2E",
-                TertiaryLighten = "#FFDEA6",
-                TertiaryDarken = "#271900",
-                TertiaryContrastText = "#FFFFFF",
-                Error = "#BA1B1B",
-                ErrorLighten = "#FFDAD4",
-                ErrorDarken = "#410001",
-                ErrorContrastText = "#FFFFFF",
-                
-                AppbarText = "#FFFFFF",
-            },
-            
-            PaletteDark = new Palette()
-            {
-                Background = "#1a1a27",
-                Surface = "#32333d",
-                
-                TextPrimary = "#FFFFFF",
-                TextSecondary = "#9f9f9f",
-                TextDisabled = "#767676",
+        },
+        Palette = new Palette()
+        {
 
-                DrawerBackground = "#1a1a27",
-                DrawerText = "#FFFFFF",
-                DrawerIcon = "rgb(87,87,87)",
-                
-            }
+            Background = "#f5f5f5",
+            Surface = "#FFFFFF",
+
+            Primary = "#AE3030",
+            PrimaryLighten = "#FFDAD5",
+            PrimaryDarken = "#410003",
+            PrimaryContrastText = "#FFFFFF",
+            Secondary = "#775653",
+            SecondaryLighten = "#FFDAD7",
+            SecondaryDarken = "#2C1513",
+            SecondaryContrastText = "#FFFFFF",
+            Tertiary = "#725B2E",
+            TertiaryLighten = "#FFDEA6",
+            TertiaryDarken = "#271900",
+            TertiaryContrastText = "#FFFFFF",
+            Error = "#BA1B1B",
+            ErrorLighten = "#FFDAD4",
+            ErrorDarken = "#410001",
+            ErrorContrastText = "#FFFFFF",
+
+            AppbarText = "#FFFFFF",
+        },
+
+        PaletteDark = new Palette()
+        {
+            Background = "#1a1a27",
+            Surface = "#32333d",
+
+            TextPrimary = "#FFFFFF",
+            TextSecondary = "#9f9f9f",
+            TextDisabled = "#767676",
+
+            DrawerBackground = "#1a1a27",
+            DrawerText = "#FFFFFF",
+            DrawerIcon = "rgb(87,87,87)",
+
         }
     };
+    /*
+    public ThemeManagerTheme ThemeManager = new()
+    {
+        Theme = this.Theme;
+        
+    };
+    */
 
 }

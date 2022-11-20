@@ -10,6 +10,7 @@
 @using Dikubot.DataLayer.Database.Models
 @using Dikubot.Extensions.Calender
 @using Dikubot.Extensions.search
+@using Dikubot.Webapp.Pages
 @using MudBlazor.Services
 @inject UserService _user
 
@@ -104,7 +105,7 @@ width: 50%;
     </MudCardContent>
     <MudCardActions>
         @if (IsChangeGuild)
-        {
+        {<MudSpacer/>
             <JoinGuild GuildID="Convert.ToUInt64(Union.Discord)"></JoinGuild>
         }
         <MudSpacer/>
@@ -174,9 +175,13 @@ width: 50%;
         
     </DialogContent>
         <DialogActions>
-            <MudButton Color="Color.Primary" 
-                       Variant="Variant.Outlined" 
-                       OnClick="GoToShowMore"> Show More </MudButton>
+            @if (!IsChangeGuild)
+            {
+                <MudButton Color="Color.Primary"
+                           Variant="Variant.Outlined"
+                           OnClick="GoToShowMore"> Show More </MudButton>
+            }
+
             @if (!Union.Discord.IsNullOrEmpty())
             {
                 <JoinGuild GuildID="Convert.ToUInt64(Union.Discord)"></JoinGuild>
