@@ -33,10 +33,9 @@ namespace Dikubot.Extensions.Localization
                 _user.GetUserGlobalModel().CultureInfo = "en-US";
               
             }
-
-            var test = _user.Claims();
             
-            if (_user.IsRegistered())
+            
+            if (_user?.GetUserGlobalModel() is not null)
             {
                 new UserGlobalServices().Upsert(_user.GetUserGlobalModel());
             }

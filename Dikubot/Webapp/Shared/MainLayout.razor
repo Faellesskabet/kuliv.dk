@@ -8,7 +8,6 @@
 @using Dikubot.Extensions.EmojiSelector
 @using MudBlazor.Utilities
 @using Dikubot.Webapp.Extensions.NavMenu
-@using MudBlazor.ThemeManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager _navigationManager;
 @inject UserService _user
@@ -19,7 +18,7 @@
 
 <MudLayout>
         
-    <MudAppBar Elevation="@ThemeManager.AppBarElevation">
+    <MudAppBar>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer"/>
         @if (_loaded)
         {
@@ -45,17 +44,12 @@
                 <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1ec_1f1e7" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.Danish)"/>
             </English>
         </Localization>
-        <MudIconButton Size="Size.Medium" Icon="@Icons.Filled.WbSunny" OnClick="() => App.DarkMode()"/> 
+        <MudIconButton Size="Size.Medium" Icon="@DarkModeIcon" OnClick="() => App.ToggleDarkMode()"/> 
         
-        @if (_user.GetUserGlobalModel().IsAdmin)
-        {
-            <MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))" />
-            <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="ThemeManager" ThemeChanged="UpdateTheme" />
-        }
         
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
     </MudAppBar>
-    <MudDrawer @bind-Open="@open" Elevation="1" ClipMode="ThemeManager.DrawerClipMode">
+    <MudDrawer @bind-Open="@open" Elevation="1">
                
         <MudDrawerHeader>
             @if (_loaded)
@@ -65,7 +59,14 @@
             
         </MudDrawerHeader>
         <MudNavMenu>
-            <MudSelect T="ulong" Label="Fællesskab" Value="@_guildId" Variant="Variant.Outlined" ValueChanged="ChangeGuild" AdornmentIcon="@Icons.Filled.People" AdornmentColor="Color.Primary"
+            <MudSelect 
+                T="ulong" 
+                Label="Fællesskab" 
+                Value="@_guildId" 
+                Variant="Variant.Outlined" 
+                ValueChanged="ChangeGuild" 
+                AdornmentIcon="@Icons.Filled.People" 
+                AdornmentColor="Color.Primary"
                        Text="@(_guilds.FirstOrDefault(model => model.GuildId == _user?.GetUserGlobalModel().SelectedGuild)?.Name ?? "Vælg fællesskab")">
                 @foreach (var guild in _guilds)
                 {
@@ -93,8 +94,10 @@
 
 @code{
     
-    private string _background => (string)(App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.Background : App.ThemeManager.Theme.Palette.Background);
+    private string _background => (string)(App.IsDarkMode ? "transparent" : App.Theme.Palette.Background.Value);
     private string _style => $"min-height: 70vh; background-color: {_background}; padding-top: 24px; padding-bottom: 24px;";
+    
+    private string DarkModeIcon => App.IsDarkMode ? Icons.Filled.WbSunny : Icons.Filled.DarkMode;
     
     bool open = true;
     private Authenticator authenticator;
@@ -168,8 +171,6 @@
         SetData();
         StateHasChanged();
     }
-
-    #region ThemManger
     
     [CascadingParameter] 
     protected App App { get; set; }
@@ -177,27 +178,6 @@
     [CascadingParameter] 
     protected GuildSettingsModel Guild { get; set; }
     
-    [CascadingParameter]
-    protected ThemeManagerTheme? ThemeManager { get; set; }
-    
-    [Parameter] 
-    public Action<ThemeManagerTheme> OnThemeManagerChange { get; set; }
-    
-    private bool _themeManagerOpen = false;
-    
-    void OpenThemeManager(bool value)
-    {
-        _themeManagerOpen = value;
-    }
-
-     void UpdateTheme(ThemeManagerTheme value)
-     {
-         this.App.ChangeTheme(value);
-         StateHasChanged();
-         
-    }
-    
-    #endregion
     
     public async Task ChangeGuild(ulong guildId)
     {

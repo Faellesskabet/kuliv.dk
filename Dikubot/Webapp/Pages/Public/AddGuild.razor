@@ -69,10 +69,8 @@ Vi tager backup af vores database, og hvis din server er i vores backup, vil den
     protected override async void OnInitialized()
     {
 
-
-        var test = _userService?.IsRegistered() ?? false;
         
-        if (!_userService?.IsRegistered() ?? true)
+        if (!_userService?.GetUserGlobalModel().Verified ?? true)
         {
             _navigationManager.NavigateTo("/", forceLoad:true);
             return;
