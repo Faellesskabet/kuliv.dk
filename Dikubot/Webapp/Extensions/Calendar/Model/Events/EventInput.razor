@@ -53,7 +53,7 @@
 
     protected override void OnInitialized()
     {
-        if (Value.Id == Guid.Empty && _user.IsRegistered())
+        if (Value.Id == Guid.Empty && _user.GetUserGlobalModel().Verified)
         {
             Value.Hosts.Add(_user.GetUserGlobalModel().DiscordId);
         }

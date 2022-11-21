@@ -137,6 +137,12 @@ namespace Dikubot.Webapp.Authentication
         /// </summary>
         public ulong DiscordIdLong => this.UserGlobalModel.DiscordIdLong;
 
+        /// <summary>
+        /// Return User state
+        /// </summary>
+        
+        
+        
         
     }
 }
