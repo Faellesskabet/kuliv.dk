@@ -54,7 +54,7 @@
 
             </MudCardContent>
         </MudField>
-        @if (_user.IsRegistered())
+        @if (_user?.GetUserGlobalModel()?.Verified ?? false)
         {
             <MudCardActions>
                 <MudButton Color="JoinColor" Disabled="@_processing" OnClick="JoinEvent" Variant="Variant.Filled">
@@ -98,7 +98,7 @@
                     <MudText Typo="Typo.body2" style="padding-left:16px; height: 56px; overflow: hidden">@Model.Subject</MudText>
                 </div>  
                 <MudSpacer/>
-                @if (_user.IsRegistered())
+                @if (_user.GetUserGlobalModel().Verified)
                 {
                     <MudIconButton Icon="@Icon" OnClick="JoinEvent" Size="Size.Large" Disabled="@_processing" Color="JoinColor">
                     </MudIconButton>
@@ -146,7 +146,7 @@
 
             </ChildContent>
         </MudTabs>
-        @if (_user.IsRegistered())
+        @if (_user.GetUserGlobalModel().Verified)
                 {
                     <MudCardActions>
                         <MudButton Color="JoinColor" Disabled="@_processing" OnClick="JoinEvent" Variant="Variant.Outlined">

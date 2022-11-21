@@ -114,7 +114,6 @@ namespace Dikubot.Webapp
                 }).AddDiscord(options =>
                 {
                     options.AccessDeniedPath = "/error";
-                    
                     options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");

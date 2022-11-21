@@ -47,22 +47,17 @@
         </MudButton>
     </MudHidden>
     <MudSpacer/>
-    <MudButton Variant="Variant.Text" Style="@NavTextStyleColor"
-               Href="/connect">
-        <Localization>
-            <Danish>Login</Danish>
-            <English>Login</English>
-        </Localization>
-    </MudButton>
-    <MudIconButton Size="Size.Medium" Color="Color.Inherit" Icon="@Icons.Filled.WbSunny" OnClick="() => App.DarkMode()"/> 
-    <Localization>
-        <Danish>
-            <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)"/>
-            </Danish>
-        <English>
-            <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1ec_1f1e7" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.Danish)"/>
-            </English>
-    </Localization>
+    @if (!_user.IsRegistered())
+    {
+        <MudButton Variant="Variant.Text" Style="@NavTextStyleColor"
+                   Href="/connect">
+            <Localization>
+                <Danish>Login</Danish>
+                <English>Login</English>
+            </Localization>
+        </MudButton>
+    }
+    <MudIconButton Size="Size.Medium" Color="Color.Inherit" Icon="@DarkModeIcon" OnClick="() => App.ToggleDarkMode()"/>
     <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
 
 </MudAppBar>
@@ -81,14 +76,16 @@
 @code {
     
     bool open = false;
-    private string NavColor => (string) (App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.AppbarBackground : App.ThemeManager.Theme.Palette.AppbarBackground);
+    private string NavColor => (string) (App.IsDarkMode ? App.Theme.PaletteDark.AppbarBackground : App.Theme.Palette.AppbarBackground);
     private string NavStyleColor => $"color: {NavColor}";
     
-    private string NavTextColor => (string)(App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.AppbarText : App.ThemeManager.Theme.Palette.AppbarText);
+    private string NavTextColor => (string)(App.IsDarkMode ? App.Theme.PaletteDark.AppbarText : App.Theme.Palette.AppbarText);
     private string NavTextStyleColor => $"color: {NavTextColor}";
     
-    private string DrawTextColor => (string)(App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.AppbarText : App.ThemeManager.Theme.Palette.AppbarText);
+    private string DrawTextColor => (string)(App.IsDarkMode ? App.Theme.PaletteDark.AppbarText : App.Theme.Palette.AppbarText);
     private string DrawTextStyleColor => $"color: {DrawTextColor}";
+
+    private string DarkModeIcon => App.IsDarkMode ? Icons.Filled.WbSunny : Icons.Filled.DarkMode;
     
     [Parameter]
     public App App { get; set; }
@@ -104,15 +101,5 @@
         open = !open;
     }
     
-    /*
-    private MudColor GetColor()
-    {
-        return 
-    }
-
-    private MudColor GetTextColor()
-    {
-        return App.ThemeProvider.IsDarkMode ? App.ThemeProvider.Theme.PaletteDark.TextPrimary : App.ThemeProvider.Theme.Palette.TextPrimary;
-    }
-  */
+  
 }

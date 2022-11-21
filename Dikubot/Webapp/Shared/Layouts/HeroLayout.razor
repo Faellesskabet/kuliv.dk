@@ -8,7 +8,6 @@
 
 @using MudBlazor.Utilities
 @using Dikubot.Webapp.Extensions.NavMenu
-@using MudBlazor.ThemeManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager _navigationManager;
 @inject UserService _user
@@ -70,13 +69,15 @@
 </MudLayout>
 
 @code{
-   
+    [CascadingParameter] 
+    protected App App { get; set; }
+
     private bool _loaded = false;
 
-    private string HeaderTitle { get; set; } = "ENHEDSLISTEN";
+    private string HeaderTitle { get; set; } = "";
     private string HeaderSubTitle { get; set; } = "";
     private string HeaderContent { get; set; } = "";
-    private string HeaderImage { get; set; } = @"/enhedslisten/Images/omEnhedslisten.jpg";
+    private string HeaderImage { get; set; } = @"";
     
     public void UpdateContext(string title = null,
                         string subTitle = null, 
@@ -117,34 +118,6 @@
         base.OnParametersSet();
     }
 
-    #region ThemManger
-    
-    [CascadingParameter] 
-    protected App App { get; set; }
-    
-    [CascadingParameter]
-    protected ThemeManagerTheme? ThemeManager { get; set; }
-    
-    [Parameter] 
-    public Action<ThemeManagerTheme> OnThemeManagerChange { get; set; }
-    
-    private bool _themeManagerOpen = false;
-    void OpenThemeManager(bool value)
-    {
-        _themeManagerOpen = value;
-    }
-
-     void UpdateTheme(ThemeManagerTheme value)
-     {
-         this.App.ChangeTheme(value);
-         //OnThemeManagerChange?.Invoke(value);
-         StateHasChanged();
-         
-    }
-
-    
-    
-    #endregion
     
     
    

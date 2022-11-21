@@ -1,11 +1,11 @@
 @inherits LayoutComponentBase
 @using Dikubot.Webapp.Extensions.NavMenu;
-@using MudBlazor.ThemeManager
+
 
 
 
 <MudLayout>
-    <TopNavMenu App="App"/>
+    <FooterTopNavMenu App="App"/>
         <MudMainContent Style="padding-right: 0; padding-left: 0">
             <MudContainer Style="@_style">
                 @Body
@@ -19,12 +19,9 @@
    
     [CascadingParameter] 
     protected App App { get; set; }
+    
 
-
-    [CascadingParameter]
-    protected ThemeManagerTheme? ThemeManager { get; set; }
-
-    private string _background => (string)(App.IsDarkMode ? App.ThemeManager.Theme.PaletteDark.Background : App.ThemeManager.Theme.Palette.Background);
+    private string _background => (string)(App.IsDarkMode ? "transparent" : App.Theme.Palette.Background.Value);
 
     private string _style => $"min-height: 70vh; background-color: {_background}; " +
                              $"padding: 24px 0px;";
