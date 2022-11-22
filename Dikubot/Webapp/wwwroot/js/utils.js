@@ -13,3 +13,7 @@ function ShowMaps(){
 function removeBackgroundImage() {
     document.body.style.background = 'none';
 }
+
+setTitle = (title) => { document.title = title; };
+
+setDescription = (description) => { document.getElementById("meta-description").setAttribute("content", description)};
