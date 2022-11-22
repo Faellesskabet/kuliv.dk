@@ -29,14 +29,16 @@
 }
 else
 {
-    <Searchbar Items="_models" Context="UnionModel">
-        <TemplateRow Context="unionModel" >
-            <MudItem xs="12" sm="6" >
-                <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"/>
-            </MudItem>
-        </TemplateRow>
-    </Searchbar>
-    <MudButton Color="@Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
+    <div style="min-width: 70vw;">
+        <Searchbar Items="_models" Context="UnionModel">
+            <TemplateRow Context="unionModel" >
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"/>
+                </MudItem>
+            </TemplateRow>
+        </Searchbar>
+        <MudButton Color="@Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
+    </div>
 }
    
 @code {
