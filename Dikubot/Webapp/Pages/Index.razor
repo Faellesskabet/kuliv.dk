@@ -7,6 +7,7 @@
 @using Data.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService
+@inject UserService _userService;
 
 
 <MudGrid>
@@ -179,14 +180,11 @@
 
     private async Task SetData()
     {
-        authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity) authState.User.Identity;
-        if (user == null)
+        guild = _userService.getGuild();
+        if (guild == null)
         {
             return;
         }
-        guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
         _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
     }
     

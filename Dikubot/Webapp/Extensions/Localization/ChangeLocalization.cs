@@ -24,20 +24,21 @@ namespace Dikubot.Extensions.Localization
         
         public void Change(Language language)
         {
+            UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
             if (language == Language.Danish)
             {
-                _user.GetUserGlobalModel().CultureInfo = "da-DK";
+                userGlobalModel.CultureInfo = "da-DK";
             }
             else
             {
-                _user.GetUserGlobalModel().CultureInfo = "en-US";
+                userGlobalModel.CultureInfo = "en-US";
               
             }
             
             
             if (_user?.GetUserGlobalModel() is not null)
             {
-                new UserGlobalServices().Upsert(_user.GetUserGlobalModel());
+                new UserGlobalServices().Upsert(userGlobalModel);
             }
             
             _notifyStateService.NotifyUserChange(this);

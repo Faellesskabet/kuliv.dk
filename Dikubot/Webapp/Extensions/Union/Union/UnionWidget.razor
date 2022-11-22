@@ -221,7 +221,7 @@ width: 50%;
 
     private void GoToEdit()
     {
-        NavigationManager.NavigateTo("/Op/Union/edit/"+Union.Id);
+        NavigationManager.NavigateTo("/op/union/edit/"+Union.Id);
     }
     private void GoToShowMore()
     {
@@ -230,14 +230,14 @@ width: 50%;
     
     private void Request()
     {
-        _navigationManager.NavigateTo($"/Request/Event/create/"+Union.Id);
+        _navigationManager.NavigateTo($"/request/event/create/"+Union.Id);
     }
 
     public int MembersCount(ulong GuildId) => Discord.DiscordBot.ClientStatic?.GetGuild(GuildId)?.MemberCount ?? 0;
     
     private void GoToMakeRequest()
     {
-        NavigationManager.NavigateTo("/Request/Union/create/"+Union.Id);
+        NavigationManager.NavigateTo("/request/union/create/"+Union.Id);
     }
 
     
