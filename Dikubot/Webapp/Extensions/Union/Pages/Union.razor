@@ -104,7 +104,7 @@
     
     private UnionModel Model { get; set; }
     
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
         UnionServices services = new UnionServices();
         GuildSettingsService guildSettingsService = new GuildSettingsService();
@@ -117,10 +117,9 @@
         
         if (!string.IsNullOrWhiteSpace(Model.Decs))
         {
-            MetadataService.SetTitle(Model.Decs);
+            MetadataService.SetDescription(Model.Decs);
         }
         
-        base.OnInitialized();
     }
     
     private void RequestCreateEvent()
