@@ -1,0 +1,125 @@
+﻿@page "/discovery/union/{uuid}"
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.Extensions.Calender
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Global.GuildSettings;
+@using Dikubot.Extensions.search
+@inject NavigationManager _navigationManager;
+@inject UserService _user;
+@attribute [AllowAnonymous]
+
+<MudGrid>
+    <MudItem xs="12" sm="8">
+        <MudItem xs="12">
+            <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudAvatar Size="Size.Large" Image="@Model.LogoUrl"></MudAvatar>
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">@Model.Title</MudText>
+                                <TagDisplay Tags="Model.Tags"></TagDisplay>
+                                @if (!string.IsNullOrWhiteSpace(Model.Href))
+                                {
+                                    <MudIconButton Icon="@Icons.Filled.Link" aria-label="Webpage" Target="_blank" Link="@Model.Href" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Model.Facebook))
+                                {
+                                    <MudIconButton Icon="@Icons.Custom.Brands.Facebook" aria-label="Facebook" Link="@Model.Facebook" Target="_blank" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+                                }
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                @if (Model.Discord is not null)
+                                {
+                                    <JoinGuild GuildID="Convert.ToUInt64(Model.Discord)"></JoinGuild>
+                                }
+                                else
+                                {
+                                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Filled.Edit" aria-label="Edit" OnClick="GoToMakeRequest" Color="Color.Primary">
+                                        Requst edit
+                                    </MudButton>
+                                }
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                        </MudCardContent>
+                    </MudCard>
+        </MudItem>
+        <MudItem xs="12" Style="padding-top: 12px">
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                                <MudCard>
+                                    <MudCardHeader>
+                                        <MudText Typo="Typo.h4"> Description </MudText>
+                                    </MudCardHeader>
+                                    <MudCardContent>
+                                        @Model.Decs
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudCard>
+                                    <MudCardHeader>
+                                        <MudText Typo="Typo.h4"> Contact </MudText>
+                                    </MudCardHeader>
+                                    <MudCardContent>
+                                        <MudField Label="Mail" Variant="Variant.Outlined" Style=" text-overflow: ellipsis">
+                                            @Model.Mail
+                                        </MudField>
+                                        <MudField Label="Hjemmeside" Variant="Variant.Outlined"  Style=" text-overflow: ellipsis">
+                                            <MudLink Href="@Model.Href"> @Model.Href</MudLink>
+                                        </MudField>
+                                        <MudField Label="Facebook" Variant="Variant.Outlined"  Style=" text-overflow: ellipsis">
+                                            <MudLink Href="@Model.Facebook"> @Model.Facebook</MudLink>
+                                        </MudField>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudCard>        
+                <MudButton Color="Color.Inherit" OnClick="RequestCreateEvent" Variant="Variant.Outlined" StartIcon="@Icons.Filled.Add"> Tilføj en begivenhed </MudButton>
+
+                <CalendarWidget 
+                    EventsServices="new EventsServices(_user, Model)"
+                    View="@View.MonthAgenda"
+                    />
+    </MudCard>
+        </MudItem>
+
+
+
+</MudGrid>
+
+
+
+@code {
+    [Parameter]
+    public string? uuid { get; set; }
+    
+    
+    private UnionModel Model { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        UnionServices services = new UnionServices();
+        GuildSettingsService guildSettingsService = new GuildSettingsService();
+        
+        Model = Guid.TryParse(uuid, out Guid guid) ? services?.Get(guid) ?? new UnionModel(guildSettingsService.Get(guid)) : new UnionModel() {};
+        
+        base.OnInitialized();
+    }
+    
+    private void RequestCreateEvent()
+    {
+        _navigationManager.NavigateTo($"/Request/Event/create/"+Model.Id);
+    }
+    private void GoToMakeRequest()
+    {
+        _navigationManager.NavigateTo("/Request/Union/create/"+Model.Id);
+    }
+
+}

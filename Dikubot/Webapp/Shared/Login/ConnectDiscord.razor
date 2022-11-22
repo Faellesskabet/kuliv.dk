@@ -40,14 +40,46 @@
 {
     <MudCard>
         <MudCardHeader>
-            <MudText Typo="Typo.h6">Log-in med Discord</MudText>
+            <MudText Typo="Typo.h6">
+                <Localization>
+                    <Danish>
+                        Log-in med Discord
+                    </Danish>
+                    <English>
+                        Log in with Discord
+                    </English>
+                </Localization>
+            </MudText>
         </MudCardHeader>
         <MudCardContent>
-            <MudText Typo="Typo.body1">For at tilgå kuliv.dk, skal du logge ind med en Discord bruger.</MudText>
+            <MudText Typo="Typo.body1">
+                <Localization>
+                    <Danish>
+                        For at tilgå kuliv.dk, skal du logge ind med en Discord bruger.
+                    </Danish>
+                    <English>
+                        To access kuliv.dk, you must log in with a Discord user.
+                    </English>
+                </Localization>
+            </MudText>
         </MudCardContent>
         <MudCardActions>
-            <MudLink Href="/login"><MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton></MudLink>
-            <MudLink><MudButton Variant="Variant.Text" Color="Color.Primary">Skriv til admin@kuliv.dk for hjælp</MudButton></MudLink>
+            <MudLink Href="/login"><MudButton Variant="Variant.Filled" Color="Color.Primary">
+                <Localization>
+                    <Danish>
+                        Login med Discord
+                    </Danish>
+                    <English>
+                        Login with Discord
+                    </English>
+                </Localization>
+            </MudButton></MudLink>
+            <MudLink><MudButton Variant="Variant.Text" Color="Color.Primary">
+                <Localization>
+                    <Danish>Skriv til support@kuliv.dk for hjælp</Danish>
+                    <English>Write to support@kuliv.dk for help</English>
+                </Localization>
+            </MudButton></MudLink>
         </MudCardActions>
     </MudCard>
 }

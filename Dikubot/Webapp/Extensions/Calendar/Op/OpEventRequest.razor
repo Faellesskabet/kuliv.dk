@@ -25,7 +25,13 @@
 <MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<EventModel>>>>(Reload))" @ref="_table"
           Loading="@_loading">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
+        <MudSelect T="RequestModel<EventModel>.StatusEmun" Label="Status" MultiSelection="true" @bind-SelectedValues="options" OnClose="o => _table.ReloadServerData()">
+            <MudSelectItem Value="RequestModel<EventModel>.StatusEmun.ongoing"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<EventModel>.StatusEmun.change"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<EventModel>.StatusEmun.approved"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<EventModel>.StatusEmun.denied"></MudSelectItem>
+        </MudSelect>
+        
         <MudSpacer />
         <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -74,6 +80,10 @@
     private EventRequestService _services;
     private bool _loading = true;
 
+    private IEnumerable<RequestModel<EventModel>.StatusEmun> options { get; set; } 
+        = new HashSet<RequestModel<EventModel>.StatusEmun>() {RequestModel<EventModel>.StatusEmun.ongoing, RequestModel<EventModel>.StatusEmun.change};
+
+    
     protected override async Task OnInitializedAsync()
     {
 
@@ -86,14 +96,15 @@
         List<RequestModel<EventModel>> items;
         if (!_searchQuery.IsNullOrEmpty())
         {
-            items = _services.Get(model => model.RequestItem.Subject.Contains(_searchQuery) 
+            items = _services.Get(model => options.Contains(model.Status) &&
+                                                    (model.RequestItem.Subject.Contains(_searchQuery) 
                                            || model.RequestItem.Description.Contains(_searchQuery)
-                                            || model.Contact.Name.Contains(_searchQuery),
+                                            || model.Contact.Name.Contains(_searchQuery)),
                     state.PageSize, state.Page);   
         }
         else
         {
-            items = _services.Get(state.PageSize, state.Page);   
+            items = _services.Get(model =>  options.Contains(model.Status),state.PageSize, state.Page);   
         }
 
         return new TableData<RequestModel<EventModel>>() { Items = items, TotalItems = (int)_services.EstimatedCount()};

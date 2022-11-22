@@ -4,3 +4,12 @@ window.getDimensions = function() {
         height: window.innerHeight
     };
 };
+
+
+function ShowMaps(){
+    const maps = new okapi.Initialize({});
+}
+
+function removeBackgroundImage() {
+    document.body.style.background = 'none';
+}

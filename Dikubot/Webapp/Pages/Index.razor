@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @using Dikubot.Webapp.Authentication
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.Discord
@@ -7,25 +7,42 @@
 @using Data.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService
+@inject UserService _userService;
 
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
         <MudCarousel Style="height:100px;" ShowArrows="@false" ShowBullets="@false" AutoCycle="@true" TData="object">
                         <MudCarouselItem Transition="Transition.Slide" Color="@Color.Transparent">
-            <MudAlert Severity="Severity.Warning" Square="true" Class="my-2">Dette er en åben beta af KULiv.dk. Hvis du finder en fejl, 
-                må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues</MudAlert>
+                            <MudAlert Severity="Severity.Warning" Square="true" Class="my-2">
+                                <Localization><Danish>
+                                    Dette er en åben beta af KULiv.dk. Hvis du finder en fejl,
+                                    må du meget gerne rappotere det her: https://github.com/Faellesskabet/Discord-Botten/issues
+                                </Danish>
+                                    <English>
+                                    This is an open beta of KULiv.dk. If you find an error,
+                                    please repot it here: https://github.com/Faellesskabet/Discord-Botten/issues
+                                    </English></Localization>
+                            </MudAlert>
                         </MudCarouselItem>
             
             <MudCarouselItem Transition="Transition.Slide" Color="@Color.Primary">
                 <div class="d-flex" style="height:100%">
-                    <MudText Typo="Typo.h3" Class="mx-auto my-auto" Style="font-size:min(7vw, 50px);">kuliv.dk - Find fællesskaber</MudText>
+                    <MudText Typo="Typo.h3" Class="mx-auto my-auto" Style="font-size:min(7vw, 50px);">
+                        <Localization><Danish>KULiv.dk - Find fællesskaber</Danish> <English>KULiv.dk - Find communities</English></Localization>
+                        
+                    </MudText>
                 </div>
             </MudCarouselItem>
 
             <MudCarouselItem Transition="Transition.Slide" Color="@Color.Tertiary">
                 <div class="d-flex" style="height:100%">
-                    <MudText Typo="Typo.h3" Class="mx-auto my-auto" Style="font-size:min(7vw, 50px);">kuliv.dk - Bliv frivillig</MudText>
+                    <MudText Typo="Typo.h3" Class="mx-auto my-auto" Style="font-size:min(7vw, 50px);">
+                        <Localization>
+                            <Danish>KULiv.dk - Bliv frivillig</Danish>
+                            <English>KULiv.dk - Become a volunteer</English>
+                        </Localization>
+                    </MudText>
                 </div>
             </MudCarouselItem>
         </MudCarousel>
@@ -35,14 +52,42 @@
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 <MudCardHeader>
                     <MudIcon Icon="@Icons.Filled.Group" Color="Color.Info"></MudIcon>
-                    <MudText Typo="Typo.h5" Color="Color.Info"> Tilmeld roller</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Info">
+                        <Localization>
+                            <Danish>
+                                Tilmeld roller
+                            </Danish>
+                            <English>
+                                Sign up for roles
+                            </English>
+                        </Localization>
+                    </MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <MudText Typo="Typo.body2">Dit fællesskab har måske nogen ting som kun kan tilgås,
-                        hvis man er en del af en specifik rolle. Find den rolle her!</MudText>
+                    <MudText Typo="Typo.body2">
+                    <Localization>
+                        <Danish>
+                           Dit fællesskab har måske nogen ting som kun kan tilgås,
+                           hvis man er en del af en specifik rolle. Find den rolle her!
+                        </Danish>
+                        <English>
+                            Your community may have some items that can only be accessed,
+                            if you are part of a specific role. Find that role here!
+                        </English>
+                    </Localization>
+                    </MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/roles">Gå til side</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/roles">
+                        <Localization>
+                            <Danish>
+                                Gå til siden
+                            </Danish>
+                            <English>
+                                Go to Page
+                            </English>
+                        </Localization>
+                    </MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
@@ -50,16 +95,28 @@
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 @if (_loaded)
                 {
-                    <MudCardHeader Style="overflow: scroll">
+                    <MudCardHeader Style="overflow: hidden">
                         <MudIcon Icon="@Icons.Filled.People" ></MudIcon>
                         <MudText Typo="Typo.h5">@_guildSettingsModel.Name</MudText>
                     </MudCardHeader>
                     <MudCardContent>
-                        <MudText Typo="Typo.body2">Du er logget ind i @_guildSettingsModel.Name fællesskabet. Alt hvad du ser og gør er i forhold til
-                            dette fællesskab.</MudText>
+                        <MudText Typo="Typo.body2">
+                            <Localization>
+                                <Danish>
+                                    Du er logget ind i @_guildSettingsModel.Name fællesskabet. Alt hvad du ser og gør er i forhold til
+                                    dette fællesskab.
+                                </Danish>
+                                <English>
+                                    You are logged into the @_guildSettingsModel.Name community. Everything you see and do is relative
+                                                                 this community.
+                                </English>
+                            </Localization>
+                        </MudText>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Variant="Variant.Text" Color="Color.Primary" Link="/changeguild">Skift fællesskab</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/changeguild">
+                            <Localization> <Danish>Skift fællesskab</Danish> <English>Change community</English></Localization>
+                        </MudButton>
                     </MudCardActions>
                 }
                 else
@@ -72,13 +129,18 @@
             <MudCard Elevation="2" Class="pa-4" Style="height: 240px;">
                 <MudCardHeader>
                     <MudIcon Icon="@Icons.Filled.HelpCenter"></MudIcon>
-                    <MudText Typo="Typo.h5">Få hjælp</MudText>
+                    <MudText Typo="Typo.h5">
+                        <Localization><Danish>Få hjælp</Danish><English>Get help</English></Localization>
+                    </MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <MudText Typo="Typo.body2">Har du nogen problemer? Her kan du finde kontakt informationer samt massere af guides!</MudText>
+                    <MudText Typo="Typo.body2">
+                        <Localization><Danish>Har du nogen problemer? Her kan du finde kontaktinformationer samt massere af guides!</Danish>
+                            <English>Do you have any problems? Here you can find contact information and plenty of guides!</English></Localization>
+                    </MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Variant="Variant.Text" Color="Color.Primary" Link="/help">Få hjælp</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/help"><Localization><Danish>Få hjælp</Danish><English>Get help</English></Localization></MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
@@ -118,14 +180,11 @@
 
     private async Task SetData()
     {
-        authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity) authState.User.Identity;
-        if (user == null)
+        guild = _userService.getGuild();
+        if (guild == null)
         {
             return;
         }
-        guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
         _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
     }
     

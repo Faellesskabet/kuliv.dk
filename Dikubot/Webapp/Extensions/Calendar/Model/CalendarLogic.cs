@@ -39,12 +39,13 @@ namespace Dikubot.Webapp.Extensions.Calendar.Model
             }
             return new CalendarModel();
         }
-        
 
-        async public Task<List<(SocketGuild, List<CalendarModel>)>> GetAllViewCalenders(CalendarModel.EnumCalendarType calendarType)
+
+        async public Task<(List<(SocketGuild, List<CalendarModel>)>, List<(SocketGuild, List<CalendarModel>)>)>
+            GetAllListListViewAndPermissionsCalenders(CalendarModel.EnumCalendarType calendarType)
         {
-            var roles = _user.GetRolesGuid() ?? new HashSet<Guid>();
-            List<(SocketGuild,List<CalendarModel>)> result = new List<(SocketGuild, List<CalendarModel>)>();
+            (List<(SocketGuild,List<CalendarModel>)>,List<(SocketGuild,List<CalendarModel>)>) 
+                result = (new List<(SocketGuild, List<CalendarModel>)>(),new List<(SocketGuild, List<CalendarModel>)>());
 
             if (!_user.Verified)
             {
@@ -53,56 +54,94 @@ namespace Dikubot.Webapp.Extensions.Calendar.Model
                     List<CalendarModel> value = service.GetAll(model => model.CalendarType == calendarType).Where(
                         model =>
                             model.Visible == CalendarModel.EnumAvailable.Public).ToList();
-                    result.Add((service.Guild, value));
+                    result.Item1.Add((service.Guild, value));
                 }
+                return result;
             }
-            else
+            
+            var roles = _user.GetRolesGuid() ?? new HashSet<Guid>();
+            
+            foreach (var service in _calendarServicesList) 
+            {
+                List<CalendarModel> views = new List<CalendarModel>();
+                List<CalendarModel> permissions = new List<CalendarModel>();
+                    foreach (var calendarModel in service
+                        .GetAll(model => model.CalendarType == calendarType))
+                    {
+                        if (calendarModel.Permission.Overlaps(roles))
+                        {
+                            permissions.Add(calendarModel);
+                            views.Add(calendarModel);
+                        }
+                        else if (calendarModel.Visible is CalendarModel.EnumAvailable.Public 
+                            or CalendarModel.EnumAvailable.Externt 
+                                 || (_user.Guilds.Contains(service.Guild) 
+                                     && (calendarModel.Visible == CalendarModel.EnumAvailable.Internt 
+                                         || calendarModel.View.Overlaps(roles))))
+                        {
+                            views.Add(calendarModel);
+                        }
+                    }
+                    result.Item1.Add((service.Guild,views));
+                    result.Item2.Add((service.Guild,permissions));
+            }
+            return result;
+        }
+        
+        async public Task<(List<CalendarModel>, List<CalendarModel>)>
+            GetAllListViewAndPermissionsCalenders(CalendarModel.EnumCalendarType calendarType)
+        {
+            (List<CalendarModel>, List<CalendarModel>)
+                result = (new List<CalendarModel>(), new List<CalendarModel>());
+                    
+            if (!_user.Verified)
             {
                 foreach (var service in _calendarServicesList)
                 {
-                    List<CalendarModel> value = service.GetAll(model => model.CalendarType == calendarType).Where(model => 
-                        model.Visible is CalendarModel.EnumAvailable.Public or CalendarModel.EnumAvailable.Externt 
-                        || (_user.Guilds.Contains(service.Guild) 
-                            && model.Visible == CalendarModel.EnumAvailable.Internt) 
-                        || model.Permission.Overlaps(roles) 
-                        || model.View.Overlaps(roles)
-                    ).ToList();
-                    result.Add((service.Guild,value));
+                    List<CalendarModel> value = service.GetAll(model => model.CalendarType == calendarType).Where(
+                        model =>
+                            model.Visible == CalendarModel.EnumAvailable.Public).ToList();
+                    result.Item1.AddRange(value);
                 }
+                return result;
             }
             
+            var roles = _user.GetRolesGuid() ?? new HashSet<Guid>();
             
+            foreach (var service in _calendarServicesList) 
+            {
+                foreach (var calendarModel in service
+                        .GetAll(model => model.CalendarType == calendarType))
+                    {
+                        if (calendarModel.Permission.Overlaps(roles))
+                        {
+                            result.Item2.Add(calendarModel);
+                            result.Item1.Add(calendarModel);
+                        }
+                        else if (calendarModel.Visible is CalendarModel.EnumAvailable.Public 
+                            or CalendarModel.EnumAvailable.Externt 
+                                 || (_user.Guilds.Contains(service.Guild) 
+                                     && (calendarModel.Visible == CalendarModel.EnumAvailable.Internt 
+                                         || calendarModel.View.Overlaps(roles))))
+                        {
+                            result.Item1.Add(calendarModel);
+                        }
+                    }
+            }
             return result;
+        }
+        
+
+        async public Task<List<(SocketGuild, List<CalendarModel>)>> GetAllViewCalenders(CalendarModel.EnumCalendarType calendarType)
+        {
+            return GetAllListListViewAndPermissionsCalenders(calendarType).Result.Item1;
         }
         
         
         
         async public Task<List<(SocketGuild, List<CalendarModel>)>> GetAllPermisionsCalendars(CalendarModel.EnumCalendarType calendarType)
         {
-            
-            if (_user.Verified is false)
-            {
-                return new List<(SocketGuild, List<CalendarModel>)>();
-            }
-            
-            var roles = _user.GetRolesGuid();
-
-            List<(SocketGuild,List<CalendarModel>)> result = new List<(SocketGuild, List<CalendarModel>)>();
-            
-            
-            foreach (var socketGuild in _user.Guilds)
-            {
-                var service = new CalendarServices(socketGuild.Id.ToString());
-            
-                
-                List<CalendarModel> value = service.GetAll(model => model.CalendarType == calendarType).Where(model => model.Permission.Overlaps(roles)).ToList();
-                result.Add((socketGuild,value));
-                 
-                
-            }
-
-            return result;
-
+            return GetAllListListViewAndPermissionsCalenders(calendarType).Result.Item2;
         }
         
         
