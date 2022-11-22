@@ -9,14 +9,22 @@
 
 <MudCard>
     <MudCardHeader>
-        <MudText Typo="Typo.h6">Hvad er dit fulde navn?</MudText>
+        <MudText Typo="Typo.h6">
+            <Localization> <Danish>Hvad er dit fulde navn?</Danish>
+                <English>What is your full name?</English></Localization>
+        </MudText>
     </MudCardHeader>
     <MudCardContent>
         <MudTextField Placeholder="Fulde navn"
                       @bind-Value="name" Immediate="@true" Autofocus="@true" />
     </MudCardContent>
     <MudCardActions>
-        <MudButton OnClick="@ConfirmName">Bekræft Navn</MudButton>
+        <MudButton OnClick="@ConfirmName">
+            <Localization>
+                <Danish>Bekræft Navn</Danish>
+                <English>Confirm Name</English>
+            </Localization>
+        </MudButton>
         <MudButton Link="/Logout" Color="Color.Error">Logud</MudButton>
     </MudCardActions>
 </MudCard>

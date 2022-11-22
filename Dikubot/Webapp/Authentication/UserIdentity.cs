@@ -61,6 +61,9 @@ namespace Dikubot.Webapp.Authentication
                 Logger.Debug(e.Message);
             }
         }
+        
+        
+        
 
         /// <Summary>This is simply just a name and it has no purposes except for us to differentiate between AuthenticationTypes / reasons for authentication</Summary>
         /// <return>"User" as a string</return>
@@ -72,13 +75,11 @@ namespace Dikubot.Webapp.Authentication
         /// The user must be verified by email
         /// The session may not be expired
         /// The user may not be banned
-        /// The user must have selected a guild
         /// </summary>
         public override bool IsAuthenticated =>
             UserGlobalModel?.DiscordId != null && UserGlobalModel.Verified && UserGlobalModel.Name != null &&
-            _discordUserClaim != null && _discordUserClaim.UserId != 0 && !UserGlobalModel.IsBanned
-            && UserGlobalModel.SelectedGuild != 0 &&
-            DiscordBot.ClientStatic.Guilds.Any(guild => guild.Id == UserGlobalModel.SelectedGuild);
+            _discordUserClaim != null && _discordUserClaim.UserId != 0 && !UserGlobalModel.IsBanned;
+
 
         public string Name => UserGlobalModel == null ? "Intet navn" : UserGlobalModel.Name;
 
@@ -128,13 +129,19 @@ namespace Dikubot.Webapp.Authentication
         /// <summary>
         /// Get all guid for roles the user have
         /// </summary>
-        public string DiscordId => this.UserGlobalModel.DiscordId;
+        public string DiscordId => this.UserGlobalModel?.DiscordId;
         
         /// <summary>
         /// Get all guid for roles the user have
         /// </summary>
         public ulong DiscordIdLong => this.UserGlobalModel.DiscordIdLong;
 
+        /// <summary>
+        /// Return User state
+        /// </summary>
+        
+        
+        
         
     }
 }

@@ -77,23 +77,22 @@ namespace Dikubot.DataLayer.Database.Global.User
             }
             return guild;
         }
-        
-        [BsonElement("DarkTheme")]
-        public bool DarkTheme { get; set; }
 
+        [BsonElement("DarkTheme")] public bool DarkTheme { get; set; } = true;
+
+        [BsonElement("CultureInfo")] 
+        public string CultureInfo { get; set; } = "en-US";
 
         /// <summary>
         /// Get all guids the user
         /// </summary>
         [BsonIgnore]
-        public HashSet<SocketGuild> Guilds
-        {
-            get => DiscordId.IsNullOrEmpty()
-                ? new HashSet<SocketGuild>()
-                : DiscordBot.ClientStatic.GetUser(this.DiscordIdLong).MutualGuilds.ToHashSet();
-        }
-        
-        
+        public HashSet<SocketGuild> Guilds =>
+            DiscordId.IsNullOrEmpty() 
+                ? new HashSet<SocketGuild>() 
+                : DiscordBot.ClientStatic.GetUser(this.DiscordIdLong)?.MutualGuilds?.ToHashSet() 
+                  ?? new HashSet<SocketGuild>();
+
         /// <summary>
         /// Get all guid for roles the user have
         /// </summary>

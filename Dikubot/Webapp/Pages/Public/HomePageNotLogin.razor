@@ -1,0 +1,25 @@
+﻿@layout FooterLayoutNoWidth
+
+<MudCarousel Class="mud-width-full align-content-center" Style="height:calc( 100vh - 150px );" TData="object" AutoCycle="false">
+    @{ var hero1 = new List<(string,string)>() {("Find din forening","/discovery/unions")};}
+    <CarouselHeroItem HeaderText="Velkommen til KULIV.dk"
+                      BackgroundImageUrl="./images/pexels-buro-millennial-1438072.jpg"
+                      ContentText="Her kan du finde en oversigt over foreninger på KU og finde et fælleskab for dig!"
+                      ActionsDictionary="@hero1"/>
+
+    @{var hero2 = new List<(string,string)>() {("Find et event","/discovery/events")};}
+        <CarouselHeroItem HeaderText="Find et arrangement tæt på dig"
+                          BackgroundImageUrl="./images/pexels-ketut-subiyanto-4623506.jpg"
+                          ContentText="Her kan du se en oversigt over forskellige events på Københavns Universitet"
+                          ActionsDictionary="@hero2"/>
+
+    @{var hero3 = new List<(string,string)>() {("Bliv frivillig","/volunteer")};}
+           <CarouselHeroItem HeaderText="Bliv frivillig"
+                             BackgroundImageUrl="./images/pexels-steve-johnson-1509534.jpg"
+                             ContentText="Vi kunne godt bruge din Hjælp - så hjælp os med at gøre KULiv.dk endnu bedre!"
+                             ActionsDictionary="@hero3"/>
+    
+</MudCarousel>
+@code {
+    
+}

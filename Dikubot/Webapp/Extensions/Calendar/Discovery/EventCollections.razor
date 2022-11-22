@@ -8,13 +8,29 @@
 @inject UserService _user
 @attribute [AllowAnonymous]
 
-<MudButton OnClick="() => Orientation = MudBlazor.Orientation.Landscape"> Landskab </MudButton>
-<MudButton OnClick="() => Orientation = MudBlazor.Orientation.Portrait"> Protrat </MudButton>
+<MudButton OnClick="() => _orientation = VariantStyle.ExpansionPanel"> Landskab </MudButton>
+<MudButton OnClick="() => _orientation = VariantStyle.Grid"> Protrat </MudButton>
 
-<Searchbar Items="Models" Context="item">
+<style>
+.mud-expand-panel .mud-expand-panel-header{
+    padding: 0;
+}
+.mud-expand-panel .mud-expand-panel-content{
+padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 16px;
+    
+}
+    
+</style>
+
+<Searchbar Items="Models" Context="item" SelectedStyle="_orientation">
     <TemplateRow Context="item">
-        <MudItem xs="12" sm="12"><EventWidget Model="item" Orientation="@Orientation"></EventWidget></MudItem>
+        <EventWidget Model="item" Orientation="VariantStyle.Grid"></EventWidget>
     </TemplateRow>
+    <TemplateExpansionPanel>
+        <EventWidget Model="item" Orientation="VariantStyle.ExpansionPanel"></EventWidget>
+    </TemplateExpansionPanel>
     <TemplatePagination>
         <MudButton Color="Color.Inherit" OnClick="() => { StartTime = StartTime.Subtract(TimeSpan.FromDays(30)); }"> Vis Tidligere </MudButton>
     </TemplatePagination>
@@ -23,21 +39,19 @@
 
 @code
 {
-    public List<EventModel> Models { get => Services.Get(StartTime, DateTime.MaxValue);}
+    private List<EventModel> Models { get => _services.Get(StartTime, DateTime.MaxValue);}
 
-    public Orientation Orientation = Orientation.Portrait;
+    private VariantStyle _orientation = VariantStyle.Grid;
     
-    private EventsServices Services;
+    private EventsServices _services;
     
     private DateTime StartTime { get; set; } = DateTime.Today;
 
     protected override void OnInitialized()
     {
-        Services =  new EventsServices(_user);
+        _services =  new EventsServices(_user);
         base.OnInitialized();
     }
-    
-    
     
     private void Request()
     {

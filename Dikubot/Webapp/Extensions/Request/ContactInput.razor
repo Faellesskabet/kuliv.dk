@@ -11,9 +11,11 @@
                 </MudCardHeader>
                 <MudCardContent>
                     <MudForm FieldChanged="OnValueChanged">
-                        <MudTextField @bind-Value="@Value.Name" Label="Dit Navn" Immediate="@true" MaxLength="64"></MudTextField>
-                        <MudTextField @bind-Value="@Value.Number" Label="Dit Telefonnummer" Immediate="@true" MaxLength="64" ></MudTextField>
-                        <MudTextField @bind-Value="@Value.Mail" Label="Din Mail" Immediate="@true" MaxLength="64"></MudTextField>
+                        <MudTextField @bind-Value="@Value.Name" Label="Your Name" Immediate="@true" MaxLength="64" 
+                                      Required="true"/>
+                        <MudTextField @bind-Value="@Value.Number" Label="Mobile number" Immediate="@true" MaxLength="64" 
+                                      Required="true"/>
+                        <MudTextField @bind-Value="@Value.Mail" Label="Email" Immediate="@true" MaxLength="64" Required="true"/>
                     </MudForm>
                 </MudCardContent>
             </MudCard>

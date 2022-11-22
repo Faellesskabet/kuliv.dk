@@ -18,10 +18,18 @@
 @using Microsoft.IdentityModel.Tokens
 
 
+
+
 <MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<UnionModel>>>>(Reload))" @ref="_table"
           Loading="@_loading">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
+        <MudSelect T="RequestModel<UnionModel>.StatusEmun" Label="Status" MultiSelection="true" @bind-SelectedValues="options" OnClose="o => _table.ReloadServerData()">
+            <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.ongoing"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.change"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.approved"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.denied"></MudSelectItem>
+        </MudSelect>
+        
         <MudSpacer />
         <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -61,15 +69,23 @@
     <MudButton Color="Color.Primary" Variant="Variant.Filled" Link="/Request/Union/create">Tilføj ny kategori</MudButton>
 </div>
 
+
 @code {
 
+    
+    
     [Inject] private IDialogService DialogService { get; set; }
     
     private MudTable<RequestModel<UnionModel>> _table;
     private string _searchQuery = "";
     private UnionRequestService _services;
     private bool _loading = true;
+    
+    
+    private IEnumerable<RequestModel<UnionModel>.StatusEmun> options { get; set; } 
+        = new HashSet<RequestModel<UnionModel>.StatusEmun>() {RequestModel<UnionModel>.StatusEmun.ongoing, RequestModel<UnionModel>.StatusEmun.change};
 
+    
     protected override async Task OnInitializedAsync()
     {
 
@@ -82,14 +98,12 @@
         List<RequestModel<UnionModel>> items;
         if (!_searchQuery.IsNullOrEmpty())
         {
-            items = _services.Get(model => model.RequestItem.Title.Contains(_searchQuery) 
-                                           || model.RequestItem.Decs.Contains(_searchQuery)
-                                            || model.Contact.Name.Contains(_searchQuery),
+            items = _services.Get(model => model.GetSearchContent().Contains(_searchQuery) && options.Contains(model.Status),
                     state.PageSize, state.Page);   
         }
         else
         {
-            items = _services.Get(state.PageSize, state.Page);   
+            items = _services.Get(model =>  options.Contains(model.Status), state.PageSize, state.Page);   
         }
 
         return new TableData<RequestModel<UnionModel>>() { Items = items, TotalItems = (int)_services.EstimatedCount()};

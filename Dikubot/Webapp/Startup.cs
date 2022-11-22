@@ -108,8 +108,12 @@ namespace Dikubot.Webapp
                 {
                     options.LoginPath = "/login";
                     options.LogoutPath = "/logout";
+                    options.AccessDeniedPath = "/error";
+                    
+                    
                 }).AddDiscord(options =>
                 {
+                    options.AccessDeniedPath = "/error";
                     options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
                     options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                     options.Scope.Add("identify guilds guilds.join");

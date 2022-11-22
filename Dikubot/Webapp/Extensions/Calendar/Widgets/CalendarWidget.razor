@@ -4,6 +4,7 @@
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.DataLayer.Database.Models
+@using Dikubot.Extensions.search
 @using Syncfusion.Blazor
 @using Syncfusion.Blazor.Schedule
 @using Syncfusion.Blazor.Data
@@ -21,43 +22,44 @@
 </style>
 
  @if (_loaded)   {
-<div class="control-section">
-    <SfSchedule @ref="ScheduleObj" 
-                ID="schedule" 
-                TValue="EventModel"
-                Width="100%" 
-                Height="650px" 
-                @bind-SelectedDate="@CurrentDate"
-                Readonly="ReadOnly"
-                ShowWeekNumber="true"
-                FirstDayOfWeek="1">
-        <ScheduleEventSettings TValue="EventModel" DataSource="@ArrangementData">
-            <ScheduleEvents TValue="EventModel" ActionCompleted="OnActionCompleted" ></ScheduleEvents>
-        </ScheduleEventSettings>
-        <ScheduleViews>
-            <ScheduleView Option="View.Month"></ScheduleView>
-        </ScheduleViews>
-        <ScheduleQuickInfoTemplates>
-            <ContentTemplate>
-                @if (((EventModel) context).Id == Guid.Empty )
-                {
-                    <EventInput Value="(EventModel) context" QuickInfo="true"></EventInput>               
-                }
-                else
-                {
-                    EventModel data = (EventModel) context;
-                    <EventWidget Model="@data" ShowTitle="false"></EventWidget>
+     <div class="control-section">
+         <SfSchedule @ref="ScheduleObj" 
+                     ID="schedule" 
+                     TValue="EventModel"
+                     Width="@WidgdetWidth" 
+                     Height="@WidgdetHeight"
+                     Readonly="ReadOnly"
+                     ShowWeekNumber="true"
+                     FirstDayOfWeek="1"
+                     SelectedDateChanged="Callback">
+             <ScheduleEventSettings TValue="EventModel" DataSource="@ArrangementData">
+                 <ScheduleEvents TValue="EventModel" ActionCompleted="OnActionCompleted" ></ScheduleEvents>
+             </ScheduleEventSettings>
+             <ScheduleViews>
+                 <ScheduleView Option="@View"></ScheduleView>
+             </ScheduleViews>
+             <ScheduleQuickInfoTemplates>
+                 <ContentTemplate>
+                     @if (((EventModel) context).Id == Guid.Empty )
+                     {
+                         <EventInput Value="(EventModel) context" QuickInfo="true"></EventInput>               
+                     }
+                     else
+                     {
+                         EventModel data = (EventModel) context;
+                         <EventWidget Model="@data" ShowTitle="false"></EventWidget>
                                            
-                }
-            </ContentTemplate>
-        </ScheduleQuickInfoTemplates>
-        <ScheduleTemplates>
-            <EditorTemplate>
-                <EventInput Value="(EventModel) context"></EventInput>
-            </EditorTemplate>
-        </ScheduleTemplates>
-    </SfSchedule>
-</div>
+                     }
+                 </ContentTemplate>
+             </ScheduleQuickInfoTemplates>
+             <ScheduleTemplates>
+                 <EditorTemplate>
+                     <EventInput Value="(EventModel) context"></EventInput>
+                 </EditorTemplate>
+             </ScheduleTemplates>
+         </SfSchedule>
+     </div>
+     
     }else
     {
         <Loading></Loading>
@@ -65,42 +67,66 @@
 
 
 @code{
-    [Parameter]
-    public static ulong? GuildId { get; set; }
-
+    
     [Parameter]
     public bool ReadOnly { get; set; } = true;
     
     [Parameter]
     public List<CalendarModel> ResourceDatasource { get; set; } = new List<CalendarModel>();
+
+    [Parameter]
+    public EventsServices EventsServices { get; set; }
     
+    [Parameter]
+    public string WidgdetHeight { get; set; } = "100%";
+    [Parameter]
+    public string WidgdetWidth { get; set; } = "100%";
+
+    [Parameter]
+    public View View { get; set; } = View.Month;
+
     private bool _loaded;
 
-    private List<EventModel> ArrangementData => _eventsServices.Get(CurrentDate);
+    private List<EventModel> ArrangementData = new List<EventModel>();
     
     SfSchedule<EventModel> ScheduleObj { get; set; }
-    
-   
+
     private DateTime CurrentDate { get; set; } = DateTime.Today;
     
     private UserGlobalModel User => _userService.GetUserGlobalModel();
     
-    private EventsServices _eventsServices;
-    
-    
-    protected override async Task OnInitializedAsync()
+    private void Callback(DateTime obj)
     {
-        _eventsServices = new EventsServices(_userService,GuildId?.ToString());
+        ArrangementData = EventsServices.Get(obj);
+        StateHasChanged();
+    }
+    
+
+    protected override void OnInitialized()
+    {
+        if (EventsServices is null)
+        {
+            EventsServices = new EventsServices(_userService);
+        }
+        
         if (!ReadOnly)
         {
             ReadOnly = !User.Verified;
         }
         _loaded = true;
-        await base.OnInitializedAsync();
-        
     }
     
-    
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ArrangementData = EventsServices.Get(CurrentDate);
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+
     public void OnCellClick(CellClickEventArgs args)
     {
         args.Cancel = true;
@@ -112,7 +138,7 @@
         {
             foreach(EventModel data in args.AddedRecords)
             {
-                data.Id = _eventsServices.Upsert(data).Id;
+                data.Id = EventsServices.Upsert(data).Id;
             }
         }
     }
@@ -128,7 +154,7 @@
                 foreach (EventModel eventData in args.AddedRecords)
                 {
                     eventData.CreateBy = User.DiscordId;
-                    _eventsServices.Upsert(eventData);
+                    EventsServices.Upsert(eventData);
                 }
             }
             if (args.ChangedRecords is {Count: > 0 })
@@ -137,7 +163,7 @@
                 {
                     if (!eventData.IsReadonly)
                     {
-                        _eventsServices.Upsert(eventData);
+                        EventsServices.Upsert(eventData);
                     }
                 }
             }
@@ -146,15 +172,15 @@
                 foreach (EventModel eventData in args.DeletedRecords)
                 {if (!eventData.IsReadonly)
                 {
-                    _eventsServices.Remove(eventData);
+                    EventsServices.Remove(eventData);
                 }
                 }
             }
             
         }
     }
+
+
     
-     
-    
-    
+
 }

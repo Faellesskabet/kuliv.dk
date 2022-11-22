@@ -1,0 +1,31 @@
+﻿@namespace Dikubot.Extensions.Localization
+@inject UserService _user;
+@using System.Globalization
+
+@if (_language == "da-DK" && Danish is not null)
+{
+    @Danish
+}
+else if (English is not null)
+{
+    @English
+}
+
+
+@code {
+    [Parameter]
+    public RenderFragment? Danish { get; set; }
+    
+    [Parameter]
+    public RenderFragment? English { get; set; }
+
+    private string _language;
+    
+    protected override void OnParametersSet()
+    {
+        _language = _user.GetUserGlobalModel().CultureInfo;
+        base.OnParametersSet();
+    }
+    
+
+}
