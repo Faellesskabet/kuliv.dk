@@ -33,7 +33,7 @@
     <base href="~/"/>
     <link href="/css/site.css" rel="stylesheet"/>
     <link rel="stylesheet" href="/Dikubot.styles.css"/>
-    <meta name="description" content="Online Discord community for students at The University of Copenhagen. 
+    <meta name="description" id="meta-description" content="Online Discord community for students at The University of Copenhagen. 
     kuliv.dk is the place to find and connect with other students of similar interests as you!"/>
 </head>
 <style>
@@ -71,17 +71,16 @@
 </div>
 
 <script src="_framework/blazor.server.js" autostart="false"></script>
-<script>
+<script>         
+     if (window.location.pathname != "/") {
+         document.title = "kuliv.dk" + window.location.pathname + " - An online community for students";    
+     }
       document.addEventListener("DOMContentLoaded", function() {
         document.body.style.backgroundColor = "";
         document.getElementById("loading-host").remove();
         Blazor.start();
-        
-        if (window.location.pathname != "/") {
-            document.title = "kuliv.dk" + window.location.pathname + " - An online community for students";    
-        }
       });
-      
+        
       console.log("### Welcome to kuliv.dk! ###\nInstead of creeping through the console, come help us make this platform even better at https://github.com/Faellesskabet/Discord-Botten");
     </script>
 </body>

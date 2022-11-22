@@ -7,6 +7,7 @@
 @using Dikubot.Extensions.search
 @inject NavigationManager _navigationManager;
 @inject UserService _user;
+@inject MetadataService MetadataService;
 @attribute [AllowAnonymous]
 
 <MudGrid>
@@ -109,6 +110,15 @@
         GuildSettingsService guildSettingsService = new GuildSettingsService();
         
         Model = Guid.TryParse(uuid, out Guid guid) ? services?.Get(guid) ?? new UnionModel(guildSettingsService.Get(guid)) : new UnionModel() {};
+        if (!string.IsNullOrWhiteSpace(Model.Title))
+        {
+            MetadataService.SetTitle(Model.Title);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(Model.Decs))
+        {
+            MetadataService.SetTitle(Model.Decs);
+        }
         
         base.OnInitialized();
     }
