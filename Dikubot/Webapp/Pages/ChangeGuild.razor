@@ -4,31 +4,20 @@
 @using Dikubot.DataLayer.Database.Global.Session
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
+@inject UserService _userService;
 
 <h3>Skifter fællesskab ...</h3>
 
 @code {
+    [CascadingParameter] 
+    protected App App { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        var authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity) authState.User.Identity;
-        try
-        {
-            UserGlobalModel userModel = user?.UserGlobalModel;
-
-            if (userModel != null) userModel.SelectedGuild = 0;
-            if (user != null)
-            {
-                new UserGlobalServices().Upsert(user.UserGlobalModel);
-                await authenticator.UpdateSession();
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        UserGlobalModel userGlobalModel = _userService.GetUserGlobalModel();
+        userGlobalModel.SelectedGuild = 0;
+        new UserGlobalServices().Upsert(userGlobalModel);
+        App.UserHasChange();
         NavigationManager.NavigateTo("/");
+        this.StateHasChanged();
     }
-
 }

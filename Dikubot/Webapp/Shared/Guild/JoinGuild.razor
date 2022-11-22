@@ -20,7 +20,7 @@
     
     [Inject] private IDialogService DialogService { get; set; }
 
-    public bool IsMember => DiscordBot.ClientStatic.GetUser(_user.GetUserGlobalModel().DiscordIdLong).MutualGuilds.Any(guild => guild.Id == GuildID);
+    public bool IsMember => DiscordBot.ClientStatic.GetUser(_user.GetUserGlobalModel().DiscordIdLong)?.MutualGuilds.Any(guild => guild.Id == GuildID) ?? false;
     
     private async Task GotoGuild()
     {
@@ -31,8 +31,9 @@
             return;
         }
 
-        _user.GetUserGlobalModel().SelectedGuild = GuildID;
-        new UserGlobalServices().Upsert(_user.GetUserGlobalModel());
+        UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
+        userGlobalModel.SelectedGuild = GuildID;
+        new UserGlobalServices().Upsert(userGlobalModel);
         await ((Authenticator) AuthenticationStateProvider).UpdateSession();
         
         

@@ -13,6 +13,7 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _user;
+@inject IJSRuntime JsRuntime;
 
 <MudThemeProvider  @bind-IsDarkMode="@IsDarkMode" Theme="Theme" />
 <MudDialogProvider/>
@@ -66,9 +67,16 @@
                     <NotFound>
                         <AuthorizeView>
                             <Authorized>
-                                <LayoutView Layout="@typeof(MainLayout)">
-                                    <PageNotFound></PageNotFound>
-                                </LayoutView>
+                                @if (Guild == null)
+                                {
+                                    <LayoutView Layout="@typeof(ChangeGuildLayout)">
+                                        <Login/>
+                                    </LayoutView>
+                                }else{
+                                    <LayoutView Layout="@typeof(MainLayout)">
+                                        <PageNotFound></PageNotFound>
+                                    </LayoutView>
+                                }
                             </Authorized>
                             <NotAuthorized>
                                 <LayoutView Layout="@typeof(FooterLayout)">
@@ -94,7 +102,11 @@
 
     protected override void OnInitialized()
     {
-        IsDarkMode = _user?.GetUserGlobalModel()?.DarkTheme ?? false;
+        if (_user.IsRegistered())
+        {
+            IsDarkMode = _user.GetUserGlobalModel().DarkTheme;
+        }
+        
         base.OnInitialized();
     }
     
@@ -103,7 +115,7 @@
     {
         IsDarkMode = !IsDarkMode;
 
-        if (_user?.GetUserGlobalModel() is not null)
+        if (_user.IsRegistered())
         {
             UserGlobalServices userGlobalServices = new UserGlobalServices();
             UserGlobalModel user = _user.GetUserGlobalModel();
@@ -116,18 +128,19 @@
     
     public void ChangeLanuage(ChangeLocalization.Language language)
     {
+        UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
         if (language == ChangeLocalization.Language.Danish)
         {
-            _user.GetUserGlobalModel().CultureInfo = "da-DK";
+            userGlobalModel.CultureInfo = "da-DK";
         }
         else
         {
-            _user.GetUserGlobalModel().CultureInfo = "en-US";
+            userGlobalModel.CultureInfo = "en-US";
         }
         
         if (_user?.GetUserGlobalModel() is not null)
         {
-            new UserGlobalServices().Upsert(_user.GetUserGlobalModel());
+            new UserGlobalServices().Upsert(userGlobalModel);
         }
         
         StateHasChanged();

@@ -13,15 +13,19 @@ namespace Data
     {
         
         private Authenticator _authenticator;
-        private UserIdentity? _user;
+        private UserIdentity _user => GetUserIdentity();
         private DiscordBot _discordBot;
 
         public UserService(AuthenticationStateProvider authenticationStateProvider, DiscordBot discordBot)
         {
             _authenticator = ((Authenticator) authenticationStateProvider);
-            AuthenticationState authState = _authenticator.GetAuthenticationStateAsync().Result;
-            _user = (UserIdentity) authState.User.Identity;
             _discordBot = discordBot;
+        }
+
+        public UserIdentity GetUserIdentity()
+        {
+            AuthenticationState authState = _authenticator.GetAuthenticationStateAsync().Result;
+            return (UserIdentity) authState.User.Identity;
         }
 
         public string id => _user?.DiscordId;
