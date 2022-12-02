@@ -1,0 +1,254 @@
+﻿@using Microsoft.IdentityModel.Tokens
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.Webapp.Extensions.Discovery.Request
+@using Dikubot.DataLayer.Database.Global.Union
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.DataLayer.Database.Models
+@using Dikubot.Extensions.Calender
+@using Dikubot.Extensions.search
+@using Dikubot.Webapp.Pages
+@using MudBlazor.Services
+@using Dikubot.DataLayer.Database.Global.Event
+@using global::Data
+@inject UserService UserService
+@inject EventsMongoService EventsMongoService
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager;
+
+<style>
+.mud-expand-panel .mud-expand-panel-header{
+    padding: 0;
+}
+.mud-expand-panel .mud-expand-panel-content{
+padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 16px;
+}
+.mud-card-header .mud-card-header-content{
+width: 50%;
+}
+    
+</style>
+
+<MudCard Elevation="25">
+
+            @if (!@Union.BannerUrl.IsNullOrEmpty() && ShowBanner)
+                    {
+                        <MudCardMedia Image="@Union.BannerUrl" Style="object-fit: cover; height: 60px; min-height: 60px; width: 100%;"/>
+                    }
+                    else if(ShowBanner)
+                    {
+                        <MudCardMedia Image="../images/placeholder-banner.png" Style="object-fit: cover; height: 60px; min-height: 60px; width: 100%;"/>
+                    }
+             <div style="height: 32px; overflow:hidden;">
+                 <TagDisplay Tags="Union.Tags"></TagDisplay>
+             </div>   
+    
+    <MudCardHeader Style="padding-bottom: 0; padding-top:0;">
+
+        
+        <CardHeaderActions>
+            @if (UserService.GetUserGlobalModel().IsAdmin && Union.Discord is null)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="GoToEdit"/>
+            }
+            else if (UserService.GetUserGlobalModel().Verified && Union.Discord is null)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Inherit" OnClick="GoToMakeRequest"/>
+            }
+        </CardHeaderActions>
+
+        <CardHeaderAvatar>
+            <MudAvatar Size="Size.Large" Image="@Union.LogoUrl"></MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body1" 
+                     Style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis">@Union.Title</MudText>
+             @if (IsChangeGuild)
+                            {
+                                <MudText Typo="Typo.body2">
+                                    @MembersCount(Convert.ToUInt64(Union.Discord)) Medlemmer
+                                </MudText>
+                            }
+             else
+             {
+                 <MudText Typo="Typo.body2" Style="white-space: nowrap;">
+               
+                     @if (!string.IsNullOrWhiteSpace(Union.Discord))
+                     {
+                         <MudIconButton Icon="@Icons.Custom.Brands.Discord" aria-label="Discord" OnClick="GoToDiscord" Color="Color.Primary" Size="Size.Medium">
+                         </MudIconButton>
+                         
+                     }
+                     @if (!string.IsNullOrWhiteSpace(Union.Href))
+                     {
+                         <MudIconButton Icon="@Icons.Filled.Link" aria-label="Webpage" Target="_blank" Link="@Union.Href" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+                     }
+                     @if (!string.IsNullOrWhiteSpace(Union.Facebook))
+                     {
+                         <MudIconButton Icon="@Icons.Custom.Brands.Facebook" aria-label="Facebook" Link="@Union.Facebook" Target="_blank" Color="Color.Primary" Size="Size.Medium"></MudIconButton>
+                     }
+
+                 </MudText>
+             }
+            
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent Style="max-height: 100px; min-height: 100px; overflow: scroll; padding-top: 0; padding-bottom: 0">
+        <MudText>@Union.Decs</MudText>
+    </MudCardContent>
+    <MudCardActions Style="height: 100px;">
+        @if (IsChangeGuild)
+        {<MudSpacer/>
+            <JoinGuild GuildID="Convert.ToUInt64(Union.Discord)"></JoinGuild>
+        }
+        <MudSpacer/>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ShowMore">Learn More</MudButton>
+        <MudSpacer/>
+        @if(!UserService.GetUserGlobalModel().Verified)
+        {
+            <MudSpacer/>
+            <MudButton Variant="Variant.Outlined" Color="Color.Success" Href="/connect">Login</MudButton>
+            <MudSpacer/>
+        } 
+        
+    </MudCardActions>
+</MudCard>
+
+
+    <MudDialog @bind-IsVisible="_visible" Options="_dialogOptions" ContentStyle="padding: 0" Style="">
+        <TitleContent>
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudAvatar Size="Size.Large" Image="@Union.LogoUrl"></MudAvatar>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6" Style="text-overflow: ellipsis ">@Union.Title</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton OnClick="Submit" Color="Color.Primary" Icon="@Icons.Filled.Close"/>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <TagDisplay Tags="Union.Tags"></TagDisplay>
+                </MudCardContent>
+            </MudCard>
+        </TitleContent>
+    <DialogContent>
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-0">
+            <MudTabPanel Text="Description">
+            
+                <MudContainer Style="max-height: 500px; overflow-y: scroll">
+                    <MudText>@Union.Decs</MudText>
+                </MudContainer>
+                
+            </MudTabPanel>
+            <MudTabPanel Text="Events">
+                <MudContainer Style="max-height: 500px; overflow-y: scroll; padding:0">
+                    @foreach (var item in _eventModels)
+                    {
+                        <EventWidget Model="item" Orientation="VariantStyle.ExpansionPanel"></EventWidget>
+                    }
+                </MudContainer>
+                <MudSpacer/><MudButton Color="Color.Inherit" OnClick="Request" Variant="Variant.Outlined" StartIcon="@Icons.Filled.Add"> Tilføj en begivenhed </MudButton>
+
+            </MudTabPanel>
+            <MudTabPanel Text="Contact">
+                <MudField Label="Mail" Variant="Variant.Outlined">
+                    @Union.Mail
+                </MudField>
+                <MudField Label="Hjemmeside" Variant="Variant.Outlined">
+                    <MudLink Href="@Union.Href"> @Union.Href</MudLink>
+                </MudField>
+                <MudField Label="Facebook" Variant="Variant.Outlined">
+                    <MudLink Href="@Union.Facebook"> @Union.Facebook</MudLink>
+                </MudField>
+            </MudTabPanel>
+        </MudTabs>
+        
+    </DialogContent>
+        <DialogActions>
+            @if (!IsChangeGuild)
+            {
+                <MudButton Color="Color.Primary"
+                           Variant="Variant.Outlined"
+                           OnClick="GoToShowMore"> Show More </MudButton>
+            }
+
+            @if (!Union.Discord.IsNullOrEmpty())
+            {
+                <JoinGuild GuildID="Convert.ToUInt64(Union.Discord)"></JoinGuild>
+            }
+            else
+            {
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Filled.Edit" aria-label="Edit" OnClick="GoToMakeRequest" Color="Color.Primary">
+                    Requst edit
+                </MudButton>
+            }
+            <MudButton StartIcon="@Icons.Filled.Close" Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Class="px-10">Close</MudButton>
+
+
+        </DialogActions>
+</MudDialog>
+
+
+@code {
+    [Parameter] public UnionModel Union{ get; set; }
+
+    [Parameter]
+    public bool ShowBanner { get; set; } = false;
+
+    [Parameter]
+    public bool IsChangeGuild { get; set; } = false;
+
+    private List<EventModel> _eventModels;
+
+
+    protected override void OnInitialized()
+    {
+        _eventModels = EventsMongoService.Get(DateTime.Today, DateTime.MaxValue);
+    }
+    
+    private void GoToEdit()
+    {
+        NavigationManager.NavigateTo("/op/union/edit/"+Union.Id);
+    }
+    private void GoToShowMore()
+    {
+        NavigationManager.NavigateTo("/discovery/union/"+Union.Id);
+    }
+    
+    private void Request()
+    {
+        NavigationManager.NavigateTo($"/request/event/create/"+Union.Id);
+    }
+
+    public int MembersCount(ulong guildId) => Discord.DiscordBot.ClientStatic?.GetGuild(guildId)?.MemberCount ?? 0;
+    
+    private void GoToMakeRequest()
+    {
+        NavigationManager.NavigateTo("/request/union/create/"+Union.Id);
+    }
+
+    
+    private bool _visible;
+    
+    [Inject] IBreakpointService BreakpointListener { get; set; }
+
+    private DialogOptions _dialogOptions = new() {FullScreen = true};
+    
+    private void ShowMore() => _visible = true;
+    void Submit() => _visible = false;
+
+    private void GoToDiscord()
+    {
+        ShowMore();
+        
+        //NavigationManager.NavigateTo("/");
+    }
+
+}

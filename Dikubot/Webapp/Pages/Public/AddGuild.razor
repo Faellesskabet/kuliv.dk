@@ -14,6 +14,7 @@
 @using Dikubot.Discord
 @using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
 @inject UserService _userService;
+@inject UserGlobalMongoService UserGlobalMongoService
 
 @if (!_loading)
 {
@@ -106,7 +107,7 @@ Vi tager backup af vores database, og hvis din server er i vores backup, vil den
         var user = _userService.GetUserGlobalModel();
         if (guild_id != null) user.SelectedGuild = Convert.ToUInt64(guild_id);
         
-        new UserGlobalServices().Upsert(user);
+        UserGlobalMongoService.Upsert(user);
         await authenticator.UpdateSession();
         
         _navigationManager.NavigateTo("/admin/settings", forceLoad:true);

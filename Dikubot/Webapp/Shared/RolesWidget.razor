@@ -1,0 +1,118 @@
+﻿@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
+@using Dikubot.DataLayer.Database.Guild.Models.User
+@using Dikubot.DataLayer.Database.Guild.Models.User.SubModels
+@using Dikubot.DataLayer.Permissions
+@using Microsoft.IdentityModel.Tokens
+
+@namespace Dikubot.Roles
+
+<MudPaper Elevation="25" Class="rounded-lg pb-4">
+    <MudPaper Height="25px" Width="100%" Style=@($"background-color: {category.Color}")></MudPaper>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h3" Align="Align.Center">@(category.Name.IsNullOrEmpty() ? "Vælg roller" : category.Name)</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <div class="d-flex justify-center">
+            <MudText Typo="Typo.h6">@category.Decs</MudText>
+        </div>
+        <MudList Class="mx-auto mt-4" Style="width:300px;">
+            @if (category.TextRoles != null)
+            {
+                @foreach (JoinRoleMainModel role in category.TextRoles)
+                {
+                    @if (!HasPermissionForRole(role))
+                    {
+                        continue;
+                    }
+                    <MudListItem>
+                        <MudTooltip Text="@role.Desc">
+                            <div class="d-flex gap-4">
+                                <MudPaper Class="flex-none d-flex">
+                                    @if (HasRole(role))
+                                    {
+                                        <MudButton Color="Color.Error" OnClick="() => LeaveRole(role)">Leave</MudButton>
+                                    }
+                                    else
+                                    {
+                                        <MudButton Color="Color.Success" OnClick="() => JoinRole(role)">Join</MudButton>
+                                    }
+                                </MudPaper>
+                                <MudItem Class="flex-auto d-flex">
+                                    <MudText Typo="Typo.h6">@role.Emoji @role.Name</MudText>
+                                </MudItem>
+                            </div>
+                        </MudTooltip>
+                        <MudDivider></MudDivider>
+                    </MudListItem>
+                }
+            }
+        </MudList>
+    </MudCardContent>
+    <MudCardActions Class="d-flex justify-center">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="() => JoinAll(category)">Join alle</MudButton>
+    </MudCardActions>
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public JoinRoleCategoryMainModel category { get; set; }
+    
+    [Parameter]
+    public PermissionsService _permissionsService{ get; set; }
+    
+    [Parameter]
+    public UserGuildMongoService UserGuildMongoService{ get; set; }
+    
+    [Parameter]
+    public UserGuildModel _userGuildModel{ get; set; }
+    
+    protected void LeaveRole(JoinRoleMainModel joinRoleMainModel)
+        {
+            _userGuildModel.RemoveRole(joinRoleMainModel.RoleId);
+            UserGuildMongoService.Update(_userGuildModel);
+            _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
+            this.StateHasChanged();
+        }
+    
+        protected void JoinRole(JoinRoleMainModel joinRoleMainModel)
+        {
+            _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
+            UserGuildMongoService.Update(_userGuildModel);
+            _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
+            this.StateHasChanged();
+        }
+        
+        protected bool HasRole(JoinRoleMainModel joinRoleMainModel)
+        {
+            return _userGuildModel.HasRole(joinRoleMainModel.RoleId);
+        }
+    
+    protected bool HasPermissionForRole(JoinRoleMainModel joinRoleMainModel)
+    {
+        return joinRoleMainModel.Permission.IsNullOrEmpty() || joinRoleMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
+    }
+
+    protected void JoinAll(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
+    {
+        if (!HasPermissionForCategory(joinRoleCategoryMainModel))
+        {
+            return;
+        }
+        foreach (var joinRoleMainModel in joinRoleCategoryMainModel.TextRoles.Where(HasPermissionForRole))
+        {
+            _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
+        }
+        UserGuildMongoService.Update(_userGuildModel);
+        _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
+        this.StateHasChanged();
+    }
+    
+    protected bool HasPermissionForCategory(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
+    {
+        return joinRoleCategoryMainModel.Permission.IsNullOrEmpty() || joinRoleCategoryMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
+    }
+    
+}

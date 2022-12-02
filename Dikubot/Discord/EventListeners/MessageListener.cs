@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News;
@@ -11,6 +12,13 @@ namespace Dikubot.Discord.EventListeners
 {
     public class MessageListener
     {
+        private readonly IGuildMongoFactory _guildMongoFactory;
+
+        public MessageListener(IGuildMongoFactory guildMongoFactory)
+        {
+            _guildMongoFactory = guildMongoFactory;
+        }
+
         public async Task OnMessageReceived(SocketMessage message)
         {
             ProcessMessage(message);
@@ -30,7 +38,7 @@ namespace Dikubot.Discord.EventListeners
             Logger.Debug($"{message.Author.ToString()} > {message.ToString()}");
         }
 
-        public static void ProcessMessage(IMessage message, bool remove = false)
+        public void ProcessMessage(IMessage message, bool remove = false)
         {
             if (message.Source != MessageSource.User)
             {
@@ -42,9 +50,9 @@ namespace Dikubot.Discord.EventListeners
                 return;
             }
             SocketGuild guild = channel.Guild;
-            TextChannelServices textChannelServices = new TextChannelServices(guild);
+            TextChannelMongoService textChannelMongoService = _guildMongoFactory.Get<TextChannelMongoService>(guild);
             TextChannelMainModel textChannelMainModel = 
-                textChannelServices.Get(model => model.DiscordId == message.Channel.Id.ToString());
+                textChannelMongoService.Get(model => model.DiscordId == message.Channel.Id.ToString());
             if (textChannelMainModel == null)
             {
                 return;
@@ -52,27 +60,27 @@ namespace Dikubot.Discord.EventListeners
             
             if (textChannelMainModel.IsQuoteChannel.GetValueOrDefault())
             {
-                MessageService messageService = new QuoteServices(guild);
+                MessageMongoService messageMongoService = _guildMongoFactory.Get<QuoteMongoServices>(guild);
                 if (remove)
                 {
-                    messageService.Remove(messageService.IMessageToModel(message));
+                    messageMongoService.Remove(messageMongoService.IMessageToModel(message));
                 }
                 else
                 {
-                    messageService.Insert(messageService.IMessageToModel(message));
+                    messageMongoService.Insert(messageMongoService.IMessageToModel(message));
                 }
             }
             
             if (textChannelMainModel.IsNewsChannel.GetValueOrDefault())
             {
-                MessageService messageService = new NewsServices(guild);
+                MessageMongoService messageMongoService = _guildMongoFactory.Get<NewsMongoServices>(guild);
                 if (remove)
                 {
-                    messageService.Remove(messageService.IMessageToModel(message));
+                    messageMongoService.Remove(messageMongoService.IMessageToModel(message));
                 }
                 else
                 {
-                    messageService.Insert(messageService.IMessageToModel(message));
+                    messageMongoService.Insert(messageMongoService.IMessageToModel(message));
                 }
             }
             

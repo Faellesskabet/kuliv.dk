@@ -9,8 +9,6 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User.SubModels
 {
     public class UserRoleModel : IActiveTimeFrame
     {
-        //Todo: Se om dette fungere :/
-        
         private Guid _roleId;
         
         public UserRoleModel(RoleMainModel roleMainModel) : this(roleMainModel.Id)
@@ -29,13 +27,6 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User.SubModels
             get => _roleId;
             set => _roleId = value;
         }
-        
-        
-        public RoleMainModel GetRoleModel(SocketGuild guild)
-        {
-            return new RoleServices(guild).Get(_roleId);
-        }
-
 
         /// <summary>
         /// We override the Equals function to determine two UserRoleModels are only equal if their role Id is the same

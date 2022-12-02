@@ -59,10 +59,6 @@
   
 
   <ItemGroup>
-    <Folder Include="DataLayer\Database\Global\ConfirmEmail" />
-    <Folder Include="Webapp\Extensions\Announcements\Admin" />
-    <Folder Include="Webapp\Extensions\Announcements\Op" />
-    <Folder Include="Webapp\Extensions\Sponsorater" />
     <Folder Include="Webapp\wwwroot\thumps" />
   </ItemGroup>
   
@@ -74,11 +70,9 @@
     <_ContentIncludedByDefault Remove="Webapp\Pages\Admin\AdminRoles\AdminRoles.razor" />
     <_ContentIncludedByDefault Remove="Webapp\Pages\Admin\AdminRoles\AdminRolesCategory.razor" />
     <_ContentIncludedByDefault Remove="Webapp\Extensions\Discovery\Request\ContactInput.razor" />
-  </ItemGroup>
-  
-
-  <ItemGroup>
-    <AdditionalFiles Include="Webapp\Extensions\Calendar\Request\RequestUnion.razor" />
+    <_ContentIncludedByDefault Remove="Webapp\Extensions\Maps\GetLocation.razor" />
+    <_ContentIncludedByDefault Remove="Webapp\Extensions\Maps\MapTest.razor" />
+    <_ContentIncludedByDefault Remove="Webapp\Extensions\Maps\MapWidget.razor" />
   </ItemGroup>
 
 </Project>

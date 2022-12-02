@@ -5,7 +5,7 @@ namespace Dikubot.DataLayer.Logic.User
 {
     public class KUUser
     {
-        private string _username;
+        private readonly string _username;
         public KUUser(string username)
         {
             _username = username;

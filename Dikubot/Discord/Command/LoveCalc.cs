@@ -1,16 +1,14 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Discord.Commands;
+using Discord.Interactions;
 
 namespace Dikubot.Discord.Command
 {
-    public class LoveCalc : ModuleBase<SocketCommandContext>
+    public class LoveCalc : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("lovecalc")]
-        [Alias("lc")]
-        [Summary("Give me a list of words and I'll tell you how much they all love each other!")]
-        public async Task LoveCalcCommand([Summary("Your lovely words")] params string[] words)
+        [SlashCommand("lovecalc", "Give me a list of words and I'll tell you how much they all love each other!")]
+        public async Task LoveCalcCommand([Summary(description:"Your lovely words")] params string[] words)
         {
             if (words.Length < 2)
             {

@@ -7,7 +7,7 @@ namespace Dikubot.DataLayer.Cronjob
 {
     public class Scheduler
     {
-        private Dictionary<CronTask, Timer> _tasks = new Dictionary<CronTask, Timer>();
+        private readonly Dictionary<CronTask, Timer> _tasks = new Dictionary<CronTask, Timer>();
 
 
         /// <summary>
@@ -15,11 +15,7 @@ namespace Dikubot.DataLayer.Cronjob
         /// </summary>
         /// <param name="cronExpression"></param>
         /// <param name="action"></param>
-        public void ScheduleTask(CronExpression cronExpression, Action action)
-        {
-            ScheduleTask(new CronTask(cronExpression, action), false);
-        }
-        
+
         /// <summary>
         /// Adds a CronTask to the Scheduler
         /// </summary>
@@ -29,12 +25,12 @@ namespace Dikubot.DataLayer.Cronjob
         {
             if (runInitially)
             {
-                task.Action.Invoke();
+                task.RunTask();
             }
             Timer timer = new Timer();
             timer.Elapsed += (sender, args) =>
             {
-                task.Action.Invoke();
+                task.RunTask();
                 timer.Stop();
                 timer.Interval = task.GetInterval();
                 timer.Start();

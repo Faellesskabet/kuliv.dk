@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
-using Discord.Commands;
+using Discord.Interactions;
 
 namespace Dikubot.Discord.Command
 {
-    public class Magic8Ball : ModuleBase<SocketCommandContext>
+    public class Magic8Ball : InteractionModuleBase<SocketInteractionContext>
     {
         private static readonly string[] answers = new string[] {
             "Det er sikkert.",
@@ -28,9 +28,7 @@ namespace Dikubot.Discord.Command
             "Ser ikke for godt ud.",
             "Meget tvivlsomt."};
 
-        [Command("magiceightball")]
-        [Alias("m8b", "magiskottekugle", "magiskotteboldt", "magisk8boldt", "magisk8kugle")]
-        [Summary("Få svar på dine spørgsmål!")]
+        [SlashCommand("magic8ball", "Answer all your questions here")]
         public async Task Magic8BallCommand(params string[] question)
         {
             if (question.Length < 1)

@@ -1,6 +1,5 @@
 @using Dikubot.Webapp.Shared.News
 @using global::Discord.WebSocket
-@using Data.Discord
 @inject UserService _userService;
 @page "/news"
 
@@ -20,7 +19,7 @@ else
     
     protected override async Task OnInitializedAsync()
     {
-        _guild = _userService.getGuild();
+        _guild = _userService.GetGuild();
         _loaded = true;
     }
 }

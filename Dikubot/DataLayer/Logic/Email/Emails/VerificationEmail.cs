@@ -7,8 +7,8 @@ namespace Dikubot.DataLayer.Logic.Email.Emails
     /// </summary>
     public class VerificationEmail : Email
     {
-        private EmailAddress _to;
-        private string _password;
+        private readonly EmailAddress _to;
+        private readonly string _password;
 
         /// <summary>
         /// Create a VerificationEmail used to send emails

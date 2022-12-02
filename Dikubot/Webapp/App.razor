@@ -14,6 +14,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _user;
 @inject IJSRuntime JsRuntime;
+@inject UserGlobalMongoService UserGlobalMongoService
 
 <MudThemeProvider  @bind-IsDarkMode="@IsDarkMode" Theme="Theme" />
 <MudDialogProvider/>
@@ -98,7 +99,7 @@
     
     public bool IsDarkMode = true;
     private GuildSettingsModel Guild;
-    
+
 
     protected override void OnInitialized()
     {
@@ -117,19 +118,18 @@
 
         if (_user.IsRegistered())
         {
-            UserGlobalServices userGlobalServices = new UserGlobalServices();
             UserGlobalModel user = _user.GetUserGlobalModel();
             user.DarkTheme = IsDarkMode;
-            userGlobalServices.Upsert(user);
+            UserGlobalMongoService.Upsert(user);
         }
        
         StateHasChanged();
     }
     
-    public void ChangeLanuage(ChangeLocalization.Language language)
+    public void ChangeLanuage(LocalizationService.Language language)
     {
         UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
-        if (language == ChangeLocalization.Language.Danish)
+        if (language == LocalizationService.Language.Danish)
         {
             userGlobalModel.CultureInfo = "da-DK";
         }
@@ -140,7 +140,7 @@
         
         if (_user?.GetUserGlobalModel() is not null)
         {
-            new UserGlobalServices().Upsert(userGlobalModel);
+            UserGlobalMongoService.Upsert(userGlobalModel);
         }
         
         StateHasChanged();

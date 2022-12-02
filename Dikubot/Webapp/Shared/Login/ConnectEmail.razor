@@ -2,6 +2,7 @@
 @using Dikubot.Discord.Command
 @using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.User
 @using Dikubot.DataLayer.Logic.Email
 @using Dikubot.DataLayer.Logic.Email.Emails
@@ -16,13 +17,14 @@
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
+@inject UserGlobalMongoService UserGlobalMongoService
+@inject IGuildMongoFactory GuildMongoFactory
 
-
-@if (String.IsNullOrEmpty(secretPassword))
+@if (String.IsNullOrEmpty(_secretPassword))
 {
     <MudCard>
         <MudCardHeader>
-            @if (incorrectPassword)
+            @if (_incorrectPassword)
             {
                 <MudAlert Severity="Severity.Error">
                     <Localization>
@@ -31,12 +33,12 @@
                     </Localization>
                 </MudAlert>
             }
-            @if (emailTaken)
+            @if (_emailTaken)
             {
                 <MudAlert Severity="Severity.Error">
                     <Localization>
-                        <Danish>Emailen @(email) er allerede i brug. Log ind på din anden Discord profil eller kontakt en administrator: <MudField> Support@kuliv.dk </MudField>.</Danish>
-                        <English>The email @(email) is already in use. Log in to your other Discord profile or contact an administrator: <MudField> Support@kuliv.dk </MudField>.</English>
+                        <Danish>Emailen @(_email) er allerede i brug. Log ind på din anden Discord profil eller kontakt en administrator: <MudField> Support@kuliv.dk </MudField>.</Danish>
+                        <English>The email @(_email) is already in use. Log in to your other Discord profile or contact an administrator: <MudField> Support@kuliv.dk </MudField>.</English>
                         </Localization>
                     
                 </MudAlert>
@@ -55,7 +57,7 @@
         <MudCardContent>
             <MudForm>
                 <MudTextField 
-                    @bind-Value="email"
+                    @bind-Value="_email"
                     Validation="@_kuEmailValidation.Validation"
                     Immediate="@true"
                     AutoFocus="@true"
@@ -77,8 +79,8 @@ else
         <MudCardHeader>
             <MudText Typo="Typo.h5">
                 <Localization>
-                    <Danish>Vi har sendt en kode til din email: @(email)</Danish>
-                    <English>We have sent a code to your email: @(email)</English>
+                    <Danish>Vi har sendt en kode til din email: @(_email)</Danish>
+                    <English>We have sent a code to your email: @(_email)</English>
                 </Localization>
             </MudText>
         </MudCardHeader>
@@ -100,7 +102,7 @@ else
             </MudText>
             <MudForm>
                 <MudTextField
-                    @bind-Value="passwordInput"
+                    @bind-Value="_passwordInput"
                     Validation="@_kuEmailValidation"
                     Immediate="@true"
                     AutoFocus="@true"
@@ -118,7 +120,7 @@ else
 }
 
 
-<MudDialog @bind-IsVisible="visible" Options="dialogOptions">
+<MudDialog @bind-IsVisible="_visible" Options="_dialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">
             How To Comfirm your Email
@@ -137,23 +139,23 @@ else
 
 @code {
      [Parameter]
-    public Login parent { get; set; }
+    public Login Parent { get; set; }
     
-    private bool visible;
-    private int rating;
-    private void OpenDialog() => visible = true;
-    void Submit() => visible = false;
+    private bool _visible;
+    private int _rating;
+    private void OpenDialog() => _visible = true;
+    void Submit() => _visible = false;
 
-    private DialogOptions dialogOptions = new() { FullWidth = true, MaxWidth = MaxWidth.Large};
+    private DialogOptions _dialogOptions = new() { FullWidth = true, MaxWidth = MaxWidth.Large};
 
     private KUEmailValidation _kuEmailValidation = new KUEmailValidation();
-    private Authenticator authenticator;
-    private UserIdentity user;
-    private string email = "";
-    private string secretPassword = "";
-    private string passwordInput = "";
-    bool incorrectPassword = false;
-    bool emailTaken = false;
+    private Authenticator _authenticator;
+    private UserIdentity _user;
+    private string _email = "";
+    private string _secretPassword = "";
+    private string _passwordInput = "";
+    bool _incorrectPassword = false;
+    bool _emailTaken = false;
 
     public void EmailOnEnter(KeyboardEventArgs e)
     {
@@ -173,79 +175,78 @@ else
     
     protected override async Task OnInitializedAsync()
     {
-        authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity) authState.User.Identity;
+        _authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await _authenticator.GetAuthenticationStateAsync();
+        _user = (UserIdentity) authState.User.Identity;
     }
     
     private async void SendEmail()
     {
-        if (!(await _kuEmailValidation.ValidateAsync(email)).IsValid)
+        if (!(await _kuEmailValidation.ValidateAsync(_email)).IsValid)
         {
             return;
         }
 
-        secretPassword = Util.SimpleRandomStringNumbers(6);
-        Console.WriteLine(secretPassword);
-        VerificationEmail verification = new VerificationEmail(new EmailAddress(email), secretPassword);
+        _secretPassword = Util.SimpleRandomStringNumbers(6);
+        Console.WriteLine(_secretPassword);
+        VerificationEmail verification = new VerificationEmail(new EmailAddress(_email), _secretPassword);
         await EmailService.SendEmail(verification);
         await InvokeAsync(() => { StateHasChanged(); });
     }
 
     private async void ConfirmEmailPassword()
     {
-        if (string.IsNullOrEmpty(secretPassword) || !secretPassword.Equals(passwordInput))
+        if (string.IsNullOrEmpty(_secretPassword) || !_secretPassword.Equals(_passwordInput))
         {
-            passwordInput = "";
-            email = "";
-            incorrectPassword = true;
-            secretPassword = "";
+            _passwordInput = "";
+            _email = "";
+            _incorrectPassword = true;
+            _secretPassword = "";
             await InvokeAsync(() => { StateHasChanged(); });
             return;
         }
         
-        UserGlobalServices userGlobalServices = new UserGlobalServices();
         
         // If the user already exists, throw an error at them!
-        if (userGlobalServices.EmailExists(email))
+        if (UserGlobalMongoService.EmailExists(_email))
         {
-            emailTaken = true;
-            passwordInput = "";
-            email = "";
-            secretPassword = "";
+            _emailTaken = true;
+            _passwordInput = "";
+            _email = "";
+            _secretPassword = "";
             await InvokeAsync(() => { StateHasChanged(); });
             return;
         }
         
         // null if user or no mutual guilds can be found.
-        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.ClientStatic.GetUser(user.UserGlobalModel.DiscordIdLong)?.MutualGuilds;
+        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.ClientStatic.GetUser(_user.UserGlobalModel.DiscordIdLong)?.MutualGuilds;
 
-        user.UserGlobalModel.Email = email;
-        user.UserGlobalModel.Verified = true;
-        userGlobalServices.Upsert(user.UserGlobalModel);
+        _user.UserGlobalModel.Email = _email;
+        _user.UserGlobalModel.Verified = true;
+        UserGlobalMongoService.Upsert(_user.UserGlobalModel);
         if (mutualGuilds != null)
             foreach (SocketGuild mutualGuild in mutualGuilds)
             {
-                UpdateUserInGuild(mutualGuild, userGlobalServices);
+                UpdateUserInGuild(mutualGuild, UserGlobalMongoService);
             }
-        await authenticator.UpdateSession();
-        parent.Update();
+        await _authenticator.UpdateSession();
+        Parent.Update();
     }
-    private async void UpdateUserInGuild(SocketGuild guild, UserGlobalServices userGlobalServices)
+    private async void UpdateUserInGuild(SocketGuild guild, UserGlobalMongoService userGlobalMongoService)
     {
-        UserGuildServices userGuildServices = new UserGuildServices(guild);
-        PermissionsService permissionsService = new PermissionsService(guild);
-        UserGuildModel newUser = userGuildServices.Get(user.UserGlobalModel.DiscordId);
+        UserGuildMongoService userGuildMongoService = GuildMongoFactory.Get<UserGuildMongoService>(guild);
+        PermissionsService permissionsService = GuildMongoFactory.Get<PermissionsService>(guild);
+        UserGuildModel newUser = userGuildMongoService.Get(_user.UserGlobalModel.DiscordId);
 
         await permissionsService.SetDiscordUserRoles(newUser);
         
-        string name = new KUUser(email.Split("@")[0]).GetName();
+        string name = new KUUser(_email.Split("@")[0]).GetName();
         if (name != "")
         {
             newUser.Name = name;
             try
             {
-                await guild.GetUser(Convert.ToUInt64(user.UserGlobalModel.DiscordId)).ModifyAsync(guildUser =>
+                await guild.GetUser(Convert.ToUInt64(_user.UserGlobalModel.DiscordId)).ModifyAsync(guildUser =>
                 {
                     guildUser.Nickname = name;
                 });
@@ -255,6 +256,6 @@ else
     //ignored
             }
         }
-        userGuildServices.Upsert(newUser);
+        userGuildMongoService.Upsert(newUser);
     }
 }

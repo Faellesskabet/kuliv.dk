@@ -1,0 +1,106 @@
+﻿
+@page "/op/union/create"
+@page "/op/union/edit/{uuid}"
+
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@using Microsoft.AspNetCore.Components
+@using Dikubot.DataLayer.Database.Global.Union
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UnionMongoService UnionMongoService
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+<h3>Kategori indstillinger @uuid</h3>
+
+@if (!_loading)
+{
+    <MudContainer>
+        <UnionInput @bind-Value="@_category"></UnionInput>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="Remove">Slette denne</MudButton>
+        
+            </MudCardActions>
+
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+    [Parameter]
+    public string? uuid { get; set; }
+    
+    
+    
+    [Inject] private IDialogService DialogService { get; set; }
+    private MudTable<UnionModel> _table;
+    private bool _loading = true;
+    private UnionModel _category;
+
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        _category = Guid.TryParse(uuid, out Guid guid) ? UnionMongoService.Get(guid) : new UnionModel();
+        _loading = false;
+    }
+    
+    
+    private async void SaveSettings()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        UnionMongoService.Upsert(_category);
+    }
+    
+    private async void Remove()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette denne her?");
+        parameters.Add("ButtonText", "Slet");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        UnionMongoService.Remove(_category);
+    }
+    
+
+    
+    private async void DiscardSettings()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Warning);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        _category = Guid.TryParse(uuid, out Guid guid) ? UnionMongoService.Get(guid) : new UnionModel();
+        this.StateHasChanged();
+    }
+
+
+
+
+}

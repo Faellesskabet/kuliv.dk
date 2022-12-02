@@ -23,12 +23,15 @@ namespace Dikubot.Webapp.Authentication
 {
     public class Authenticator : AuthenticationStateProvider
     {
-        private IHttpContextAccessor _httpContextAccssor;
+        private readonly IHttpContextAccessor _httpContextAccssor;
         private SocketGuild _guild;
+        private readonly UserGlobalMongoService _userGlobalMongoService;
 
-        public Authenticator(IHttpContextAccessor httpContextAccssor)
+        public Authenticator(IHttpContextAccessor httpContextAccssor,
+            UserGlobalMongoService userGlobalMongoService)
         {
             _httpContextAccssor = httpContextAccssor;
+            _userGlobalMongoService = userGlobalMongoService;
         }
         
         /// <summary>
@@ -72,20 +75,7 @@ namespace Dikubot.Webapp.Authentication
         {
             return user == null ? null : DiscordBot.ClientStatic.GetGuild(user.SelectedGuild);
         }
-
-        /// <summary>
-        /// Get the GuildSettingsModel of the current session
-        /// </summary>
-        /// <returns></returns>
-        public async Task<GuildSettingsModel> GetGuildSettings()
-        {
-            return await GetGuildSettings(await GetSocketGuild());
-        }
-
-        private async Task<GuildSettingsModel> GetGuildSettings(SocketGuild guild)
-        {
-            return new GuildSettingsService().Get(model => model.GuildId == guild.Id) ?? new GuildSettingsModel(guild);
-        }
+        
 
         private DiscordUserClaim GetDiscordUserClaim()
         {
@@ -144,7 +134,7 @@ namespace Dikubot.Webapp.Authentication
             
             //Here we return a UserIdentity with our sessionModel. The system will then check the user connected to the session,
             //to see what authorisation step the user is at.
-            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(discordUserClaim))));
+            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity(discordUserClaim, _userGlobalMongoService))));
         }
 
         /// <summary>
@@ -156,7 +146,7 @@ namespace Dikubot.Webapp.Authentication
         {
             DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
             UserIdentity userIdentity =
-                discordUserClaim == null ? new UserIdentity() : new UserIdentity(discordUserClaim);
+                discordUserClaim == null ? new UserIdentity() : new UserIdentity(discordUserClaim, _userGlobalMongoService);
             NotifyAuthenticationStateChanged(
                 Task.FromResult(new AuthenticationState(new ClaimsPrincipal(userIdentity))));
         }

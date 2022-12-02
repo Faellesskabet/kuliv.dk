@@ -1,0 +1,47 @@
+﻿@page "/discovery/unions"
+
+@using Dikubot.DataLayer.Database.Global.GuildSettings;
+@using Dikubot.DataLayer.Database.Global.Union
+@attribute [AllowAnonymous]
+@inject NavigationManager NavigationManager
+@inject GuildSettingsMongoService GuildSettingsMongoService
+@inject UnionMongoService UnionMongoService
+
+
+
+    <Searchbar Items="_models" Context="UnionModel" NumberOfItems="12">
+        <TemplateRow Context="unionModel" >
+           <MudItem xs="12" sm="6" md="4" lg="3" >
+           <UnionWidget Union="unionModel"></UnionWidget>
+           </MudItem>
+        </TemplateRow>
+    </Searchbar>
+
+
+<MudButton Color="Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
+
+@code {
+    public List<UnionModel> _models { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var list = UnionMongoService.GetAll();
+        
+        var list2 = GuildSettingsMongoService.Get()
+            .Where(model => model.IsPublic)
+            .Select(model => new UnionModel(model));
+        list.AddRange(list2);
+        
+        _models = list.OrderBy(model => model.Title).ToList();
+        
+        base.OnInitialized();
+    }
+    
+    private void GotoAddGuild()
+    {
+        NavigationManager.NavigateTo("/Request/Union/create");
+    }
+    
+    
+}
+

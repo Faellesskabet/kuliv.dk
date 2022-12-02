@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cronos;
 using Dikubot.DataLayer.Database.Global.User;
 using Microsoft.Graph;
 
@@ -11,21 +12,29 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs;
 /// </summary>
 public class FixForbiddenDuplicatesTask : CronTask
 {
+
+    private readonly UserGlobalMongoService _userGlobalMongoService;
+
+    public FixForbiddenDuplicatesTask(UserGlobalMongoService userGlobalMongoService)
+    {
+        _userGlobalMongoService = userGlobalMongoService;
+    }
+
     // * * */1 * *
     /// <summary>
     /// Updates every day
     /// </summary>
-    public FixForbiddenDuplicatesTask() : base(Cronos.CronExpression.Parse("* * */1 * *"), Update)
+    protected override CronExpression CronExpression()
     {
+        return Cronos.CronExpression.Parse("* * */1 * *");
     }
-    
-    private static void Update()
+
+    public override void RunTask()
     {
         Console.WriteLine("Removing legacy elements");
-        UserGlobalServices userGlobalServices = new UserGlobalServices();
-        foreach (var user in userGlobalServices.GetAll())
+        foreach (var user in _userGlobalMongoService.GetAll())
         {
-            List<UserGlobalModel> duplicates = userGlobalServices.GetAll(model => model.DiscordId == user.DiscordId);
+            List<UserGlobalModel> duplicates = _userGlobalMongoService.GetAll(model => model.DiscordId == user.DiscordId);
             if (duplicates.Count <= 1)
             {
                 continue;
@@ -36,7 +45,7 @@ public class FixForbiddenDuplicatesTask : CronTask
                 if (!duplicate.Verified)
                 {
                     Console.WriteLine("REMOVED ONE ELEMENT");
-                    userGlobalServices.Remove(duplicate);
+                    _userGlobalMongoService.Remove(duplicate);
                 }
             }
         }

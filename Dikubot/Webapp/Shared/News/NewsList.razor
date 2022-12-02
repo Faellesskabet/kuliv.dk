@@ -1,6 +1,7 @@
 @using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News
 @using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages
-@using Data.Discord
+@using Dikubot.DataLayer.Database.Guild
+@inject IGuildMongoFactory GuildMongoFactory
 
 @if (_loaded)
 {
@@ -28,7 +29,7 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _messages = new NewsServices(Guild.Guild).Get(10, model => model.TimeStamp);
+        _messages = GuildMongoFactory.Get<NewsMongoServices>(Guild.Guild).Get(10, model => model.TimeStamp);
         _loaded = true;
         StateHasChanged();
     }

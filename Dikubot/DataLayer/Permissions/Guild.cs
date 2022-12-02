@@ -12,7 +12,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <return>void.</return>
         public void SetDatabaseGuild()
         {
-            var GuildModels = _guildServices.Get();
+            var GuildModels = _guildMongoService.Get();
             var toBeRemoved = new List<GuildMainModel>(GuildModels);
 
             Func<GuildMainModel, SocketGuild, bool> inDB = (m0, m1) =>
@@ -32,12 +32,12 @@ namespace Dikubot.DataLayer.Permissions
         /// <Summary>Add a text channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseGuild(GuildMainModel guildMain) =>
-            _guildServices.Upsert(guildMain);
+            _guildMongoService.Upsert(guildMain);
 
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseGuild(SocketGuild Guild) =>
-            _guildServices.Remove(_guildServices.SocketToModel(Guild));
+            _guildMongoService.Remove(_guildMongoService.SocketToModel(Guild));
 
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
@@ -46,7 +46,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseGuild(GuildMainModel guildMain) =>
-            _guildServices.Remove(guildMain);
+            _guildMongoService.Remove(guildMain);
 
         /// <Summary>Removes a text channel from the database and the discord server.</Summary>
         /// <return>void.</return>

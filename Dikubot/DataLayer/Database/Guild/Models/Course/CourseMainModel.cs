@@ -34,11 +34,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Course
         [Required]
         [BsonElement("MainTextChannelModelId")]
         public Guid MainTextChannelModelId { get; set; }
-
-        public TextChannelMainModel GetMainTextChannel(SocketGuild guild)
-        {
-            return new TextChannelServices(guild).Get(MainTextChannelModelId);
-        }
+        
 
         /// <summary>
         /// This is the team category list. Each team in a course will have their own category. Only the Admin will be able to access all the categories

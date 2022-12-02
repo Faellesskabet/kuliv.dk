@@ -1,17 +1,26 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
 using Dikubot.DataLayer.Permissions;
-using Discord.Commands;
+using Discord.Interactions;
 
 namespace Dikubot.Discord.Command
 {
-    [Group("channel")]
-    public class ChannelCommands : ModuleBase<SocketCommandContext>
+    [global::Discord.Commands.Group("channel")]
+    public class ChannelCommands : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("expandable")]
-        [Summary("Make a channel expandable")]
-        public async Task ExpandAsync([Summary("Channel id")] params string[] channelid)
+        private IPermissionServiceFactory _permissionServiceFactory;
+        private IGuildMongoFactory _guildMongoFactory;
+
+        public ChannelCommands(IPermissionServiceFactory permissionServiceFactory, IGuildMongoFactory guildMongoFactory)
+        {
+            _permissionServiceFactory = permissionServiceFactory;
+            _guildMongoFactory = guildMongoFactory;
+        }
+
+        [SlashCommand("expandable", "Make a channel expandable")]
+        public async Task ExpandAsync([Summary(description:"Channel id")] params string[] channelid)
         {
             var mod = Context.Guild.Roles.Any(role => role.Permissions.Administrator);
             if (!mod)
@@ -19,7 +28,7 @@ namespace Dikubot.Discord.Command
                 return;
             }
 
-            var permissionsService = new PermissionsService(Context.Guild);
+            var permissionsService = _permissionServiceFactory.Get(Context.Guild);
 
             if (channelid.Length != 1)
             {
@@ -27,7 +36,7 @@ namespace Dikubot.Discord.Command
                 return;
             }
             
-            var voiceChannelServices = new VoiceChannelServices(Context.Guild);
+            var voiceChannelServices = _guildMongoFactory.Get<VoiceChannelMongoService>(Context.Guild);
             var newModel = voiceChannelServices.Get(model => model.DiscordId == channelid[0]);
             if (newModel == null)
             {

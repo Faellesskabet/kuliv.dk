@@ -37,7 +37,7 @@ namespace Dikubot.DataLayer.Static
             return isEmail(email) && (email.EndsWith(".ku.dk") || email.EndsWith("@ku.dk"));
         }
 
-        private static Random random = new Random();
+        private static readonly Random random = new Random();
 
         /// <summary>
         /// SimpleRandomString returns a random string with the specified length. It's called simple because it has removed look-alike characters like O and 0.
@@ -75,18 +75,18 @@ namespace Dikubot.DataLayer.Static
             }
         }
 
-        public static void UpdateUserNameOnAllForcedGuilds(SocketUser user)
+        public static void UpdateUserNameOnAllForcedGuilds(SocketUser user,
+            GuildSettingsMongoService guildSettingsMongoService,
+                UserGlobalMongoService userGlobalMongoService)
         {
             if (user == null)
             {
                 return;
             }
-            GuildSettingsService guildSettingsService = new GuildSettingsService();
-            UserGlobalServices userGlobalServices = new UserGlobalServices();
-            UserGlobalModel userGlobalModel = userGlobalServices.Get(user);
+            UserGlobalModel userGlobalModel = userGlobalMongoService.Get(user);
             foreach (SocketGuild guild in user.MutualGuilds)
             {
-                GuildSettingsModel guildSettingsModel = guildSettingsService.Get(guild);
+                GuildSettingsModel guildSettingsModel = guildSettingsMongoService.Get(guild);
                 if (!guildSettingsModel.ForceNameChange)
                 {
                     continue;

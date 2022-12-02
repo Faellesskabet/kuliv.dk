@@ -18,7 +18,7 @@ namespace Dikubot.Webapp.Authentication
     public sealed class UserIdentity : ClaimsIdentity
     {
         private readonly DiscordUserClaim _discordUserClaim;
-        private GuildSettingsService _guildSettingsService;
+        private GuildSettingsMongoService _guildSettingsMongoService;
 
         /// <summary>
         /// Empty UserIdentity
@@ -32,11 +32,11 @@ namespace Dikubot.Webapp.Authentication
         /// Creates a UserIdentity from a DiscordUserClaim
         /// </summary>
         /// <param name="discordUserClaim"></param>
-        public UserIdentity(DiscordUserClaim discordUserClaim)
+        public UserIdentity(DiscordUserClaim discordUserClaim, 
+            UserGlobalMongoService userGlobalMongoService)
         {
             _discordUserClaim = discordUserClaim;
-            UserGlobalModel = new UserGlobalServices().Get(discordUserClaim.UserId);
-            _guildSettingsService = new GuildSettingsService();
+            UserGlobalModel = userGlobalMongoService.Get(discordUserClaim.UserId);
 
             if (UserGlobalModel == null)
             {
@@ -93,39 +93,6 @@ namespace Dikubot.Webapp.Authentication
         /// </summary>
         public DiscordUserClaim DiscordUserClaim => _discordUserClaim;
         
-        
-        /// <summary>
-        /// Get all Guild the user have joined
-        /// </summary>
-        public IReadOnlyCollection<SocketGuild> GetJoinedGuilds()
-        {
-            return DiscordBot.ClientStatic.GetUser(this.UserGlobalModel.DiscordIdLong).MutualGuilds;
-            
-        }
-
-        /// <summary>
-        /// Get all guid for roles the user have
-        /// </summary>
-        public HashSet<Guid> GetRolesGuid()
-        {
-            return GetRolesGuid(this.UserGlobalModel.SelectedGuild);
-        }
-        public HashSet<Guid> GetRolesGuid(ulong guildId)
-        {
-            var guild = DiscordBot.ClientStatic.GetGuild(guildId);
-            return GetRolesGuid(guild);
-        }
-        
-        public HashSet<Guid> GetRolesGuid(SocketGuild guild)
-        {
-            UserGuildServices userGuildServices = new UserGuildServices(guild);
-            return userGuildServices
-                .Get(model => model.DiscordId.Equals(this.DiscordId))
-                .Roles.Select(model => model.RoleId)
-                .ToHashSet();
-        }
-        
-
         /// <summary>
         /// Get all guid for roles the user have
         /// </summary>
