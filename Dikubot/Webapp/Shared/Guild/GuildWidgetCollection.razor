@@ -1,15 +1,9 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.Settings.Tags
-@using Microsoft.IdentityModel.Tokens
-@using Data.Discord
 @inject NavigationManager NavigationManager
-
+@inject GuildSettingsMongoService GuildSettingsMongoService
 @using Dikubot.Extensions.search
-@using Dikubot.DataLayer.Database.Global.Settings.Tags
-@using Dikubot.DataLayer.Database.Global.GuildSettings;
-@using Dikubot.Webapp.Extensions.Discovery.Links
 @inject UserService _user;
-@using System.Reflection
+@using Dikubot.DataLayer.Database.Global.Union
 
 
     <Searchbar Items="_models" Context="UnionModel">
@@ -26,17 +20,14 @@
 @code {
     [Parameter] public List<GuildWidgetDto> Guilds { get; set; }
     
-
-    public GuildSettingsService _GuildSettingsService = new GuildSettingsService();
-    readonly UnionServices _services = new UnionServices();
     
     public List<UnionModel> _models { get; set; }
 
     protected override void OnInitialized()
     {
         
-        var serverList = _user.GetUserGlobalModel().Guilds.Select(g => g.Id);
-        var list = _GuildSettingsService.Get()
+        var serverList = _user.GetGuilds().Select(g => g.Id);
+        var list = GuildSettingsMongoService.Get()
             .Where(model => model.IsPublic || serverList.Contains(model.GuildId))
             .Select(model => new UnionModel(model));
         

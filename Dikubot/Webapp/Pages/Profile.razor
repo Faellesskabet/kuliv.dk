@@ -3,13 +3,13 @@
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
+@inject UserGlobalMongoService UserGlobalMongoService
 
 <h3>Profile</h3>
 @if (_loaded)
 {
     <MudSwitch Label="Dark theme" @bind-Checked="@user.UserGlobalModel.DarkTheme"></MudSwitch>
-    <MudButton Color="Color.Success" OnClick="() => _userGlobalServices.Update(user.UserGlobalModel)">Gem ændringer</MudButton>
+    <MudButton Color="Color.Success" OnClick="() => UserGlobalMongoService.Update(user.UserGlobalModel)">Gem ændringer</MudButton>
 }
 else
 {
@@ -21,14 +21,12 @@ else
     private Authenticator authenticator;
     private UserIdentity user;
     private bool _loaded = false;
-    private UserGlobalServices _userGlobalServices;
 
     protected override async Task OnInitializedAsync()
     {
         authenticator = ((Authenticator) AuthenticationStateProvider);
         var authState = await authenticator.GetAuthenticationStateAsync();
         user = (UserIdentity) authState.User.Identity;
-        _userGlobalServices = new UserGlobalServices();
         _loaded = true;
     }
 

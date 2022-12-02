@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Global.User;
@@ -12,14 +13,14 @@ namespace Data
     public class UserService
     {
         
-        private Authenticator _authenticator;
-        private UserIdentity _user => GetUserIdentity();
-        private DiscordBot _discordBot;
+        private readonly Authenticator _authenticator;
+        private UserIdentity User => GetUserIdentity();
+        private readonly DiscordSocketClient _discordSocketClient;
 
-        public UserService(AuthenticationStateProvider authenticationStateProvider, DiscordBot discordBot)
+        public UserService(AuthenticationStateProvider authenticationStateProvider, DiscordSocketClient discordSocketClient)
         {
             _authenticator = ((Authenticator) authenticationStateProvider);
-            _discordBot = discordBot;
+            _discordSocketClient = discordSocketClient;
         }
 
         public UserIdentity GetUserIdentity()
@@ -28,7 +29,7 @@ namespace Data
             return (UserIdentity) authState.User.Identity;
         }
 
-        public string id => _user?.DiscordId;
+        public string Id => User?.DiscordId;
         
         
         /// <summary>
@@ -37,17 +38,31 @@ namespace Data
         /// </summary>
         public bool IsRegistered()
         {
-            return _user?.UserGlobalModel != null;
+            return User?.UserGlobalModel != null;
         }
 
         public UserGlobalModel GetUserGlobalModel()
         {
-            return _user?.UserGlobalModel ?? new UserGlobalModel();
+            return User?.UserGlobalModel ?? new UserGlobalModel();
         }
 
-        public SocketGuild getGuild()
+        /// <summary>
+        /// Returns the currently selected guild
+        /// </summary>
+        /// <returns></returns>
+        public SocketGuild GetGuild()
         {
-            return _discordBot.Client.GetGuild(GetUserGlobalModel().SelectedGuild);
+            return _discordSocketClient.GetGuild(GetUserGlobalModel().SelectedGuild);
+        }
+        
+        /// <summary>
+        /// Returns a list of mutual guilds between the user and the bot
+        /// </summary>
+        /// <returns></returns>
+        public List<SocketGuild> GetGuilds()
+        {
+            return _discordSocketClient.GetUser(GetUserGlobalModel().DiscordIdLong)?.MutualGuilds?.ToList() ??
+                   new List<SocketGuild>();
         }
 
         public async Task<string> GetTokenAsync()
@@ -57,7 +72,7 @@ namespace Data
 
         public IEnumerable<Claim> Claims()
         {
-            return _user?.Claims ?? new List<Claim>();
+            return User?.Claims ?? new List<Claim>();
         }
  
         

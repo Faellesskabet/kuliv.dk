@@ -15,12 +15,29 @@ using AspNet.Security.OAuth.Discord;
 using Blazored.LocalStorage;
 using Data;
 using Dikubot.DataLayer.Caching;
+using Dikubot.DataLayer.Cronjob;
 using Dikubot.DataLayer.Cronjob.Cronjobs;
+using Dikubot.DataLayer.Database;
+using Dikubot.DataLayer.Database.Global.Calendar;
+using Dikubot.DataLayer.Database.Global.Event;
+using Dikubot.DataLayer.Database.Global.GuildCalendars;
+using Dikubot.DataLayer.Database.Global.GuildSettings;
+using Dikubot.DataLayer.Database.Global.Session;
+using Dikubot.DataLayer.Database.Global.Tags;
+using Dikubot.DataLayer.Database.Global.Union;
+using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
+using Dikubot.DataLayer.Permissions;
 using Dikubot.Discord;
+using Dikubot.Discord.EventListeners;
+using Dikubot.Discord.EventListeners.Permissions;
 using Dikubot.Webapp.Authentication;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
+using Dikubot.Webapp.Data;
+using Dikubot.Webapp.Extensions.Discovery.Links;
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
@@ -39,20 +56,59 @@ namespace Dikubot.Webapp
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        
         public void ConfigureServices(IServiceCollection services)
         {
             
             var initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
+            
+            // DISCORD SERVICES
+            DiscordSocketConfig discordSocketConfig = new DiscordSocketConfig()
+            {
+                AlwaysDownloadUsers = true,
+                MessageCacheSize = 1000,
+                GatewayIntents = GatewayIntents.All,
+            };
 
-            services.AddScoped<NotifyStateService>();
-            services.AddSingleton<Cache<MessageModel, IMessage>>();
-            services.AddSingleton<CacheNewsMessagesTask>();
-            
+            services.AddSingleton(discordSocketConfig).AddSingleton<DiscordSocketClient>()
+                .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
+                .AddSingleton<InteractionHandler>();
             services.AddSingleton<DiscordBot>();
+            services.AddSingleton<PermissionListeners>();
+            services.AddSingleton<ExpandableVoiceChatListener>();
+            services.AddSingleton<GreetingListener>();
+            services.AddSingleton<GuildDownloadListeners>();
+            services.AddSingleton<MessageListener>();
             
+            // DATABASE SERVICES
+            services.AddSingleton<Database>();
+            services.AddSingleton<IGuildMongoFactory, GuildMongoFactory>();
+            services.AddSingleton<UserGlobalMongoService>();
+            services.AddSingleton<SessionMongoService>();
+            services.AddSingleton<GuildSettingsMongoService>();
+            services.AddSingleton<UnionMongoService>();
+            services.AddSingleton<TagMongoService>();
+            services.AddSingleton<GuildCalendarMongoService>();
+            services.AddSingleton<EventsMongoService>();
+            services.AddSingleton<EventRequestMongoService>();
+            services.AddSingleton<CalendarMongoService>();
+            
+            services.AddSingleton<IPermissionServiceFactory, PermissionServiceFactory>();
+            
+            // CRONJOBS
+            services.AddSingleton<Scheduler>();
+            services.AddSingleton<BackupDatabaseTask>();
+            services.AddSingleton<ForceNameChangeTask>();
+            services.AddSingleton<UpdateVerifiedTask>();
+            services.AddSingleton<CacheNewsMessagesTask>();
+            services.AddSingleton<CronJobService>();
+            
+            // CACHE
+            services.AddSingleton<Cache<MessageModel, IMessage>>();
+            
+            // WEB SERVICES
+            services.AddScoped<NotifyStateService>();
+            services.AddScoped<LocalizationService>();
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
            
             services.AddServerSideBlazor(options =>
@@ -77,22 +133,19 @@ namespace Dikubot.Webapp
                 });
             
             
-            //Do NICE STUFF - with login :D
             services.AddHttpContextAccessor();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            //Kalender
             services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
             
             services.AddResponseCaching();
             services.AddRouting();
             services.AddBlazoredLocalStorage(config =>
                 config.JsonSerializerOptions.WriteIndented = true);
-            
-            // Authentication
+
             services.AddScoped<AuthenticationStateProvider, Authenticator>();
             services.AddScoped<UserService>();
             services.AddScoped<BrowserService>();
@@ -126,8 +179,14 @@ namespace Dikubot.Webapp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.ApplicationServices.GetService<DiscordSocketClient>().Ready += () =>
+            {
+                app.ApplicationServices.GetService<CronJobService>().Schedule();
+                return Task.CompletedTask;
+            };
             app.ApplicationServices.GetService<DiscordBot>().Run();
-            
+
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -5,7 +5,9 @@
 @using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel
 @using Dikubot.DataLayer.Static
 @using Dikubot.Webapp.Shared.Dialog
+@using Dikubot.DataLayer.Database.Guild
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IGuildMongoFactory IGuildMongoFactory
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
 <h3>Nyhed indstillinger</h3>
 @if (_loaded)
@@ -43,7 +45,7 @@ else
     private Authenticator authenticator;
     private UserIdentity user;
     private SocketGuild _guild;
-    private TextChannelServices _textChannelServices;
+    private TextChannelMongoService _textChannelMongoService;
     private List<TextChannelMainModel> _textChannelMainModels;
 
     private IEnumerable<TextChannelMainModel> _selectedChannels { get; set; }
@@ -66,8 +68,8 @@ else
         }
         
         _guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
-        _textChannelServices = new TextChannelServices(_guild);
-        _textChannelMainModels = _textChannelServices.GetAll();
+        _textChannelMongoService = IGuildMongoFactory.Get<TextChannelMongoService>(_guild);
+        _textChannelMainModels = _textChannelMongoService.GetAll();
         _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel.GetValueOrDefault());
 
         _loaded = true;
@@ -94,7 +96,7 @@ else
             {
                 textChannelMainModel.IsNewsChannel = true;
             }
-            _textChannelServices.Upsert(textChannelMainModel);
+            _textChannelMongoService.Upsert(textChannelMainModel);
         }
         this.StateHasChanged();
     }

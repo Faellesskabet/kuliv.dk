@@ -9,11 +9,12 @@
 @using MudBlazor.Utilities
 @using Dikubot.Webapp.Extensions.NavMenu
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager _navigationManager;
-@inject UserService _user
-@inject NotifyStateService _notifyStateService
-
-
+@inject NavigationManager NavigationManager;
+@inject UserService User
+@inject NotifyStateService NotifyStateService
+@inject GuildSettingsMongoService GuildSettingsMongoService
+@inject UserGlobalMongoService UserGlobalMongoService
+@inject LocalizationService LocalizationService
 
 
 <MudLayout>
@@ -38,10 +39,10 @@
 
         <Localization>
             <Danish>
-                <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.English)"/>
+                <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1e9_1f1f0" OnClick="() => LocalizationService.Change(LocalizationService.Language.English)"/>
             </Danish>
             <English>
-                <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1ec_1f1e7" OnClick="() => new ChangeLocalization(_user, _notifyStateService).Change(ChangeLocalization.Language.Danish)"/>
+                <MudIconButton Size="Size.Large" Icon="@Twemoji.E1f1ec_1f1e7" OnClick="() => LocalizationService.Change(LocalizationService.Language.Danish)"/>
             </English>
         </Localization>
         <MudIconButton Size="Size.Medium" Icon="@DarkModeIcon" OnClick="() => App.ToggleDarkMode()"/> 
@@ -67,7 +68,7 @@
                 ValueChanged="ChangeGuild" 
                 AdornmentIcon="@Icons.Filled.People" 
                 AdornmentColor="Color.Primary"
-                       Text="@(_guilds.FirstOrDefault(model => model.GuildId == _user?.GetUserGlobalModel().SelectedGuild)?.Name ?? "Vælg fællesskab")">
+                       Text="@(_guilds.FirstOrDefault(model => model.GuildId == User?.GetUserGlobalModel().SelectedGuild)?.Name ?? "Vælg fællesskab")">
                 @foreach (var guild in _guilds)
                 {
                     <MudSelectItem Value="@guild.GuildId">@guild.Name</MudSelectItem>
@@ -114,7 +115,7 @@
 
     protected override void OnParametersSet()
     {
-        var thisUri = _navigationManager.ToBaseRelativePath(_navigationManager.Uri).Split("/");
+        var thisUri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Split("/");
 
         string href = "";
         _breadcrumbItems = new List<BreadcrumbItem>
@@ -134,16 +135,14 @@
     {
         await SetData();
         _loaded = true;
-        _notifyStateService.UserChange += UserChange;
-        
-        GuildSettingsService guildSettingsService = new GuildSettingsService();
+        NotifyStateService.UserChange += UserChange;
         
         _guilds = new List<GuildSettingsModel>();
-        _guildId = _user.GetUserGlobalModel().SelectedGuild;
+        _guildId = User.GetUserGlobalModel().SelectedGuild;
         
-        foreach (var guild in _user.GetUserGlobalModel().Guilds)
+        foreach (var guild in User.GetGuilds())
         {
-            _guilds.Add(guildSettingsService.Get(guild));
+            _guilds.Add(GuildSettingsMongoService.Get(guild));
         }
 
         GuildSettingsModel ShowMore = new GuildSettingsModel(){Name = "Show More", Id = Guid.Empty};
@@ -163,7 +162,7 @@
             return;
         }
         guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
-        Guild = new GuildSettingsService().Get(model => model.GuildId == user.UserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
+        Guild = GuildSettingsMongoService.Get(model => model.GuildId == user.UserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
     }
     
     private void UserChange(object? sender, EventArgs e)
@@ -183,13 +182,13 @@
     {
         _guildId = guildId;
         
-        if (_guildId == _user.GetUserGlobalModel().SelectedGuild)
+        if (_guildId == User.GetUserGlobalModel().SelectedGuild)
         {
             return;
         }
-        UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
+        UserGlobalModel userGlobalModel = User.GetUserGlobalModel();
         userGlobalModel.SelectedGuild = _guildId;
-        new UserGlobalServices().Upsert(userGlobalModel);
+        UserGlobalMongoService.Upsert(userGlobalModel);
         
         App.UserHasChange();
         

@@ -1,14 +1,12 @@
 using System;
 using System.Threading.Tasks;
-using Discord.Commands;
+using Discord.Interactions;
 
 namespace Dikubot.Discord.Command
 {
-    public class TequilaTuesday : ModuleBase<SocketCommandContext>
+    public class TequilaTuesday : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("tequilatuesday")]
-        [Alias("ttt", "tequilatightstuesday", "tequilatightstirsdag", "tequilatuesday", "tequilatirsdag")]
-        [Summary("Er det TTT i dag?")]
+        [SlashCommand("ttt", "is today TTT?")]
         public async Task TequilaTuesdayCommand()
         {
             if (DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)

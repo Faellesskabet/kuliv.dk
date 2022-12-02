@@ -5,7 +5,11 @@
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Static
 @using Dikubot.Webapp.Pages
+@using Dikubot.DataLayer.Database.Global.GuildSettings
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject DiscordSocketClient DiscordSocketClient
+@inject UserGlobalMongoService UserGlobalMongoService
+@inject GuildSettingsMongoService GuildSettingsMongoService
 
 <MudCard>
     <MudCardHeader>
@@ -16,7 +20,7 @@
     </MudCardHeader>
     <MudCardContent>
         <MudTextField Placeholder="Fulde navn"
-                      @bind-Value="name" Immediate="@true" Autofocus="@true" />
+                      @bind-Value="_name" Immediate="@true" Autofocus="@true" />
     </MudCardContent>
     <MudCardActions>
         <MudButton OnClick="@ConfirmName">
@@ -33,26 +37,26 @@
 @code {
 
     [Parameter]
-    public Login parent { get; set; }
+    public Login Parent { get; set; }
 
-    private Authenticator authenticator;
-    private UserIdentity user;
-    private string name = "";
+    private Authenticator _authenticator;
+    private UserIdentity _user;
+    private string _name = "";
 
     protected override async Task OnInitializedAsync()
     {
-        authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity) authState.User.Identity;
+        _authenticator = ((Authenticator) AuthenticationStateProvider);
+        var authState = await _authenticator.GetAuthenticationStateAsync();
+        _user = (UserIdentity) authState.User.Identity;
     }
 
     private async void ConfirmName()
     {
-        user.UserGlobalModel.Name = name;
-        new UserGlobalServices().Upsert(user.UserGlobalModel);
-        Util.UpdateUserNameOnAllForcedGuilds(DiscordBot.ClientStatic.GetUser(user.UserGlobalModel.DiscordIdLong));
-        await authenticator.UpdateSession();
-        parent.Update();
+        _user.UserGlobalModel.Name = _name;
+        UserGlobalMongoService.Upsert(_user.UserGlobalModel);
+        Util.UpdateUserNameOnAllForcedGuilds(DiscordSocketClient.GetUser(_user.UserGlobalModel.DiscordIdLong), GuildSettingsMongoService, UserGlobalMongoService);
+        await _authenticator.UpdateSession();
+        Parent.Update();
     }
 
 }

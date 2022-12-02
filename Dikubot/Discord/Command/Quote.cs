@@ -1,28 +1,37 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.Quote;
 using Dikubot.Discord.EventListeners;
 using Discord;
 using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
+using ContextType = Discord.Commands.ContextType;
 
 namespace Dikubot.Discord.Command
 {
-    [Group("quote")]
-    [RequireContext(ContextType.Guild)]
+    [global::Discord.Commands.Group("quote")]
+    [global::Discord.Commands.RequireContext(ContextType.Guild)]
     [Alias("citat")]
-    public class Quote : ModuleBase<SocketCommandContext>
+    public class Quote : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("")]
-        [Alias("")]
-        [Summary("Get a random quote from the quote channel")]
+
+        private IGuildMongoFactory _guildMongoFactory;
+
+        public Quote(IGuildMongoFactory guildMongoFactory)
+        {
+            _guildMongoFactory = guildMongoFactory;
+        }
+
+        [SlashCommand("quote", "Get a random quote from the quote channel!")]
         public async Task GetQuote()
         {
             SocketGuild guild = Context.Guild;
-            MessageModel quoteModel = new QuoteServices(Context.Guild).GetSamples(1).FirstOrDefault();
+            MessageModel quoteModel = _guildMongoFactory.Get<QuoteMongoServices>(Context.Guild).GetSamples(1).FirstOrDefault();
 
             if (quoteModel == null)
             {
@@ -38,12 +47,12 @@ namespace Dikubot.Discord.Command
         [Command("test")]
         public async Task GetQuotes()
         {
-            await ReplyAsync("test " + new QuoteServices(Context.Guild).Get().FirstOrDefault()?.MessageId);
+            await ReplyAsync("test " + _guildMongoFactory.Get<QuoteMongoServices>(Context.Guild).Get().FirstOrDefault()?.MessageId);
         }
 
         [Command("connect")]
-        [Summary("Connect a quote channel")]
-        public async Task ConnectChannel([Summary("Channel id")] ulong channelId = 0)
+        [global::Discord.Commands.Summary("Connect a quote channel")]
+        public async Task ConnectChannel([global::Discord.Commands.Summary("Channel id")] ulong channelId = 0)
         {
             if (!Util.IsMod(Context.User, Context.Guild))
             {
@@ -56,8 +65,8 @@ namespace Dikubot.Discord.Command
         }
         
         [Command("disconnect")]
-        [Summary("Disconnect a quote channel")]
-        public async Task DisconnectChannel([Summary("Channel id")] ulong channelId = 0)
+        [global::Discord.Commands.Summary("Disconnect a quote channel")]
+        public async Task DisconnectChannel([global::Discord.Commands.Summary("Channel id")] ulong channelId = 0)
         {
             if (!Util.IsMod(Context.User, Context.Guild))
             {
@@ -73,25 +82,25 @@ namespace Dikubot.Discord.Command
             {
                 channelId = (ulong) this.Context.Channel.Id;
             }
-            TextChannelServices textChannelServices = new TextChannelServices(this.Context.Guild);
-            TextChannelMainModel textChannelModel = textChannelServices.Get(model => model.DiscordId == channelId.ToString());
+            TextChannelMongoService textChannelMongoService = _guildMongoFactory.Get<TextChannelMongoService>(this.Context.Guild);
+            TextChannelMainModel textChannelModel = textChannelMongoService.Get(model => model.DiscordId == channelId.ToString());
             if (textChannelModel == null)
             {
                 await ReplyAsync("The given channelId does not match any channels.");
                 return;
             }
             textChannelModel.IsQuoteChannel = connect;
-            textChannelServices.Update(textChannelModel);
+            textChannelMongoService.Update(textChannelModel);
             
             //We add all the quotes to the database
             if (connect)
             {
-                new QuoteServices(this.Context.Guild).DownloadMessagesFromChannel(Context.Guild.GetTextChannel(channelId));
+                _guildMongoFactory.Get<QuoteMongoServices>(this.Context.Guild).DownloadMessagesFromChannel(Context.Guild.GetTextChannel(channelId));
             }
             //We remove all the quotes from the channel
             else
             {
-                new QuoteServices(this.Context.Guild).Remove(model => model.ChannelId == channelId.ToString());
+                _guildMongoFactory.Get<QuoteMongoServices>(this.Context.Guild).Remove(model => model.ChannelId == channelId.ToString());
             }
             await ReplyAsync($"The channel named {textChannelModel.Name} has been {(connect?"connected":"disconnected")} from quotes!");
         } 

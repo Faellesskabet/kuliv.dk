@@ -4,11 +4,10 @@
 @using Dikubot.Discord
 @using Dikubot.Webapp.Shared.News
 @using global::Discord.WebSocket
-@using Data.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService
 @inject UserService _userService;
-
+@inject GuildSettingsMongoService GuildSettingsMongoService
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12">
@@ -180,12 +179,12 @@
 
     private async Task SetData()
     {
-        guild = _userService.getGuild();
+        guild = _userService.GetGuild();
         if (guild == null)
         {
             return;
         }
-        _guildSettingsModel = new GuildSettingsService().Get(guild) ?? new GuildSettingsModel(guild);
+        _guildSettingsModel = GuildSettingsMongoService.Get(guild) ?? new GuildSettingsModel(guild);
     }
     
     private void UserChange(object? sender, EventArgs e)

@@ -5,22 +5,20 @@
 @using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.Discord
 @using Dikubot.Webapp.Pages
-@using Data.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime;
-@inject UserService _userService;
+@inject UserService UserService;
 
 @using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Microsoft.IdentityModel.Tokens
-@using Data.Discord
 @inject NavigationManager NavigationManager
+@inject GuildSettingsMongoService GuildSettingsMongoService
 
 @using Dikubot.Extensions.search
-@using Dikubot.DataLayer.Database.Global.Settings.Tags
 @using Dikubot.DataLayer.Database.Global.GuildSettings;
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using System.Reflection
+@using Dikubot.DataLayer.Database.Global.Union
 @using Color = MudBlazor.Color
 
 @if (!_loaded)
@@ -30,7 +28,7 @@
 else
 {
     <div style="min-width: 70vw;">
-        <Searchbar Items="_models" Context="UnionModel">
+        <Searchbar Items="Models" Context="UnionModel">
             <TemplateRow Context="unionModel" >
                 <MudItem xs="12" sm="6" md="4" lg="3">
                     <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"/>
@@ -43,21 +41,19 @@ else
    
 @code {
     [Parameter]
-    public Login parent { get; set; }
+    public Login Parent { get; set; }
 
     private bool _loaded = false;
     
     [Parameter] public List<GuildWidgetDto> Guilds { get; set; }
     
-    public GuildSettingsService _GuildSettingsService = new GuildSettingsService();
-    
-    public List<UnionModel> _models { get; set; }
+    public List<UnionModel> Models { get; set; }
 
     protected override void OnInitialized()
     {
-        var userGuilds = _userService.GetUserGlobalModel().Guilds.Select(model => model.Id).ToHashSet();
+        var userGuilds = UserService.GetGuilds().Select(model => model.Id).ToHashSet();
         
-        var list = _GuildSettingsService.Get()
+        var list = GuildSettingsMongoService.Get()
             .Where(model => model.IsPublic 
                             || model.ForceVerified ||
                 userGuilds.Contains(model.GuildId))
@@ -66,7 +62,7 @@ else
             .Select(model => new UnionModel(model)).ToList();
 
 
-        _models = list;
+        Models = list;
 
         _loaded = true;
         base.OnInitialized();

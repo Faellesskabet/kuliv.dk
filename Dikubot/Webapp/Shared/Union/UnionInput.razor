@@ -1,0 +1,35 @@
+﻿@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.DataLayer.Database.Global.Union
+
+<MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5">Association: @Value.Title </MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudForm FieldChanged="OnValueChanged">
+                        <MudTextField @bind-Value="@Value.Title" Label="Association Name" Immediate="@true" MaxLength="64" Disabled="Disable" Required="true"/>
+                        <MudTextField @bind-Value="@Value.LogoUrl" Label="LogoUrl" Immediate="@true" MaxLength="4096"  Disabled="Disable"/>
+                        <TagsInput @bind-Value="@Value.TagsEnumerable"></TagsInput>
+                        <MudTextField @bind-Value="@Value.Decs" Label="Description" Lines="3" Immediate="@true"MaxLength="4096" Variant="Variant.Outlined"  Disabled="Disable"/>
+                        <MudTextField @bind-Value="@Value.Facebook" Label="Facebook" Immediate="@true" MaxLength="4096" Variant="Variant.Outlined"  Disabled="Disable"/>
+                        <MudTextField @bind-Value="@Value.Href" Label="Hjemmeside" Immediate="@true" MaxLength="4096" Variant="Variant.Outlined"  Disabled="Disable"/>
+                        <MudTextField @bind-Value="@Value.Mail" Label="Mail" Immediate="@true" MaxLength="4096" Variant="Variant.Outlined"  Disabled="Disable"/>
+                    </MudForm>
+                </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public UnionModel Value { get; set; }
+
+    [Parameter]
+    public EventCallback<UnionModel> ValueChanged { get; set; }
+
+    [Parameter]
+    public bool Disable { get; set; } = false;
+    
+    private async Task OnValueChanged()
+    {
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

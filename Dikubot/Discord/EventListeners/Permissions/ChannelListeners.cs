@@ -22,7 +22,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(voiceChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(voiceChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(voiceChannel.Guild);
                 permissionsService.AddOrUpdateDatabaseVoiceChannel(voiceChannel);
             }
             else if (channel is SocketTextChannel)
@@ -32,7 +32,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(textChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(textChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(textChannel.Guild);
                 permissionsService.AddOrUpdateDatabaseTextChannel(textChannel);
             }
             else if (channel is SocketCategoryChannel)
@@ -42,7 +42,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(categoryChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(categoryChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(categoryChannel.Guild);
                 permissionsService.AddOrUpdateDatabaseCategoryChannel(categoryChannel);
             }
         }
@@ -62,7 +62,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(voiceChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(voiceChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(voiceChannel.Guild);
                 permissionsService.RemoveDatabaseVoiceChannel(voiceChannel);
             }
             else if (channel is SocketTextChannel)
@@ -72,7 +72,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(textChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(textChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(textChannel.Guild);
                 permissionsService.RemoveDatabaseTextChannel(textChannel);
             }
             else if (channel is SocketCategoryChannel)
@@ -82,7 +82,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(categoryChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(categoryChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(categoryChannel.Guild);
                 permissionsService.RemoveDatabaseCategoryChannel(categoryChannel);
             }
         }
@@ -103,7 +103,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(voiceChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(voiceChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(voiceChannel.Guild);
                 permissionsService.AddOrUpdateDatabaseVoiceChannel(voiceChannel);
             }
             else if (channelAfter is SocketTextChannel)
@@ -113,7 +113,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(textChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(textChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(textChannel.Guild);
                 permissionsService.AddOrUpdateDatabaseTextChannel(textChannel);
             }
             else if (channelAfter is SocketCategoryChannel)
@@ -123,7 +123,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
                 if (await util.IsBotFirstEntryInAuditLog(categoryChannel.Guild))
                     return;
 
-                permissionsService = new PermissionsService(categoryChannel.Guild);
+                permissionsService = _permissionServiceFactory.Get(categoryChannel.Guild);
                 permissionsService.AddOrUpdateDatabaseCategoryChannel(categoryChannel);
             }
         }

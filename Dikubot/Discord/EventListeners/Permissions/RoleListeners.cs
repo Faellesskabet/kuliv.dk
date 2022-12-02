@@ -16,7 +16,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
             if (await util.IsBotFirstEntryInAuditLog(role.Guild))
                 return;
 
-            var permissionsServices = new PermissionsService(role.Guild);
+            var permissionsServices = _permissionServiceFactory.Get(role.Guild);
             permissionsServices.AddOrUpdateDatabaseRole(role);
         }
 
@@ -30,7 +30,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
             if (await util.IsBotFirstEntryInAuditLog(role.Guild))
                 return;
 
-            var permissionsServices = new PermissionsService(role.Guild);
+            var permissionsServices = _permissionServiceFactory.Get(role.Guild);
             permissionsServices.RemoveDatabaseRole(role);
         }
 
@@ -45,7 +45,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
             if (await util.IsBotFirstEntryInAuditLog(roleAfter.Guild))
                 return;
 
-            var permissionsServices = new PermissionsService(roleAfter.Guild);
+            var permissionsServices = _permissionServiceFactory.Get(roleAfter.Guild);
             permissionsServices.AddOrUpdateDatabaseRole(roleAfter);
         }
     }

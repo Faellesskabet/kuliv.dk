@@ -8,26 +8,14 @@ namespace Dikubot.DataLayer.Caching
     /// This cache is unreliable in the sense that items are not cached individually, meaning items are cached between x and y minutes, instead of a constant amount of time.
     /// The reason the cache is implemented like this is really just because I thought it was a fun way of implementing cache
     /// </summary>
-    public class Cache<TKey, TValue>
+    public class Cache<TKey, TValue> : CronTask
     {
-        private int _swap;
+        private readonly int _swap = 30;
         private CronTask _cronTask;
         private Scheduler _scheduler = new Scheduler();
-
         
-        private Dictionary<TKey, TValue> activeStorage = new Dictionary<TKey, TValue>();
+        private readonly Dictionary<TKey, TValue> activeStorage = new Dictionary<TKey, TValue>();
         private Dictionary<TKey, TValue> inactiveStorage = new Dictionary<TKey, TValue>();
-
-        /// <summary>
-        /// Initialize a cache. Cached items will be cached for at least swap minutes, and at most 2 times swap minutes
-        /// </summary>
-        /// <param name="swap">Cached items will be cached for at least swap minutes, and at most 2 times swap minutes</param>
-        public Cache()
-        {
-            _swap = 30;
-            _cronTask = new CronTask(CronExpression.Parse($"*/{_swap} * * * *"), Swap);
-
-        }
         
         /// <summary>
         /// Swap simply switches the inactive and active storage
@@ -109,9 +97,16 @@ namespace Dikubot.DataLayer.Caching
             get => GetValue(key);
             set => SetValue(key, value);
         }
-        
-        
-        
-        
+
+
+        protected override CronExpression CronExpression()
+        {
+            return Cronos.CronExpression.Parse($"*/{_swap} * * * *");
+        }
+
+        public override void RunTask()
+        {
+            this.Swap();
+        }
     }
 }

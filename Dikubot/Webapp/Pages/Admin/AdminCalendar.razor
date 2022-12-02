@@ -1,0 +1,115 @@
+﻿@page "/admin/calendar"
+
+@using Dikubot.Webapp.Authentication
+@using System.Net.Http.Json
+@using Dikubot.DataLayer.Database.Global.Calendar
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar
+@using Dikubot.Discord
+@using Dikubot.Webapp.Shared.Dialog
+@using global::Discord.WebSocket
+@using Microsoft.IdentityModel.Tokens
+@inject CalendarMongoService CalendarMongoService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+
+<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<CalendarModel>>>(Reload))" @ref="_table"
+          Loading="@_loading">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
+        <MudSpacer />
+        <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Navn</MudTh>
+        <MudTh>Beskrivelse</MudTh>
+        <MudTh>Synlighed</MudTh>
+        <MudTh>CalendarType</MudTh>
+        <MudTh>Indstillinger</MudTh>
+        <MudTh>Slet</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Navn">@context.Name</MudTd>
+        <MudTd DataLabel="Beskrivelse">@context.Decs</MudTd>
+        <MudTd DataLabel="Visible">@context.Visible</MudTd>
+        <MudTd DataLabel="CalendarType">@context.CalendarType</MudTd>
+        <MudTd DataLabel="Indstillinger">
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/admin/calendar/edit/{@context.Id.ToString()}")>Rediger</MudButton>
+        </MudTd>
+        <MudTd DataLabel="Slet">
+            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>Kunne ikke finde nogen elementer</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <Loading></Loading>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+<div class="d-flex flex-wrap mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" Link="/admin/calendar/create">Tilføj ny kategori</MudButton>
+</div>
+
+@code {
+
+    [Inject] private IDialogService DialogService { get; set; }
+    
+    private MudTable<CalendarModel> _table;
+    private string _searchQuery = "";
+    private UserGlobalModel _userGlobalModel;
+    private SocketGuild _guild;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _userGlobalModel.GetSelectedGuild();
+        _loading = false;
+    }
+
+    private async Task<TableData<CalendarModel>> Reload(TableState state)
+    {
+        List<CalendarModel> items;
+        if (!_searchQuery.IsNullOrEmpty())
+        {
+            items = CalendarMongoService.Get(model => model.Name.Contains(_searchQuery) || model.Decs.Contains(_searchQuery),
+                    state.PageSize, state.Page);   
+        }
+        else
+        {
+            items = CalendarMongoService.Get(state.PageSize, state.Page);   
+        }
+
+        return new TableData<CalendarModel>() { Items = items, TotalItems = (int)CalendarMongoService.EstimatedCount()};
+    }
+    
+    private void OnSearch(string text)
+    {
+        _searchQuery = text;
+        _table.ReloadServerData();
+    }
+
+    private async void DeleteCategory(CalendarModel joinRoleCategoryMainModel)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
+        parameters.Add("ButtonText", "Slet");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        CalendarMongoService.Remove(joinRoleCategoryMainModel);
+        await _table.ReloadServerData();
+    }
+    
+}

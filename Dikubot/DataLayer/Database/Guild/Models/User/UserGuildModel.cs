@@ -40,16 +40,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.User
             set => _roles = new HashSet<UserRoleModel>(value);
         }
         
-        public bool HasRole(string name, SocketGuild guild)
+        public bool HasRole(ulong roleId, RoleMongoService roleMongoService)
         {
-            RoleServices services = new RoleServices(guild);
-            return _roles.Any(model =>
-                String.Equals(services.Get(model.RoleId)?.Name, name, StringComparison.CurrentCultureIgnoreCase));
-        }
-
-        public bool HasRole(ulong roleId, SocketGuild guild)
-        {
-            return _roles.Any(model => Convert.ToUInt64(model.GetRoleModel(guild).DiscordId) == roleId);
+            return _roles.Any(model => Convert.ToUInt64(roleMongoService.Get(model.RoleId).DiscordId) == roleId);
         }
         
         public bool HasRole(Guid guid)

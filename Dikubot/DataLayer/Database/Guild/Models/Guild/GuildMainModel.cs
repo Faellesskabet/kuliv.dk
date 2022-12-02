@@ -17,7 +17,7 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Guild
         [BsonElement("Options")] public GuildOptions Options { get; set; }
         
         //MAIN THING
-        private IGuild _guildImplementation;
+        private readonly IGuild _guildImplementation;
         
         
         public GuildMainModel(SocketGuild guildImplementation)

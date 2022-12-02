@@ -4,7 +4,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject UserService _user;
-@namespace Dikubot.Extensions.Guild
+@inject UserGlobalMongoService UserGlobalMongoService
 
 @if (IsMember)
         {
@@ -33,7 +33,7 @@
 
         UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
         userGlobalModel.SelectedGuild = GuildID;
-        new UserGlobalServices().Upsert(userGlobalModel);
+        UserGlobalMongoService.Upsert(userGlobalModel);
         await ((Authenticator) AuthenticationStateProvider).UpdateSession();
         
         

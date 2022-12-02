@@ -5,6 +5,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
 @inject UserService _userService;
+@inject UserGlobalMongoService UserGlobalMongoService
 
 <h3>Skifter fællesskab ...</h3>
 
@@ -15,7 +16,7 @@
     {
         UserGlobalModel userGlobalModel = _userService.GetUserGlobalModel();
         userGlobalModel.SelectedGuild = 0;
-        new UserGlobalServices().Upsert(userGlobalModel);
+        UserGlobalMongoService.Upsert(userGlobalModel);
         App.UserHasChange();
         NavigationManager.NavigateTo("/");
         this.StateHasChanged();

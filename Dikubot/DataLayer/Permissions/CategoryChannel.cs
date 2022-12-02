@@ -15,7 +15,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <return>void.</return>
         public void SetDatabaseCategoryChannels()
         {
-            var categoryChannelModels = _categoryChannelServices.Get();
+            var categoryChannelModels = _categoryChannelMongoService.Get();
             var socketCategories = guild.CategoryChannels.ToList();
             var discordRoleIds = new HashSet<ulong>(socketCategories.Select(role => role.Id));
             var toBeRemoved = categoryChannelModels.Where(model => !discordRoleIds.Contains(UInt64.Parse(model.DiscordId))).ToList();
@@ -28,18 +28,18 @@ namespace Dikubot.DataLayer.Permissions
                 socketCategories.Exists(n => inDB(m, n)));
 
             // Remove the category channels from the database that is not on the discord server.
-            toBeRemoved.ForEach(m => _categoryChannelServices.Remove(m));
+            toBeRemoved.ForEach(m => _categoryChannelMongoService.Remove(m));
 
             // Makes an upsert of the category channels on the server so they match the ones in the database.
             socketCategories.ForEach(model =>
-                _categoryChannelServices.Upsert(_categoryChannelServices.SocketToModel(model)));
+                _categoryChannelMongoService.Upsert(_categoryChannelMongoService.SocketToModel(model)));
         }
 
         /// <Summary>Will sync all the category channels on the database to the discord server.</Summary>
         /// <return>void.</return>
         public async void SetDiscordCategoryChannels()
         {
-            var categoryChannelModels = _categoryChannelServices.Get();
+            var categoryChannelModels = _categoryChannelMongoService.Get();
             var socketCategoryChannels = guild.CategoryChannels.ToList();
             var toBeRemoved = new List<SocketCategoryChannel>(socketCategoryChannels);
 
@@ -62,7 +62,7 @@ namespace Dikubot.DataLayer.Permissions
                 if (socketCategoryChannel == null)
                 {
                     // If the category channel could not be found create it.
-                    var properties = _categoryChannelServices.ModelToCategoryChannelProperties(categoryChannelModel);
+                    var properties = _categoryChannelMongoService.ModelToCategoryChannelProperties(categoryChannelModel);
                     var restCategoryChannel = await guild.CreateCategoryChannelAsync(
                         categoryChannelModel.Name,
                         channelProperties =>
@@ -88,7 +88,7 @@ namespace Dikubot.DataLayer.Permissions
                 else
                 {
                     // If the category channel could be found modify it so it matches the database.
-                    var properties = _categoryChannelServices.ModelToCategoryChannelProperties(categoryChannelModel);
+                    var properties = _categoryChannelMongoService.ModelToCategoryChannelProperties(categoryChannelModel);
                     await socketCategoryChannel.ModifyAsync(channelProperties =>
                     {
                         channelProperties.Position = properties.Position;
@@ -116,34 +116,34 @@ namespace Dikubot.DataLayer.Permissions
         /// <Summary>Add a category channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseCategoryChannel(SocketCategoryChannel categoryChannel) =>
-            _categoryChannelServices.Upsert(_categoryChannelServices.SocketToModel(categoryChannel));
+            _categoryChannelMongoService.Upsert(_categoryChannelMongoService.SocketToModel(categoryChannel));
 
 
         /// <Summary>Add a category channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseCategoryChannel(RestCategoryChannel categoryChannel) =>
-            _categoryChannelServices.Upsert(_categoryChannelServices.RestToModel(categoryChannel));
+            _categoryChannelMongoService.Upsert(_categoryChannelMongoService.RestToModel(categoryChannel));
 
 
         /// <Summary>Add a category channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseCategoryChannel(CategoryChannelMainModel categoryChannelMain) =>
-            _categoryChannelServices.Remove(categoryChannelMain);
+            _categoryChannelMongoService.Remove(categoryChannelMain);
 
         /// <Summary>Removes a category channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseCategoryChannel(SocketCategoryChannel categoryChannel) =>
-            _categoryChannelServices.Remove(_categoryChannelServices.SocketToModel(categoryChannel));
+            _categoryChannelMongoService.Remove(_categoryChannelMongoService.SocketToModel(categoryChannel));
 
         /// <Summary>Removes a category channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseCategoryChannel(RestCategoryChannel categoryChannel) =>
-            _categoryChannelServices.Remove(_categoryChannelServices.RestToModel(categoryChannel));
+            _categoryChannelMongoService.Remove(_categoryChannelMongoService.RestToModel(categoryChannel));
 
         /// <Summary>Removes a category channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseCategoryChannel(CategoryChannelMainModel categoryChannelMain) =>
-            _categoryChannelServices.Remove(categoryChannelMain);
+            _categoryChannelMongoService.Remove(categoryChannelMain);
 
         /// <Summary>Removes a category channel from the database and the discord server.</Summary>
         /// <return>void.</return>
@@ -173,7 +173,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <return>void.</return>
         public async Task<CategoryChannelMainModel> AddCategoryChannel(CategoryChannelMainModel categoryChannelMain)
         {
-            var properties = _categoryChannelServices.ModelToCategoryChannelProperties(categoryChannelMain);
+            var properties = _categoryChannelMongoService.ModelToCategoryChannelProperties(categoryChannelMain);
             var restCategoryChannel = await guild.CreateCategoryChannelAsync(
                 categoryChannelMain.Name,
                 channelProperties =>

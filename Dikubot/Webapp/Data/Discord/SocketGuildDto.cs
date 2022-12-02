@@ -1,6 +1,6 @@
 using Discord.WebSocket;
 
-namespace Data.Discord;
+namespace Dikubot.Webapp.Data.Discord;
 
 /// <summary>
 /// It annoys me that this is the only workaround I could find

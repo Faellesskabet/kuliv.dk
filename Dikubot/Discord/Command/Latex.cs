@@ -1,15 +1,14 @@
 using System;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 
 namespace Dikubot.Discord.Command
 {
-    public class Latex : ModuleBase<SocketCommandContext>
+    public class Latex : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("latex")]
-        [Summary("Latex to image")]
-        public async Task HelpCommand([Remainder] string latex)
+        [SlashCommand("latex", "Latex to image")]
+        public async Task HelpCommand([Summary(description:"Latex to be rendered as an image")] params string[] latex)
         {
             try {
                 var embed = new EmbedBuilder();

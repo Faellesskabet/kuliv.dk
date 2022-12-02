@@ -15,7 +15,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <return>void.</return>
         public void SetDatabaseTextChannels()
         {
-            var textChannelModels = _textChannelServices.Get();
+            var textChannelModels = _textChannelMongoService.Get();
             var socketRoles = guild.TextChannels.ToList();
             var discordRoleIds = new HashSet<ulong>(socketRoles.Select(role => role.Id));
             var toBeRemoved = textChannelModels.Where(model => !discordRoleIds.Contains(UInt64.Parse(model.DiscordId))).ToList();
@@ -28,18 +28,18 @@ namespace Dikubot.DataLayer.Permissions
                 socketRoles.Exists(n => inDB(m, n)));
 
             // Remove the text channels from the database that is not on the discord server.
-            toBeRemoved.ForEach(m => _textChannelServices.Remove(m));
+            toBeRemoved.ForEach(m => _textChannelMongoService.Remove(m));
 
             // Makes an upsert of the text channels on the server so they match the ones in the database.
             socketRoles.ForEach(model =>
-                _textChannelServices.Upsert(_textChannelServices.SocketToModel(model)));
+                _textChannelMongoService.Upsert(_textChannelMongoService.SocketToModel(model)));
         }
 
         /// <Summary>Will sync all the text channels on the database to the discord server.</Summary>
         /// <return>void.</return>
         public async void SetDiscordTextChannels()
         {
-            var textChannelModels = _textChannelServices.Get();
+            var textChannelModels = _textChannelMongoService.Get();
             var socketTextChannels = guild.TextChannels.ToList();
             var toBeRemoved = new List<SocketTextChannel>(socketTextChannels);
 
@@ -61,7 +61,7 @@ namespace Dikubot.DataLayer.Permissions
                 if (socketTextChannel == null)
                 {
                     // If the text channel could not be found create it.
-                    var properties = _textChannelServices.ModelToTextChannelProperties(textChannelModel);
+                    var properties = _textChannelMongoService.ModelToTextChannelProperties(textChannelModel);
                     var restTextChannel = await guild.CreateTextChannelAsync(
                         textChannelModel.Name,
                         channelProperties =>
@@ -91,7 +91,7 @@ namespace Dikubot.DataLayer.Permissions
                 else
                 {
                     // If the text channel could be found modify it so it matches the database.
-                    var properties = _textChannelServices.ModelToTextChannelProperties(textChannelModel);
+                    var properties = _textChannelMongoService.ModelToTextChannelProperties(textChannelModel);
                     await socketTextChannel.ModifyAsync(channelProperties =>
                     {
                         channelProperties.Position = properties.Position;
@@ -122,32 +122,32 @@ namespace Dikubot.DataLayer.Permissions
         /// <Summary>Add a text channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseTextChannel(SocketTextChannel textChannel) =>
-            _textChannelServices.Upsert(_textChannelServices.SocketToModel(textChannel));
+            _textChannelMongoService.Upsert(_textChannelMongoService.SocketToModel(textChannel));
 
         /// <Summary>Add a text channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseTextChannel(RestTextChannel textChannel) =>
-            _textChannelServices.Upsert(_textChannelServices.RestToModel(textChannel));
+            _textChannelMongoService.Upsert(_textChannelMongoService.RestToModel(textChannel));
 
         /// <Summary>Add a text channel on the discord server to the database.</Summary>
         /// <return>void.</return>
         public void AddOrUpdateDatabaseTextChannel(TextChannelMainModel textChannelMain) =>
-            _textChannelServices.Upsert(textChannelMain);
+            _textChannelMongoService.Upsert(textChannelMain);
 
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseTextChannel(SocketTextChannel textChannel) =>
-            _textChannelServices.Remove(_textChannelServices.SocketToModel(textChannel));
+            _textChannelMongoService.Remove(_textChannelMongoService.SocketToModel(textChannel));
 
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseTextChannel(RestTextChannel textChannel) =>
-            _textChannelServices.Remove(_textChannelServices.RestToModel(textChannel));
+            _textChannelMongoService.Remove(_textChannelMongoService.RestToModel(textChannel));
 
         /// <Summary>Removes a text channel from the database.</Summary>
         /// <return>void.</return>
         public void RemoveDatabaseTextChannel(TextChannelMainModel textChannelMain) =>
-            _textChannelServices.Remove(textChannelMain);
+            _textChannelMongoService.Remove(textChannelMain);
 
         /// <Summary>Removes a text channel from the database and the discord server.</Summary>
         /// <return>void.</return>
@@ -177,7 +177,7 @@ namespace Dikubot.DataLayer.Permissions
         /// <return>void.</return>
         public async Task<TextChannelMainModel> AddTextChannel(TextChannelMainModel textChannelMain)
         {
-            var properties = _textChannelServices.ModelToTextChannelProperties(textChannelMain);
+            var properties = _textChannelMongoService.ModelToTextChannelProperties(textChannelMain);
             var restTextChannel = await guild.CreateTextChannelAsync(
                 textChannelMain.Name,
                 channelProperties =>

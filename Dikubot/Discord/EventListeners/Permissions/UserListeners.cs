@@ -19,7 +19,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
             if (await util.IsBotFirstEntryInAuditLog(user.Guild))
                 return;
 
-            var permissionsServices = new PermissionsService(user.Guild);
+            var permissionsServices = _permissionServiceFactory.Get(user.Guild);
             permissionsServices.AddOrUpdateDatabaseUser(user);
             permissionsServices.SetDiscordUserRoles(user);
         }
@@ -34,15 +34,14 @@ namespace Dikubot.Discord.EventListeners.Permissions
             if (await util.IsBotFirstEntryInAuditLog(socketGuild))
                 return;
 
-            UserGuildServices userGuildServices = new UserGuildServices(socketGuild);
-            UserGlobalServices userGlobalServices = new UserGlobalServices();
-            UserGlobalModel userGlobalModel = userGlobalServices.Get(socketUser);
+            UserGuildMongoService userGuildMongoService = _guildMongoFactory.Get<UserGuildMongoService>(socketGuild);
+            UserGlobalModel userGlobalModel = _userGlobalMongoService.Get(socketUser);
             if (userGlobalModel.SelectedGuild == socketGuild.Id)
             {
                 userGlobalModel.SelectedGuild = 0;
-                userGlobalServices.Upsert(userGlobalModel);
+                _userGlobalMongoService.Upsert(userGlobalModel);
             }
-            userGuildServices.Remove(model => Equals(model.DiscordId, socketUser.Id));
+            userGuildMongoService.Remove(model => Equals(model.DiscordId, socketUser.Id));
         }
 
         /// <Summary>When a user gets edited it will be updated in the database.</Summary>
@@ -57,7 +56,7 @@ namespace Dikubot.Discord.EventListeners.Permissions
             //if (await util.IsBotFirstEntryInAuditLog(userAfter.Guild))
             //    return;
 
-            var permissionsServices = new PermissionsService(userAfter.Guild);
+            var permissionsServices = _permissionServiceFactory.Get(userAfter.Guild);
             permissionsServices.AddOrUpdateDatabaseUser(userAfter);
         }
     }

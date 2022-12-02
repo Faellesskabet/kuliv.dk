@@ -7,6 +7,13 @@ namespace Dikubot.Discord.EventListeners;
 
 public class GreetingListener
 {
+    private readonly GuildSettingsMongoService _guildSettingsMongoService;
+
+    public GreetingListener(GuildSettingsMongoService guildSettingsMongoService)
+    {
+        _guildSettingsMongoService = guildSettingsMongoService;
+    }
+
     public async Task UserJoined(SocketGuildUser user)
     {
         if (user.MutualGuilds.Count == 1)
@@ -17,9 +24,8 @@ public class GreetingListener
                 $"Du kan finde andre KU relaterede netværk, få hjælp til Discord, " +
                 $"vælge roller, bekræfte at du går på KU og meget mere på vores hjemmeside https://kuliv.dk/");
         }
-
-        GuildSettingsService guildSettingsService = new GuildSettingsService();
-        GuildSettingsModel guildSettingsModel = guildSettingsService.Get(user.Guild);
+        
+        GuildSettingsModel guildSettingsModel = _guildSettingsMongoService.Get(user.Guild);
 
         if (!guildSettingsModel.WelcomeMessageEnabled)
         {

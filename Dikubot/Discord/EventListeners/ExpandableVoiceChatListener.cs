@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.VoiceChannel;
 using Dikubot.DataLayer.Permissions;
 using Discord.WebSocket;
@@ -10,6 +11,14 @@ namespace Dikubot.Discord.EventListeners
 {
     public class ExpandableVoiceChatListener
     {
+        
+        private readonly IGuildMongoFactory _guildMongoFactory;
+
+        public ExpandableVoiceChatListener(IGuildMongoFactory guildMongoFactory)
+        {
+            _guildMongoFactory = guildMongoFactory;
+        }
+
         /// <Summary>Will delete all the empty channels.</Summary>
         /// <param name="channel">The channel that will be deleted from.</param>
         /// <return>Task.</return>
@@ -19,8 +28,8 @@ namespace Dikubot.Discord.EventListeners
                 return;
 
             var guild = channel.Guild;
-            var voiceChannelServices = new VoiceChannelServices(guild);
-            var permissionsService = new PermissionsService(guild);
+            var voiceChannelServices = _guildMongoFactory.Get<VoiceChannelMongoService>(guild);
+            var permissionsService = _guildMongoFactory.Get<PermissionsService>(guild);
             var channelModel = voiceChannelServices.Get(m => m.DiscordId == channel.Id.ToString());
 
             if (!channelModel.ExpandOnJoin.GetValueOrDefault())
@@ -60,7 +69,7 @@ namespace Dikubot.Discord.EventListeners
             }
             
             // ToDo: får en fejl System.NullReferenceException: Object reference not set to an instance of an object.
-            var voiceChannelServices = new VoiceChannelServices(channel.Guild);
+            var voiceChannelServices = _guildMongoFactory.Get<VoiceChannelMongoService>(channel.Guild);
 
             // If channel is null return.
             
@@ -92,7 +101,7 @@ namespace Dikubot.Discord.EventListeners
             }
 
             // Adds the voice channel to the database and server.
-            var permissionsService = new PermissionsService(channel.Guild);
+            var permissionsService = _guildMongoFactory.Get<PermissionsService>(channel.Guild);
             await permissionsService.AddVoiceChannel(childModel);
         }
 

@@ -3,9 +3,11 @@
 @using Dikubot.Discord
 @using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Global.Tags
 @using Dikubot.DataLayer.Static
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject GuildSettingsMongoService GuildSettingsMongoService
+@inject TagMongoService TagMongoService
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
 
 @if (!_loaded)
@@ -32,7 +34,7 @@ else
                            HelperText="Så Folk lettere kan finde din server"
                            @bind-SelectedValues="_guildSettingsModel.TagsEnumerable"
                            MultiSelectionTextFunc="list => GetTagsString(_guildSettingsModel)" Text="@GetTagsString(_guildSettingsModel)">
-                    @foreach (var tag in _tagServices.GetAll())
+                    @foreach (var tag in TagMongoService.GetAll())
                     {
                         <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
                     }
@@ -77,9 +79,7 @@ else
     private SocketGuild guild;
     private bool _loaded = false;
     private GuildSettingsModel _guildSettingsModel;
-    private GuildSettingsService _guildSettingsService;
-    private readonly TagServices _tagServices = new TagServices();
-    
+
     [Inject] private IDialogService DialogService { get; set; }
     
     
@@ -93,26 +93,25 @@ else
             return;
         }
         guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
-        _guildSettingsService = new GuildSettingsService();
-        _guildSettingsModel = _guildSettingsService.Get(guild);
+        _guildSettingsModel = GuildSettingsMongoService.Get(guild);
         _loaded = true;
     }
 
     private async void saveSettings()
     {
-        _guildSettingsService.Upsert(_guildSettingsModel);
+        GuildSettingsMongoService.Upsert(_guildSettingsModel);
         await DialogService.ShowMessageBox("Ændringer gemt", "Dine ændringer er blevet gemt. Der kan gå nogle timer før alle ændringer ses.", "Bekræft");
     }
 
     private async void discardSettings()
     {
-        _guildSettingsModel = _guildSettingsService.Get(guild);
+        _guildSettingsModel = GuildSettingsMongoService.Get(guild);
         await DialogService.ShowMessageBox("Ændringer slettet", "Dine ændringer er blevet slettet", "Bekræft");   
     }
 
     private string GetTagsString(GuildSettingsModel model)
     {
-        return Util.ConcatListToString(model.GetTags().Select(tag => tag?.Name ?? "").ToList());
+        return Util.ConcatListToString(model.Tags.Select(t => TagMongoService.Get(t)).ToList().Select(tag => tag?.Name ?? "").ToList());
     }
     
 }

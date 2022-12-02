@@ -12,7 +12,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IConfiguration Configuration
-@inject IJSRuntime jsRuntime
+@inject IJSRuntime JsRuntime
 @using Microsoft.Net.Http
 @using Microsoft.AspNetCore.Mvc;
 @using Microsoft.Extensions.Options
@@ -34,9 +34,10 @@
 @using Color = MudBlazor.Color
 
 @inject NavigationManager Navigation;
-@inject IHttpContextAccessor httpContextAccessor;
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject UserGlobalMongoService UserGlobalMongoService;
 
-@if ((discordUser == null || !discordUser.HasClaim(claim => claim.Issuer == "Discord")) && !loading)
+@if ((_discordUser == null || !_discordUser.HasClaim(claim => claim.Issuer == "Discord")) && !_loading)
 {
     <MudCard>
         <MudCardHeader>
@@ -83,7 +84,7 @@
         </MudCardActions>
     </MudCard>
 }
-else if(!loading)
+else if(!_loading)
 {
     <MudCard>
         <MudCardHeader>
@@ -92,7 +93,7 @@ else if(!loading)
             </CardHeaderAvatar>
             <CardHeaderContent>
                  <MudText Typo="Typo.h6">Er dette dig?</MudText>
-                <MudText Typo="Typo.body1">@httpContextAccessor.HttpContext.User.Identity.Name! </MudText>
+                <MudText Typo="Typo.body1">@HttpContextAccessor.HttpContext.User.Identity.Name! </MudText>
             </CardHeaderContent>
         </MudCardHeader>
         <MudCardActions>
@@ -107,27 +108,27 @@ else if(!loading)
 
 @code {
     [Parameter]
-    public Login parent { get; set; }
+    public Login Parent { get; set; }
     
     [Parameter]
     public string AuthCode { get; set; }
 
-    private Authenticator authenticator;
-    private ClaimsPrincipal discordUser;
-    private string client_id, client_secret, redirect_url;
-    private bool loading;
+    private Authenticator _authenticator;
+    private ClaimsPrincipal _discordUser;
+    private string _clientId, _clientSecret, _redirectUrl;
+    private bool _loading;
     private DiscordAuthenticationModel _discordAuthenticationModel;
 
 
     protected override async Task OnInitializedAsync()
     {
-        discordUser = httpContextAccessor.HttpContext?.User;
+        _discordUser = HttpContextAccessor.HttpContext?.User;
     }
 
 
     private async Task RejectDiscord()
     {
-        discordUser = null;
+        _discordUser = null;
         await OnInitializedAsync();
         await InvokeAsync(() => { StateHasChanged(); });
         Navigation.NavigateTo("/Logout", true);
@@ -136,17 +137,16 @@ else if(!loading)
     private async Task ApproveDiscord()
     {
         
-        UserGlobalServices userServices = new UserGlobalServices();
-        var id = ulong.Parse(discordUser.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value).ToString();
+        var id = ulong.Parse(_discordUser.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value).ToString();
 
-        if (!userServices.Exists(model => model.DiscordId == id))
+        if (!UserGlobalMongoService.Exists(model => model.DiscordId == id))
         {
-            UserGlobalModel userModel = userServices.Get(id);
-            userServices.Upsert(userModel);
+            UserGlobalModel userModel = UserGlobalMongoService.Get(id);
+            UserGlobalMongoService.Upsert(userModel);
         }
         
-        await authenticator.UpdateSession();
-        parent.Update();
+        await _authenticator.UpdateSession();
+        Parent.Update();
     }
     
 

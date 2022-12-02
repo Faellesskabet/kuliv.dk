@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Cronos;
 using Dikubot.DataLayer.Caching;
+using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News;
 using Dikubot.DataLayer.Static;
@@ -13,24 +15,31 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs;
 public class CacheNewsMessagesTask: CronTask
 {
 
-    private static Cache<MessageModel, IMessage> _cache;
+    private readonly Cache<MessageModel, IMessage> _cache;
+    private readonly IGuildMongoFactory _guildMongoFactory;
+    
+    public CacheNewsMessagesTask(Cache<MessageModel, IMessage> cache, IGuildMongoFactory guildMongoFactory)
+    {
+        _cache = cache;
+        _guildMongoFactory = guildMongoFactory;
+    }
+
     // */30 * * * *
     /// <summary>
     /// Caches all the latest news messages every 30 minute
     /// </summary>
-    public CacheNewsMessagesTask(Cache<MessageModel, IMessage> cache) : base(
-        Cronos.CronExpression.Parse("*/30 * * * *"), Cache)
+    protected override CronExpression CronExpression()
     {
-        _cache = cache;
+        return Cronos.CronExpression.Parse("*/30 * * * *");
     }
 
-    private static void Cache()
+    public override void RunTask()
     {
         Logger.Debug("Caching latest news");
         foreach (SocketGuild guild in DiscordBot.ClientStatic.Guilds)
         {
-            NewsServices newsServices = new NewsServices(guild);
-            List<MessageModel> messageModels = newsServices.Get(20);
+            NewsMongoServices newsMongoServices = _guildMongoFactory.Get<NewsMongoServices>(guild);
+            List<MessageModel> messageModels = newsMongoServices.Get(20);
             foreach (MessageModel messageModel in messageModels)
             {
                 if (_cache.ContainsKey(messageModel))
@@ -43,7 +52,7 @@ public class CacheNewsMessagesTask: CronTask
                 
                 if (message == null)
                 {
-                    newsServices.Remove(messageModel);
+                    newsMongoServices.Remove(messageModel);
                     continue;
                 }
 

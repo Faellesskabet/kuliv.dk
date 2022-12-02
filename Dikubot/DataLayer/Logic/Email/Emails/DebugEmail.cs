@@ -4,7 +4,7 @@ namespace Dikubot.DataLayer.Logic.Email.Emails
 {
     public class DebugEmail : Email
     {
-        private string errorMessage;
+        private readonly string errorMessage;
         public DebugEmail(string errorMessage)
         {
             this.errorMessage = errorMessage;

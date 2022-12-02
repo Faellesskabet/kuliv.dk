@@ -18,19 +18,19 @@
     <div class="@_growState" style="margin-bottom: 10px; margin-top: 10px;">
         @if (_state == State.ConnectDiscord)
         {
-            <ConnectDiscord parent="@this"/>
+            <ConnectDiscord Parent="@this"/>
         }
         @if (_state == State.ConnectEmail)
         {
-            <ConnectEmail parent="@this"/>
+            <ConnectEmail Parent="@this"/>
         }
         @if (_state == State.ConnectName)
         {
-            <ConnectName parent="@this"/>
+            <ConnectName Parent="@this"/>
         }
         @if (_state == State.SelectGuild)
         {
-            <SelectGuild parent="@this"/>
+            <SelectGuild Parent="@this"/>
         }
         @if (_state == State.NoAccess)
         {

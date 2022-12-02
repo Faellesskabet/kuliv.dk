@@ -34,11 +34,6 @@ namespace Dikubot.DataLayer.Database.Global.Session
             set => _userId = value;
         }
         
-        public UserGlobalModel GetUserModel()
-        {
-            return new UserGlobalServices().Get(this.UserId);
-        }
-
         private DateTime _expires;
 
         [BsonElement("Expires")]

@@ -10,9 +10,16 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
 
-public abstract class MessageService : GuildServices<MessageModel>, IIndexed<MessageModel>
+public abstract class MessageMongoService : GuildMongoService<MessageModel>, IIndexed<MessageModel>
 {
-    public MessageService(string collection, SocketGuild guild) : base(collection, guild) { }
+    private readonly IGuildMongoFactory _guildMongoFactory;
+    private readonly MessageListener _messageListener;
+    public MessageMongoService(Database database, IGuildMongoFactory guildMongoFactory, SocketGuild guild, MessageListener messageListener) : base(
+        database, guild)
+    {
+        _guildMongoFactory = guildMongoFactory;
+        _messageListener = messageListener;
+    }
         
     public MessageModel SocketToModel(SocketMessage textMessage)
     {
@@ -39,9 +46,9 @@ public abstract class MessageService : GuildServices<MessageModel>, IIndexed<Mes
             return;
         }
         SocketGuild guild = channel.Guild;
-        TextChannelServices textChannelServices = new TextChannelServices(guild);
+        TextChannelMongoService textChannelMongoService = _guildMongoFactory.Get<TextChannelMongoService>(guild);
         TextChannelMainModel textChannelMainModel = 
-            textChannelServices.Get(model => model.DiscordId == channel.Id.ToString());
+            textChannelMongoService.Get(model => model.DiscordId == channel.Id.ToString());
         if (textChannelMainModel == null)
         {
             return;
@@ -55,14 +62,14 @@ public abstract class MessageService : GuildServices<MessageModel>, IIndexed<Mes
             {
                 continue;
             }
-            MessageListener.ProcessMessage(message);
+            _messageListener.ProcessMessage(message);
         }
     }
 
     public void DownloadAllMessages()
     {
-        TextChannelServices textChannelServices = new TextChannelServices(Guild);
-        List<TextChannelMainModel> channels = textChannelServices.GetAll(ChannelFilter());
+        TextChannelMongoService textChannelMongoService =  _guildMongoFactory.Get<TextChannelMongoService>(Guild);
+        List<TextChannelMainModel> channels = textChannelMongoService.GetAll(ChannelFilter());
         foreach (var channel in channels)
         {
             DownloadMessagesFromChannel(Guild.GetTextChannel( Convert.ToUInt64(channel.DiscordId)));
