@@ -25,6 +25,7 @@ using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.Tags;
 using Dikubot.DataLayer.Database.Global.Union;
+using Dikubot.DataLayer.Database.Global.Union.Request;
 using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
@@ -87,6 +88,7 @@ namespace Dikubot.Webapp
             services.AddSingleton<SessionMongoService>();
             services.AddSingleton<GuildSettingsMongoService>();
             services.AddSingleton<UnionMongoService>();
+            services.AddSingleton<UnionRequestMongoService>();
             services.AddSingleton<TagMongoService>();
             services.AddSingleton<GuildCalendarMongoService>();
             services.AddSingleton<EventsMongoService>();
