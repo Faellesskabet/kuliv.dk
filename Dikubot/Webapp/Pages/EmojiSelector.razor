@@ -243,8 +243,8 @@
     
     protected override async Task OnInitializedAsync()
     {
-        string EmojisString = File.ReadAllText("Webapp/Extensions/EmojiSelector/full-emoji-list.json");
-            //;Dikubot/Webapp/Extensions/EmojiSelector/full-emoji-list.json
+        string EmojisString = File.ReadAllText("Webapp/wwwroot/misc/full-emoji-list.json");
+            //;Dikubot/Webapp/wwwroot/misc/full-emoji-list.json
         myDeserializedClass = JsonConvert.DeserializeObject<Emojis>(EmojisString);
         smileyList = myDeserializedClass.SmileysPeople.ToDictionary(model => model.emoji, model => model.description);
         animalsList = myDeserializedClass.AnimalsNature.ToDictionary(model => model.emoji, model => model.description);
