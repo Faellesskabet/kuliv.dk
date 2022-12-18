@@ -147,13 +147,24 @@ namespace Dikubot.DataLayer.Database
         /// <returns></returns>
         public List<TModel> Get(Expression<Func<TModel, bool>> filter, int count, int page) =>
             Get(filter, count, page, null);
+        
+        /// <summary>
+        /// Get the nth first element of page count that matches the filter.
+        /// The pages have the size of count. So if page = 3, and count = 10, then it'll skip the 30 first elements.
+        /// </summary>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
+        /// model.Id == id)</param>
+        /// <param name="count">The maximal amount of elements that will be returned. The method will only return as many elements as fit the filter.</param>
+        /// <param name="page">The page specifies how many elements will be skipped. Page size is page number multiplied by count.</param>
+        /// <param name="sortBy">The sortBy specifies determines SortBy.</param>
+        /// <returns></returns>
         public List<TModel> Get(Expression<Func<TModel, bool>> filter, int count, int page, Expression<Func<TModel, object>> sortBy)
         {
             try
             {
                 if (sortBy != null)
                 {
-                    return _collection.Find(filter).SortByDescending(sortBy).Skip(count * page).Limit(count).ToList();
+                    return _collection.Find(filter).SortBy(sortBy).Skip(count * page).Limit(count).ToList();
                 }
                 return _collection.Find(filter).Skip(count * page).Limit(count).ToList();
             }
@@ -174,9 +185,34 @@ namespace Dikubot.DataLayer.Database
         /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
         /// model.Id == id)</param>
         /// <return>A list of some Model type.</return>
-        public List<TModel> GetAll(Expression<Func<TModel, bool>> filter) =>
-            _collection.Find<TModel>(filter).ToList();
+        public List<TModel> GetAll(Expression<Func<TModel, bool>> filter) => GetAll(filter, null);
+            
 
+        /// <Summary>Retrieves a list of elements in the collection based on a custom filter and Sortring</Summary>
+        /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
+        /// model.Id == id)</param>
+        /// <param name="sortBy">The sortBy specifies determines SortBy.</param>
+        /// <return>A list of some Model type.</return>
+        public virtual List<TModel> GetAll(Expression<Func<TModel, bool>> filter, Expression<Func<TModel, object>> sortBy)
+        {
+            try
+            {
+                if (sortBy != null)
+                {
+                    return _collection.Find(filter).SortBy(sortBy).ToList();
+                }
+                return _collection.Find(filter).ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            return new List<TModel>();
+        }
+
+        
+        
         /// <Summary>Returns whether there exists which fits the filter</Summary>
         /// <param name="filter">The filter is what determines what is returned. Example of a  filter is: (model =>
         /// model.Id == id)</param>
@@ -205,6 +241,7 @@ namespace Dikubot.DataLayer.Database
             }
 
             Insert(model);
+            
             return model;
         }
 
