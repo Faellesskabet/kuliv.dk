@@ -37,7 +37,7 @@ public class VerifyUser : ModuleBase<SocketCommandContext>
             return;
         }
 
-        UserGlobalModel userModel = new UserGlobalModel();
+        UserGlobalModel userModel = userGlobalServices.Get(userId);
         userModel.DiscordIdLong = user.Id;
         userModel.Email = email;
         userModel.Verified = true;
