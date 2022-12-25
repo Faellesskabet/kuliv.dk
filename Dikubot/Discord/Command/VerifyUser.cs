@@ -56,6 +56,6 @@ public class VerifyUser : ModuleBase<SocketCommandContext>
         }
         
         
-        await ReplyAsync($"User with ID {user.Id} and name {user.Username} has been verified with email ${email}");
+        await ReplyAsync($"User with ID {user.Id} and name {user.Username} has been verified with email {email}");
     }
 }
