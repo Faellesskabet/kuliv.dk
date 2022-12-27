@@ -1,4 +1,3 @@
-using System;
 using Cronos;
 using Dikubot.DataLayer.Database.Global.Session;
 
@@ -12,11 +11,11 @@ public class ClearExpiredSessionsTask : CronTask
     {
         _sessionMongoService = sessionMongoService;
     }
-    
+
 
     // 0 0 */1 * *
     /// <summary>
-    /// Clears expired sessions at 00:00 on every day-of-month.
+    ///     Clears expired sessions at 00:00 on every day-of-month.
     /// </summary>
     protected override CronExpression CronExpression()
     {
@@ -27,6 +26,4 @@ public class ClearExpiredSessionsTask : CronTask
     {
         _sessionMongoService.RemoveAll(model => model.IsExpired);
     }
-    
-    
 }

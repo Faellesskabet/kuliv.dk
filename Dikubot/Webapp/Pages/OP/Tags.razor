@@ -1,11 +1,10 @@
 ﻿@page "/op/tags"
-@using Dikubot.Webapp.Authentication
-@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
-@using Syncfusion.Blazor.Buttons
-
-@using Dikubot.DataLayer.Database.Global.Tags
-@using Dikubot.Webapp.Shared.Dialog
 @using Microsoft.IdentityModel.Tokens
+@using Syncfusion.Blazor.Buttons
+@using Dikubot.DataLayer.Database.Global.Tags
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
 @inject TagMongoService TagMongoService
 
 
@@ -13,9 +12,10 @@
           Loading="@_loading">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
-        <MudSpacer />
+        <MudSpacer/>
         <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+        </MudTextField>
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Preview</MudTh>
@@ -27,13 +27,13 @@
         <MudTh>Slet</MudTh>
     </HeaderContent>
     <RowTemplate>
-        
-        
+
+
         <MudTd DataLabel="">
             <SfChip>
                 <ChipItems>
                     @{
-                        string color = $"background-color: " + @context.Color + ";" + "color: " + @context.TextColor + ";";
+                        string color = "background-color: " + context.Color + ";" + "color: " + context.TextColor + ";";
                     }
                     <ChipItem Text="@context.Name" style="@color"></ChipItem>
                 </ChipItems>
@@ -44,7 +44,7 @@
         <MudTd DataLabel="Visible">@context.Color</MudTd>
         <MudTd DataLabel="CalendarType">@context.TextColor</MudTd>
         <MudTd DataLabel="Indstillinger">
-            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Op/Tags/edit/{@context.Id.ToString()}")>Rediger</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Op/Tags/edit/{context.Id.ToString()}")>Rediger</MudButton>
         </MudTd>
         <MudTd DataLabel="Slet">
             <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
@@ -57,7 +57,7 @@
         <Loading></Loading>
     </LoadingContent>
     <PagerContent>
-        <MudTablePager />
+        <MudTablePager/>
     </PagerContent>
 </MudTable>
 <div class="d-flex flex-wrap mt-4">
@@ -66,15 +66,15 @@
 
 @code {
 
-    [Inject] private IDialogService DialogService { get; set; }
-    
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
     private MudTable<TagsMainModel> _table;
     private string _searchQuery = "";
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        
         _loading = false;
     }
 
@@ -84,16 +84,16 @@
         if (!_searchQuery.IsNullOrEmpty())
         {
             items = TagMongoService.Get(model => model.Name.Contains(_searchQuery) || model.Decs.Contains(_searchQuery),
-                    state.PageSize, state.Page);   
+                state.PageSize, state.Page);
         }
         else
         {
-            items = TagMongoService.Get(state.PageSize, state.Page);   
+            items = TagMongoService.Get(state.PageSize, state.Page);
         }
 
-        return new TableData<TagsMainModel>() { Items = items, TotalItems = (int)TagMongoService.EstimatedCount()};
+        return new TableData<TagsMainModel> { Items = items, TotalItems = (int)TagMongoService.EstimatedCount() };
     }
-    
+
     private void OnSearch(string text)
     {
         _searchQuery = text;
@@ -102,7 +102,7 @@
 
     private async void DeleteCategory(TagsMainModel joinRoleCategoryMainModel)
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
         parameters.Add("ButtonText", "Slet");
         parameters.Add("Color", Color.Error);
@@ -112,9 +112,9 @@
         {
             return;
         }
-        
+
         TagMongoService.Remove(joinRoleCategoryMainModel);
         await _table.ReloadServerData();
     }
-    
+
 }

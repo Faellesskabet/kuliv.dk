@@ -1,9 +1,8 @@
-﻿@using System.Diagnostics.CodeAnalysis
-@using Dikubot.DataLayer.Database
+﻿@inject TagMongoService TagMongoService
 @using Dikubot.DataLayer.Database.Global.Tags
 @using Dikubot.Extensions.search
-@using Microsoft.AspNetCore.Components
-@inject TagMongoService TagMongoService
+@using Dikubot.DataLayer.Database
+@using System.Diagnostics.CodeAnalysis
 @typeparam TMainModel
 
 
@@ -18,7 +17,7 @@
     {
         <MudChipSet @bind-SelectedChips="_selected" MultiSelection="true" Filter="true">
             <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false">
-                @foreach (var cat in _categories)
+                @foreach (TagsMainModel cat in _categories)
                 {
                     @if (!ShowCategories.Contains(cat.Id))
                     {
@@ -31,21 +30,21 @@
                                     @cat.Name
                                 </MudButton>
                             </MudTooltip>
-                       
+
                         </div>
                     }
-               
+
                     @if (ShowCategories.Contains(cat.Id))
                     {
                         <MudField Label="@cat.Name" Variant="Variant.Outlined" InnerPadding="false"
                                   AdornmentIcon="@Icons.Filled.Close"
                                   Adornment="Adornment.End"
-                                  AdornmentColor="Color.Primary" 
+                                  AdornmentColor="Color.Primary"
                                   OnAdornmentClick="() => ShowCategories.Remove(cat.Id)">
-                            @foreach (var tag in _tags.Where(tag => tag.Category.Contains(cat.Id)))
+                            @foreach (TagsMainModel tag in _tags.Where(tag => tag.Category.Contains(cat.Id)))
                             {
                                 //Kan ikke gøres direkte :(
-                                string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+                                string style = "background-color: " + tag.Color + ";" + "color: " + tag.TextColor + ";";
                                 <MudChip Value="tag.Id" Variant="Variant.Text" Style="@style"> @tag.Name</MudChip>
                             }
                         </MudField>
@@ -53,7 +52,6 @@
                 }
             </MudButtonGroup>
         </MudChipSet>
-        
     }
 </MudGrid>
 <MudItem xs="12">
@@ -64,55 +62,57 @@
         }
         else
         {
-            @TemplatePagination <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4" />
+            @TemplatePagination
+            <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4"/>
         }
     </MudGrid>
 </MudItem>
 @if (SelectedStyle is null && TemplateRow is not null)
 {
     <MudGrid>
-        @foreach (var item in ItemList.Skip((Selected - 1) * NumberOfItems).Take(NumberOfItems))
+        @foreach (TMainModel item in ItemList.Skip((Selected - 1) * NumberOfItems).Take(NumberOfItems))
         {
             @TemplateRow(item)
         }
     </MudGrid>
 }
-@if(TemplateRow is not null && SelectedStyle is VariantStyle.Grid){
+@if (TemplateRow is not null && SelectedStyle is VariantStyle.Grid)
+{
     <MudGrid>
-        
-        @foreach (var item in ItemList.Skip((Selected - 1) * NumberOfItems).Take(NumberOfItems))
+
+        @foreach (TMainModel item in ItemList.Skip((Selected - 1) * NumberOfItems).Take(NumberOfItems))
         {
             <MudItem xs="12" sm="4">
                 @TemplateRow(item)
             </MudItem>
-
         }
     </MudGrid>
-} else if(TemplateExpansionPanel is not null && (SelectedStyle is null or VariantStyle.ExpansionPanel ))
-    {
-        <MudGrid>
-            @foreach (var item in ItemList.Skip((Selected-1)*NumberOfItems).Take(NumberOfItems))
-            {
-                <MudItem xs="12" Style="padding: 0; margin: 0">
-                    <MudDivider Style="background-color: transparent"></MudDivider>
-                    @TemplateExpansionPanel(item)
-                    <MudDivider Style="background-color: transparent"></MudDivider>
-                </MudItem>
-               
-            }
-        </MudGrid>
-    }
+}
+else if (TemplateExpansionPanel is not null && SelectedStyle is null or VariantStyle.ExpansionPanel)
+{
+    <MudGrid>
+        @foreach (TMainModel item in ItemList.Skip((Selected - 1) * NumberOfItems).Take(NumberOfItems))
+        {
+            <MudItem xs="12" Style="padding: 0; margin: 0">
+                <MudDivider Style="background-color: transparent"></MudDivider>
+                @TemplateExpansionPanel(item)
+                <MudDivider Style="background-color: transparent"></MudDivider>
+            </MudItem>
+        }
+    </MudGrid>
+}
 
 <MudGrid Justify="Justify.Center" Style="margin-bottom: 12px">
     @if (TemplatePagination is null)
     {
-        <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4" />
+        <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4"/>
     }
     else
     {
-        @TemplatePagination <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4" />
+        @TemplatePagination
+        <MudPagination Color="Color.Primary" Count="Count" @bind-Selected="@Selected" Class="mt-4"/>
     }
-    
+
 </MudGrid>
 
 @code {
@@ -120,14 +120,14 @@
     [Parameter]
     public int Selected { get; set; } = 1;
 
-    private int Count => ItemList.Count / NumberOfItems+1;
-    
-    [Parameter] public int NumberOfItems { get; set; } = 9;
+    private int Count => ItemList.Count / NumberOfItems + 1;
+
+    [Parameter]
+    public int NumberOfItems { get; set; } = 9;
 
     [Parameter]
     public VariantStyle? SelectedStyle { get; set; }
 
-    
 
     [Parameter]
     public string SearchQuery { get; set; }
@@ -137,7 +137,7 @@
 
     [Parameter]
     public bool ShowSearchbar { get; set; } = true;
-    
+
     [Parameter]
     public RenderFragment<TMainModel>? TemplateRow { get; set; }
 
@@ -149,18 +149,19 @@
 
     private HashSet<TagsMainModel> _tags;
     private List<TagsMainModel> _categories;
-    private HashSet<Guid> ShowCategories { get; set; } = new HashSet<Guid>();
-    
-    
-    [Parameter, AllowNull]
+    private HashSet<Guid> ShowCategories { get; set; } = new();
+
+
+    [Parameter]
+    [AllowNull]
     public List<TMainModel> Items { get; set; }
-    
+
     //SearchCriteria((item as MainModel).GetSearchContent(),(item as MainModel).GetTags())
     public List<TMainModel> ItemList => Items.Where(item =>
         SearchCriteria((item as MainModel).GetSearchContent(), (item as MainModel).GetTags())).ToList();
-    
-    
-    MudChip[] _selected = new MudChip[]{};
+
+
+    MudChip[] _selected = { };
 
     protected override void OnInitialized()
     {
@@ -168,13 +169,13 @@
         _categories = TagMongoService.GetAll().Where(t => t.TagType == TagsMainModel.enumTagType.category).ToList();
     }
 
-    
-    public bool SearchCriteria(List<string> items = null,  HashSet<Guid> tags = null )
+
+    public bool SearchCriteria(List<string> items = null, HashSet<Guid> tags = null)
     {
         if (tags != null)
         {
-            HashSet<Guid> hasSelected = _selected.Select(_ => (_.Value is Guid ? (Guid) _.Value : default) ).ToHashSet();
-            if (!(_tags.Count == hasSelected.Count || hasSelected.Count ==0) && !hasSelected.IsSubsetOf(tags) )
+            HashSet<Guid> hasSelected = _selected.Select(_ => _.Value is Guid ? (Guid)_.Value : default).ToHashSet();
+            if (!(_tags.Count == hasSelected.Count || hasSelected.Count == 0) && !hasSelected.IsSubsetOf(tags))
             {
                 return false;
             }
@@ -182,14 +183,14 @@
 
         if (items != null)
         {
-            return string.IsNullOrWhiteSpace(SearchQuery) 
+            return string.IsNullOrWhiteSpace(SearchQuery)
                    || items.Exists(s => s?.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase) ?? false);
         }
 
         return true;
     }
-    
-    
-    
-    
+
+
+
+
 }

@@ -1,37 +1,13 @@
-
-@using global::Discord.WebSocket
-@using Dikubot.Discord.Command
-@using Dikubot.DataLayer.Logic.User
-@using Dikubot.DataLayer.Static
-@using Dikubot.Discord
-@using global::Discord
-@using Azure.Core
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.OAuth
+@using Microsoft.Extensions.Configuration
 @using Microsoft.AspNetCore.Http
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Webapp.Authentication
+@using System.Security.Claims
+@using Dikubot.DataLayer.Database.Global.Session.DiscordAuthentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IConfiguration Configuration
 @inject IJSRuntime JsRuntime
-@using Microsoft.Net.Http
-@using Microsoft.AspNetCore.Mvc;
-@using Microsoft.Extensions.Options
-@using Newtonsoft.Json.Linq
-@using System.Net.Http.Headers
-@using System.Security.Claims
-@using global::Discord.Rest
-@using System.Configuration
-@using System.IO
-@using System.Net
-@using System.Text
-@using Dikubot.DataLayer.Database.Global.Session
-@using Dikubot.DataLayer.Database.Global.Session.DiscordAuthentication
-@using Dikubot.DataLayer.Database.Global.User
-@using Dikubot.Discord
-@using Dikubot.Webapp.Authentication
-@using Dikubot.Webapp.Pages
-@using Microsoft.Extensions.Configuration
-@using Color = MudBlazor.Color
 
 @inject NavigationManager Navigation;
 @inject IHttpContextAccessor HttpContextAccessor;
@@ -65,26 +41,30 @@
             </MudText>
         </MudCardContent>
         <MudCardActions>
-            <MudLink Href="/login"><MudButton Variant="Variant.Filled" Color="Color.Primary">
-                <Localization>
-                    <Danish>
-                        Login med Discord
-                    </Danish>
-                    <English>
-                        Login with Discord
-                    </English>
-                </Localization>
-            </MudButton></MudLink>
-            <MudLink><MudButton Variant="Variant.Text" Color="Color.Primary">
-                <Localization>
-                    <Danish>Skriv til support@kuliv.dk for hjælp</Danish>
-                    <English>Write to support@kuliv.dk for help</English>
-                </Localization>
-            </MudButton></MudLink>
+            <MudLink Href="/login">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">
+                    <Localization>
+                        <Danish>
+                            Login med Discord
+                        </Danish>
+                        <English>
+                            Login with Discord
+                        </English>
+                    </Localization>
+                </MudButton>
+            </MudLink>
+            <MudLink>
+                <MudButton Variant="Variant.Text" Color="Color.Primary">
+                    <Localization>
+                        <Danish>Skriv til support@kuliv.dk for hjælp</Danish>
+                        <English>Write to support@kuliv.dk for help</English>
+                    </Localization>
+                </MudButton>
+            </MudLink>
         </MudCardActions>
     </MudCard>
 }
-else if(!_loading)
+else if (!_loading)
 {
     <MudCard>
         <MudCardHeader>
@@ -92,7 +72,7 @@ else if(!_loading)
                 <MudAvatar Image="discordUser.GetAvatarUrl()" Size="Size.Large" Color="Color.Primary"></MudAvatar>
             </CardHeaderAvatar>
             <CardHeaderContent>
-                 <MudText Typo="Typo.h6">Er dette dig?</MudText>
+                <MudText Typo="Typo.h6">Er dette dig?</MudText>
                 <MudText Typo="Typo.body1">@HttpContextAccessor.HttpContext.User.Identity.Name! </MudText>
             </CardHeaderContent>
         </MudCardHeader>
@@ -107,9 +87,10 @@ else if(!_loading)
 
 
 @code {
+
     [Parameter]
     public Login Parent { get; set; }
-    
+
     [Parameter]
     public string AuthCode { get; set; }
 
@@ -136,18 +117,17 @@ else if(!_loading)
 
     private async Task ApproveDiscord()
     {
-        
-        var id = ulong.Parse(_discordUser.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value).ToString();
+        string id = ulong.Parse(_discordUser.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value).ToString();
 
         if (!UserGlobalMongoService.Exists(model => model.DiscordId == id))
         {
             UserGlobalModel userModel = UserGlobalMongoService.Get(id);
             UserGlobalMongoService.Upsert(userModel);
         }
-        
+
         await _authenticator.UpdateSession();
         Parent.Update();
     }
-    
+
 
 }

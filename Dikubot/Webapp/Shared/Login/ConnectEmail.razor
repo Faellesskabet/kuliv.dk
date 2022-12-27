@@ -1,6 +1,3 @@
-@using global::Discord.WebSocket
-@using Dikubot.Discord.Command
-@using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.User
@@ -12,15 +9,14 @@
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
-@using Dikubot.Webapp.Pages
+@using global::Discord.WebSocket
 @using SendGrid.Helpers.Mail
-
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
 @inject UserGlobalMongoService UserGlobalMongoService
 @inject IGuildMongoFactory GuildMongoFactory
 
-@if (String.IsNullOrEmpty(_secretPassword))
+@if (string.IsNullOrEmpty(_secretPassword))
 {
     <MudCard>
         <MudCardHeader>
@@ -39,8 +35,8 @@
                     <Localization>
                         <Danish>Emailen @(_email) er allerede i brug. Log ind på din anden Discord profil eller kontakt en administrator: <MudField> Support@kuliv.dk </MudField>.</Danish>
                         <English>The email @(_email) is already in use. Log in to your other Discord profile or contact an administrator: <MudField> Support@kuliv.dk </MudField>.</English>
-                        </Localization>
-                    
+                    </Localization>
+
                 </MudAlert>
             }
             <MudText Typo="Typo.h6">
@@ -56,7 +52,7 @@
         </MudCardHeader>
         <MudCardContent>
             <MudForm>
-                <MudTextField 
+                <MudTextField
                     @bind-Value="_email"
                     Validation="@_kuEmailValidation.Validation"
                     Immediate="@true"
@@ -71,7 +67,7 @@
             <MudButton OnClick="@SendEmail">Send email</MudButton>
             <MudButton Link="Logout" Color="Color.Error">Logud</MudButton>
         </MudCardActions>
-    </MudCard>   
+    </MudCard>
 }
 else
 {
@@ -94,9 +90,10 @@ else
                         </MudButton>
                     </Danish>
                     <English>
-                        If you have not received an email within 2 minutes, try our guide: <MudButton OnClick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
-                                                                                                                                         Quarantine Center Guide.
-                                                                                                                                     </MudButton>
+                        If you have not received an email within 2 minutes, try our guide:
+                        <MudButton OnClick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+                            Quarantine Center Guide.
+                        </MudButton>
                     </English>
                 </Localization>
             </MudText>
@@ -129,7 +126,7 @@ else
     <DialogContent>
         <MudContainer Style="max-height:300px; overflow-y: scroll">
             <HowToComfirmEmail></HowToComfirmEmail>
-        </MudContainer> 
+        </MudContainer>
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Class="px-10">Close</MudButton>
@@ -138,17 +135,26 @@ else
 
 
 @code {
-     [Parameter]
+
+    [Parameter]
     public Login Parent { get; set; }
-    
+
     private bool _visible;
     private int _rating;
-    private void OpenDialog() => _visible = true;
-    void Submit() => _visible = false;
 
-    private DialogOptions _dialogOptions = new() { FullWidth = true, MaxWidth = MaxWidth.Large};
+    private void OpenDialog()
+    {
+        _visible = true;
+    }
 
-    private KUEmailValidation _kuEmailValidation = new KUEmailValidation();
+    void Submit()
+    {
+        _visible = false;
+    }
+
+    private DialogOptions _dialogOptions = new() { FullWidth = true, MaxWidth = MaxWidth.Large };
+
+    private KUEmailValidation _kuEmailValidation = new();
     private Authenticator _authenticator;
     private UserIdentity _user;
     private string _email = "";
@@ -164,7 +170,7 @@ else
             SendEmail();
         }
     }
-    
+
     public void PasswordOnEnter(KeyboardEventArgs e)
     {
         if (e.Code == "Enter")
@@ -172,14 +178,14 @@ else
             ConfirmEmailPassword();
         }
     }
-    
+
     protected override async Task OnInitializedAsync()
     {
-        _authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await _authenticator.GetAuthenticationStateAsync();
-        _user = (UserIdentity) authState.User.Identity;
+        _authenticator = (Authenticator)AuthenticationStateProvider;
+        AuthenticationState authState = await _authenticator.GetAuthenticationStateAsync();
+        _user = (UserIdentity)authState.User.Identity;
     }
-    
+
     private async void SendEmail()
     {
         if (!(await _kuEmailValidation.ValidateAsync(_email)).IsValid)
@@ -205,9 +211,9 @@ else
             await InvokeAsync(() => { StateHasChanged(); });
             return;
         }
-        
-        
-        // If the user already exists, throw an error at them!
+
+
+    // If the user already exists, throw an error at them!
         if (UserGlobalMongoService.EmailExists(_email))
         {
             _emailTaken = true;
@@ -217,8 +223,8 @@ else
             await InvokeAsync(() => { StateHasChanged(); });
             return;
         }
-        
-        // null if user or no mutual guilds can be found.
+
+    // null if user or no mutual guilds can be found.
         IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.ClientStatic.GetUser(_user.UserGlobalModel.DiscordIdLong)?.MutualGuilds;
 
         _user.UserGlobalModel.Email = _email;
@@ -232,6 +238,7 @@ else
         await _authenticator.UpdateSession();
         Parent.Update();
     }
+
     private async void UpdateUserInGuild(SocketGuild guild, UserGlobalMongoService userGlobalMongoService)
     {
         UserGuildMongoService userGuildMongoService = GuildMongoFactory.Get<UserGuildMongoService>(guild);
@@ -239,17 +246,14 @@ else
         UserGuildModel newUser = userGuildMongoService.Get(_user.UserGlobalModel.DiscordId);
 
         await permissionsService.SetDiscordUserRoles(newUser);
-        
+
         string name = new KUUser(_email.Split("@")[0]).GetName();
         if (name != "")
         {
             newUser.Name = name;
             try
             {
-                await guild.GetUser(Convert.ToUInt64(_user.UserGlobalModel.DiscordId)).ModifyAsync(guildUser =>
-                {
-                    guildUser.Nickname = name;
-                });
+                await guild.GetUser(Convert.ToUInt64(_user.UserGlobalModel.DiscordId)).ModifyAsync(guildUser => { guildUser.Nickname = name; });
             }
             catch (Exception e)
             {
@@ -258,4 +262,5 @@ else
         }
         userGuildMongoService.Upsert(newUser);
     }
+
 }

@@ -1,15 +1,15 @@
-﻿@using Dikubot.Webapp.Authentication
-@using global::Discord
+﻿@using global::Discord
 @using Color = MudBlazor.Color
 @inject NavigationManager Navigation
+
 @code {
+
     protected override void OnInitialized()
     {
-        //This auto redirects a user to the login page
-        //Navigation.NavigateTo("Account/Login", true);
-        
+    //This auto redirects a user to the login page
+    //Navigation.NavigateTo("Account/Login", true);
     }
-    
+
     private IUser discordUser;
 }
 
@@ -23,8 +23,12 @@
             <MudText Typo="Typo.body1">For at tilgå KULiv, skal du logge ind med en Discord bruger.</MudText>
         </MudCardContent>
         <MudCardActions>
-            <a href="/login"><MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton></a>
-            <a href="https://dnur.dk/"><MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton></a>
+            <a href="/login">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">Login med Discord</MudButton>
+            </a>
+            <a href="https://dnur.dk/">
+                <MudButton Variant="Variant.Text" Color="Color.Primary">Klik her for hjælp</MudButton>
+            </a>
         </MudCardActions>
     </MudCard>
 }

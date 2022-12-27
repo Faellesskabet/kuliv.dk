@@ -1,18 +1,10 @@
 ﻿@page "/op/union/webScrapper/"
-@using System;
-@using System.IO
-@using System.Collections
-@using System.Net
-@using System.Net.Http;
-@using Dikubot.Webapp.Extensions.Discovery.Links
-@using Dikubot.Extensions.search
-@using Microsoft.Graph
-@using Newtonsoft.Json
-@using Microsoft.AspNetCore.Components
+@using Dikubot.DataLayer.Database.Global.Union
 @using Dikubot.Webapp.Authentication
+@using Newtonsoft.Json
+@using System.Net
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UnionMongoService UnionMongoService
-@using Dikubot.DataLayer.Database.Global.Union
 @attribute [Authorize(Roles = Permissions.GlobalAdmin)]
 
 <h3>WebScrapper</h3>
@@ -22,57 +14,50 @@
 <MudButton OnClick="Scrapper" Variant="Variant.Filled" Color="Color.Default"> START SCARPING :D</MudButton>
 
 <Searchbar Items="_unionModels" Context="UnionModel" NumberOfItems="12">
-    <TemplateRow Context="unionModel" >
-        <MudItem xs="12" sm="6" md="4" lg="3" >
+    <TemplateRow Context="unionModel">
+        <MudItem xs="12" sm="6" md="4" lg="3">
             <UnionWidget Union="unionModel"></UnionWidget>
             <MudButton OnClick="() => removeItem(unionModel)" Variant="Variant.Outlined" Color="Color.Error"> REMOVE </MudButton>
             <MudButton OnClick="() => UnionMongoService.Upsert(unionModel)" Variant="Variant.Outlined" Color="Color.Success"> ADD </MudButton>
         </MudItem>
     </TemplateRow>
-    </Searchbar>
-
+</Searchbar>
 
 
 @code {
 
-    
-    
- public string FORENINGSLIVKU(int n){
-        return "https://www.foreningsliv-ku.dk/wp-json/buddypress/v1/groups?per_page=100&page="+n;
-}
 
+    public string FORENINGSLIVKU(int n)
+    {
+        return "https://www.foreningsliv-ku.dk/wp-json/buddypress/v1/groups?per_page=100&page=" + n;
+    }
 
-    
-    
 
     private void removeItem(UnionModel model)
     {
-        _unionModels = _unionModels.Where(unionModel => unionModel.Title != model.Title ).ToList();
+        _unionModels = _unionModels.Where(unionModel => unionModel.Title != model.Title).ToList();
     }
-    
-    List<UnionModel> _unionModels = new List<UnionModel>();
+
+    List<UnionModel> _unionModels = new();
 
     private void SaveAll()
     {
-        foreach (var sModel in _unionModels)
+        foreach (UnionModel sModel in _unionModels)
         {
             if (!UnionMongoService.Exists(model => model.Title == sModel.Title))
             {
                 _unionModels.Add(sModel);
             }
         }
-        
-        
     }
-    
+
 
     private async Task Scrapper()
     {
-        
         _unionModels = new List<UnionModel>();
         try
         {
-            List<GroupsForeningsLivKU> myDeserializedClass = new List<GroupsForeningsLivKU>();
+            List<GroupsForeningsLivKU> myDeserializedClass = new();
 
             int n = 1;
             while (true)
@@ -81,8 +66,8 @@
                 string content = client.GetStringAsync(FORENINGSLIVKU(n)).Result;
                 n++;
                 List<GroupsForeningsLivKU> elemensts = JsonConvert.DeserializeObject<List<GroupsForeningsLivKU>>(content);
-                
-                foreach (var group in elemensts)
+
+                foreach (GroupsForeningsLivKU group in elemensts)
                 {
                     if (!myDeserializedClass.Contains(group))
                     {
@@ -94,120 +79,114 @@
                 }
                 if (elemensts.Count < 100)
                 {
-                 break;   
+                    break;
                 }
             }
-            
+
             string res = "";
-                    
-            foreach (var group in myDeserializedClass)
+
+            foreach (GroupsForeningsLivKU group in myDeserializedClass)
             {
                 Task.Run(() =>
                 {
     //string response = client.GetStringAsync(VARIABLE.link).Result;
-                if (!UnionMongoService.Exists(model => model.Title == group.name))
-                {
-                    String facebook = "";
-                    String hjemmeside = "";
-                    String Mail = "";
-                    try
+                    if (!UnionMongoService.Exists(model => model.Title == group.name))
                     {
-                        HttpClientHandler clientHandler = new HttpClientHandler
+                        string facebook = "";
+                        string hjemmeside = "";
+                        string Mail = "";
+                        try
                         {
-                            AllowAutoRedirect = true,
-                            MaxAutomaticRedirections = 5,
+                            HttpClientHandler clientHandler = new HttpClientHandler
+                            {
+                                AllowAutoRedirect = true,
+                                MaxAutomaticRedirections = 5
+                            };
+
+                            HttpClient httpClient = new HttpClient(clientHandler);
+
+
+                            Uri url = new Uri(group.link, new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = true });
+
+
+                            HttpResponseMessage response = httpClient.GetAsync(url).Result;
+
+
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                Console.WriteLine(response.StatusCode + ": " + url);
+                                Console.WriteLine(response.Headers);
+                                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                                {
+                                }
+                            }
+                            else
+                            {
+    //https://html-agility-pack.net/ - når vi skal opdaterer til noget smartere
+                                string itemContent = httpClient.GetStringAsync(url).Result;
+
+                                string key = "";
+                                int pFrom = 0;
+                                int pTo = 0;
+                                if (!itemContent.Contains("<td class=\"label\" title=\"Link til Facebook\">Facebook</td><td class=\"data\"><i>Ikke angivet</i></td>"))
+                                {
+                                    key = "\">Facebook</td><td class=\"data\"><a target=\"_new\" href=\"";
+                                    pFrom = itemContent.IndexOf(key) + key.Length;
+                                    pTo = itemContent.IndexOf("\">", pFrom);
+
+                                    facebook = itemContent.Substring(pFrom, pTo - pFrom);
+                                }
+
+                                if (!itemContent.Contains("<td class=\"label\" title=\"Link til hjemmeside\">Web</td><td class=\"data\"><i>Ikke angivet"))
+                                {
+                                    key = "Web</td><td class=\"data\"><a target=\"_new\" href=\"";
+                                    pFrom = itemContent.IndexOf(key) + key.Length;
+                                    pTo = itemContent.IndexOf("\">", pFrom);
+
+                                    hjemmeside = itemContent.Substring(pFrom, pTo - pFrom);
+                                }
+
+                                if (!itemContent.Contains("E-mail</td><td class=\"data\"><i>Ikke angivet</i>"))
+                                {
+                                    key = "<td class=\"label\" title=\"\">E-mail</td><td class=\"data\"><a target=\"_new\" href=\"mailto:";
+                                    pFrom = itemContent.IndexOf(key) + key.Length;
+                                    pTo = itemContent.IndexOf("\" target=\"_new", pFrom);
+                                    Mail = itemContent.Substring(pFrom, pTo - pFrom);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                        string hashCode = string.Format("{0:X}", group.id.GetHashCode());
+                        string localFileName = "thumps/" + hashCode + ".jpg";
+                        try
+                        {
+                            WebClient webClient = new WebClient();
+
+                            webClient.DownloadFile(group.avatar_urls.full, "Webapp/wwwroot/" + localFileName);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+
+                        UnionModel unionModel = new UnionModel
+                        {
+                            Title = group.name,
+                            Decs = group.description.raw,
+                            LogoUrl = localFileName,
+                            Facebook = facebook,
+                            Href = hjemmeside,
+                            Mail = Mail
                         };
-                        
-                        HttpClient httpClient = new HttpClient(clientHandler);
-                        
-                       
-                        Uri url = new Uri(group.link, new UriCreationOptions{DangerousDisablePathAndQueryCanonicalization = true});
-                        
-                        
-                        HttpResponseMessage response = httpClient.GetAsync(url).Result;
-                        
-                        
-                        if(!response.IsSuccessStatusCode)
+                        if (!UnionMongoService.Exists(model => model.Title == unionModel.Title))
                         {
-                            Console.WriteLine(response.StatusCode + ": "+ url);
-                            Console.WriteLine(response.Headers);
-                            if (response.StatusCode == HttpStatusCode.Unauthorized)
-                            {
-                            }
-                        }
-                        else
-                        {
-                            //https://html-agility-pack.net/ - når vi skal opdaterer til noget smartere
-                            string itemContent = httpClient.GetStringAsync(url).Result;
-
-                            string key = "";
-                            int pFrom = 0;
-                            int pTo = 0;
-                            if (!itemContent.Contains("<td class=\"label\" title=\"Link til Facebook\">Facebook</td><td class=\"data\"><i>Ikke angivet</i></td>"))
-                            {
-                                key = "\">Facebook</td><td class=\"data\"><a target=\"_new\" href=\"";
-                                pFrom = itemContent.IndexOf(key) + key.Length;
-                                pTo = itemContent.IndexOf("\">", pFrom);
-
-                                facebook = itemContent.Substring(pFrom, pTo - pFrom);
-                            }
-
-                            if (!itemContent.Contains("<td class=\"label\" title=\"Link til hjemmeside\">Web</td><td class=\"data\"><i>Ikke angivet"))
-                            {
-                                key = "Web</td><td class=\"data\"><a target=\"_new\" href=\"";
-                                pFrom = itemContent.IndexOf(key) + key.Length;
-                                pTo = itemContent.IndexOf("\">", pFrom);
-
-                                hjemmeside = itemContent.Substring(pFrom, pTo - pFrom);
-                            }
-
-                            if (!itemContent.Contains("E-mail</td><td class=\"data\"><i>Ikke angivet</i>"))
-                            {
-                                key = "<td class=\"label\" title=\"\">E-mail</td><td class=\"data\"><a target=\"_new\" href=\"mailto:";
-                                pFrom = itemContent.IndexOf(key) + key.Length;
-                                pTo = itemContent.IndexOf("\" target=\"_new", pFrom);
-                                Mail = itemContent.Substring(pFrom, pTo - pFrom);
-                            }
-
+                            _unionModels.Add(unionModel);
+                            StateHasChanged();
                         }
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        
-                    }
-                    string hashCode = String.Format("{0:X}", group.id.GetHashCode());
-                    string localFileName = "thumps/"+hashCode+".jpg";
-                    try
-                    {
-                        WebClient webClient = new WebClient();
-                        
-                        webClient.DownloadFile(group.avatar_urls.full, "Webapp/wwwroot/"+localFileName);
-
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        
-                    }
-                    
-                    UnionModel unionModel = new UnionModel()
-                    {
-                        Title = group.name,
-                        Decs = group.description.raw,
-                        LogoUrl = localFileName,
-                        Facebook = facebook,
-                        Href = hjemmeside,
-                        Mail = Mail,
-                    };
-                    if (!UnionMongoService.Exists(model => model.Title == unionModel.Title))
-                    {
-                        _unionModels.Add(unionModel);
-                        StateHasChanged();
-                    }
-                    
-                }
-  
                 });
             }
         }
@@ -217,8 +196,7 @@
         }
     }
 
-    
-    
+
     public class AvatarUrls
     {
         public string full { get; set; }
@@ -275,4 +253,5 @@
         public bool embeddable { get; set; }
         public string href { get; set; }
     }
+
 }

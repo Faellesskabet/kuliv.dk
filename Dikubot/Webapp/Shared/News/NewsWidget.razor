@@ -1,8 +1,7 @@
-@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages
-@using Dikubot.Discord
 @using global::Discord
-@using Color = MudBlazor.Color
+@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages
 @using Dikubot.DataLayer.Caching
+@using Color = MudBlazor.Color
 @inject Cache<MessageModel, IMessage> _cache
 @if (_loaded)
 {
@@ -30,9 +29,13 @@ else
 }
 
 @code {
-    [Parameter, EditorRequired]
+
+    [Parameter]
+    [EditorRequired]
     public MessageModel Message { get; set; }
-    [Parameter, EditorRequired]
+
+    [Parameter]
+    [EditorRequired]
     public SocketGuildDto Guild { get; set; }
 
     private IMessage _discordMessage;
@@ -48,7 +51,6 @@ else
         }
         _discordMessage = _cache[Message];
         _loaded = true;
-        StateHasChanged();
     }
 
 }

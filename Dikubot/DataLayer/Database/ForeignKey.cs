@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dikubot.DataLayer.Database;
 
 /// <summary>
-/// TODO: Implement system for foreign keys and detecting when the foreign object no longer exists
+///     TODO: Implement system for foreign keys and detecting when the foreign object no longer exists
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public class ForeignKey<Service, Model> where Service : MongoService<Model> where Model : MainModel
@@ -16,13 +15,13 @@ public class ForeignKey<Service, Model> where Service : MongoService<Model> wher
     {
         ForeignId = guid;
     }
+
     public ForeignKey(Model model)
     {
         ForeignId = model.Id;
     }
 
-    [BsonElement("ForeignId")]
-    private Guid ForeignId { get; set; }
+    [BsonElement("ForeignId")] private Guid ForeignId { get; }
 
     public Model Get(Service service)
     {
@@ -37,16 +36,17 @@ public class ForeignKey<Service, Model> where Service : MongoService<Model> wher
 
 public class ForeignKeySet<Service, Model> where Service : MongoService<Model> where Model : MainModel
 {
-    [BsonElement("ForeignKeys")]
-    private HashSet<ForeignKey<Service, Model>> ForeignKeys { get; set; }
+    [BsonElement("ForeignKeys")] private HashSet<ForeignKey<Service, Model>> ForeignKeys { get; set; }
 
-    public IEnumerable<Guid> GetForeignIds(Service service) =>
-        GetModels(service).Select(model => model.Id);
+    public IEnumerable<Guid> GetForeignIds(Service service)
+    {
+        return GetModels(service).Select(model => model.Id);
+    }
 
     public HashSet<Model> GetModels(Service service)
     {
-        HashSet<Model> models = new HashSet<Model>();
-        foreach (var key in ForeignKeys)
+        HashSet<Model> models = new();
+        foreach (ForeignKey<Service, Model> key in ForeignKeys)
         {
             Model model = key.Get(service);
             if (model == null)

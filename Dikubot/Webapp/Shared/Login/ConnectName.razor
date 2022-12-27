@@ -1,11 +1,8 @@
-@using Dikubot.Discord
-@using Dikubot.Webapp.Authentication
 @using global::Discord.WebSocket
-@using Dikubot.DataLayer.Database.Global.Session
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Static
-@using Dikubot.Webapp.Pages
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject DiscordSocketClient DiscordSocketClient
 @inject UserGlobalMongoService UserGlobalMongoService
@@ -14,13 +11,15 @@
 <MudCard>
     <MudCardHeader>
         <MudText Typo="Typo.h6">
-            <Localization> <Danish>Hvad er dit fulde navn?</Danish>
-                <English>What is your full name?</English></Localization>
+            <Localization>
+                <Danish>Hvad er dit fulde navn?</Danish>
+                <English>What is your full name?</English>
+            </Localization>
         </MudText>
     </MudCardHeader>
     <MudCardContent>
         <MudTextField Placeholder="Fulde navn"
-                      @bind-Value="_name" Immediate="@true" Autofocus="@true" />
+                      @bind-Value="_name" Immediate="@true" Autofocus="@true"/>
     </MudCardContent>
     <MudCardActions>
         <MudButton OnClick="@ConfirmName">
@@ -45,9 +44,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await _authenticator.GetAuthenticationStateAsync();
-        _user = (UserIdentity) authState.User.Identity;
+        _authenticator = (Authenticator)AuthenticationStateProvider;
+        AuthenticationState authState = await _authenticator.GetAuthenticationStateAsync();
+        _user = (UserIdentity)authState.User.Identity;
     }
 
     private async void ConfirmName()

@@ -1,12 +1,5 @@
-﻿@namespace Dikubot.Webapp.Extensions.NavMenu
-@using Dikubot.Webapp.Authentication
-@using Dikubot.Discord
-@using global::Discord.WebSocket
-@using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.User
-@using Dikubot.Webapp.Pages
-@using MudBlazor.Utilities
-@using Data
+﻿@using Dikubot.Webapp.Authentication
+@namespace Dikubot.Webapp.Extensions.NavMenu
 
 
 @inject UserService _user;
@@ -31,7 +24,7 @@
             <Danish>Tilmeld roller</Danish>
             <English>Register roles</English>
         </Localization>
-        
+
     </MudNavLink>
 </MudNavGroup>
 <MudNavGroup Expanded="true" Title="Discovery">
@@ -80,16 +73,16 @@
 <MudNavGroup Title="Settings" Icon="@Icons.Filled.Settings">
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Person" Href="/profile">Min Profil</MudNavLink>
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Help" Href="/help">Få hjælp</MudNavLink>
-    
+
     <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.Logout" Href="/logout">Log-ud</MudNavLink>
 </MudNavGroup>
-@if (_user.Claims().Any(m => m.Value == Permissions.GuildAdmin || m.Value == Permissions.GlobalAdmin)  )
-{<MudDivider Class="my-2"/>
+@if (_user.Claims().Any(m => m.Value == Permissions.GuildAdmin || m.Value == Permissions.GlobalAdmin))
+{
+    <MudDivider Class="my-2"/>
     <MudNavGroup Title="Admin" Icon="@Icons.Filled.Settings">
         @if (_user.Claims().Any(m => m.Value == Permissions.GlobalAdmin))
         {
             <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Filled.CrueltyFree" IconColor="Color.Primary" Href="/op">System Admin indstillinger</MudNavLink>
-            
         }
         @if (_user.Claims().Any(m => m.Value == Permissions.GuildAdmin))
         {
@@ -101,10 +94,11 @@
 
 @code
 {
-    [Inject] private IDialogService DialogService { get; set; }
-    
-    
-    
-    
-    
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+
+
+
+
 }

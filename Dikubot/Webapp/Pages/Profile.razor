@@ -1,5 +1,4 @@
 @page "/profile"
-@using System.Security.Claims
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -20,13 +19,13 @@ else
 @code {
     private Authenticator authenticator;
     private UserIdentity user;
-    private bool _loaded = false;
+    private bool _loaded;
 
     protected override async Task OnInitializedAsync()
     {
-        authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity) authState.User.Identity;
+        authenticator = (Authenticator)AuthenticationStateProvider;
+        AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity)authState.User.Identity;
         _loaded = true;
     }
 

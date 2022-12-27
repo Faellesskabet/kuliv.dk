@@ -1,9 +1,8 @@
-﻿@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
+﻿@using Microsoft.IdentityModel.Tokens
+@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
 @using Dikubot.DataLayer.Database.Guild.Models.User
 @using Dikubot.DataLayer.Database.Guild.Models.User.SubModels
 @using Dikubot.DataLayer.Permissions
-@using Microsoft.IdentityModel.Tokens
-
 @namespace Dikubot.Roles
 
 <MudPaper Elevation="25" Class="rounded-lg pb-4">
@@ -59,37 +58,37 @@
 
     [Parameter]
     public JoinRoleCategoryMainModel category { get; set; }
-    
+
     [Parameter]
-    public PermissionsService _permissionsService{ get; set; }
-    
+    public PermissionsService _permissionsService { get; set; }
+
     [Parameter]
-    public UserGuildMongoService UserGuildMongoService{ get; set; }
-    
+    public UserGuildMongoService UserGuildMongoService { get; set; }
+
     [Parameter]
-    public UserGuildModel _userGuildModel{ get; set; }
-    
+    public UserGuildModel _userGuildModel { get; set; }
+
     protected void LeaveRole(JoinRoleMainModel joinRoleMainModel)
-        {
-            _userGuildModel.RemoveRole(joinRoleMainModel.RoleId);
-            UserGuildMongoService.Update(_userGuildModel);
-            _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
-            this.StateHasChanged();
-        }
-    
-        protected void JoinRole(JoinRoleMainModel joinRoleMainModel)
-        {
-            _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
-            UserGuildMongoService.Update(_userGuildModel);
-            _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
-            this.StateHasChanged();
-        }
-        
-        protected bool HasRole(JoinRoleMainModel joinRoleMainModel)
-        {
-            return _userGuildModel.HasRole(joinRoleMainModel.RoleId);
-        }
-    
+    {
+        _userGuildModel.RemoveRole(joinRoleMainModel.RoleId);
+        UserGuildMongoService.Update(_userGuildModel);
+        _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
+        StateHasChanged();
+    }
+
+    protected void JoinRole(JoinRoleMainModel joinRoleMainModel)
+    {
+        _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
+        UserGuildMongoService.Update(_userGuildModel);
+        _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
+        StateHasChanged();
+    }
+
+    protected bool HasRole(JoinRoleMainModel joinRoleMainModel)
+    {
+        return _userGuildModel.HasRole(joinRoleMainModel.RoleId);
+    }
+
     protected bool HasPermissionForRole(JoinRoleMainModel joinRoleMainModel)
     {
         return joinRoleMainModel.Permission.IsNullOrEmpty() || joinRoleMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
@@ -101,18 +100,18 @@
         {
             return;
         }
-        foreach (var joinRoleMainModel in joinRoleCategoryMainModel.TextRoles.Where(HasPermissionForRole))
+        foreach (JoinRoleMainModel joinRoleMainModel in joinRoleCategoryMainModel.TextRoles.Where(HasPermissionForRole))
         {
             _userGuildModel.AddRole(new UserRoleModel(joinRoleMainModel.RoleId));
         }
         UserGuildMongoService.Update(_userGuildModel);
         _permissionsService.SetDiscordUserRoles(_userGuildModel).ConfigureAwait(false);
-        this.StateHasChanged();
+        StateHasChanged();
     }
-    
+
     protected bool HasPermissionForCategory(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
     {
         return joinRoleCategoryMainModel.Permission.IsNullOrEmpty() || joinRoleCategoryMainModel.Permission.Any(guid => _userGuildModel.HasRole(guid));
     }
-    
+
 }

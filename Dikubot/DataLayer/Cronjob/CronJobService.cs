@@ -4,16 +4,16 @@ namespace Dikubot.DataLayer.Cronjob;
 
 public class CronJobService
 {
-    private readonly Scheduler _scheduler;
     private readonly BackupDatabaseTask _backupDatabaseTask;
-    private readonly ForceNameChangeTask _forceNameChangeTask;
-    private readonly UpdateVerifiedTask  _updateVerifiedTask;
     private readonly CacheNewsMessagesTask _cacheNewsMessagesTask;
+    private readonly ForceNameChangeTask _forceNameChangeTask;
+    private readonly Scheduler _scheduler;
+    private readonly UpdateVerifiedTask _updateVerifiedTask;
 
-    public CronJobService(Scheduler scheduler, 
-        BackupDatabaseTask backupDatabaseTask, 
-        ForceNameChangeTask forceNameChangeTask, 
-        UpdateVerifiedTask updateVerifiedTask, 
+    public CronJobService(Scheduler scheduler,
+        BackupDatabaseTask backupDatabaseTask,
+        ForceNameChangeTask forceNameChangeTask,
+        UpdateVerifiedTask updateVerifiedTask,
         CacheNewsMessagesTask cacheNewsMessagesTask)
     {
         _scheduler = scheduler;

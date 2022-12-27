@@ -1,15 +1,13 @@
 @page "/connect"
-@using Dikubot.Webapp.Authentication
 @using Microsoft.AspNetCore.Http
-@using Microsoft.Graph
-@using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
 @using System.Net
+@using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
 @inject IHttpContextAccessor _httpContextAccessor;
 
 <link rel="stylesheet" href="css/diku/login.css"/>
-<div class="d-flex align-center gap-8 flex-column justify-center" 
+<div class="d-flex align-center gap-8 flex-column justify-center"
      style="margin-left: 5%; margin-right: 5%; margin-top: 5vh;">
     <div class="flex-grow-0" style="margin-top: 10px;">
         <MudText Typo="Typo.h2" Style="color: #c43a3f;">kuliv.dk</MudText>
@@ -18,19 +16,19 @@
     <div class="@_growState" style="margin-bottom: 10px; margin-top: 10px;">
         @if (_state == State.ConnectDiscord)
         {
-            <ConnectDiscord Parent="@this"/>
+            <ConnectDiscord Parent="@(this)"/>
         }
         @if (_state == State.ConnectEmail)
         {
-            <ConnectEmail Parent="@this"/>
+            <ConnectEmail Parent="@(this)"/>
         }
         @if (_state == State.ConnectName)
         {
-            <ConnectName Parent="@this"/>
+            <ConnectName Parent="@(this)"/>
         }
         @if (_state == State.SelectGuild)
         {
-            <SelectGuild Parent="@this"/>
+            <SelectGuild Parent="@(this)"/>
         }
         @if (_state == State.NoAccess)
         {
@@ -38,7 +36,7 @@
         }
     </div>
 </div>
-    <br/>
+<br/>
 <ul class="circles">
     <li></li>
     <li></li>
@@ -54,6 +52,7 @@
 
 
 @code {
+
     [Parameter]
     public string AuthCode { get; set; }
 
@@ -67,7 +66,7 @@
     }
 
     private State _state;
-    private String _growState = "";
+    private string _growState = "";
     private AuthenticationState authState;
 
     protected override async Task OnInitializedAsync()
@@ -75,7 +74,7 @@
         if (_httpContextAccessor.HttpContext != null && !_httpContextAccessor.HttpContext.Response.HasStarted
             && _httpContextAccessor.HttpContext.Request.Path.HasValue && !_httpContextAccessor.HttpContext.Request.Path.Value.Equals("/"))
         {
-            _httpContextAccessor.HttpContext.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+            _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
         }
         _state = await getState();
         _growState = _state == State.SelectGuild ? "flex-grow-1" : "flex-grow-0";
@@ -83,8 +82,8 @@
 
     private async Task<State> getState()
     {
-        authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity) authState.User.Identity;
+        authState = await ((Authenticator)AuthenticationStateProvider).GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity)authState.User.Identity;
 
         if (user?.UserGlobalModel == null)
         {
@@ -100,15 +99,15 @@
         {
             return State.ConnectName;
         }
-        
+
         return user.UserGlobalModel.IsBanned ? State.NoAccess : State.SelectGuild;
     }
 
 
     public async void Update()
     {
-        authState = await ((Authenticator) AuthenticationStateProvider).GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity) authState.User.Identity;
+        authState = await ((Authenticator)AuthenticationStateProvider).GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity)authState.User.Identity;
         if (user != null && user.IsAuthenticated)
         {
             NavigationManager.NavigateTo("/");

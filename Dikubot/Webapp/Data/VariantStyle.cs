@@ -1,7 +1,8 @@
-﻿namespace Dikubot.Extensions.search
+﻿namespace Dikubot.Extensions.search;
+
+public enum VariantStyle
 {
-    public enum VariantStyle
-    {
-        Card,Grid,ExpansionPanel
-    }
+    Card,
+    Grid,
+    ExpansionPanel
 }

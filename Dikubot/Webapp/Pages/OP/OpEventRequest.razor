@@ -1,13 +1,11 @@
 ﻿@page "/op/event/request"
-
-@using Dikubot.Webapp.Authentication
-@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
-
-@using Dikubot.DataLayer.Database.Global.Event
-@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Microsoft.IdentityModel.Tokens
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using Dikubot.Webapp.Shared.Dialog
-@using Microsoft.IdentityModel.Tokens
+@using Dikubot.DataLayer.Database.Global.Event
+@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.Webapp.Authentication
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
 @inject UserService _user
 @inject EventRequestMongoService EventRequestMongoService
 @inject EventsMongoService EventsMongoService
@@ -22,10 +20,11 @@
             <MudSelectItem Value="RequestModel<EventModel>.StatusEmun.approved"></MudSelectItem>
             <MudSelectItem Value="RequestModel<EventModel>.StatusEmun.denied"></MudSelectItem>
         </MudSelect>
-        
-        <MudSpacer />
+
+        <MudSpacer/>
         <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+        </MudTextField>
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Status</MudTh>
@@ -35,14 +34,15 @@
         <MudTh>Slet</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Status">@context.Status
-            <MudIconButton Icon="@Icons.Filled.AddCircleOutline" OnClick="()=>Approve(context)" Color="Color.Success"></MudIconButton>
-            <MudIconButton Icon="@Icons.Filled.NotInterested" OnClick="()=>Denied(context)" Color="Color.Error"></MudIconButton>
+        <MudTd DataLabel="Status">
+            @context.Status
+            <MudIconButton Icon="@Icons.Filled.AddCircleOutline" OnClick="() => Approve(context)" Color="Color.Success"></MudIconButton>
+            <MudIconButton Icon="@Icons.Filled.NotInterested" OnClick="() => Denied(context)" Color="Color.Error"></MudIconButton>
         </MudTd>
         <MudTd DataLabel="Navn">@context.Contact.Name</MudTd>
         <MudTd DataLabel="Beskrivelse">@context.RequestItem.Subject</MudTd>
         <MudTd DataLabel="Indstillinger">
-            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Request/Event/edit/{@context.Id.ToString()}")>Rediger</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Request/Event/edit/{context.Id.ToString()}")>Rediger</MudButton>
         </MudTd>
         <MudTd DataLabel="Slet">
             <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
@@ -55,7 +55,7 @@
         <Loading></Loading>
     </LoadingContent>
     <PagerContent>
-        <MudTablePager />
+        <MudTablePager/>
     </PagerContent>
 </MudTable>
 <div class="d-flex flex-wrap mt-4">
@@ -64,16 +64,17 @@
 
 @code {
 
-    [Inject] private IDialogService DialogService { get; set; }
-    
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
     private MudTable<RequestModel<EventModel>> _table;
     private string _searchQuery = "";
     private bool _loading = true;
 
-    private IEnumerable<RequestModel<EventModel>.StatusEmun> options { get; set; } 
-        = new HashSet<RequestModel<EventModel>.StatusEmun>() {RequestModel<EventModel>.StatusEmun.ongoing, RequestModel<EventModel>.StatusEmun.change};
+    private IEnumerable<RequestModel<EventModel>.StatusEmun> options { get; set; }
+        = new HashSet<RequestModel<EventModel>.StatusEmun> { RequestModel<EventModel>.StatusEmun.ongoing, RequestModel<EventModel>.StatusEmun.change };
 
-    
+
     protected override async Task OnInitializedAsync()
     {
         _loading = false;
@@ -85,19 +86,19 @@
         if (!_searchQuery.IsNullOrEmpty())
         {
             items = EventRequestMongoService.Get(model => options.Contains(model.Status) &&
-                                                    (model.RequestItem.Subject.Contains(_searchQuery) 
-                                           || model.RequestItem.Description.Contains(_searchQuery)
-                                            || model.Contact.Name.Contains(_searchQuery)),
-                    state.PageSize, state.Page);   
+                                                          (model.RequestItem.Subject.Contains(_searchQuery)
+                                                           || model.RequestItem.Description.Contains(_searchQuery)
+                                                           || model.Contact.Name.Contains(_searchQuery)),
+                state.PageSize, state.Page);
         }
         else
         {
-            items = EventRequestMongoService.Get(model =>  options.Contains(model.Status),state.PageSize, state.Page);   
+            items = EventRequestMongoService.Get(model => options.Contains(model.Status), state.PageSize, state.Page);
         }
 
-        return new TableData<RequestModel<EventModel>>() { Items = items, TotalItems = (int)EventRequestMongoService.EstimatedCount()};
+        return new TableData<RequestModel<EventModel>> { Items = items, TotalItems = (int)EventRequestMongoService.EstimatedCount() };
     }
-    
+
     private void OnSearch(string text)
     {
         _searchQuery = text;
@@ -106,7 +107,7 @@
 
     private async void DeleteCategory(RequestModel<EventModel> joinRoleCategoryMainModel)
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
         parameters.Add("ButtonText", "Slet");
         parameters.Add("Color", Color.Error);
@@ -116,14 +117,14 @@
         {
             return;
         }
-        
+
         EventRequestMongoService.Remove(joinRoleCategoryMainModel);
         await _table.ReloadServerData();
     }
-    
+
     private async void Approve(RequestModel<EventModel> model)
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil godkende Unionen");
         parameters.Add("ButtonText", "Approve");
         parameters.Add("Color", Color.Success);
@@ -133,17 +134,18 @@
         {
             return;
         }
-        
+
         model.RequestItem = EventsMongoService.Upsert(model.RequestItem);
         model.Status = RequestModel<EventModel>.StatusEmun.approved;
-        
+
         EventRequestMongoService.Upsert(model);
 
         await _table.ReloadServerData();
     }
+
     private async void Denied(RequestModel<EventModel> model)
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du ikke vil godkende Unionen");
         parameters.Add("ButtonText", "Denied");
         parameters.Add("Color", Color.Error);
@@ -153,11 +155,11 @@
         {
             return;
         }
-        
+
         model.Status = RequestModel<EventModel>.StatusEmun.denied;
         EventRequestMongoService.Upsert(model);
 
         await _table.ReloadServerData();
     }
-    
+
 }

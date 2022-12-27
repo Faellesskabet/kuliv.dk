@@ -1,25 +1,12 @@
 ﻿@page "/op/union/request"
-
-@using Dikubot.Webapp.Authentication
-@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
-@using Syncfusion.Blazor.Buttons
-
-@using Dikubot.Webapp.Authentication
-@using System.Net.Http.Json
-@using Dikubot.DataLayer.Database.Global.Union
-@using Dikubot.DataLayer.Database.Global.Union.Request
-@using Dikubot.DataLayer.Database.Global.User
-@using Dikubot.DataLayer.Database.Guild.Models.Calendar
-@using Dikubot.Discord
-@using Dikubot.Webapp.Extensions.Discovery.Links
-@using Dikubot.Webapp.Extensions.Discovery.Request
-@using Dikubot.Webapp.Shared.Dialog
-@using global::Discord.WebSocket
-@using Microsoft.AspNetCore.Razor.TagHelpers
 @using Microsoft.IdentityModel.Tokens
+@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.DataLayer.Database.Global.Union
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
 @inject UnionRequestMongoService UnionRequestMongoService
 @inject UnionMongoService UnionMongoService
-
 
 
 <MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<UnionModel>>>>(Reload))" @ref="_table"
@@ -31,10 +18,11 @@
             <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.approved"></MudSelectItem>
             <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.denied"></MudSelectItem>
         </MudSelect>
-        
-        <MudSpacer />
+
+        <MudSpacer/>
         <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+        </MudTextField>
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Status</MudTh>
@@ -44,14 +32,15 @@
         <MudTh>Slet</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Status">@context.Status
-            <MudIconButton Icon="@Icons.Filled.AddCircleOutline" OnClick="()=>Approve(context)" Color="Color.Success"></MudIconButton>
-            <MudIconButton Icon="@Icons.Filled.NotInterested" OnClick="()=>Denied(context)" Color="Color.Error"></MudIconButton>
+        <MudTd DataLabel="Status">
+            @context.Status
+            <MudIconButton Icon="@Icons.Filled.AddCircleOutline" OnClick="() => Approve(context)" Color="Color.Success"></MudIconButton>
+            <MudIconButton Icon="@Icons.Filled.NotInterested" OnClick="() => Denied(context)" Color="Color.Error"></MudIconButton>
         </MudTd>
         <MudTd DataLabel="Navn">@context.Contact.Name</MudTd>
         <MudTd DataLabel="Beskrivelse">@context.RequestItem.Title</MudTd>
         <MudTd DataLabel="Indstillinger">
-            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Request/Union/edit/{@context.Id.ToString()}")>Rediger</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Request/Union/edit/{context.Id.ToString()}")>Rediger</MudButton>
         </MudTd>
         <MudTd DataLabel="Slet">
             <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
@@ -64,7 +53,7 @@
         <Loading></Loading>
     </LoadingContent>
     <PagerContent>
-        <MudTablePager />
+        <MudTablePager/>
     </PagerContent>
 </MudTable>
 <div class="d-flex flex-wrap mt-4">
@@ -74,22 +63,21 @@
 
 @code {
 
-    
-    
-    [Inject] private IDialogService DialogService { get; set; }
-    
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
     private MudTable<RequestModel<UnionModel>> _table;
     private string _searchQuery = "";
     private bool _loading = true;
-    
-    
-    private IEnumerable<RequestModel<UnionModel>.StatusEmun> options { get; set; } 
-        = new HashSet<RequestModel<UnionModel>.StatusEmun>() {RequestModel<UnionModel>.StatusEmun.ongoing, RequestModel<UnionModel>.StatusEmun.change};
 
-    
+
+    private IEnumerable<RequestModel<UnionModel>.StatusEmun> options { get; set; }
+        = new HashSet<RequestModel<UnionModel>.StatusEmun> { RequestModel<UnionModel>.StatusEmun.ongoing, RequestModel<UnionModel>.StatusEmun.change };
+
+
     protected override async Task OnInitializedAsync()
     {
-        
         _loading = false;
     }
 
@@ -99,16 +87,16 @@
         if (!_searchQuery.IsNullOrEmpty())
         {
             items = UnionRequestMongoService.Get(model => model.GetSearchContent().Contains(_searchQuery) && options.Contains(model.Status),
-                    state.PageSize, state.Page);   
+                state.PageSize, state.Page);
         }
         else
         {
-            items = UnionRequestMongoService.Get(model =>  options.Contains(model.Status), state.PageSize, state.Page);   
+            items = UnionRequestMongoService.Get(model => options.Contains(model.Status), state.PageSize, state.Page);
         }
 
-        return new TableData<RequestModel<UnionModel>>() { Items = items, TotalItems = (int)UnionRequestMongoService.EstimatedCount()};
+        return new TableData<RequestModel<UnionModel>> { Items = items, TotalItems = (int)UnionRequestMongoService.EstimatedCount() };
     }
-    
+
     private void OnSearch(string text)
     {
         _searchQuery = text;
@@ -117,7 +105,7 @@
 
     private async void DeleteCategory(RequestModel<UnionModel> joinRoleCategoryMainModel)
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
         parameters.Add("ButtonText", "Slet");
         parameters.Add("Color", Color.Error);
@@ -127,14 +115,14 @@
         {
             return;
         }
-        
+
         UnionRequestMongoService.Remove(joinRoleCategoryMainModel);
         await _table.ReloadServerData();
     }
-    
+
     private async void Approve(RequestModel<UnionModel> model)
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil godkende Unionen");
         parameters.Add("ButtonText", "Approve");
         parameters.Add("Color", Color.Success);
@@ -144,17 +132,18 @@
         {
             return;
         }
-        
+
         model.RequestItem = UnionMongoService.Upsert(model.RequestItem);
         model.Status = RequestModel<UnionModel>.StatusEmun.approved;
-        
+
         UnionRequestMongoService.Upsert(model);
 
         await _table.ReloadServerData();
     }
+
     private async void Denied(RequestModel<UnionModel> model)
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du ikke vil godkende Unionen");
         parameters.Add("ButtonText", "Denied");
         parameters.Add("Color", Color.Error);
@@ -164,11 +153,11 @@
         {
             return;
         }
-        
+
         model.Status = RequestModel<UnionModel>.StatusEmun.denied;
         UnionRequestMongoService.Upsert(model);
 
         await _table.ReloadServerData();
     }
-    
+
 }

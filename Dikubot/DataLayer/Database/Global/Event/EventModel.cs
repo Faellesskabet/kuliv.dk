@@ -1,91 +1,74 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using Dikubot.DataLayer.Database.Guild.Models.Calendar;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dikubot.DataLayer.Database.Global.Event
+namespace Dikubot.DataLayer.Database.Global.Event;
+
+public class EventModel : EventsAttributes
 {
-    public class EventModel : EventsAttributes
+    [BsonElement("Tags")] public HashSet<Guid> Tags { get; set; } = new();
+
+    [BsonElement("Accepted")] public HashSet<string> Accepted { get; set; } = new();
+
+    [BsonElement("Declined")] public HashSet<string> Declined { get; set; } = new();
+
+    public override HashSet<Guid> GetTags()
     {
-        
-        [BsonElement("Hosts")] public HashSet<string> Hosts { get; set; } = new HashSet<string>();
+        return Tags;
+    }
+    
+    [BsonIgnore]
+    public IEnumerable<Guid> TagsEnumerable { get => Tags; set => Tags = new HashSet<Guid>(value); }
 
-        [BsonElement("HostServers")]
-        public HashSet<Guid> HostServers{ get; set; } = new HashSet<Guid>();
-        
-        [BsonElement("Tags")] public HashSet<Guid> Tags { get; set; } = new HashSet<Guid>();
-        
-        [BsonIgnore]
-        public IEnumerable<Guid> TagsEnumerable { get => Tags; set => Tags = new HashSet<Guid>(value); }
 
-        public override HashSet<Guid> GetTags()
+    public override List<string> GetSearchContent()
+    {
+        return new List<string>
         {
-            return Tags;
-        }
+            Subject,
+            Description,
+            Location
+        };
+    }
 
-        public override List<string> GetSearchContent()
+    public string Time()
+    {
+        if (!StartTime.Year.Equals(EndTime.Year))
         {
-            return new List<string>()
-            {
-                Subject,
-                Description,
-                Location
-            };
-        }
-
-        [BsonElement("Accepted")]
-        public HashSet<string> Accepted { get; set; } = new HashSet<string>();
-
-        [BsonElement("Declined")] public HashSet<string> Declined { get; set; } = new HashSet<string>();
-
-        
-        public string Time()
-        {
-
-            if (!StartTime.Year.Equals(EndTime.Year))
-            {
-                if (IsAllDay)
-                {
-                    return $"{StartTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)} - " +
-                           $"{EndTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
-                }
-                return $"{StartTime.ToString("HH:mm", CultureInfo.InvariantCulture)} - " +
-                       $"{EndTime.ToString("HH:mm", CultureInfo.InvariantCulture)}" +
-                       $"{StartTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)} - " +
-                       $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}" ;
-            } if(!StartTime.Month.Equals(EndTime.Month))
-            {
-                if (IsAllDay)
-                {
-                    return $"{StartTime.ToString("'d.'dd/MM", CultureInfo.InvariantCulture)} - " +
-                           $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}";
-                }
-                return $"{StartTime.ToString("HH:mm", CultureInfo.InvariantCulture)} - " +
-                       $"{EndTime.ToString("HH:mm ", CultureInfo.InvariantCulture)}"
-                       + $"{StartTime.ToString("'d.'dd/MM", CultureInfo.InvariantCulture)} - " 
-                       + $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}" ;
-            }
-            if(!StartTime.Day.Equals(EndTime.Day))
-            {
-                if (IsAllDay)
-                {
-                    return $"{StartTime.ToString("'d.'dd", CultureInfo.InvariantCulture)} - " +
-                           $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}";
-                }
-                return $"{StartTime.ToString("HH:mm", CultureInfo.InvariantCulture)} - " +
-                       $"{EndTime.ToString("HH:mm", CultureInfo.InvariantCulture)}"+
-                $"{StartTime.ToString("'d' dd", CultureInfo.InvariantCulture)} - " +
-                       $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}";
-            }
             if (IsAllDay)
-            {
-                return $"{StartTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
-            }
-            return $"{StartTime.ToString("'Kl.'HH:mm", CultureInfo.InvariantCulture)} - " +
-                   $"{EndTime.ToString("HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+                return $"{StartTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)} - " +
+                       $"{EndTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+            return $"{StartTime.ToString("HH:mm", CultureInfo.InvariantCulture)} - " +
+                   $"{EndTime.ToString("HH:mm", CultureInfo.InvariantCulture)}" +
+                   $"{StartTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)} - " +
+                   $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}";
         }
-        
+
+        if (!StartTime.Month.Equals(EndTime.Month))
+        {
+            if (IsAllDay)
+                return $"{StartTime.ToString("'d.'dd/MM", CultureInfo.InvariantCulture)} - " +
+                       $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+            return $"{StartTime.ToString("HH:mm", CultureInfo.InvariantCulture)} - " +
+                   $"{EndTime.ToString("HH:mm ", CultureInfo.InvariantCulture)}"
+                   + $"{StartTime.ToString("'d.'dd/MM", CultureInfo.InvariantCulture)} - "
+                   + $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+        }
+
+        if (!StartTime.Day.Equals(EndTime.Day))
+        {
+            if (IsAllDay)
+                return $"{StartTime.ToString("'d.'dd", CultureInfo.InvariantCulture)} - " +
+                       $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+            return $"{StartTime.ToString("HH:mm", CultureInfo.InvariantCulture)} - " +
+                   $"{EndTime.ToString("HH:mm", CultureInfo.InvariantCulture)}" +
+                   $"{StartTime.ToString("'d' dd", CultureInfo.InvariantCulture)} - " +
+                   $"{EndTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+        }
+
+        if (IsAllDay) return $"{StartTime.ToString("'d.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
+        return $"{StartTime.ToString("'Kl.'HH:mm", CultureInfo.InvariantCulture)} - " +
+               $"{EndTime.ToString("HH:mm 'd.'dd/MM/yyyy", CultureInfo.InvariantCulture)}";
     }
 }

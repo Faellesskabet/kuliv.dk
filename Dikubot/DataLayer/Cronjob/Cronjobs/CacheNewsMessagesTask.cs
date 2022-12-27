@@ -12,12 +12,11 @@ using Discord.WebSocket;
 
 namespace Dikubot.DataLayer.Cronjob.Cronjobs;
 
-public class CacheNewsMessagesTask: CronTask
+public class CacheNewsMessagesTask : CronTask
 {
-
     private readonly Cache<MessageModel, IMessage> _cache;
     private readonly IGuildMongoFactory _guildMongoFactory;
-    
+
     public CacheNewsMessagesTask(Cache<MessageModel, IMessage> cache, IGuildMongoFactory guildMongoFactory)
     {
         _cache = cache;
@@ -26,7 +25,7 @@ public class CacheNewsMessagesTask: CronTask
 
     // */30 * * * *
     /// <summary>
-    /// Caches all the latest news messages every 30 minute
+    ///     Caches all the latest news messages every 30 minute
     /// </summary>
     protected override CronExpression CronExpression()
     {
@@ -42,14 +41,11 @@ public class CacheNewsMessagesTask: CronTask
             List<MessageModel> messageModels = newsMongoServices.Get(20);
             foreach (MessageModel messageModel in messageModels)
             {
-                if (_cache.ContainsKey(messageModel))
-                {
-                    continue;
-                }
+                if (_cache.ContainsKey(messageModel)) continue;
 
                 IMessage message = guild.GetTextChannel(Convert.ToUInt64(messageModel.ChannelId))
                     .GetMessageAsync(Convert.ToUInt64(messageModel.MessageId)).Result;
-                
+
                 if (message == null)
                 {
                     newsMongoServices.Remove(messageModel);
@@ -59,6 +55,7 @@ public class CacheNewsMessagesTask: CronTask
                 _cache[messageModel] = message;
             }
         }
+
         Logger.Debug("Finished caching latest news");
     }
 }

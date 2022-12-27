@@ -1,13 +1,30 @@
 ﻿@page "/calendar"
-@inject UserService _userService
+@using Dikubot.DataLayer.Database.Global.Calendar
+@using Dikubot.DataLayer.Database.Global.Event
+@using Dikubot.DataLayer.Database.Global.GuildCalendars
+@using global::Discord.WebSocket
+@inject UserService UserService
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@using Dikubot.Webapp.Authentication
-@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+@inject GuildCalendarMongoService GuildCalendarMongoService
 <h3>Calendar</h3>
 
-<CalendarWidget GuildId="@_userService.GetUserGlobalModel().SelectedGuild"></CalendarWidget>
-
+@if (_loaded)
+{
+    <CalendarWidget Events="@_events"></CalendarWidget>
+}
+else
+{
+    <Loading></Loading>
+}
 
 @code {
-    
+    private List<EventModel> _events;
+    private bool _loaded = false;
+
+    protected override void OnInitialized()
+    {
+        _events = GuildCalendarMongoService.GetEventsForGuilds(UserService.GetGuilds()).ToList();
+        _loaded = true;
+    }
+
 }

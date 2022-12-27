@@ -1,17 +1,13 @@
 ﻿@page "/admin/event/create"
 @page "/admin/event/edit/{uuid}"
-
-@using Dikubot.Webapp.Authentication
-@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.Event
+@using Dikubot.DataLayer.Database.Global.Tags
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
-
-@using Dikubot.DataLayer.Database.Guild.Models.User
-@using Dikubot.Webapp.Shared.Dialog
-@using Microsoft.AspNetCore.Components
-@using Dikubot.DataLayer.Database.Global.Tags
-@using Dikubot.DataLayer.Database.Global.Event
 @using Dikubot.DataLayer.Database.Global.Calendar
+@using global::Discord.WebSocket
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
 @inject UserService _user
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject EventsMongoService EventsMongoService
@@ -22,19 +18,19 @@
 @if (!_loading)
 {
     <MudContainer>
-            <MudCard>
-                <MudCardHeader>
-                    <MudText Typo="Typo.h5">Eventet: @_model.Subject</MudText>
-                </MudCardHeader>
-                <MudCardContent>
-                    <EventInput @bind-Value="_model"></EventInput>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
-                    <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
-                </MudCardActions>
-                
-            </MudCard>
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Eventet: @_model.Subject</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <EventInput @bind-Value="_model"></EventInput>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            </MudCardActions>
+
+        </MudCard>
     </MudContainer>
 }
 else
@@ -43,28 +39,30 @@ else
 }
 
 @code {
+
     [Parameter]
     public string? uuid { get; set; }
-    
-    [Inject] private IDialogService DialogService { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
 
     private MudTable<EventModel> _table;
     private bool _loading = true;
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
     private EventModel _model;
-    
+
     protected override async Task OnInitializedAsync()
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _model = Guid.TryParse(uuid, out Guid guid) ? EventsMongoService.Get(guid) : new EventModel() {CreateBy = _userGlobalModel.DiscordId};
+        _model = Guid.TryParse(uuid, out Guid guid) ? EventsMongoService.Get(guid) : new EventModel { CreatedBy = _userGlobalModel.Id };
         _loading = false;
     }
-    
+
     private async void SaveSettings()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
         parameters.Add("ButtonText", "Gem");
         parameters.Add("Color", Color.Success);
@@ -74,13 +72,14 @@ else
         {
             return;
         }
+        
         EventsMongoService.Upsert(_model);
     }
 
-    
+
     private async void DiscardSettings()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
         parameters.Add("ButtonText", "Slet Ændringer");
         parameters.Add("Color", Color.Warning);
@@ -92,7 +91,7 @@ else
         }
         
         _model = Guid.TryParse(uuid, out Guid guid) ? EventsMongoService.Get(guid) : new EventModel();
-        this.StateHasChanged();
+        StateHasChanged();
     }
 
 

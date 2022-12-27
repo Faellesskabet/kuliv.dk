@@ -1,7 +1,7 @@
-@using Dikubot.Webapp.Shared.News
-@using global::Discord.WebSocket
 @inject UserService _userService;
 @page "/news"
+@using global::Discord.WebSocket
+@using Dikubot.Webapp.Shared.News
 
 <MudText Typo="Typo.h3">Nyheder</MudText>
 @if (_loaded)
@@ -16,10 +16,11 @@ else
 @code {
     private bool _loaded;
     private SocketGuild _guild;
-    
+
     protected override async Task OnInitializedAsync()
     {
         _guild = _userService.GetGuild();
         _loaded = true;
     }
+
 }

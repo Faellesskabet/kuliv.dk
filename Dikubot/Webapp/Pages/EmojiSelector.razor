@@ -1,15 +1,13 @@
 ﻿@page "/emojis"
-@using Syncfusion.Blazor.Popups
-@using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.Navigations
-
-@using Newtonsoft.Json
 @using System.IO
+@using Newtonsoft.Json
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
 @using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs
 @namespace Dikubot.Extensions.EmojiSelector
 
 
-<input name="Emoji" @bind="@Value" hidden @oninput="OnValueChanged" />
+<input name="Emoji" @bind="@Value" hidden @oninput="OnValueChanged"/>
 
 <button class="e-btn e-tbar-btn" @onclick="ClickHandler">
     <div class="e-tbar-btn-text" style="font-weight: 500;">@Value</div>
@@ -27,19 +25,19 @@
                         </ChildContent>
                         <ContentTemplate>
                             <div id="rteEmoticons-smiley">
-                                @for (int i = 0; i < this.smileyList.Count; i++)
+                                @for (int i = 0; i < smileyList.Count; i++)
                                 {
                                     int index = i;
                                     if (currentIndex == i)
                                     {
-                                        <div class="char_block @activeClass" title="@this.smileyList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index , 0))">
-                                            @((MarkupString)this.smileyList.Keys.ToList()[index])
+                                        <div class="char_block @activeClass" title="@smileyList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 0))">
+                                            @((MarkupString)smileyList.Keys.ToList()[index])
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="char_block" title="@this.smileyList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 0))">
-                                            @((MarkupString)this.smileyList.Keys.ToList()[index])
+                                        <div class="char_block" title="@smileyList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 0))">
+                                            @((MarkupString)smileyList.Keys.ToList()[index])
                                         </div>
                                     }
                                 }
@@ -52,19 +50,19 @@
                         </ChildContent>
                         <ContentTemplate>
                             <div id="rteEmoticons-animal">
-                                @for (int i = 0; i < this.animalsList.Count; i++)
+                                @for (int i = 0; i < animalsList.Count; i++)
                                 {
                                     int index = i;
                                     if (currentIndex == i)
                                     {
-                                        <div class="char_block @activeClass" title="@this.animalsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 1))">
-                                            @((MarkupString)this.animalsList.Keys.ToList()[index])
+                                        <div class="char_block @activeClass" title="@animalsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 1))">
+                                            @((MarkupString)animalsList.Keys.ToList()[index])
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="char_block" title="@this.animalsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index , 1))">
-                                            @((MarkupString)this.animalsList.Keys.ToList()[index])
+                                        <div class="char_block" title="@animalsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 1))">
+                                            @((MarkupString)animalsList.Keys.ToList()[index])
                                         </div>
                                     }
                                 }
@@ -77,19 +75,19 @@
                         </ChildContent>
                         <ContentTemplate>
                             <div id="rteEmoticons-animal">
-                                @for (int i = 0; i < this.objectsList.Count; i++)
+                                @for (int i = 0; i < objectsList.Count; i++)
                                 {
                                     int index = i;
                                     if (currentIndex == i)
                                     {
-                                        <div class="char_block @activeClass" title="@this.objectsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 2))">
-                                            @((MarkupString)this.objectsList.Keys.ToList()[index])
+                                        <div class="char_block @activeClass" title="@objectsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 2))">
+                                            @((MarkupString)objectsList.Keys.ToList()[index])
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="char_block" title="@this.objectsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index , 2))">
-                                            @((MarkupString)this.objectsList.Keys.ToList()[index])
+                                        <div class="char_block" title="@objectsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 2))">
+                                            @((MarkupString)objectsList.Keys.ToList()[index])
                                         </div>
                                     }
                                 }
@@ -102,19 +100,19 @@
                         </ChildContent>
                         <ContentTemplate>
                             <div id="rteEmoticons-animal">
-                                @for (int i = 0; i < this.symbolsList.Count; i++)
+                                @for (int i = 0; i < symbolsList.Count; i++)
                                 {
                                     int index = i;
                                     if (currentIndex == i)
                                     {
-                                        <div class="char_block @activeClass" title="@this.symbolsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 3))">
-                                            @((MarkupString)this.symbolsList.Keys.ToList()[index])
+                                        <div class="char_block @activeClass" title="@symbolsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 3))">
+                                            @((MarkupString)symbolsList.Keys.ToList()[index])
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="char_block" title="@this.symbolsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index , 3))">
-                                            @((MarkupString)this.symbolsList.Keys.ToList()[index])
+                                        <div class="char_block" title="@symbolsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 3))">
+                                            @((MarkupString)symbolsList.Keys.ToList()[index])
                                         </div>
                                     }
                                 }
@@ -127,19 +125,19 @@
                         </ChildContent>
                         <ContentTemplate>
                             <div id="rteEmoticons-animal">
-                                @for (int i = 0; i < this.travelPlacesList.Count; i++)
+                                @for (int i = 0; i < travelPlacesList.Count; i++)
                                 {
                                     int index = i;
                                     if (currentIndex == i)
                                     {
-                                        <div class="char_block @activeClass" title="@this.travelPlacesList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 4))">
-                                            @((MarkupString)this.travelPlacesList.Keys.ToList()[index])
+                                        <div class="char_block @activeClass" title="@travelPlacesList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 4))">
+                                            @((MarkupString)travelPlacesList.Keys.ToList()[index])
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="char_block" title="@this.travelPlacesList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index , 4))">
-                                            @((MarkupString)this.travelPlacesList.Keys.ToList()[index])
+                                        <div class="char_block" title="@travelPlacesList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 4))">
+                                            @((MarkupString)travelPlacesList.Keys.ToList()[index])
                                         </div>
                                     }
                                 }
@@ -152,19 +150,19 @@
                         </ChildContent>
                         <ContentTemplate>
                             <div id="rteEmoticons-animal">
-                                @for (int i = 0; i < this.flagsList.Count; i++)
+                                @for (int i = 0; i < flagsList.Count; i++)
                                 {
                                     int index = i;
                                     if (currentIndex == i)
                                     {
-                                        <div class="char_block @activeClass" title="@this.flagsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 5))">
-                                            @((MarkupString)this.flagsList.Keys.ToList()[index])
+                                        <div class="char_block @activeClass" title="@flagsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 5))">
+                                            @((MarkupString)flagsList.Keys.ToList()[index])
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="char_block" title="@this.flagsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index , 5))">
-                                            @((MarkupString)this.flagsList.Keys.ToList()[index])
+                                        <div class="char_block" title="@flagsList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 5))">
+                                            @((MarkupString)flagsList.Keys.ToList()[index])
                                         </div>
                                     }
                                 }
@@ -177,19 +175,19 @@
                         </ChildContent>
                         <ContentTemplate>
                             <div id="rteEmoticons-animal">
-                                @for (int i = 0; i < this.activitiesList.Count; i++)
+                                @for (int i = 0; i < activitiesList.Count; i++)
                                 {
                                     int index = i;
                                     if (currentIndex == i)
                                     {
-                                        <div class="char_block @activeClass" title="@this.activitiesList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 6))">
-                                            @((MarkupString)this.activitiesList.Keys.ToList()[index])
+                                        <div class="char_block @activeClass" title="@activitiesList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 6))">
+                                            @((MarkupString)activitiesList.Keys.ToList()[index])
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="char_block" title="@this.activitiesList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index , 6))">
-                                            @((MarkupString)this.activitiesList.Keys.ToList()[index])
+                                        <div class="char_block" title="@activitiesList.Values.ToList()[index]" @onclick="@(e => OnIconIconClick(index, 6))">
+                                            @((MarkupString)activitiesList.Keys.ToList()[index])
                                         </div>
                                     }
                                 }
@@ -201,29 +199,29 @@
         </Content>
     </DialogTemplates>
     <DialogButtons>
-        <DialogButton Content="Insert" IsPrimary="true" OnClick="OnInsert" Disabled="@disableInsertBtn" />
-        <DialogButton Content="Cancel" OnClick="DialogOverlay" />
+        <DialogButton Content="Insert" IsPrimary="true" OnClick="OnInsert" Disabled="@disableInsertBtn"/>
+        <DialogButton Content="Cancel" OnClick="DialogOverlay"/>
     </DialogButtons>
-    <DialogEvents OnOverlayModalClick="DialogOverlay" />
+    <DialogEvents OnOverlayModalClick="DialogOverlay"/>
 </SfDialog>
 
 @code {
     string rteObj;
 
-    
+
     [Parameter]
     public string Value { get; set; } = "🙂";
 
     [Parameter]
     public EventCallback<string> ValueChanged { get; set; }
-    
+
     private async Task OnValueChanged(ChangeEventArgs e)
     {
         Value = e.Value.ToString();
 
         await ValueChanged.InvokeAsync(Value);
     }
-    
+
     int currentIndex { get; set; } = -1;
     int currentTabIndex { get; set; }
     string activeClass = "e-active";
@@ -240,82 +238,78 @@
 
 
     Emojis myDeserializedClass;
-    
+
     protected override async Task OnInitializedAsync()
     {
         string EmojisString = File.ReadAllText("Webapp/wwwroot/misc/full-emoji-list.json");
-            //;Dikubot/Webapp/wwwroot/misc/full-emoji-list.json
+    //;Dikubot/Webapp/wwwroot/misc/full-emoji-list.json
         myDeserializedClass = JsonConvert.DeserializeObject<Emojis>(EmojisString);
         smileyList = myDeserializedClass.SmileysPeople.ToDictionary(model => model.emoji, model => model.description);
         animalsList = myDeserializedClass.AnimalsNature.ToDictionary(model => model.emoji, model => model.description);
-        objectsList =myDeserializedClass.Objects.ToDictionary(model => model.emoji, model => model.description);
+        objectsList = myDeserializedClass.Objects.ToDictionary(model => model.emoji, model => model.description);
         flagsList = myDeserializedClass.Flags.ToDictionary(model => model.emoji, model => model.description);
         symbolsList = myDeserializedClass.Symbols.ToDictionary(model => model.emoji, model => model.description);
         activitiesList = myDeserializedClass.Activities.ToDictionary(model => model.emoji, model => model.description);
         travelPlacesList = myDeserializedClass.TravelPlaces.ToDictionary(model => model.emoji, model => model.description);
-
-        
     }
-    
-    
 
 
-    
     private void OnIconIconClick(int index, int tabIndex)
     {
-        this.disableInsertBtn = false;
-        this.currentIndex = index;
-        this.currentTabIndex = tabIndex;
+        disableInsertBtn = false;
+        currentIndex = index;
+        currentTabIndex = tabIndex;
     }
+
     private async Task ClickHandler()
     {
-        this.dialogVisible = true;
+        dialogVisible = true;
     /* await this.rteObj.SaveSelectionAsync(); */
     }
+
     private async Task OnInsert()
     {
-        if (this.currentIndex > -1)
+        if (currentIndex > -1)
         {
-            switch (this.currentTabIndex)
-    {
-        case 0:
-            Value = this.smileyList.Keys.ToList()[this.currentIndex];
-            break;
-        case 1:
-            Value = this.animalsList.Keys.ToList()[this.currentIndex];
-            break;
-        case 2:
-            Value = this.objectsList.Keys.ToList()[this.currentIndex];
-            break;
-        case 3:
-            Value = this.symbolsList.Keys.ToList()[this.currentIndex];
-            break;
-        case 4:
-            Value = this.travelPlacesList.Keys.ToList()[this.currentIndex];
-            break;
-        case 5:
-            Value = this.flagsList.Keys.ToList()[this.currentIndex];
-            break;
-        case 6:
-            Value = this.activitiesList.Keys.ToList()[this.currentIndex];
-            break;
-        default:
-            break;
-    }
+            switch (currentTabIndex)
+            {
+                case 0:
+                    Value = smileyList.Keys.ToList()[currentIndex];
+                    break;
+                case 1:
+                    Value = animalsList.Keys.ToList()[currentIndex];
+                    break;
+                case 2:
+                    Value = objectsList.Keys.ToList()[currentIndex];
+                    break;
+                case 3:
+                    Value = symbolsList.Keys.ToList()[currentIndex];
+                    break;
+                case 4:
+                    Value = travelPlacesList.Keys.ToList()[currentIndex];
+                    break;
+                case 5:
+                    Value = flagsList.Keys.ToList()[currentIndex];
+                    break;
+                case 6:
+                    Value = activitiesList.Keys.ToList()[currentIndex];
+                    break;
+            }
             await ValueChanged.InvokeAsync(Value);
-            this.dialogVisible = false;
-            this.currentIndex = -1;
+            dialogVisible = false;
+            currentIndex = -1;
         }
-        
-        this.disableInsertBtn = true;
+
+        disableInsertBtn = true;
     }
+
     private void DialogOverlay()
     {
-        this.dialogVisible = false;
-        this.currentIndex = -1;
+        dialogVisible = false;
+        currentIndex = -1;
     }
-    
-    
+
+
     public class Emoji
     {
         public int no { get; set; }
@@ -325,7 +319,7 @@
         public bool flagged { get; set; }
         public List<object> keywords { get; set; }
     }
-    
+
 
     public class Emojis
     {
@@ -337,16 +331,17 @@
 
         [JsonProperty("Travel & Places")]
         public List<Emoji> TravelPlaces { get; set; }
+
         public List<Emoji> Activities { get; set; }
         public List<Emoji> Objects { get; set; }
         public List<Emoji> Symbols { get; set; }
         public List<Emoji> Flags { get; set; }
     }
 
-    
 
 
-    
+
+
 }
 
 <style>

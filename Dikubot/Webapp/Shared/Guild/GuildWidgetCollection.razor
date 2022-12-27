@@ -1,49 +1,46 @@
 @using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.DataLayer.Database.Global.Union
 @inject NavigationManager NavigationManager
 @inject GuildSettingsMongoService GuildSettingsMongoService
-@using Dikubot.Extensions.search
 @inject UserService _user;
-@using Dikubot.DataLayer.Database.Global.Union
 
 
-    <Searchbar Items="_models" Context="UnionModel">
-        <TemplateRow Context="unionModel" >
-           <MudItem xs="12" sm="6" md="4" lg="3" >
-               <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"/>
-           </MudItem>
-        </TemplateRow>
-    </Searchbar>
+<Searchbar Items="_models" Context="UnionModel">
+    <TemplateRow Context="unionModel">
+        <MudItem xs="12" sm="6" md="4" lg="3">
+            <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"/>
+        </MudItem>
+    </TemplateRow>
+</Searchbar>
 
 
 <MudButton Color="Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
 
 @code {
-    [Parameter] public List<GuildWidgetDto> Guilds { get; set; }
-    
-    
+
+    [Parameter]
+    public List<GuildWidgetDto> Guilds { get; set; }
+
+
     public List<UnionModel> _models { get; set; }
 
     protected override void OnInitialized()
     {
-        
-        var serverList = _user.GetGuilds().Select(g => g.Id);
-        var list = GuildSettingsMongoService.Get()
+        IEnumerable<ulong> serverList = _user.GetGuilds().Select(g => g.Id);
+        IEnumerable<UnionModel> list = GuildSettingsMongoService.Get()
             .Where(model => model.IsPublic || serverList.Contains(model.GuildId))
             .Select(model => new UnionModel(model));
-        
+
         _models = list.OrderBy(model => model.Title).ToList();
-        
+
         base.OnInitialized();
     }
-    
-    
-    
-    
-    
+
+
     private void GotoAddGuild()
     {
         NavigationManager.NavigateTo("/addguild");
     }
-    
-    
+
+
 }
