@@ -1,32 +1,30 @@
+@using Dikubot.Webapp.Extensions.NavMenu
 @inherits LayoutComponentBase
-@using Dikubot.Webapp.Extensions.NavMenu;
-
-
 
 
 <MudLayout>
     <FooterTopNavMenu App="App"/>
-        <MudMainContent Style="padding-right: 0; padding-left: 0">
-            <MudContainer Style="@_style">
-                @Body
-            </MudContainer>
-        </MudMainContent>
+    <MudMainContent Style="padding-right: 0; padding-left: 0">
+        <MudContainer Style="@_style">
+            @Body
+        </MudContainer>
+    </MudMainContent>
     <Footer style="margin-top: 16px; min-height: 30vh;"></Footer>
 </MudLayout>
 
 @code {
 
-   
-    [CascadingParameter] 
+
+    [CascadingParameter]
     protected App App { get; set; }
-    
+
     [Parameter]
     public string Width { get; set; } = "100";
-    
+
 
     private string _background => (string)(App.IsDarkMode ? "transparent" : App.Theme.Palette.Background.Value);
 
     private string _style => $"min-height: 70vh; background-color: {_background}; " +
-                             $"padding: 24px 24px;";
+                             "padding: 24px 24px;";
 
 }

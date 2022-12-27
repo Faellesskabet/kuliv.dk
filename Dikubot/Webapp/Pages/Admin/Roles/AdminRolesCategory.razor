@@ -1,14 +1,13 @@
 @page "/admin/roles/create"
 @page "/admin/roles/edit/{uuid}"
-
-@using Dikubot.Webapp.Authentication
-@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
-@using global::Discord.WebSocket
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild
-@using Dikubot.Extensions.EmojiSelector
+@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
 @using Dikubot.DataLayer.Database.Guild.Models.Role
 @using Dikubot.DataLayer.Static
+@using Dikubot.Extensions.EmojiSelector
+@using Dikubot.DataLayer.Database.Global.User
+@using global::Discord.WebSocket
+@using Dikubot.Webapp.Authentication
 @using Dikubot.Webapp.Shared.Dialog
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IGuildMongoFactory GuildMongoFactory
@@ -18,30 +17,30 @@
 @if (!_loading)
 {
     <MudContainer>
-            <MudCard>
-                <MudCardHeader>
-                    <MudText Typo="Typo.h5">Sæt din kategori indstillinger her</MudText>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudForm>
-                        <MudTextField @bind-Value="@_category.Name" Label="Kategori navn" Immediate="@true" MaxLength="32"></MudTextField>
-                        <MudTextField @bind-Value="@_category.Decs" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
-                        <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
-                        <MudSelect Label="Påkrævet roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne se kategorien" @bind-SelectedValues="_category.PermissionEnumerable"
-                                   MultiSelectionTextFunc="list => GetRoleString(_category)" Text="@GetRoleString(_category)">
-                            @foreach (var role in _roleMainModels)
-                            {
-                                <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudForm>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
-                    <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
-                </MudCardActions>
-                
-            </MudCard>
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Sæt din kategori indstillinger her</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudForm>
+                    <MudTextField @bind-Value="@_category.Name" Label="Kategori navn" Immediate="@true" MaxLength="32"></MudTextField>
+                    <MudTextField @bind-Value="@_category.Decs" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+                    <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
+                    <MudSelect Label="Påkrævet roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne se kategorien" @bind-SelectedValues="_category.PermissionEnumerable"
+                               MultiSelectionTextFunc="list => GetRoleString(_category)" Text="@GetRoleString(_category)">
+                        @foreach (RoleMainModel role in _roleMainModels)
+                        {
+                            <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudForm>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            </MudCardActions>
+
+        </MudCard>
         <MudCard Style="margin-top: 25px; margin-bottom: 25px;">
             <MudCardHeader>
                 <MudText Typo="Typo.h5">Roller i kategorien</MudText>
@@ -59,11 +58,15 @@
                         <MudTh>Slet</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd DataLabel="Navn"><MudTextField @bind-Value="@context.Name" Label="Navn" Immediate="@true" MaxLength="32"></MudTextField></MudTd>
-                        <MudTd DataLabel="Beskrivelse"><MudTextField @bind-Value="@context.Desc" Label="Beskrivelse" Immediate="@true" MaxLength="256" Lines="2" Variant="Variant.Outlined"></MudTextField></MudTd>
+                        <MudTd DataLabel="Navn">
+                            <MudTextField @bind-Value="@context.Name" Label="Navn" Immediate="@true" MaxLength="32"></MudTextField>
+                        </MudTd>
+                        <MudTd DataLabel="Beskrivelse">
+                            <MudTextField @bind-Value="@context.Desc" Label="Beskrivelse" Immediate="@true" MaxLength="256" Lines="2" Variant="Variant.Outlined"></MudTextField>
+                        </MudTd>
                         <MudTd>
                             <MudSelect Label="Rolle" Lines="2" HelperText="Hvilken rolle skal man kunne tilvælge sig selv" @bind-Value="@context.RoleId"
-                                       Text="@(_roleMongoService.Get(model => model.Id == @context.RoleId)?.Name ?? "")">
+                                       Text="@(_roleMongoService.Get(model => model.Id == context.RoleId)?.Name ?? "")">
                                 @foreach (RoleMainModel role in _roleMainModels)
                                 {
                                     // We won't let people choose administrator roles as the verified role,
@@ -79,16 +82,18 @@
                         <MudTd>
                             <MudSelect Label="Påkrævet roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne vælge rollen" @bind-SelectedValues="@context.PermissionEnumerable"
                                        MultiSelectionTextFunc="list => GetRoleString(context)" Text="@GetRoleString(context)">
-                                @foreach (var role in _roleMainModels)
+                                @foreach (RoleMainModel role in _roleMainModels)
                                 {
                                     <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
                                 }
                             </MudSelect>
                         </MudTd>
                         <MudTd DataLabel="Emoji">
-                            <EmojiSelector @bind-Value="context.Emoji" />
+                            <EmojiSelector @bind-Value="context.Emoji"/>
                         </MudTd>
-                        <MudTd DataLabel="Slet"><MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="() => RemoveRole(context)">Slet</MudButton></MudTd>
+                        <MudTd DataLabel="Slet">
+                            <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="() => RemoveRole(context)">Slet</MudButton>
+                        </MudTd>
                     </RowTemplate>
                     <NoRecordsContent>
                         <MudText>Kunne ikke finde nogen elementer</MudText>
@@ -97,11 +102,13 @@
                         <MudText>Loading...</MudText>
                     </LoadingContent>
                     <PagerContent>
-                        <MudTablePager />
+                        <MudTablePager/>
                     </PagerContent>
                 </MudTable>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" 
-                           OnClick="@AddRole">Tilføj ny rolle</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           OnClick="@AddRole">
+                    Tilføj ny rolle
+                </MudButton>
             </MudCardContent>
             <MudDivider DividerType="DividerType.Middle"></MudDivider>
             <MudCardActions>
@@ -118,10 +125,12 @@ else
 }
 
 @code {
+
     [Parameter]
     public string? uuid { get; set; }
-    
-    [Inject] private IDialogService DialogService { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
 
     private MudTable<JoinRoleMainModel> _table;
     private bool _loading = true;
@@ -144,23 +153,23 @@ else
         _roleMainModels = _roleMongoService.GetAll();
         _loading = false;
     }
-    
+
     private async Task<TableData<JoinRoleMainModel>> Reload(TableState state)
     {
-        return new TableData<JoinRoleMainModel>() { Items = _joinRoleMainModels, TotalItems = _joinRoleMainModels.Count};
+        return new TableData<JoinRoleMainModel> { Items = _joinRoleMainModels, TotalItems = _joinRoleMainModels.Count };
     }
-    
+
     private void AddRole()
     {
         _joinRoleMainModels.Add(new JoinRoleMainModel());
         _table.ReloadServerData();
     }
-    
+
     private string GetRoleString(JoinRoleCategoryMainModel category)
     {
         return Util.ConcatListToString(category.GetPermissionRoles(_roleMongoService).Select(model => model?.Name ?? "").ToList());
     }
-    
+
     private string GetRoleString(JoinRoleMainModel category)
     {
         return Util.ConcatListToString(category.GetPermissionRoles(_roleMongoService).Select(model => model?.Name ?? "").ToList());
@@ -168,7 +177,7 @@ else
 
     private async void RemoveRole(JoinRoleMainModel joinRoleMainModel)
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette denne gruppe?");
         parameters.Add("ButtonText", "Slet");
         parameters.Add("Color", Color.Error);
@@ -178,14 +187,14 @@ else
         {
             return;
         }
-        
+
         _joinRoleMainModels.Remove(joinRoleMainModel);
         await _table.ReloadServerData();
     }
 
     private async void SaveSettings()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
         parameters.Add("ButtonText", "Gem");
         parameters.Add("Color", Color.Success);
@@ -196,9 +205,9 @@ else
             return;
         }
 
-        // We don't wanna save the roles here, but the category references the roles, so we do this to avoid saving
-        // role changes
-        var oldCategory = _joinRoleMongoService.Get(_category.Id);
+    // We don't wanna save the roles here, but the category references the roles, so we do this to avoid saving
+    // role changes
+        JoinRoleCategoryMainModel oldCategory = _joinRoleMongoService.Get(_category.Id);
         if (oldCategory?.TextRoles != null)
         {
             _category.TextRoles = oldCategory.TextRoles;
@@ -208,7 +217,7 @@ else
 
     private async void SaveRoles()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil gemme dine grupper?");
         parameters.Add("ButtonText", "Gem");
         parameters.Add("Color", Color.Success);
@@ -225,7 +234,7 @@ else
 
     private async void DiscardSettings()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
         parameters.Add("ButtonText", "Slet Ændringer");
         parameters.Add("Color", Color.Warning);
@@ -235,14 +244,14 @@ else
         {
             return;
         }
-        
+
         _category = Guid.TryParse(uuid, out Guid guid) ? _joinRoleMongoService.Get(guid) : new JoinRoleCategoryMainModel();
-        this.StateHasChanged();
+        StateHasChanged();
     }
 
     private async void DiscardRoles()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
         parameters.Add("ButtonText", "Slet Ændringer");
         parameters.Add("Color", Color.Warning);
@@ -252,9 +261,9 @@ else
         {
             return;
         }
-        
+
         _joinRoleMainModels = _category.TextRoles ?? new List<JoinRoleMainModel>();
-        this.StateHasChanged();
+        StateHasChanged();
     }
 
 

@@ -10,7 +10,7 @@ public class MetadataService
     {
         _js = js;
     }
-    
+
     public async void SetTitle(string title)
     {
         await _js.InvokeVoidAsync("setTitle", title);
@@ -20,5 +20,4 @@ public class MetadataService
     {
         await _js.InvokeVoidAsync("setDescription", description);
     }
-    
 }

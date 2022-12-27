@@ -1,53 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using Dikubot.DataLayer.Database.Guild.Models.Role;
-using Microsoft.IdentityModel.Tokens;
+using Dikubot.DataLayer.Database.Global.User;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dikubot.DataLayer.Database.Guild.Models.Calendar
+namespace Dikubot.DataLayer.Database.Global.Event;
+
+public class EventsAttributes : MainModel
 {
-    public class EventsAttributes : MainModel
-    {
-        
-        
-        [BsonElement("Subject")] 
-        public string Subject { get; set; }
-        
-        [BsonElement("Location")] 
-        public string Location { get; set; }
+    [BsonElement("Subject")]
+    [BsonRequired]
+    public string Subject { get; set; }
 
-        [BsonElement("Description")] 
-        public string Description { get; set; }
+    [BsonElement("Location")] public string Location { get; set; }
 
-        [BsonElement("StartTime")]
-        [BsonRepresentation(BsonType.DateTime)]
-        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
-        [Required]
-        public DateTime StartTime { get; set; } = DateTime.Now;
+    [BsonElement("Description")]
+    [BsonRequired]
+    public string Description { get; set; }
 
-        [BsonElement("EndTime")]
-        [Required]
-        [BsonRepresentation(BsonType.DateTime)]
-        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
-        public DateTime EndTime {get; set; } = DateTime.Now;
-        
-        [BsonElement("RecurrenceRule")] 
-        public string RecurrenceRule { get; set; }
-        
-        [BsonElement("RecurrenceException")] 
-        public string RecurrenceException { get; set; }
+    [BsonElement("StartTime")]
+    [BsonRepresentation(BsonType.DateTime)]
+    [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
+    [Required]
+    public DateTime StartTime { get; set; } = DateTime.Now;
 
-        [BsonElement("IsAllDay")]
-        public bool IsAllDay { get; set; }
+    [BsonElement("EndTime")]
+    [Required]
+    [BsonRepresentation(BsonType.DateTime)]
+    [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
+    public DateTime EndTime { get; set; } = DateTime.Now;
 
-        [BsonElement("CreateBy")] public string CreateBy { get; set; } = "";
+    [BsonElement("RecurrenceRule")] public string RecurrenceRule { get; set; }
 
-        [BsonIgnore]
-        public bool IsReadonly { get; set; } = true;
+    [BsonElement("RecurrenceException")] public string RecurrenceException { get; set; }
 
+    [BsonElement("IsAllDay")] public bool IsAllDay { get; set; }
 
-    }
+    /// <summary>
+    /// CreatedBy is a should be a UserGlobalModel guid
+    /// </summary>
+    [BsonElement("CreatedBy")]
+    [BsonRequired]
+    public Guid CreatedBy { get; set; }
+
+    [BsonIgnore] public bool IsReadonly { get; set; } = true;
 }

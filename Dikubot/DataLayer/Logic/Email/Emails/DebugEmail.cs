@@ -1,32 +1,33 @@
 using SendGrid.Helpers.Mail;
 
-namespace Dikubot.DataLayer.Logic.Email.Emails
+namespace Dikubot.DataLayer.Logic.Email.Emails;
+
+public class DebugEmail : Email
 {
-    public class DebugEmail : Email
+    private readonly string errorMessage;
+
+    public DebugEmail(string errorMessage)
     {
-        private readonly string errorMessage;
-        public DebugEmail(string errorMessage)
-        {
-            this.errorMessage = errorMessage;
-        }
-        public string GetTextContent()
-        {
-            return errorMessage;
-        }
+        this.errorMessage = errorMessage;
+    }
 
-        public string GetHtmlContent()
-        {
-            return errorMessage;
-        }
+    public string GetTextContent()
+    {
+        return errorMessage;
+    }
 
-        public EmailAddress GetTo()
-        {
-            return new EmailAddress("lukiwokimc@gmail.com");
-        }
+    public string GetHtmlContent()
+    {
+        return errorMessage;
+    }
 
-        public string GetSubject()
-        {
-            return "KUliv ERROR";
-        }
+    public EmailAddress GetTo()
+    {
+        return new EmailAddress("lukiwokimc@gmail.com");
+    }
+
+    public string GetSubject()
+    {
+        return "KUliv ERROR";
     }
 }

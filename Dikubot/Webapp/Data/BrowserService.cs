@@ -1,7 +1,7 @@
-namespace Data;
-
-using Microsoft.JSInterop;
 using System.Threading.Tasks;
+using Microsoft.JSInterop;
+
+namespace Data;
 
 public class BrowserService
 {
@@ -16,7 +16,6 @@ public class BrowserService
     {
         return await _js.InvokeAsync<BrowserDimension>("getDimensions");
     }
-
 }
 
 public class BrowserDimension

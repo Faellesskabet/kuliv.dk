@@ -1,18 +1,17 @@
-﻿@using Dikubot.DataLayer.Static
-@using Dikubot.DataLayer.Database.Global.Tags
+﻿@using Dikubot.DataLayer.Database.Global.Tags
 @inject TagMongoService TagMongoService
 
-@foreach (var tag in TagsList)
+@foreach (TagsMainModel tag in TagsList)
 {
     //Kan ikke gøres direkte :(
-    string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
+    string style = "background-color: " + tag.Color + ";" + "color: " + tag.TextColor + ";";
     <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
 }
 
 @code {
 
     [Parameter]
-    public List<TagsMainModel> TagsList { get; set; } = new List<TagsMainModel>();
+    public List<TagsMainModel> TagsList { get; set; } = new();
 
     [Parameter]
     public HashSet<Guid> Tags { get; set; }
@@ -28,13 +27,12 @@
 
     protected override void OnParametersSet()
     {
-        
         TagsList = Tags.Select(t => TagMongoService.Get(t)).ToList();
-       
+
         base.OnParametersSet();
     }
-    
-    
+
+
 
 
 }

@@ -1,16 +1,13 @@
 ﻿@page "/admin/calendar/create"
 @page "/admin/calendar/edit/{uuid}"
-
-@using Dikubot.Webapp.Authentication
-@using Dikubot.DataLayer.Database.Guild.Models.Calendar
-@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Global.Calendar
 @using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.Role
 @using Dikubot.DataLayer.Static
+@using global::Discord.WebSocket
+@using Dikubot.Webapp.Authentication
 @using Dikubot.Webapp.Shared.Dialog
-@using Microsoft.AspNetCore.Components
-@using Dikubot.DataLayer.Database.Global.Calendar
-@using Dikubot.DataLayer.Database.Guild
 @inject CalendarMongoService CalendarMongoService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IGuildMongoFactory GuildMongoFactory
@@ -20,66 +17,32 @@
 @if (!_loading)
 {
     <MudContainer>
-            <MudCard>
-                <MudCardHeader>
-                    <MudText Typo="Typo.h5">Sæt din Kalender indstillinger her</MudText>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudForm>
-                        <MudTextField @bind-Value="@_category.Name" Label="Kalenderens navn" Immediate="@true" MaxLength="32"></MudTextField>
-                        <MudTextField @bind-Value="@_category.Decs" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
-                        
-                        <MudSelect @bind-Value="@_category.CalendarType" Label="Vælg Type">
-                            @foreach (CalendarModel.EnumCalendarType item in Enum.GetValues(typeof(CalendarModel.EnumCalendarType)))
-                            {
-                                <MudSelectItem Value="@(item)" />
-                            }
-                        </MudSelect>       
-                        
-                        <MudSelect @bind-Value="@_category.Display" Label="Vælg Display">
-                            @foreach (CalendarModel.EnumDisplay item in Enum.GetValues(typeof(CalendarModel.EnumDisplay)))
-                            {
-                                <MudSelectItem Value="@(item)" />
-                            }
-                        </MudSelect>
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Sæt din Kalender indstillinger her</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudForm>
+                    <MudTextField @bind-Value="@_calendarModel.Name" Label="Calendar Name" Immediate="@true" MaxLength="32"></MudTextField>
+                    <MudTextField @bind-Value="@_calendarModel.Description" Label="Calendar description" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+                    
+                    <MudSelect @bind-Value="@_calendarModel.Display" Label="Choose Display">
+                        @foreach (CalendarModel.EnumDisplay item in Enum.GetValues(typeof(CalendarModel.EnumDisplay)))
+                        {
+                            <MudSelectItem Value="@(item)"/>
+                        }
+                    </MudSelect>
 
-                        <MudSelect @bind-Value="@_category.Visible" Label="Vælg Visible">
-                            @foreach (CalendarModel.EnumAvailable item in Enum.GetValues(typeof(CalendarModel.EnumAvailable)))
-                            {
-                                <MudSelectItem Value="@(item)" />
-                            }
-                        </MudSelect>
-                        <MudSelect Disabled="_category.Visible == CalendarModel.EnumAvailable.Public || _category.Visible == CalendarModel.EnumAvailable.Externt" 
-                                   Label="View roller" Lines="2" MultiSelection="true" HelperText="Brugeren skal have mindst en af disse roller for at se begivenheden" @bind-SelectedValues="_category.ViewEnumerable"
-                                   MultiSelectionTextFunc="list => GetViewRolesString(_category)" Text="@GetViewRolesString(_category)">
-                            @foreach (var role in _roleMainModels)
-                            {
-                                <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
-                            }
-                        </MudSelect>
-                        
-                        <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
-                        
-                        
-                        <MudSelect Label="Permission roller" Lines="2" MultiSelection="true" HelperText="Brugere skal have mindst en af disse roller for at kunne lave begivenheder i denne kalender" @bind-SelectedValues="_category.PermissionEnumerable"
-                                   MultiSelectionTextFunc="list => GetPermissionRolesString(_category)" Text="@GetPermissionRolesString(_category)">
-                            @foreach (var role in _roleMainModels)
-                            {
-                                <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
-                            }
-                        </MudSelect>
-                        
-                        
-                        
-                        
-                    </MudForm>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
-                    <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
-                </MudCardActions>
-                
-            </MudCard>
+                    <MudSwitch @bind-Value="@_calendarModel.Visible" T="bool" Label="Allow others to see this calendar"></MudSwitch>
+                    <MudColorPicker @bind-Text="@_calendarModel.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_calendarModel.Color};")" Label="Choose color"></MudColorPicker>
+                </MudForm>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            </MudCardActions>
+
+        </MudCard>
     </MudContainer>
 }
 else
@@ -88,16 +51,18 @@ else
 }
 
 @code {
+
     [Parameter]
     public string? uuid { get; set; }
-    
-    [Inject] private IDialogService DialogService { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
 
     private MudTable<CalendarModel> _table;
     private bool _loading = true;
     private UserGlobalModel _userGlobalModel;
     private SocketGuild _guild;
-    private CalendarModel _category;
+    private CalendarModel _calendarModel;
     private RoleMongoService _roleMongoService;
     private List<RoleMainModel> _roleMainModels;
 
@@ -105,25 +70,16 @@ else
     {
         _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         _guild = _userGlobalModel.GetSelectedGuild();
-        _category = Guid.TryParse(uuid, out Guid guid) ? CalendarMongoService.Get(guid) : new CalendarModel();
+        _calendarModel = Guid.TryParse(uuid, out Guid guid) ? CalendarMongoService.Get(guid) : new CalendarModel();
         _roleMongoService = GuildMongoFactory.Get<RoleMongoService>(_guild);
         _roleMainModels = _roleMongoService.GetAll();
         _loading = false;
     }
 
-    private string GetPermissionRolesString(CalendarModel category)
-    {
-        return Util.ConcatListToString(category.GetPermissionRoles(_roleMongoService).Select(model => model?.Name ?? "").ToList());
-    }
-    
-    private string GetViewRolesString(CalendarModel category)
-    {
-        return Util.ConcatListToString(category.GetViewRoles(_roleMongoService).Select(model => model?.Name ?? "").ToList());
-    }
     
     private async void SaveSettings()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
         parameters.Add("ButtonText", "Gem");
         parameters.Add("Color", Color.Success);
@@ -133,17 +89,14 @@ else
         {
             return;
         }
-
-        // We don't wanna save the roles here, but the category references the roles, so we do this to avoid saving
-        // role changes
-
-        CalendarMongoService.Upsert(_category);
+        
+        CalendarMongoService.Upsert(_calendarModel);
     }
 
-    
+
     private async void DiscardSettings()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
         parameters.Add("ButtonText", "Slet Ændringer");
         parameters.Add("Color", Color.Warning);
@@ -153,9 +106,9 @@ else
         {
             return;
         }
-        
-        _category = Guid.TryParse(uuid, out Guid guid) ? CalendarMongoService.Get(guid) : new CalendarModel();
-        this.StateHasChanged();
+
+        _calendarModel = Guid.TryParse(uuid, out Guid guid) ? CalendarMongoService.Get(guid) : new CalendarModel();
+        StateHasChanged();
     }
 
 

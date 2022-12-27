@@ -8,10 +8,7 @@ public class NotifyStateService
 
     public void NotifyUserChange(object sender)
     {
-        if (this.UserChange == null)
-        {
-            return;
-        }
-        this.UserChange(sender, EventArgs.Empty);
+        if (UserChange == null) return;
+        UserChange(sender, EventArgs.Empty);
     }
 }

@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dikubot.DataLayer.Database.Guild.Models.Guild.Submodels.GuildOptions
+namespace Dikubot.DataLayer.Database.Guild.Models.Guild.Submodels.GuildOptions;
+
+public class GuildOptions : MainModel
 {
-    public class GuildOptions : MainModel
-    {
-        [BsonElement("Tags")] public List<Guid> Tags { get; set; }
-        
-    }
+    [BsonElement("Tags")] public List<Guid> Tags { get; set; }
 }

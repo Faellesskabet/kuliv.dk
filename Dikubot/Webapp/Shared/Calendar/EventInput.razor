@@ -1,8 +1,5 @@
-﻿@namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
-@using Dikubot.DataLayer.Static
-@using Dikubot.DataLayer.Database.Guild.Models.Calendar
-@using Dikubot.Extensions.Calender
-@using Dikubot.DataLayer.Database.Global.Event
+﻿@using Dikubot.DataLayer.Database.Global.Event
+@namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @inject UserService User
 
 <MudCard>
@@ -35,6 +32,7 @@
 </MudCard>
 
 @code {
+
     [Parameter]
     public EventModel Value { get; set; }
 
@@ -49,49 +47,43 @@
         await ValueChanged.InvokeAsync(Value);
     }
 
-    protected override void OnInitialized()
-    {
-        if (Value.Id == Guid.Empty && User.GetUserGlobalModel().Verified)
-        {
-            Value.Hosts.Add(User.GetUserGlobalModel().DiscordId);
-        }
-        base.OnInitialized();
-    }
-
     /*
     private string GetHostsString()
     {
         return Util.ConcatListToString(Value.GetHostServers(_guild.Id.ToString()).Select(tag => tag?.Name ?? "").ToList());
     }
     */
-    
-    private TimeSpan? StartTimeSpan {
-        get =>new TimeSpan(Value.StartTime.Hour, Value.StartTime.Minute, 00); 
-        set => Value.StartTime = value.HasValue ? 
+
+    private TimeSpan? StartTimeSpan
+    {
+        get => new TimeSpan(Value.StartTime.Hour, Value.StartTime.Minute, 00);
+        set => Value.StartTime = value.HasValue ?
             new DateTime(Value.StartTime.Year, Value.StartTime.Month, Value.StartTime.Day, value.Value.Hours, value.Value.Minutes, value.Value.Seconds)
-            : new DateTime(); 
+            : new DateTime();
     }
-    private TimeSpan? EndTimeSpan {
-        get =>new TimeSpan(Value.EndTime.Hour, Value.EndTime.Minute, 00); 
-        set => Value.EndTime = value.HasValue ? 
+
+    private TimeSpan? EndTimeSpan
+    {
+        get => new TimeSpan(Value.EndTime.Hour, Value.EndTime.Minute, 00);
+        set => Value.EndTime = value.HasValue ?
             new DateTime(Value.EndTime.Year, Value.EndTime.Month, Value.EndTime.Day, value.Value.Hours, value.Value.Minutes, value.Value.Seconds)
-            : new DateTime(); 
+            : new DateTime();
     }
-    
+
     private DateTime? StartTime
     {
         get => Value.StartTime;
-        set => Value.StartTime = value.HasValue ? new DateTime(value.Value.Year, value.Value.Month, value.Value.Day, Value.StartTime.Hour,Value.StartTime.Minute,Value.StartTime.Second)
+        set => Value.StartTime = value.HasValue ? new DateTime(value.Value.Year, value.Value.Month, value.Value.Day, Value.StartTime.Hour, Value.StartTime.Minute, Value.StartTime.Second)
             : new DateTime();
     }
-    
+
     private DateTime? EndTime
     {
         get => Value.EndTime;
         set => Value.EndTime = value.HasValue ? new DateTime(value.Value.Year, value.Value.Month, value.Value.Day, Value.EndTime.Hour, Value.EndTime.Minute, Value.EndTime.Second)
             : new DateTime();
     }
-    
-    
-    
+
+
+
 }

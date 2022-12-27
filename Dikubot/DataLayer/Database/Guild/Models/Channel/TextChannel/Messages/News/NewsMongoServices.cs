@@ -8,7 +8,9 @@ namespace Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.N
 public class NewsMongoServices : MessageMongoService
 {
     public NewsMongoServices(Database database, IGuildMongoFactory guildMongoFactory,
-        SocketGuild guild, MessageListener messageListener) : base(database, guildMongoFactory, guild, messageListener) { }
+        SocketGuild guild, MessageListener messageListener) : base(database, guildMongoFactory, guild, messageListener)
+    {
+    }
 
     protected override Expression<Func<TextChannelMainModel, bool>> ChannelFilter()
     {

@@ -1,15 +1,15 @@
 ﻿@inherits LayoutComponentBase
 @namespace Dikubot.Webapp.Shared.Layouts.Layout
 
- <MudContainer Class="mt-6" Style="@_style">
-            @Body
-        </MudContainer>
+<MudContainer Class="mt-6" Style="@_style">
+    @Body
+</MudContainer>
 
 @code {
-    
-    [CascadingParameter] 
+
+    [CascadingParameter]
     protected App App { get; set; }
-    
+
     private string _background => (string)(App.IsDarkMode ? "transparent" : App.Theme.Palette.Background.Value);
     private string _style => $"min-height: 70vh; background-color: {_background}; padding-top: 24px; padding-bottom: 24px;";
 }

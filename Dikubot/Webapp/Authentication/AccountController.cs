@@ -5,29 +5,30 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dikubot.Webapp.Authentication
+namespace Dikubot.Webapp.Authentication;
 
-{ 
-    [ApiController]
-    public class AccountController : ControllerBase
+[ApiController]
+public class AccountController : ControllerBase
+{
+    [HttpGet("/login")]
+    [HttpPost("/login")]
+    public async Task<IActionResult> Login(string returnUrl = "/")
     {
-        
-        [HttpGet("/login")]
-        [HttpPost("/login")]
-        public async Task<IActionResult> Login(string returnUrl = "/")
-        {
-            return this.Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, DiscordAuthenticationDefaults.AuthenticationScheme);
-        }
+        return Challenge(new AuthenticationProperties { RedirectUri = returnUrl },
+            DiscordAuthenticationDefaults.AuthenticationScheme);
+    }
 
-        [HttpGet("/logout")]
-        [HttpPost("/logout")]
-        public async Task<SignOutResult> LogOut(string returnUrl = "/") => this.SignOut(new AuthenticationProperties { RedirectUri = returnUrl },
+    [HttpGet("/logout")]
+    [HttpPost("/logout")]
+    public async Task<SignOutResult> LogOut(string returnUrl = "/")
+    {
+        return SignOut(new AuthenticationProperties { RedirectUri = returnUrl },
             CookieAuthenticationDefaults.AuthenticationScheme);
-        
-        [HttpGet("/confirm_email/{uuid}")]
-        public RedirectToPageResult ConfirmEmail(Guid uuid)
-        {
-            return RedirectToPage("/");
-        }
+    }
+
+    [HttpGet("/confirm_email/{uuid}")]
+    public RedirectToPageResult ConfirmEmail(Guid uuid)
+    {
+        return RedirectToPage("/");
     }
 }

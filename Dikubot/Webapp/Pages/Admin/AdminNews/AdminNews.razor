@@ -1,11 +1,11 @@
 @page "/admin/news"
-@using Dikubot.Webapp.Authentication
-@using Dikubot.Discord
-@using global::Discord.WebSocket
+@using Dikubot.DataLayer.Database.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel
 @using Dikubot.DataLayer.Static
+@using Dikubot.Discord
+@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
 @using Dikubot.Webapp.Shared.Dialog
-@using Dikubot.DataLayer.Database.Guild
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IGuildMongoFactory IGuildMongoFactory
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
@@ -20,12 +20,12 @@
             <MudCardContent>
                 <MudSelect Label="Nyhed kanaler" Lines="2" MultiSelection="true" HelperText="Vælg alle de kanaler der skal bruges til nyheder" @bind-SelectedValues="_selectedChannels"
                            MultiSelectionTextFunc="list => GetText(_selectedChannels)" Text="@GetText(_selectedChannels)">
-                    @foreach (var textChannel in _textChannelMainModels)
+                    @foreach (TextChannelMainModel textChannel in _textChannelMainModels)
                     {
                         <MudSelectItem Value="@textChannel">@textChannel.Name</MudSelectItem>
                     }
                 </MudSelect>
-            
+
             </MudCardContent>
             <MudCardActions>
                 <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveNews">Gem ændringer</MudButton>
@@ -40,8 +40,10 @@ else
 }
 
 @code {
-    [Inject] private IDialogService DialogService { get; set; }
-    
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
     private Authenticator authenticator;
     private UserIdentity user;
     private SocketGuild _guild;
@@ -55,18 +57,18 @@ else
         return Util.ConcatListToString(channels.Select(model => model?.Name ?? "").ToList());
     }
 
-    private bool _loaded = false;
+    private bool _loaded;
 
     protected override async Task OnInitializedAsync()
     {
-        authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity) authState.User.Identity;
+        authenticator = (Authenticator)AuthenticationStateProvider;
+        AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity)authState.User.Identity;
         if (user == null)
         {
             return;
         }
-        
+
         _guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
         _textChannelMongoService = IGuildMongoFactory.Get<TextChannelMongoService>(_guild);
         _textChannelMainModels = _textChannelMongoService.GetAll();
@@ -77,7 +79,7 @@ else
 
     private async void SaveNews()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil gemme dine ændringer?");
         parameters.Add("ButtonText", "Gem Ændringer");
         parameters.Add("Color", Color.Success);
@@ -88,8 +90,8 @@ else
             return;
         }
 
-        HashSet<TextChannelMainModel> hashedSelection = new HashSet<TextChannelMainModel>(_selectedChannels);
-        foreach (var textChannelMainModel in _textChannelMainModels)
+        HashSet<TextChannelMainModel> hashedSelection = new(_selectedChannels);
+        foreach (TextChannelMainModel textChannelMainModel in _textChannelMainModels)
         {
             textChannelMainModel.IsNewsChannel = false;
             if (_selectedChannels.Contains(textChannelMainModel))
@@ -98,12 +100,12 @@ else
             }
             _textChannelMongoService.Upsert(textChannelMainModel);
         }
-        this.StateHasChanged();
+        StateHasChanged();
     }
 
     private async void DiscardNews()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
         parameters.Add("ButtonText", "Slet Ændringer");
         parameters.Add("Color", Color.Warning);
@@ -113,8 +115,9 @@ else
         {
             return;
         }
-        
+
         _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel.GetValueOrDefault());
-        this.StateHasChanged();
+        StateHasChanged();
     }
+
 }

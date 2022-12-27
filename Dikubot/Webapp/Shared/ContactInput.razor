@@ -1,50 +1,50 @@
-﻿@using Microsoft.AspNetCore.Components
-@using Dikubot.Webapp.Extensions.Discovery.Request
-@using Microsoft.IdentityModel.Tokens
+﻿@using Microsoft.IdentityModel.Tokens
 @using Dikubot.DataLayer.Database.Global.Union.Request
 @inject UserService _userService;
 @namespace Dikubot.Webapp.Extensions.Discovery.Request
 
 
-            <MudCard>
-                <MudCardHeader>
-                    <MudText Typo="Typo.h5">Dine Kontakt oplysninger</MudText>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudForm FieldChanged="OnValueChanged">
-                        <MudTextField @bind-Value="@Value.Name" Label="Your Name" Immediate="@true" MaxLength="64" 
-                                      Required="true"/>
-                        <MudTextField @bind-Value="@Value.Number" Label="Mobile number" Immediate="@true" MaxLength="64" 
-                                      Required="true"/>
-                        <MudTextField @bind-Value="@Value.Mail" Label="Email" Immediate="@true" MaxLength="64" Required="true"/>
-                    </MudForm>
-                </MudCardContent>
-            </MudCard>
+<MudCard>
+    <MudCardHeader>
+        <MudText Typo="Typo.h5">Dine Kontakt oplysninger</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm FieldChanged="OnValueChanged">
+            <MudTextField @bind-Value="@Value.Name" Label="Your Name" Immediate="@true" MaxLength="64"
+                          Required="true"/>
+            <MudTextField @bind-Value="@Value.Number" Label="Mobile number" Immediate="@true" MaxLength="64"
+                          Required="true"/>
+            <MudTextField @bind-Value="@Value.Mail" Label="Email" Immediate="@true" MaxLength="64" Required="true"/>
+        </MudForm>
+    </MudCardContent>
+</MudCard>
 
 
 @code {
+
     [Parameter]
     public ContactModel Value { get; set; }
 
     [Parameter]
     public EventCallback<ContactModel> ValueChanged { get; set; }
 
-                protected override void OnInitialized()
-                {
-                    if (Value.Name.IsNullOrEmpty())
-                    {
-                        Value.Name = _userService?.GetUserGlobalModel()?.Name;
-                    }
-                    if (Value.Mail.IsNullOrEmpty())
-                    {
-                        Value.Mail = _userService?.GetUserGlobalModel()?.Email;
-                    }
-                    
-                    base.OnInitialized();
-                }
+    protected override void OnInitialized()
+    {
+        if (Value.Name.IsNullOrEmpty())
+        {
+            Value.Name = _userService?.GetUserGlobalModel()?.Name;
+        }
+        if (Value.Mail.IsNullOrEmpty())
+        {
+            Value.Mail = _userService?.GetUserGlobalModel()?.Email;
+        }
 
-                private async Task OnValueChanged()
+        base.OnInitialized();
+    }
+
+    private async Task OnValueChanged()
     {
         await ValueChanged.InvokeAsync(Value);
     }
+
 }

@@ -1,17 +1,14 @@
-﻿@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
-@using Dikubot.Extensions.search
-@using Dikubot.Webapp.Extensions.Discovery.Links
-@using Dikubot.Webapp.Extensions.Discovery.Request
-@using Orientation = MudBlazor.Orientation
-@using System.Globalization
-@using Dikubot.DataLayer.Database.Global.Event
+﻿@using Dikubot.DataLayer.Database.Global.Event
 @using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.Extensions.search
+@using System.Globalization
 @inject UserService User;
 @inject NavigationManager NavigationManager;
 @inject EventsMongoService EventsMongoService
 @inject EventRequestMongoService EventRequestMongoService
 
-@if (Orientation is VariantStyle.Card or VariantStyle.Grid )
+@if (Orientation is VariantStyle.Card or VariantStyle.Grid)
 {
     <MudCard>
         @if (ShowTitle)
@@ -83,11 +80,12 @@
             </MudCardActions>
         }
     </MudCard>
-} else if (Orientation == VariantStyle.ExpansionPanel)
+}
+else if (Orientation == VariantStyle.ExpansionPanel)
 {
     <MudExpansionPanel HideIcon="true" Style="padding: 0">
         <TitleContent>
-            
+
             <div class="d-flex">
 
                 <MudPaper Height="88px" Width="110px" Square="true" Class="mud-theme-primary" Style="align-items: center;">
@@ -96,9 +94,11 @@
                     </MudText>
                 </MudPaper>
                 <div>
-                    <div style="height: 32px; overflow: hidden; overflow-y: scroll "><TagDisplay Tags="Model.Tags"/></div>
+                    <div style="height: 32px; overflow: hidden; overflow-y: scroll ">
+                        <TagDisplay Tags="Model.Tags"/>
+                    </div>
                     <MudText Typo="Typo.body2" style="padding-left:16px; height: 56px; overflow: hidden">@Model.Subject</MudText>
-                </div>  
+                </div>
                 <MudSpacer/>
                 @if (User.GetUserGlobalModel().Verified)
                 {
@@ -111,92 +111,92 @@
                 }
             </div>
         </TitleContent>
-    <ChildContent>
-        <MudTabs Outlined="true"
-                 Position="Position.Top"
-                 Rounded="true" Border="true"
-                 ApplyEffectsToContainer="true"
-                 PanelClass="flex-shrink-1"
-                 HeaderPosition="TabHeaderPosition.Before" Style="padding-left: 0; padding-right: 0">
-            <ChildContent>
-                <MudTabPanel Text="Beskrivelse">
-                    <MudField Label="Beskrivelse" Variant="Variant.Outlined">
-                        <MudCardContent Style="width: 100%; max-height: 150px; min-height: 150px; overflow: scroll; padding-top: 0; padding-bottom: 0">
-                        
-                            <MudText Typo="Typo.body2">
-                                @(Model.Description)
-                            </MudText>
-                        
-                        </MudCardContent>
-                    </MudField>
-                </MudTabPanel>
-                
-                <MudTabPanel Text="Details">
-                    <ChildContent>
-                        <MudField Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.AccessTime">
-                            @Model.Time()
-                        </MudField>
-                        <MudField AdornmentIcon="@Icons.Filled.Place" Adornment="Adornment.Start">
-                            @Model.Location
-                        </MudField>
-                        <MudField AdornmentIcon="@Icons.Filled.People" Adornment="Adornment.Start">
-                            @Model.Accepted.Count.ToString()
-                        </MudField>
-                    </ChildContent>
+        <ChildContent>
+            <MudTabs Outlined="true"
+                     Position="Position.Top"
+                     Rounded="true" Border="true"
+                     ApplyEffectsToContainer="true"
+                     PanelClass="flex-shrink-1"
+                     HeaderPosition="TabHeaderPosition.Before" Style="padding-left: 0; padding-right: 0">
+                <ChildContent>
+                    <MudTabPanel Text="Beskrivelse">
+                        <MudField Label="Beskrivelse" Variant="Variant.Outlined">
+                            <MudCardContent Style="width: 100%; max-height: 150px; min-height: 150px; overflow: scroll; padding-top: 0; padding-bottom: 0">
 
-                </MudTabPanel>
+                                <MudText Typo="Typo.body2">
+                                    @(Model.Description)
+                                </MudText>
 
-            </ChildContent>
-        </MudTabs>
-        @if (User.GetUserGlobalModel().Verified)
-                {
-                    <MudCardActions>
-                        <MudButton Color="JoinColor" Disabled="@_processing" OnClick="JoinEvent" Variant="Variant.Outlined">
-                            @if (_processing)
-                            {
-                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
-                                <MudText Class="ms-2">Processing</MudText>
-                            }
-                            else
-                            {
-                                <MudText>@JoinText</MudText>
-                            }
-                        </MudButton>
-                                  
-                        <MudSpacer/>
-                        <MudButton OnClick="ShowMore"  Variant="Variant.Outlined"> Show More </MudButton>
-                             <MudSpacer/>
-                        @if (User.GetUserGlobalModel().IsAdmin)
+                            </MudCardContent>
+                        </MudField>
+                    </MudTabPanel>
+
+                    <MudTabPanel Text="Details">
+                        <ChildContent>
+                            <MudField Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.AccessTime">
+                                @Model.Time()
+                            </MudField>
+                            <MudField AdornmentIcon="@Icons.Filled.Place" Adornment="Adornment.Start">
+                                @Model.Location
+                            </MudField>
+                            <MudField AdornmentIcon="@Icons.Filled.People" Adornment="Adornment.Start">
+                                @Model.Accepted.Count.ToString()
+                            </MudField>
+                        </ChildContent>
+
+                    </MudTabPanel>
+
+                </ChildContent>
+            </MudTabs>
+            @if (User.GetUserGlobalModel().Verified)
+            {
+                <MudCardActions>
+                    <MudButton Color="JoinColor" Disabled="@_processing" OnClick="JoinEvent" Variant="Variant.Outlined">
+                        @if (_processing)
                         {
-                            <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="Edit"/>
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                            <MudText Class="ms-2">Processing</MudText>
                         }
-                        else if (User.GetUserGlobalModel().Verified)
+                        else
                         {
-                            <MudIconButton Icon="@Icons.Filled.Edit" Color="Color.Inherit" OnClick="Request"/>
+                            <MudText>@JoinText</MudText>
                         }
-                    </MudCardActions>
-                }
-                else
-                {
-                    <MudCardActions>
-                        <MudSpacer/>
-                        <MudButton Color="Color.Default" Variant="Variant.Filled" Href="/connect"> login </MudButton>
-                        <MudSpacer/>
-                    </MudCardActions>
-                }
-    </ChildContent>
+                    </MudButton>
+
+                    <MudSpacer/>
+                    <MudButton OnClick="ShowMore" Variant="Variant.Outlined"> Show More </MudButton>
+                    <MudSpacer/>
+                    @if (User.GetUserGlobalModel().IsAdmin)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="Edit"/>
+                    }
+                    else if (User.GetUserGlobalModel().Verified)
+                    {
+                        <MudIconButton Icon="@Icons.Filled.Edit" Color="Color.Inherit" OnClick="Request"/>
+                    }
+                </MudCardActions>
+            }
+            else
+            {
+                <MudCardActions>
+                    <MudSpacer/>
+                    <MudButton Color="Color.Default" Variant="Variant.Filled" Href="/connect"> login </MudButton>
+                    <MudSpacer/>
+                </MudCardActions>
+            }
+        </ChildContent>
     </MudExpansionPanel>
-    
 }
 
 
 @code {
+
     [Parameter]
     public EventModel Model { get; set; }
 
     [Parameter]
     public bool ShowTitle { get; set; } = true;
-        
+
     [Parameter]
     public ulong GuildId { get; set; }
 
@@ -204,13 +204,13 @@
     public VariantStyle Orientation { get; set; } = VariantStyle.Card;
 
     private string Icon => HasJoined ? Icons.Filled.Favorite : Icons.TwoTone.Favorite;
-    
+
     private bool HasJoined => Model.Accepted.Contains(User.GetUserGlobalModel().DiscordId);
-    private Color JoinColor => HasJoined ?  Color.Error : Color.Success ;
-    private string JoinText => HasJoined ?  "Decline" : "Join" ;
-    
+    private Color JoinColor => HasJoined ? Color.Error : Color.Success;
+    private string JoinText => HasJoined ? "Decline" : "Join";
+
     private bool _processing = false;
-    
+
 
     private async void JoinEvent()
     {
@@ -244,12 +244,12 @@
 
     private void Request()
     {
-        RequestModel<EventModel> requestModel = new RequestModel<EventModel>();
+        RequestModel<EventModel> requestModel = new();
         requestModel.RequestItem = Model;
         requestModel.Status = RequestModel<EventModel>.StatusEmun.change;
         requestModel = EventRequestMongoService.Upsert(requestModel);
         NavigationManager.NavigateTo($"/Request/Event/edit/{requestModel.Id}");
     }
-     
-    
+
+
 }

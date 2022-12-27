@@ -15,10 +15,7 @@ public class PermissionServiceFactory : IPermissionServiceFactory
 
     public PermissionsService Get(SocketGuild guild)
     {
-        if (guild == null)
-        {
-            throw new ArgumentNullException(nameof(guild));
-        }
-        return ActivatorUtilities.CreateInstance<PermissionsService>(_serviceProvider, new object[] { guild });
+        if (guild == null) throw new ArgumentNullException(nameof(guild));
+        return ActivatorUtilities.CreateInstance<PermissionsService>(_serviceProvider, guild);
     }
 }

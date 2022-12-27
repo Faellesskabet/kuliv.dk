@@ -1,15 +1,13 @@
 ﻿@page "/request/event/create"
 @page "/request/event/create/{unionID}"
 @page "/request/event/edit/{uuid}"
-
-
-@using Dikubot.Webapp.Shared.Dialog
-@using Microsoft.AspNetCore.Components
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using Dikubot.Webapp.Extensions.Discovery.Request
-@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
-@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.Webapp.Shared.Dialog
 @using Dikubot.DataLayer.Database.Global.Event
+@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject EventRequestMongoService EventRequestMongoService
@@ -18,13 +16,13 @@
 @if (!_loading)
 {
     <MudContainer>
-        <ContactInput @bind-Value="@_request.Contact" ></ContactInput>
+        <ContactInput @bind-Value="@_request.Contact"></ContactInput>
         <EventInput @bind-Value="@_request.RequestItem"></EventInput>
-            <MudCardActions>
-                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="AddOneMore">Tilføj en ny</MudButton>
-            </MudCardActions>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="AddOneMore">Tilføj en ny</MudButton>
+        </MudCardActions>
     </MudContainer>
 }
 else
@@ -33,32 +31,30 @@ else
 }
 
 @code {
+
     [Parameter]
     public string? uuid { get; set; }
-    
+
     [Parameter]
     public string? unionID { get; set; }
-    
-    [Inject] private IDialogService DialogService { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
     private bool _loading = true;
     private RequestModel<EventModel> _request;
-    
+
 
     protected override async Task OnInitializedAsync()
     {
         _request = Guid.TryParse(uuid, out Guid guid) ? EventRequestMongoService.Get(guid) : new RequestModel<EventModel>();
-        if (Guid.TryParse(unionID, out Guid UnionGuid))
-        {
-            _request.RequestItem.HostServers.Add(UnionGuid);
-        }
-        
         _loading = false;
     }
-    
-    
+
+
     private async void SaveSettings()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
         parameters.Add("ButtonText", "Gem");
         parameters.Add("Color", Color.Success);
@@ -70,13 +66,13 @@ else
         }
 
         _request = EventRequestMongoService.Upsert(_request);
-        NavigationManager.NavigateTo("/Request/Event/edit/"+_request.Id.ToString());
+        NavigationManager.NavigateTo("/Request/Event/edit/" + _request.Id);
     }
 
-    
+
     private async void DiscardSettings()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
         parameters.Add("ButtonText", "Slet Ændringer");
         parameters.Add("Color", Color.Warning);
@@ -86,14 +82,14 @@ else
         {
             return;
         }
-        
+
         _request = Guid.TryParse(uuid, out Guid guid) ? EventRequestMongoService.Get(guid) : new RequestModel<EventModel>();
-        this.StateHasChanged();
+        StateHasChanged();
     }
-    
+
     private async void AddOneMore()
     {
-        var parameters = new DialogParameters();
+        DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
         parameters.Add("ButtonText", "Slet Ændringer");
         parameters.Add("Color", Color.Success);
@@ -103,10 +99,10 @@ else
         {
             return;
         }
-        
-        NavigationManager.NavigateTo("/Request/Event/create", forceLoad:true);
+
+        NavigationManager.NavigateTo("/Request/Event/create", true);
     }
-    
+
 
 
 

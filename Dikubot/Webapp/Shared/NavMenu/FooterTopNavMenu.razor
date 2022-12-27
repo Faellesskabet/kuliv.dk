@@ -1,17 +1,7 @@
 ﻿@namespace Dikubot.Webapp.Extensions.NavMenu
-@using Dikubot.Webapp.Authentication
-@using Dikubot.Discord
-@using global::Discord.WebSocket
-@using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.User
-@using Dikubot.Webapp.Pages
-@using MudBlazor.Utilities
-@using Data
-@using Dikubot.Extensions.EmojiSelector
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NotifyStateService _notifyStateService;
 @inject UserService _user
-
 
 
 <MudAppBar Elevation="1" Style="background-color: #231b2f">
@@ -20,8 +10,10 @@
         <MudSpacer/>
     </MudHidden>
     <MudButton Variant="Variant.Text"
-               Href="/"> <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText></MudButton>
-    
+               Href="/">
+        <MudText Typo="Typo.h5" Color="Color.Primary"> kuliv.dk</MudText>
+    </MudButton>
+
     <MudHidden Breakpoint="Breakpoint.SmAndUp" Invert="true">
         <MudButton Variant="Variant.Text"
                    Href="/discovery/unions"
@@ -36,7 +28,9 @@
             </Localization>
         </MudButton>
         <MudButton Variant="Variant.Text" Style="@NavTextStyleColor"
-                   Href="/discovery/events">Events</MudButton>
+                   Href="/discovery/events">
+            Events
+        </MudButton>
         <MudButton Variant="Variant.Text"
                    Href="/discovery/calendar"
                    Style="@NavTextStyleColor">
@@ -61,45 +55,45 @@
     <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Faellesskabet/Discord-Botten" Target="_blank"/>
 
 </MudAppBar>
-       <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Temporary">
-           <MudDrawerHeader>
-               <MudText Typo="Typo.h6" Color="Color.Primary" >KULiv.dk</MudText>
-           </MudDrawerHeader>
-           <MudNavMenu>
-               <MudNavLink Match="NavLinkMatch.All" Href="/discovery/unions">Foreninger</MudNavLink>
-               <MudNavLink Match="NavLinkMatch.All" Href="/discovery/events">Events</MudNavLink>
-               <MudNavLink Match="NavLinkMatch.All" Href="/discovery/calendar">Kalender</MudNavLink>
-           </MudNavMenu>
-       </MudDrawer>
+<MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Temporary">
+    <MudDrawerHeader>
+        <MudText Typo="Typo.h6" Color="Color.Primary">KULiv.dk</MudText>
+    </MudDrawerHeader>
+    <MudNavMenu>
+        <MudNavLink Match="NavLinkMatch.All" Href="/discovery/unions">Foreninger</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All" Href="/discovery/events">Events</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All" Href="/discovery/calendar">Kalender</MudNavLink>
+    </MudNavMenu>
+</MudDrawer>
 
 
 @code {
-    
+
     bool open = false;
-    private string NavColor => (string) (App.IsDarkMode ? App.Theme.PaletteDark.AppbarBackground : App.Theme.Palette.AppbarBackground);
+    private string NavColor => (string)(App.IsDarkMode ? App.Theme.PaletteDark.AppbarBackground : App.Theme.Palette.AppbarBackground);
     private string NavStyleColor => $"color: {NavColor}";
-    
+
     private string NavTextColor => (string)(App.IsDarkMode ? App.Theme.PaletteDark.AppbarText : App.Theme.Palette.AppbarText);
     private string NavTextStyleColor => $"color: {NavTextColor}";
-    
+
     private string DrawTextColor => (string)(App.IsDarkMode ? App.Theme.PaletteDark.AppbarText : App.Theme.Palette.AppbarText);
     private string DrawTextStyleColor => $"color: {DrawTextColor}";
 
     private string DarkModeIcon => App.IsDarkMode ? Icons.Filled.WbSunny : Icons.Filled.DarkMode;
-    
+
     [Parameter]
     public App App { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        //NavColor = GetColor().Value;
-        //NavTextColor = GetTextColor().Value;
+    //NavColor = GetColor().Value;
+    //NavTextColor = GetTextColor().Value;
     }
 
     void ToggleDrawer()
     {
         open = !open;
     }
-    
-  
+
+
 }
