@@ -1,23 +1,35 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.User;
 using Dikubot.DataLayer.Permissions;
 using Dikubot.Discord.EventListeners;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 
 namespace Dikubot.Discord.Command;
 
-public class VerifyUser : ModuleBase<SocketCommandContext>
+public class VerifyUser : InteractionModuleBase<SocketInteractionContext>
 {
-    [Command("verify")]
-    [Summary("Get help with a specific command")]
+
+    private UserGlobalMongoService _userGlobalMongoService;
+    private IGuildMongoFactory _guildMongoFactory;
+    private IPermissionServiceFactory _permissionServiceFactory;
+    private DiscordSocketClient _discordSocketClient;
+    public VerifyUser(UserGlobalMongoService userGlobalMongoService, IGuildMongoFactory guildMongoFactory,
+        IPermissionServiceFactory permissionServiceFactory, DiscordSocketClient discordSocketClient)
+    {
+        _userGlobalMongoService = userGlobalMongoService;
+        _guildMongoFactory = guildMongoFactory;
+        _permissionServiceFactory = permissionServiceFactory;
+        _discordSocketClient = discordSocketClient;
+    }
+    [SlashCommand("verify", "verify a user")]
     public async Task Verify([Summary("user discord id")] ulong userId, [Summary("user email")] string email)
     {
-        UserGlobalServices userGlobalServices = new UserGlobalServices();
-        if (!userGlobalServices.Get(Context.User).IsAdmin)
+        if (!_userGlobalMongoService.Get(Context.User).IsAdmin)
         {
             await ReplyAsync("Only system admins may use this command");
             return;
@@ -37,19 +49,19 @@ public class VerifyUser : ModuleBase<SocketCommandContext>
             return;
         }
 
-        UserGlobalModel userModel = userGlobalServices.Get(userId);
+        UserGlobalModel userModel = _userGlobalMongoService.Get(userId);
         userModel.DiscordIdLong = user.Id;
         userModel.Email = email;
         userModel.Verified = true;
-        userGlobalServices.Upsert(userModel);
+        _userGlobalMongoService.Upsert(userModel);
         
-        IReadOnlyCollection<SocketGuild> mutualGuilds = DiscordBot.ClientStatic.GetUser(userModel.DiscordIdLong)?.MutualGuilds;
+        IReadOnlyCollection<SocketGuild> mutualGuilds = _discordSocketClient.GetUser(userModel.DiscordIdLong)?.MutualGuilds;
         if (mutualGuilds != null)
         {
             foreach (SocketGuild mutualGuild in mutualGuilds)
             {
-                UserGuildServices userGuildServices = new UserGuildServices(mutualGuild);
-                PermissionsService permissionsService = new PermissionsService(mutualGuild);
+                UserGuildMongoService userGuildServices = _guildMongoFactory.Get<UserGuildMongoService>(mutualGuild);
+                PermissionsService permissionsService = _permissionServiceFactory.Get(mutualGuild);
                 UserGuildModel newUser = userGuildServices.Get(userModel.DiscordId);
                 await permissionsService.SetDiscordUserRoles(newUser);
             }
