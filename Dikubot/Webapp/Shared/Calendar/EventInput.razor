@@ -1,0 +1,89 @@
+﻿@using Dikubot.DataLayer.Database.Global.Event
+@namespace Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@inject UserService User
+
+<MudCard>
+    <MudCardContent>
+        <MudForm FieldChanged="OnValueChanged">
+            <MudTextField @bind-Value="@Value.Subject" Label="Eventets navn" Immediate="@true" MaxLength="32"></MudTextField>
+            <MudTextField @bind-Value="@Value.Location" Label="Lokation" Immediate="@true" MaxLength="32"></MudTextField>
+            <TagsInput @bind-Value="Value.TagsEnumerable"></TagsInput>
+            <MudSwitch @bind-Checked="@Value.IsAllDay" Color="Color.Primary" Label="All Day"/>
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudText> Start:</MudText>
+                    <MudTimePicker Label="24 hours" @bind-Time="StartTimeSpan" Disabled="Value.IsAllDay"/>
+                    <MudDatePicker Label="Start tid" @bind-Date="StartTime" DisableToolbar="true"/>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText> End:</MudText>
+                    <MudTimePicker Label="24 hours" @bind-Time="EndTimeSpan" Disabled="Value.IsAllDay"/>
+                    <MudDatePicker Label="Slut tid" @bind-Date="EndTime" DisableToolbar="true"/>
+                </MudItem>
+            </MudGrid>
+
+            @if (!QuickInfo)
+            {
+                <MudTextField @bind-Value="@Value.Description" Label="Kategori beskrivelse" Immediate="@true" Lines="5" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+            }
+
+        </MudForm>
+    </MudCardContent>
+</MudCard>
+
+@code {
+
+    [Parameter]
+    public EventModel Value { get; set; }
+
+    [Parameter]
+    public EventCallback<EventModel> ValueChanged { get; set; }
+
+    [Parameter]
+    public bool QuickInfo { get; set; } = false;
+
+    private async Task OnValueChanged()
+    {
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    /*
+    private string GetHostsString()
+    {
+        return Util.ConcatListToString(Value.GetHostServers(_guild.Id.ToString()).Select(tag => tag?.Name ?? "").ToList());
+    }
+    */
+
+    private TimeSpan? StartTimeSpan
+    {
+        get => new TimeSpan(Value.StartTime.Hour, Value.StartTime.Minute, 00);
+        set => Value.StartTime = value.HasValue ?
+            new DateTime(Value.StartTime.Year, Value.StartTime.Month, Value.StartTime.Day, value.Value.Hours, value.Value.Minutes, value.Value.Seconds)
+            : new DateTime();
+    }
+
+    private TimeSpan? EndTimeSpan
+    {
+        get => new TimeSpan(Value.EndTime.Hour, Value.EndTime.Minute, 00);
+        set => Value.EndTime = value.HasValue ?
+            new DateTime(Value.EndTime.Year, Value.EndTime.Month, Value.EndTime.Day, value.Value.Hours, value.Value.Minutes, value.Value.Seconds)
+            : new DateTime();
+    }
+
+    private DateTime? StartTime
+    {
+        get => Value.StartTime;
+        set => Value.StartTime = value.HasValue ? new DateTime(value.Value.Year, value.Value.Month, value.Value.Day, Value.StartTime.Hour, Value.StartTime.Minute, Value.StartTime.Second)
+            : new DateTime();
+    }
+
+    private DateTime? EndTime
+    {
+        get => Value.EndTime;
+        set => Value.EndTime = value.HasValue ? new DateTime(value.Value.Year, value.Value.Month, value.Value.Day, Value.EndTime.Hour, Value.EndTime.Minute, Value.EndTime.Second)
+            : new DateTime();
+    }
+
+
+
+}

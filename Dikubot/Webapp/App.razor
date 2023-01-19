@@ -1,104 +1,106 @@
-@using Dikubot.Webapp.Authentication
-@using System.Threading
-@using Dikubot.DataLayer.Database.Global.GuildSettings
-@using global::Discord.WebSocket
-@using Dikubot.Webapp.Pages
-@using Microsoft.IdentityModel.Tokens
 @using System.Reflection
+@using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Discord
-@using Microsoft.Graph
-@using Dikubot.Webapp.Shared.Layouts.Layout;
+@using Microsoft.IdentityModel.Tokens
+@using Dikubot.Webapp.Shared.Layouts.Layout
 @inject NotifyStateService _notifyStateService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _user;
 @inject IJSRuntime JsRuntime;
+@inject UserGlobalMongoService UserGlobalMongoService
 
-<MudThemeProvider  @bind-IsDarkMode="@IsDarkMode" Theme="Theme" />
+<MudThemeProvider @bind-IsDarkMode="@IsDarkMode" Theme="Theme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <LoadingScreen>
     <CascadingAuthenticationState>
-        <CascadingValue Value="@this">
-        <CascadingValue Value="@Theme">
-            <CascadingValue Value="@Guild">
-                <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
-                    <Found Context="routeData">
-                        <AuthorizeView>
-                            <Authorizing><Loading/></Authorizing>
-                            <Authorized>
-                                @if (Guild == null)
-                                {
-                                    <LayoutView Layout="@typeof(ChangeGuildLayout)">
-                                        <Login/>
-                                    </LayoutView>
-                                }else
-                                {
-                                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-                                }
-                            </Authorized>
-                            <NotAuthorized>
-                                @if (_user.IsRegistered())
-                                {
-                                    <LayoutView Layout="@typeof(ChangeGuildLayout)">
-                                        <Login/>
-                                    </LayoutView>
-                                } else if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
-                                {
-                                    <LayoutView Layout="@typeof(FooterLayoutNoWidth)">
-                                        <HomePageNotLogin/>
-                                    </LayoutView>
-                                }
-                                else if (@routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public") ||
-                                         !routeData.PageType.GetCustomAttributes(typeof(AllowAnonymousAttribute)).IsNullOrEmpty())
-                                {
-                                    <RouteView RouteData="@routeData" DefaultLayout="typeof(FooterLayout)"></RouteView>
-                                }
-                                else
-                                {
+        <CascadingValue Value="@(this)">
+            <CascadingValue Value="@Theme">
+                <CascadingValue Value="@Guild">
+                    <Router AppAssembly="@typeof(Startup).Assembly" PreferExactMatches="@true">
+                        <Found Context="routeData">
+                            <AuthorizeView>
+                                <Authorizing>
+                                    <Loading/>
+                                </Authorizing>
+                                <Authorized>
+                                    @if (Guild == null)
+                                    {
+                                        <LayoutView Layout="@typeof(ChangeGuildLayout)">
+                                            <Login/>
+                                        </LayoutView>
+                                    }
+                                    else
+                                    {
+                                        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                                    }
+                                </Authorized>
+                                <NotAuthorized>
+                                    @if (_user.IsRegistered())
+                                    {
+                                        <LayoutView Layout="@typeof(ChangeGuildLayout)">
+                                            <Login/>
+                                        </LayoutView>
+                                    }
+                                    else if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Index"))
+                                    {
+                                        <LayoutView Layout="@typeof(FooterLayoutNoWidth)">
+                                            <HomePageNotLogin/>
+                                        </LayoutView>
+                                    }
+                                    else if (routeData.PageType.FullName.StartsWith("Dikubot.Webapp.Pages.Public") ||
+                                             !routeData.PageType.GetCustomAttributes(typeof(AllowAnonymousAttribute)).IsNullOrEmpty())
+                                    {
+                                        <RouteView RouteData="@routeData" DefaultLayout="typeof(FooterLayout)"></RouteView>
+                                    }
+                                    else
+                                    {
+                                        <LayoutView Layout="@typeof(FooterLayout)">
+                                            <Login/>
+                                        </LayoutView>
+                                    }
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        </Found>
+                        <NotFound>
+                            <AuthorizeView>
+                                <Authorized>
+                                    @if (Guild == null)
+                                    {
+                                        <LayoutView Layout="@typeof(ChangeGuildLayout)">
+                                            <Login/>
+                                        </LayoutView>
+                                    }
+                                    else
+                                    {
+                                        <LayoutView Layout="@typeof(MainLayout)">
+                                            <PageNotFound></PageNotFound>
+                                        </LayoutView>
+                                    }
+                                </Authorized>
+                                <NotAuthorized>
                                     <LayoutView Layout="@typeof(FooterLayout)">
-                                        <Login/>
-                                    </LayoutView>
-                                }
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </Found>
-                    <NotFound>
-                        <AuthorizeView>
-                            <Authorized>
-                                @if (Guild == null)
-                                {
-                                    <LayoutView Layout="@typeof(ChangeGuildLayout)">
-                                        <Login/>
-                                    </LayoutView>
-                                }else{
-                                    <LayoutView Layout="@typeof(MainLayout)">
                                         <PageNotFound></PageNotFound>
                                     </LayoutView>
-                                }
-                            </Authorized>
-                            <NotAuthorized>
-                                <LayoutView Layout="@typeof(FooterLayout)">
-                                    <PageNotFound></PageNotFound>
-                                </LayoutView>
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </NotFound>
-                </Router>
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        </NotFound>
+                    </Router>
+                </CascadingValue>
             </CascadingValue>
         </CascadingValue>
-        </CascadingValue>
-        </CascadingAuthenticationState>
-    
-    
+    </CascadingAuthenticationState>
+
+
 </LoadingScreen>
 
 @code {
-    
+
     public bool IsDarkMode = true;
     private GuildSettingsModel Guild;
-    
+
 
     protected override void OnInitialized()
     {
@@ -106,10 +108,10 @@
         {
             IsDarkMode = _user.GetUserGlobalModel().DarkTheme;
         }
-        
+
         base.OnInitialized();
     }
-    
+
 
     public void ToggleDarkMode()
     {
@@ -117,19 +119,18 @@
 
         if (_user.IsRegistered())
         {
-            UserGlobalServices userGlobalServices = new UserGlobalServices();
             UserGlobalModel user = _user.GetUserGlobalModel();
             user.DarkTheme = IsDarkMode;
-            userGlobalServices.Upsert(user);
+            UserGlobalMongoService.Upsert(user);
         }
-       
+
         StateHasChanged();
     }
-    
-    public void ChangeLanuage(ChangeLocalization.Language language)
+
+    public void ChangeLanuage(LocalizationService.Language language)
     {
         UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
-        if (language == ChangeLocalization.Language.Danish)
+        if (language == LocalizationService.Language.Danish)
         {
             userGlobalModel.CultureInfo = "da-DK";
         }
@@ -137,19 +138,18 @@
         {
             userGlobalModel.CultureInfo = "en-US";
         }
-        
+
         if (_user?.GetUserGlobalModel() is not null)
         {
-            new UserGlobalServices().Upsert(userGlobalModel);
+            UserGlobalMongoService.Upsert(userGlobalModel);
         }
-        
+
         StateHasChanged();
-            
     }
-    
+
     protected override async Task OnInitializedAsync()
     {
-        if (_user?.GetUserGlobalModel()?.SelectedGuild is null or 0 
+        if (_user?.GetUserGlobalModel()?.SelectedGuild is null or 0
             || !DiscordBot.ClientStatic.Guilds.Any(guild => guild.Id == _user.GetUserGlobalModel().SelectedGuild))
         {
             Guild = null;
@@ -157,15 +157,14 @@
         else
         {
             Guild = new GuildSettingsModel(_user?.GetUserGlobalModel()?.GetSelectedGuild());
-            
         }
-        
+
         _notifyStateService.UserChange += UserChange;
     }
 
     public void UserHasChange()
     {
-        if (_user?.GetUserGlobalModel()?.SelectedGuild is null or 0 
+        if (_user?.GetUserGlobalModel()?.SelectedGuild is null or 0
             || !DiscordBot.ClientStatic.Guilds.Any(guild => guild.Id == _user.GetUserGlobalModel().SelectedGuild))
         {
             Guild = null;
@@ -173,34 +172,26 @@
         else
         {
             Guild = new GuildSettingsModel(_user?.GetUserGlobalModel()?.GetSelectedGuild());
-            
         }
-        
+
         StateHasChanged();
     }
-    
-    
+
+
     private void UserChange(object? sender, EventArgs e)
     {
         InvokeAsync(StateHasChanged);
-        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad:true);
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
-    
-    
 
 
-    public readonly MudTheme Theme = new MudTheme()
+    public readonly MudTheme Theme = new()
     {
-        Typography = new Typography()
+        Typography = new Typography(),
+        Palette = new Palette
         {
-
-        },
-        Palette = new Palette()
-        {
-
             Background = "#f5f5f5",
             Surface = "#FFFFFF",
-
             Primary = "#AE3030",
             PrimaryLighten = "#FFDAD5",
             PrimaryDarken = "#410003",
@@ -217,25 +208,21 @@
             ErrorLighten = "#FFDAD4",
             ErrorDarken = "#410001",
             ErrorContrastText = "#FFFFFF",
-
-            AppbarText = "#FFFFFF",
+            AppbarText = "#FFFFFF"
         },
-
-        PaletteDark = new Palette()
+        PaletteDark = new Palette
         {
             Background = "#1a1a27",
             Surface = "#32333d",
-
             TextPrimary = "#FFFFFF",
             TextSecondary = "#9f9f9f",
             TextDisabled = "#767676",
-
             DrawerBackground = "#1a1a27",
             DrawerText = "#FFFFFF",
-            DrawerIcon = "rgb(87,87,87)",
-
+            DrawerIcon = "rgb(87,87,87)"
         }
     };
+
     /*
     public ThemeManagerTheme ThemeManager = new()
     {

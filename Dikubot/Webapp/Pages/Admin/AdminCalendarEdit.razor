@@ -1,0 +1,117 @@
+﻿@page "/admin/calendar/create"
+@page "/admin/calendar/edit/{uuid}"
+@using Dikubot.DataLayer.Database.Global.Calendar
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild
+@using Dikubot.DataLayer.Database.Guild.Models.Role
+@using Dikubot.DataLayer.Static
+@using global::Discord.WebSocket
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@inject CalendarMongoService CalendarMongoService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IGuildMongoFactory GuildMongoFactory
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+<h3>Kategori indstillinger @uuid</h3>
+
+@if (!_loading)
+{
+    <MudContainer>
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Sæt din Kalender indstillinger her</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudForm>
+                    <MudTextField @bind-Value="@_calendarModel.Name" Label="Calendar Name" Immediate="@true" MaxLength="32"></MudTextField>
+                    <MudTextField @bind-Value="@_calendarModel.Description" Label="Calendar description" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+                    
+                    <MudSelect @bind-Value="@_calendarModel.Display" Label="Choose Display">
+                        @foreach (CalendarModel.EnumDisplay item in Enum.GetValues(typeof(CalendarModel.EnumDisplay)))
+                        {
+                            <MudSelectItem Value="@(item)"/>
+                        }
+                    </MudSelect>
+
+                    <MudSwitch @bind-Value="@_calendarModel.Visible" T="bool" Label="Allow others to see this calendar"></MudSwitch>
+                    <MudColorPicker @bind-Text="@_calendarModel.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_calendarModel.Color};")" Label="Choose color"></MudColorPicker>
+                </MudForm>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            </MudCardActions>
+
+        </MudCard>
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+
+    [Parameter]
+    public string? uuid { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    private MudTable<CalendarModel> _table;
+    private bool _loading = true;
+    private UserGlobalModel _userGlobalModel;
+    private SocketGuild _guild;
+    private CalendarModel _calendarModel;
+    private RoleMongoService _roleMongoService;
+    private List<RoleMainModel> _roleMainModels;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _userGlobalModel.GetSelectedGuild();
+        _calendarModel = Guid.TryParse(uuid, out Guid guid) ? CalendarMongoService.Get(guid) : new CalendarModel();
+        _roleMongoService = GuildMongoFactory.Get<RoleMongoService>(_guild);
+        _roleMainModels = _roleMongoService.GetAll();
+        _loading = false;
+    }
+
+    
+    private async void SaveSettings()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        
+        CalendarMongoService.Upsert(_calendarModel);
+    }
+
+
+    private async void DiscardSettings()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Warning);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _calendarModel = Guid.TryParse(uuid, out Guid guid) ? CalendarMongoService.Get(guid) : new CalendarModel();
+        StateHasChanged();
+    }
+
+
+
+
+}

@@ -1,0 +1,166 @@
+﻿@using Dikubot.DataLayer.Database.Global.Event
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+@using Dikubot.DataLayer.Database.Global.Calendar
+@inject UserService UserService;
+@inject EventsMongoService EventsMongoService
+
+@namespace Dikubot.Webapp.Shared.Calendar
+<style>
+    .e-quick-popup-wrapper{
+    z-index: 1301 !important;
+    }
+    .mud-popover{
+    z-index: 10001 !important;
+    }
+</style>
+
+@if (_loaded)
+{
+    <div class="control-section">
+        <SfSchedule @ref="ScheduleObj"
+                    ID="schedule"
+                    TValue="EventModel"
+                    Width="@WidgetWidth"
+                    Height="@WidgetHeight"
+                    Readonly="ReadOnly"
+                    ShowWeekNumber="true"
+                    FirstDayOfWeek="1"
+                    SelectedDateChanged="Callback">
+            <ScheduleEventSettings TValue="EventModel" DataSource="@Events">
+                <ScheduleEvents TValue="EventModel" ActionCompleted="OnActionCompleted"></ScheduleEvents>
+            </ScheduleEventSettings>
+            <ScheduleViews>
+                <ScheduleView Option="@View"></ScheduleView>
+            </ScheduleViews>
+            <ScheduleQuickInfoTemplates>
+                <ContentTemplate>
+                    @if (((EventModel)context).Id == Guid.Empty)
+                    {
+                        <EventInput Value="(EventModel)context" QuickInfo="true"></EventInput>
+                    }
+                    else
+                    {
+                        EventModel data = (EventModel)context;
+                        <EventWidget Model="@data" ShowTitle="false"></EventWidget>
+                    }
+                </ContentTemplate>
+            </ScheduleQuickInfoTemplates>
+            <ScheduleTemplates>
+                <EditorTemplate>
+                    <EventInput Value="(EventModel)context"></EventInput>
+                </EditorTemplate>
+            </ScheduleTemplates>
+        </SfSchedule>
+    </div>
+}
+else
+{
+    <Loading></Loading>
+}
+
+
+@code{
+
+    [Parameter]
+    public bool ReadOnly { get; set; } = true;
+
+    [Parameter]
+    public List<EventModel> Events { get; set; } = new();
+
+    [Parameter]
+    public string WidgetHeight { get; set; } = "100%";
+
+    [Parameter]
+    public string WidgetWidth { get; set; } = "100%";
+
+    [Parameter]
+    public View View { get; set; } = View.Month;
+
+    private bool _loaded;
+    
+    private List<EventModel> InitialEvents { get; set; } = new();
+    
+
+    SfSchedule<EventModel> ScheduleObj { get; set; }
+
+    private DateTime CurrentDate { get; set; } = DateTime.Today;
+
+    private UserGlobalModel User => UserService.GetUserGlobalModel();
+
+    private void Callback(DateTime startDate)
+    {
+        // endDate = last day of the month
+        DateTime endDate = new DateTime(startDate.Year, startDate.Month, DateTime.DaysInMonth(startDate.Year, startDate.Month));
+        Events = EventsMongoService.FilterByDate(InitialEvents, startDate, endDate);
+        StateHasChanged();
+    }
+
+    
+    protected override void OnParametersSet()
+    {
+        InitialEvents = Events;
+        if (!ReadOnly)
+        {
+            ReadOnly = !User.Verified;
+        }
+        _loaded = true;
+        
+    }
+
+    public void OnCellClick(CellClickEventArgs args)
+    {
+        args.Cancel = true;
+    }
+
+    public void OnActionBegin(ActionEventArgs<EventModel> args)
+    {
+        if (args.ActionType == ActionType.EventCreate && args.AddedRecords.Count > 0)
+        {
+            foreach (EventModel eventModel in args.AddedRecords)
+            {
+                eventModel.Id = EventsMongoService.Upsert(eventModel).Id;
+            }
+        }
+    }
+
+
+    private void OnActionCompleted(ActionEventArgs<EventModel> args)
+    {
+        if (args.ActionType == ActionType.DateNavigate || args.ActionType == ActionType.EventCreate || args.ActionType == ActionType.EventChange || args.ActionType == ActionType.EventRemove)
+        {
+            if (args.AddedRecords is {Count: > 0 })
+            {
+                foreach (EventModel eventData in args.AddedRecords)
+                {
+                    eventData.CreatedBy = User.Id;
+                    EventsMongoService.Upsert(eventData);
+                }
+            }
+            if (args.ChangedRecords is {Count: > 0 })
+            {
+                foreach (EventModel eventData in args.ChangedRecords)
+                {
+                    if (!eventData.IsReadonly)
+                    {
+                        EventsMongoService.Upsert(eventData);
+                    }
+                }
+            }
+            if (args.DeletedRecords is {Count: > 0 })
+            {
+                foreach (EventModel eventData in args.DeletedRecords)
+                {
+                    if (!eventData.IsReadonly)
+                    {
+                        EventsMongoService.Remove(eventData);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+}

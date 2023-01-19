@@ -1,66 +1,76 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Dikubot.DataLayer.Database.Global.User;
-using Dikubot.Discord;
 using Dikubot.Webapp.Authentication;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace Data
+namespace Data;
+
+public class UserService
 {
-    public class UserService
+    private readonly Authenticator _authenticator;
+    private readonly DiscordSocketClient _discordSocketClient;
+
+    public UserService(AuthenticationStateProvider authenticationStateProvider, DiscordSocketClient discordSocketClient)
     {
-        
-        private Authenticator _authenticator;
-        private UserIdentity _user => GetUserIdentity();
-        private DiscordBot _discordBot;
+        _authenticator = (Authenticator)authenticationStateProvider;
+        _discordSocketClient = discordSocketClient;
+    }
 
-        public UserService(AuthenticationStateProvider authenticationStateProvider, DiscordBot discordBot)
-        {
-            _authenticator = ((Authenticator) authenticationStateProvider);
-            _discordBot = discordBot;
-        }
+    private UserIdentity User => GetUserIdentity();
 
-        public UserIdentity GetUserIdentity()
-        {
-            AuthenticationState authState = _authenticator.GetAuthenticationStateAsync().Result;
-            return (UserIdentity) authState.User.Identity;
-        }
+    public string Id => User?.DiscordId;
 
-        public string id => _user?.DiscordId;
-        
-        
-        /// <summary>
-        /// This do only check if the use is Registered, hence
-        /// if _user?.UserGlobalModel != null
-        /// </summary>
-        public bool IsRegistered()
-        {
-            return _user?.UserGlobalModel != null;
-        }
+    public UserIdentity GetUserIdentity()
+    {
+        AuthenticationState authState = _authenticator.GetAuthenticationStateAsync().Result;
+        return (UserIdentity)authState.User.Identity;
+    }
 
-        public UserGlobalModel GetUserGlobalModel()
-        {
-            return _user?.UserGlobalModel ?? new UserGlobalModel();
-        }
 
-        public SocketGuild getGuild()
-        {
-            return _discordBot.Client.GetGuild(GetUserGlobalModel().SelectedGuild);
-        }
+    /// <summary>
+    ///     This do only check if the use is Registered, hence
+    ///     if _user?.UserGlobalModel != null
+    /// </summary>
+    public bool IsRegistered()
+    {
+        return User?.UserGlobalModel != null;
+    }
 
-        public async Task<string> GetTokenAsync()
-        {
-            return await _authenticator.GetTokenAsync();
-        }
+    public UserGlobalModel GetUserGlobalModel()
+    {
+        return User?.UserGlobalModel ?? new UserGlobalModel();
+    }
 
-        public IEnumerable<Claim> Claims()
-        {
-            return _user?.Claims ?? new List<Claim>();
-        }
- 
-        
+    /// <summary>
+    ///     Returns the currently selected guild
+    /// </summary>
+    /// <returns></returns>
+    public SocketGuild GetGuild()
+    {
+        return _discordSocketClient.GetGuild(GetUserGlobalModel().SelectedGuild);
+    }
 
+    /// <summary>
+    ///     Returns a list of mutual guilds between the user and the bot
+    /// </summary>
+    /// <returns></returns>
+    public List<SocketGuild> GetGuilds()
+    {
+        return _discordSocketClient.GetUser(GetUserGlobalModel().DiscordIdLong)?.MutualGuilds?.ToList() ??
+               new List<SocketGuild>();
+    }
+
+    public async Task<string> GetTokenAsync()
+    {
+        return await _authenticator.GetTokenAsync();
+    }
+
+    public IEnumerable<Claim> Claims()
+    {
+        return User?.Claims ?? new List<Claim>();
     }
 }

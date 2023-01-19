@@ -1,6 +1,7 @@
-@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News
+@using Dikubot.DataLayer.Database.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages
-@using Data.Discord
+@using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages.News
+@inject IGuildMongoFactory GuildMongoFactory
 
 @if (_loaded)
 {
@@ -21,16 +22,22 @@ else
 }
 
 @code {
-    [Parameter, EditorRequired]
+
+    [Parameter]
+    [EditorRequired]
     public SocketGuildDto Guild { get; set; }
+
     private List<MessageModel> _messages;
     private bool _loaded;
-
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _messages = new NewsServices(Guild.Guild).Get(10, model => model.TimeStamp);
-        _loaded = true;
-        StateHasChanged();
+        _messages = GuildMongoFactory.Get<NewsMongoServices>(Guild.Guild).Get(10, model => -model.TimeStamp.ToUnixTimeSeconds());
+        if (!_loaded)
+        {
+            _loaded = true;
+            StateHasChanged();
+        }
     }
 
 }

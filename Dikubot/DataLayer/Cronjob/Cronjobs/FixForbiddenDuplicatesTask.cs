@@ -1,46 +1,48 @@
 using System;
-using System.Collections.Generic;
+using Cronos;
 using Dikubot.DataLayer.Database.Global.User;
-using Microsoft.Graph;
 
 namespace Dikubot.DataLayer.Cronjob.Cronjobs;
 
 /// <summary>
-/// The purpose of this task is only to fix some legacy duplication issues.
-/// Can be removed after 1 run.
+///     The purpose of this task is only to fix some legacy duplication issues.
+///     Can be removed after 1 run.
 /// </summary>
 public class FixForbiddenDuplicatesTask : CronTask
 {
+    private readonly UserGlobalMongoService _userGlobalMongoService;
+
+    public FixForbiddenDuplicatesTask(UserGlobalMongoService userGlobalMongoService)
+    {
+        _userGlobalMongoService = userGlobalMongoService;
+    }
+
     // * * */1 * *
     /// <summary>
-    /// Updates every day
+    ///     Updates every day
     /// </summary>
-    public FixForbiddenDuplicatesTask() : base(Cronos.CronExpression.Parse("* * */1 * *"), Update)
+    protected override CronExpression CronExpression()
     {
+        return Cronos.CronExpression.Parse("* * */1 * *");
     }
-    
-    private static void Update()
+
+    public override void RunTask()
     {
         Console.WriteLine("Removing legacy elements");
-        UserGlobalServices userGlobalServices = new UserGlobalServices();
-        foreach (var user in userGlobalServices.GetAll())
+        foreach (UserGlobalModel user in _userGlobalMongoService.GetAll())
         {
-            List<UserGlobalModel> duplicates = userGlobalServices.GetAll(model => model.DiscordId == user.DiscordId);
-            if (duplicates.Count <= 1)
-            {
-                continue;
-            }
+            System.Collections.Generic.List<UserGlobalModel> duplicates =
+                _userGlobalMongoService.GetAll(model => model.DiscordId == user.DiscordId);
+            if (duplicates.Count <= 1) continue;
 
-            foreach (var duplicate in duplicates)
-            {
+            foreach (UserGlobalModel duplicate in duplicates)
                 if (!duplicate.Verified)
                 {
                     Console.WriteLine("REMOVED ONE ELEMENT");
-                    userGlobalServices.Remove(duplicate);
+                    _userGlobalMongoService.Remove(duplicate);
                 }
-            }
         }
+
         Console.WriteLine("Removed legacy elements");
     }
-
 }
