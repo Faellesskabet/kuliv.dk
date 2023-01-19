@@ -14,7 +14,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
     
     - name: Restore dependencies
       run: dotnet restore
@@ -47,8 +47,8 @@ jobs:
           cd /root/Discord-Botten/Dikubot
           git pull
           systemctl stop kuliv.service
-          rm -rf ./bin/Release/net6.0
+          rm -rf ./bin/Release/net7.0
           dotnet publish --configuration Release
-          rm -rf ./bin/Release/net6.0/wwwroot
-          cp -r Webapp/wwwroot/ ./bin/Release/net6.0
+          rm -rf ./bin/Release/net7.0/wwwroot
+          cp -r Webapp/wwwroot/ ./bin/Release/net7.0
           systemctl start kuliv.service
