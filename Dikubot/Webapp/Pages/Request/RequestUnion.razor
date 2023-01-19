@@ -1,0 +1,231 @@
+﻿@page "/request/union/create/{unionID}"
+@page "/request/union/create/"
+@page "/request/union/edit/{uuid}"
+@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.DataLayer.Database.Global.Union
+@using Dikubot.Webapp.Shared.Dialog
+@using Dikubot.Webapp.Extensions.Discovery.Request
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject UserService _user
+@inject UnionRequestMongoService UnionRequestMongoService
+@inject UnionMongoService UnionMongoService
+@attribute [AllowAnonymous]
+
+
+@if (!_loading)
+{
+    <MudContainer>
+        @if (string.IsNullOrWhiteSpace(_origanModel.Title))
+        {
+            <MudText Typo="Typo.h5">Creating a Association </MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.h5">Association: @_origanModel.Title </MudText>
+        }
+
+
+        <ContactInput @bind-Value="@_Request.Contact"/>
+
+        @if (_user.GetUserGlobalModel().IsAdmin)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Approve">Godkend Ændringerne</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="Denied">Denid Ændringerne</MudButton>
+        }
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudText Typo="Typo.h6"> Change </MudText>
+                <UnionInput @bind-Value="@_Request.RequestItem"/>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudText Typo="Typo.h6"> Orginale </MudText>
+                <UnionInput Value="_origanModel" Disable="true"/>
+            </MudItem>
+        </MudGrid>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="AddOneMore">Tilføj en ny</MudButton>
+        </MudCardActions>
+
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+
+    [Parameter]
+    public string? uuid { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    [Parameter]
+    public string? unionID { get; set; }
+
+    private MudTable<UnionModel> _table;
+    private bool _loading = true;
+    private RequestModel<UnionModel> _Request;
+    private UnionModel _origanModel = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _Request = Guid.TryParse(uuid, out Guid guid) ? UnionRequestMongoService.Get(guid) : new RequestModel<UnionModel>();
+
+        if (Guid.TryParse(unionID, out Guid UnionGuid))
+        {
+            _Request.RequestItem = UnionMongoService.Get(UnionGuid);
+        }
+        if (_Request.RequestItem.Id != Guid.Empty)
+        {
+            _origanModel = UnionMongoService.Get(_Request.RequestItem.Id);
+        }
+
+        _loading = false;
+    }
+
+
+    private async void SaveSettings()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _Request = UnionRequestMongoService.Upsert(_Request);
+
+        NavigationManager.NavigateTo("/request/union/edit/" + _Request.Id);
+    }
+
+    private async void Approve()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil godkende?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        if (_user.GetUserGlobalModel().IsAdmin)
+        {
+            _Request.Status = RequestModel<UnionModel>.StatusEmun.approved;
+            UnionMongoService.Upsert(_Request.RequestItem);
+        }
+        _Request = UnionRequestMongoService.Upsert(_Request);
+
+        MoveToNext();
+    }
+
+    private async void Denied()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil Denied?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+        if (_user.GetUserGlobalModel().IsAdmin)
+        {
+            _Request.Status = RequestModel<UnionModel>.StatusEmun.denied;
+        }
+        _Request = UnionRequestMongoService.Upsert(_Request);
+
+        MoveToNext();
+    }
+
+
+    private async void MoveToNext()
+    {
+        RequestModel<UnionModel> next = UnionRequestMongoService.Get(model =>
+            model.Status == RequestModel<UnionModel>.StatusEmun.ongoing || model.Status
+            == RequestModel<UnionModel>.StatusEmun.change);
+
+        if (next != null)
+        {
+            DialogParameters parameters = new DialogParameters();
+            parameters.Add("ContentText", "Vil du videre til den næste?");
+            parameters.Add("ButtonText", "Next");
+            parameters.Add("Color", Color.Success);
+            DialogResult result = await DialogService.Show<ConfirmDialog>("Next", parameters).Result;
+
+            if (result.Cancelled)
+            {
+                return;
+            }
+            NavigationManager.NavigateTo("/request/union/edit/" + next.Id, true);
+            StateHasChanged();
+        }
+        else
+        {
+            DialogParameters parameters = new DialogParameters();
+            parameters.Add("ContentText", "Det var den sidste");
+            parameters.Add("ButtonText", "Tilbage");
+            parameters.Add("Color", Color.Success);
+            DialogResult result = await DialogService.Show<ConfirmDialog>("Tilbage", parameters).Result;
+
+            if (result.Cancelled)
+            {
+                return;
+            }
+            NavigationManager.NavigateTo("/Op/Union/Request");
+        }
+    }
+
+
+    private async void DiscardSettings()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Warning);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _Request = Guid.TryParse(uuid, out Guid guid) ? UnionRequestMongoService.Get(guid) : new RequestModel<UnionModel>();
+        StateHasChanged();
+    }
+
+    private async void AddOneMore()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Add one more", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        NavigationManager.NavigateTo("/Request/Union/create", true);
+    }
+
+
+
+
+
+}

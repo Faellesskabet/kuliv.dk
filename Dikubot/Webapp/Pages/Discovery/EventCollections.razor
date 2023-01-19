@@ -1,0 +1,58 @@
+﻿@page "/discovery/events"
+@using Dikubot.DataLayer.Database.Global.Event
+@using Dikubot.Extensions.search
+@inject UserService _userService;
+@inject NavigationManager _navigationManager;
+@inject UserService _user
+@inject EventsMongoService EventsMongoService
+@attribute [AllowAnonymous]
+
+<MudButton OnClick="() => _orientation = VariantStyle.ExpansionPanel"> Landskab </MudButton>
+<MudButton OnClick="() => _orientation = VariantStyle.Grid"> Protrat </MudButton>
+
+<style>
+.mud-expand-panel .mud-expand-panel-header{
+    padding: 0;
+}
+.mud-expand-panel .mud-expand-panel-content{
+padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 16px;
+    
+}
+    
+</style>
+
+<Searchbar Items="Models" Context="item" SelectedStyle="_orientation">
+    <TemplateRow Context="item">
+        <EventWidget Model="item" Orientation="VariantStyle.Grid"></EventWidget>
+    </TemplateRow>
+    <TemplateExpansionPanel>
+        <EventWidget Model="item" Orientation="VariantStyle.ExpansionPanel"></EventWidget>
+    </TemplateExpansionPanel>
+    <TemplatePagination>
+        <MudButton Color="Color.Inherit" OnClick="() => { StartTime = StartTime.Subtract(TimeSpan.FromDays(30)); }"> Vis Tidligere </MudButton>
+    </TemplatePagination>
+</Searchbar>
+<MudButton Color="@Color.Primary" FullWidth="@true" OnClick="@Request" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit event til KULiv.dk</MudButton>
+
+@code
+{
+    private List<EventModel> Models => EventsMongoService.Get(StartTime, DateTime.MaxValue);
+
+    private VariantStyle _orientation = VariantStyle.Grid;
+
+
+    private DateTime StartTime { get; set; } = DateTime.Today;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    private void Request()
+    {
+        _navigationManager.NavigateTo("/Request/Event/create");
+    }
+
+}

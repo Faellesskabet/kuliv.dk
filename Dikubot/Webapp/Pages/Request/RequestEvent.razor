@@ -1,0 +1,110 @@
+﻿@page "/request/event/create"
+@page "/request/event/create/{unionID}"
+@page "/request/event/edit/{uuid}"
+@using Dikubot.Webapp.Extensions.Discovery.Links
+@using Dikubot.Webapp.Extensions.Discovery.Request
+@using Dikubot.Webapp.Shared.Dialog
+@using Dikubot.DataLayer.Database.Global.Event
+@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject EventRequestMongoService EventRequestMongoService
+@attribute [AllowAnonymous]
+
+@if (!_loading)
+{
+    <MudContainer>
+        <ContactInput @bind-Value="@_request.Contact"></ContactInput>
+        <EventInput @bind-Value="@_request.RequestItem"></EventInput>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="AddOneMore">Tilføj en ny</MudButton>
+        </MudCardActions>
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+
+    [Parameter]
+    public string? uuid { get; set; }
+
+    [Parameter]
+    public string? unionID { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    private bool _loading = true;
+    private RequestModel<EventModel> _request;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _request = Guid.TryParse(uuid, out Guid guid) ? EventRequestMongoService.Get(guid) : new RequestModel<EventModel>();
+        _loading = false;
+    }
+
+
+    private async void SaveSettings()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _request = EventRequestMongoService.Upsert(_request);
+        NavigationManager.NavigateTo("/Request/Event/edit/" + _request.Id);
+    }
+
+
+    private async void DiscardSettings()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Warning);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _request = Guid.TryParse(uuid, out Guid guid) ? EventRequestMongoService.Get(guid) : new RequestModel<EventModel>();
+        StateHasChanged();
+    }
+
+    private async void AddOneMore()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Add one more", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        NavigationManager.NavigateTo("/Request/Event/create", true);
+    }
+
+
+
+
+
+}

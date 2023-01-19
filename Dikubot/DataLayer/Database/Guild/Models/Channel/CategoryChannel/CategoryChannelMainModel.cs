@@ -1,9 +1,8 @@
-namespace Dikubot.DataLayer.Database.Guild.Models.Channel.CategoryChannel
+namespace Dikubot.DataLayer.Database.Guild.Models.Channel.CategoryChannel;
+
+/// <summary>
+///     Class for elements in the CategoryChannel collection.
+/// </summary>
+public class CategoryChannelMainModel : ChannelMainModel
 {
-    /// <summary>
-    /// Class for elements in the CategoryChannel collection.
-    /// </summary>
-    public class CategoryChannelMainModel : ChannelMainModel
-    {
-    }
 }

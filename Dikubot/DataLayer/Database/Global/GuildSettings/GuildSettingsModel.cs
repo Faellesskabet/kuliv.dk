@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using Dikubot.DataLayer.Database;
-using Dikubot.DataLayer.Database.Global.Settings.Tags;
+using Dikubot.DataLayer.Database.Attributes;
 using Discord.WebSocket;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -19,113 +17,114 @@ public class GuildSettingsModel : MainModel
         BannerUrl = guild.BannerUrl;
         Description = guild.Description;
     }
-    
+
     public GuildSettingsModel()
-    {}
-    
-    [BsonElement("GuildId")] [BsonUnique]
-    public ulong GuildId { get; set; }
-    
+    {
+    }
+
+    [BsonElement("GuildId")] [BsonUnique] public ulong GuildId { get; set; }
+
     /// <summary>
-    /// Can the guild be seen by everyone
-    /// If false then only members of the guild can see it
+    ///     Can the guild be seen by everyone
+    ///     If false then only members of the guild can see it
     /// </summary>
     [BsonElement("IsPublic")]
     public bool IsPublic { get; set; }
-    
+
     /// <summary>
-    /// The display name of the guild. Does not have to be the same as the guild name on Discord
+    ///     The display name of the guild. Does not have to be the same as the guild name on Discord
     /// </summary>
-    [BsonElement("Name")] [StringLength(32)]
+    [BsonElement("Name")]
+    [StringLength(32)]
     public string Name { get; set; }
-    
+
     /// <summary>
-    /// The logo of the guild. Does not have to be the same as the guild logo on Discord.
+    ///     The logo of the guild. Does not have to be the same as the guild logo on Discord.
     /// </summary>
-    [BsonElement("LogoUrl")] [StringLength(2048)]
+    [BsonElement("LogoUrl")]
+    [StringLength(2048)]
     public string LogoUrl { get; set; }
-    
+
     /// <summary>
-    /// The banner of the guild. Does not have to be the same as the guild banner on Discord.
+    ///     The banner of the guild. Does not have to be the same as the guild banner on Discord.
     /// </summary>
-    [BsonElement("BannerUrl")] [StringLength(2048)]
+    [BsonElement("BannerUrl")]
+    [StringLength(2048)]
     public string BannerUrl { get; set; }
-    
+
     /// <summary>
-    /// The description of the guild. Does not have to be the same as the guild description on Discord.
+    ///     The description of the guild. Does not have to be the same as the guild description on Discord.
     /// </summary>
-    [BsonElement("Description")] [StringLength(4096)]
+    [BsonElement("Description")]
+    [StringLength(4096)]
     public string Description { get; set; }
-    
+
     /// <summary>
-    /// This will force people to use their real name, if we are able to find one.
-    /// If this is toggled from false to true, then ALL names are updated.
-    /// If it is toggled from true to false, then NO names are updated, they must be updated manually, as we do not save the past names of users.
+    ///     This will force people to use their real name, if we are able to find one.
+    ///     If this is toggled from false to true, then ALL names are updated.
+    ///     If it is toggled from true to false, then NO names are updated, they must be updated manually, as we do not save
+    ///     the past names of users.
     /// </summary>
     [BsonElement("ForceNameChange")]
     public bool ForceNameChange { get; set; }
-    
+
     /// <summary>
-    /// Users will only be able to join your guild through the website if they're verified.
+    ///     Users will only be able to join your guild through the website if they're verified.
     /// </summary>
     [BsonElement("ForceVerified")]
     public bool ForceVerified { get; set; }
-    
+
     /// <summary>
-    /// All verified users on a server will get this role. Verified people won't get a special role if the role can't be found or is non-existent.
+    ///     All verified users on a server will get this role. Verified people won't get a special role if the role can't be
+    ///     found or is non-existent.
     /// </summary>
     [BsonElement("VerifiedRole")]
     public ulong VerifiedRole { get; set; }
-    
+
     /// <summary>
-    /// Whether or not the welcome message is enabled. If it is enabled, then users receive a the WelcomeMessage upon
-    /// joining the guild. If the WelcomeMessageEnabled is true but WelcomeMessage is empty, then no message is sent regardless.
+    ///     Whether or not the welcome message is enabled. If it is enabled, then users receive a the WelcomeMessage upon
+    ///     joining the guild. If the WelcomeMessageEnabled is true but WelcomeMessage is empty, then no message is sent
+    ///     regardless.
     /// </summary>
     [BsonElement("WelcomeMessageEnabled")]
     public bool WelcomeMessageEnabled { get; set; }
-    
+
     /// <summary>
-    /// The Welcome message that is sent to new users.
+    ///     The Welcome message that is sent to new users.
     /// </summary>
-    [BsonElement("WelcomeMessage")] [StringLength(4096)]
+    [BsonElement("WelcomeMessage")]
+    [StringLength(4096)]
     public string WelcomeMessage { get; set; }
 
     /// <summary>
-    /// Facebook Side, some uniouns still use a facebook side :(
+    ///     Facebook Side, some uniouns still use a facebook side :(
     /// </summary>
     [BsonElement("FacebookUrl")]
     public string FacebookUrl { get; set; }
-    
+
     /// <summary>
-    /// Webpage for a union
+    ///     Webpage for a union
     /// </summary>
     [BsonElement("Webpage")]
     public string Webpage { get; set; }
 
     /// <summary>
-    /// The tags associated with the guild. They're used for searching and filtering
+    ///     The tags associated with the guild. They're used for searching and filtering
     /// </summary>
     [BsonElement("Tags")]
-    public HashSet<Guid> Tags { get; set; } = new HashSet<Guid>();
-    
-    [BsonIgnore]
-    public IEnumerable<Guid> TagsEnumerable { get => Tags; set => Tags = new HashSet<Guid>(value); }
+    public HashSet<Guid> Tags { get; set; } = new();
 
-    public List<TagsMainModel> GetTags()
+    [BsonIgnore]
+    public IEnumerable<Guid> TagsEnumerable
     {
-        return GetTags(new TagServices());
+        get => Tags;
+        set => Tags = new HashSet<Guid>(value);
     }
-    public List<TagsMainModel> GetTags(TagServices services)
-    {
-        return Tags.Select(t => services.Get(t)).ToList();
-    }
-    
-    
+
     /// <summary>
-    /// Indicates whether the guild accept support tickets.
+    ///     Indicates whether the guild accept support tickets.
     /// </summary>
     public bool SupportTicketsEnabled { get; set; }
-    
-    [BsonElement("AnnouncementChannels")]
-    public List<ulong> AnnouncementChannels { get; set; }
+
+    [BsonElement("AnnouncementChannels")] public List<ulong> AnnouncementChannels { get; set; }
 }

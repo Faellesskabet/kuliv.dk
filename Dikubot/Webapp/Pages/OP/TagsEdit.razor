@@ -1,0 +1,105 @@
+﻿@page "/op/tags/create"
+@page "/op/tags/edit/{uuid}"
+@using Dikubot.DataLayer.Database.Global.Tags
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject TagMongoService TagMongoService
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+<h3>Kategori indstillinger @uuid</h3>
+
+@if (!_loading)
+{
+    <MudContainer>
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Sæt din Kalender indstillinger her</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudForm>
+                    <MudTextField @bind-Value="@_category.Name" Label="Tags navn" Immediate="@true" MaxLength="32"></MudTextField>
+                    <MudTextField @bind-Value="@_category.Decs" Label="Kategori beskrivelse" Immediate="@true" Lines="3" MaxLength="4096" Variant="Variant.Outlined"></MudTextField>
+                    <MudColorPicker @bind-Text="@_category.Color" ColorPickerView="ColorPickerView.Grid" PickerVariant="PickerVariant.Dialog" Style="@($"color: {_category.Color};")" Label="Kategori farve"></MudColorPicker>
+                    <MudSelect @bind-Value="@_category.TextColor">
+                        <MudSelectItem Value="@TagsMainModel.enumTextColor.black"> black </MudSelectItem>
+                        <MudSelectItem Value="@TagsMainModel.enumTextColor.white"> white </MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect @bind-Value="@_category.TagType">
+                        <MudSelectItem Value="@TagsMainModel.enumTagType.tag"> Tag </MudSelectItem>
+                        <MudSelectItem Value="@TagsMainModel.enumTagType.category"> category </MudSelectItem>
+                    </MudSelect>
+                    <TagsInput @bind-Value="@_category.CategoryEnumerable" TagType="@TagsMainModel.enumTagType.category"></TagsInput>
+                </MudForm>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettings">Gem indstillinger</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="DiscardSettings">Gem ikke indstillinger</MudButton>
+            </MudCardActions>
+
+        </MudCard>
+    </MudContainer>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+
+    [Parameter]
+    public string? uuid { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    private MudTable<TagsMainModel> _table;
+    private bool _loading = true;
+    private TagsMainModel _category;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _category = Guid.TryParse(uuid, out Guid guid) ? TagMongoService.Get(guid) : new TagsMainModel();
+        _loading = false;
+    }
+
+
+    private async void SaveSettings()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil gemme dine indstillinger?");
+        parameters.Add("ButtonText", "Gem");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Gem", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        TagMongoService.Upsert(_category);
+    }
+
+
+    private async void DiscardSettings()
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette dine ændringer?");
+        parameters.Add("ButtonText", "Slet Ændringer");
+        parameters.Add("Color", Color.Warning);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet Ændringer", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _category = Guid.TryParse(uuid, out Guid guid) ? TagMongoService.Get(guid) : new TagsMainModel();
+        StateHasChanged();
+    }
+
+
+
+
+}

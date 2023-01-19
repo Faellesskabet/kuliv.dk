@@ -4,63 +4,64 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject UserService _user;
-@namespace Dikubot.Extensions.Guild
+@inject UserGlobalMongoService UserGlobalMongoService
 
 @if (IsMember)
-        {
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@GotoGuild">Go to Community</MudButton>
-        }
-        else
-        {
-            <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@Join">Join Community</MudButton>
-        }
+{
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@GotoGuild">Go to Community</MudButton>
+}
+else
+{
+    <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@Join">Join Community</MudButton>
+}
 
 @code {
-    [Parameter] public ulong GuildID { get; set; }
-    
-    [Inject] private IDialogService DialogService { get; set; }
+
+    [Parameter]
+    public ulong GuildID { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
 
     public bool IsMember => DiscordBot.ClientStatic.GetUser(_user.GetUserGlobalModel().DiscordIdLong)?.MutualGuilds.Any(guild => guild.Id == GuildID) ?? false;
-    
+
     private async Task GotoGuild()
     {
-        
         if (_user == null)
         {
-            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
 
         UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
         userGlobalModel.SelectedGuild = GuildID;
-        new UserGlobalServices().Upsert(userGlobalModel);
-        await ((Authenticator) AuthenticationStateProvider).UpdateSession();
-        
-        
-        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad:true);
-        
+        UserGlobalMongoService.Upsert(userGlobalModel);
+        await ((Authenticator)AuthenticationStateProvider).UpdateSession();
+
+
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
-    
+
     private async Task Join()
     {
-        UserGlobalModel userModel = await ((Authenticator) AuthenticationStateProvider).GetUserGlobal();
+        UserGlobalModel userModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         if (userModel == null)
         {
-            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
-        
-        
+
+
         bool? result = await DialogService.ShowMessageBox(
-            "Bekræft", 
-            "Du er ved at join et nyt fællesskab. Er du sikker?", 
-            yesText:"Join", cancelText:"Fortryd");
+            "Bekræft",
+            "Du er ved at join et nyt fællesskab. Er du sikker?",
+            "Join", cancelText: "Fortryd");
 
         if (!result.GetValueOrDefault())
         {
             return;
         }
-        
+
         try
         {
             string accessToken = await _user.GetTokenAsync();
@@ -68,10 +69,10 @@
         }
         catch (Exception e)
         {
-            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
         await GotoGuild();
     }
-    
+
 }

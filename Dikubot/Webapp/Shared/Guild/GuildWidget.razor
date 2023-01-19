@@ -1,36 +1,35 @@
-@using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.Session
-@using Dikubot.DataLayer.Database.Global.User
-@using Dikubot.DataLayer.Static
-@using Dikubot.Discord
-@using Dikubot.Webapp.Authentication
-@using Microsoft.AspNetCore.Http
 @using Microsoft.IdentityModel.Tokens
+@using Microsoft.AspNetCore.Http
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Discord
+@using Dikubot.DataLayer.Database.Global.Tags
+@using Dikubot.DataLayer.Database.Global.GuildSettings
+@using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor httpContextAccessor;
 @inject UserService _userService
-@using Syncfusion.Blazor.Buttons
-@using Data.Discord
+@inject UserGlobalMongoService UserGlobalMongoService
+@inject TagMongoService TagMongoService
 
 <MudCard Elevation="25" Style="min-width: 420px; max-width: 420px; max-height: 340px; min-height: 340px;">
-        @if (!@Guild.BannerUrl.IsNullOrEmpty())
+    @if (!Guild.BannerUrl.IsNullOrEmpty())
+    {
+        <MudCardMedia Image="@Guild.BannerUrl" Style="object-fit: cover; height: 60px; min-height: 60px; width: 100%;"/>
+    }
+    else
+    {
+        <MudCardMedia Image="../images/placeholder-banner.png" Style="object-fit: cover; height: 60px; min-height: 60px; width: 100%;"/>
+    }
+    <div style="min-height: 28px; max-height: 28px;" class="d-flex justify-start flex-wrap">
+        @foreach (TagsMainModel tag in Guild.Tags.Select(t => TagMongoService.Get(t)).ToList())
         {
-            <MudCardMedia Image="@Guild.BannerUrl" Style="object-fit: cover; height: 60px; min-height: 60px; width: 100%;"/>
+            //Kan ikke gøres direkte :(
+            string style = "background-color: " + tag.Color + ";" + "color: " + tag.TextColor + ";";
+            <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
         }
-        else
-        {
-            <MudCardMedia Image="../images/placeholder-banner.png" Style="object-fit: cover; height: 60px; min-height: 60px; width: 100%;"/>
-        }
-        <div style="min-height: 28px; max-height: 28px;" class="d-flex justify-start flex-wrap">
-            @foreach (var tag in Guild.GetTags())
-            {
-                    //Kan ikke gøres direkte :(
-                string style = $"background-color: " + @tag.Color + ";" + "color: " + @tag.TextColor + ";";
-                <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
-            }
-        </div>
-        <MudCardHeader>
+    </div>
+    <MudCardHeader>
         <CardHeaderAvatar>
             <MudAvatar Image="@Guild.LogoUrl"></MudAvatar>
         </CardHeaderAvatar>
@@ -56,51 +55,54 @@
 
 
 @code {
-    [Inject] private IDialogService DialogService { get; set; }
-    [Parameter] public GuildWidgetDto GuildWidgetDto { get; set; }
-    
-    public GuildSettingsModel Guild{get => GuildWidgetDto.GuildSettingsModel;}
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    [Parameter]
+    public GuildWidgetDto GuildWidgetDto { get; set; }
+
+    public GuildSettingsModel Guild => GuildWidgetDto.GuildSettingsModel;
 
     private async Task GotoGuild()
     {
-        var authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity) authState.User.Identity;
+        Authenticator authenticator = (Authenticator)AuthenticationStateProvider;
+        AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
+        UserIdentity user = (UserIdentity)authState.User.Identity;
         UserGlobalModel userModel = user?.UserGlobalModel;
 
         if (userModel == null)
         {
-            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
 
         userModel.SelectedGuild = Guild.GuildId;
-        new UserGlobalServices().Upsert(user.UserGlobalModel);
+        UserGlobalMongoService.Upsert(user.UserGlobalModel);
         await authenticator.UpdateSession();
         NavigationManager.NavigateTo("/");
-        
     }
-    
+
     private async Task JoinGuild()
     {
-        UserGlobalModel userModel = await ((Authenticator) AuthenticationStateProvider).GetUserGlobal();
+        UserGlobalModel userModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
         if (userModel == null)
         {
-            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
-        
-        
+
+
         bool? result = await DialogService.ShowMessageBox(
-            "Bekræft", 
-            "Du er ved at join et nyt fællesskab. Er du sikker?", 
-            yesText:"Join", cancelText:"Fortryd");
+            "Bekræft",
+            "Du er ved at join et nyt fællesskab. Er du sikker?",
+            "Join", cancelText: "Fortryd");
 
         if (!result.GetValueOrDefault())
         {
             return;
         }
-        
+
         try
         {
             string accessToken = await _userService.GetTokenAsync();
@@ -108,9 +110,10 @@
         }
         catch (Exception e)
         {
-            await DialogService.ShowMessageBox( "Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
+            await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
         await GotoGuild();
     }
+
 }

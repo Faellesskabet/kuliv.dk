@@ -1,16 +1,15 @@
 @page "/oldlogout"
-@using Dikubot.Webapp.Authentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
 
 <h3>Logger ud...</h3>
 
 @code {
+
     protected override Task OnInitializedAsync()
     {
         try
         {
-            
             NavigationManager.NavigateTo("/logout", true);
         }
         catch (Exception e)

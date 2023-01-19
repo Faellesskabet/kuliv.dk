@@ -1,0 +1,120 @@
+﻿@page "/op/tags"
+@using Microsoft.IdentityModel.Tokens
+@using Syncfusion.Blazor.Buttons
+@using Dikubot.DataLayer.Database.Global.Tags
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+@inject TagMongoService TagMongoService
+
+
+<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<TagsMainModel>>>(Reload))" @ref="_table"
+          Loading="@_loading">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
+        <MudSpacer/>
+        <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+        </MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Preview</MudTh>
+        <MudTh>Navn</MudTh>
+        <MudTh>Beskrivelse</MudTh>
+        <MudTh>Farve</MudTh>
+        <MudTh>Text Far</MudTh>
+        <MudTh>Indstillinger</MudTh>
+        <MudTh>Slet</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+
+
+        <MudTd DataLabel="">
+            <SfChip>
+                <ChipItems>
+                    @{
+                        string color = "background-color: " + context.Color + ";" + "color: " + context.TextColor + ";";
+                    }
+                    <ChipItem Text="@context.Name" style="@color"></ChipItem>
+                </ChipItems>
+            </SfChip>
+        </MudTd>
+        <MudTd DataLabel="Navn">@context.Name</MudTd>
+        <MudTd DataLabel="Beskrivelse">@context.Decs</MudTd>
+        <MudTd DataLabel="Visible">@context.Color</MudTd>
+        <MudTd DataLabel="CalendarType">@context.TextColor</MudTd>
+        <MudTd DataLabel="Indstillinger">
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Op/Tags/edit/{context.Id.ToString()}")>Rediger</MudButton>
+        </MudTd>
+        <MudTd DataLabel="Slet">
+            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>Kunne ikke finde nogen elementer</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <Loading></Loading>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager/>
+    </PagerContent>
+</MudTable>
+<div class="d-flex flex-wrap mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" Link="/Op/Tags/create">Tilføj ny kategori</MudButton>
+</div>
+
+@code {
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    private MudTable<TagsMainModel> _table;
+    private string _searchQuery = "";
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = false;
+    }
+
+    private async Task<TableData<TagsMainModel>> Reload(TableState state)
+    {
+        List<TagsMainModel> items;
+        if (!_searchQuery.IsNullOrEmpty())
+        {
+            items = TagMongoService.Get(model => model.Name.Contains(_searchQuery) || model.Decs.Contains(_searchQuery),
+                state.PageSize, state.Page);
+        }
+        else
+        {
+            items = TagMongoService.Get(state.PageSize, state.Page);
+        }
+
+        return new TableData<TagsMainModel> { Items = items, TotalItems = (int)TagMongoService.EstimatedCount() };
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchQuery = text;
+        _table.ReloadServerData();
+    }
+
+    private async void DeleteCategory(TagsMainModel joinRoleCategoryMainModel)
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
+        parameters.Add("ButtonText", "Slet");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        TagMongoService.Remove(joinRoleCategoryMainModel);
+        await _table.ReloadServerData();
+    }
+
+}
