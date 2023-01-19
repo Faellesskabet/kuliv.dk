@@ -1,11 +1,13 @@
 @page "/admin/settings"
-@using Dikubot.Webapp.Authentication
-@using Dikubot.Discord
-@using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.Settings.Tags
+@using Dikubot.DataLayer.Database.Global.Tags
 @using Dikubot.DataLayer.Static
+@using Dikubot.Discord
+@using Dikubot.Webapp.Authentication
+@using global::Discord.WebSocket
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject GuildSettingsMongoService GuildSettingsMongoService
+@inject TagMongoService TagMongoService
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
 
 @if (!_loaded)
@@ -24,29 +26,29 @@ else
                 <MudTextField @bind-Value="_guildSettingsModel.Name" Label="Navn" HelperText="Hvad skal dit fællesskab hedde i vores system?" Immediate="@true"></MudTextField>
                 <MudSwitch @bind-Checked="_guildSettingsModel.IsPublic" Color="Color.Success" Label="Offentlig - Skal folk der ikke er en del af dit fællesskab kunne se den i vores system?"></MudSwitch>
                 <MudSwitch @bind-Checked="_guildSettingsModel.ForceVerified" Color="Color.Success" Label="Skal man være verified for at se dit fællesskab i vores system? (Overskrives af Offentlig)"></MudSwitch>
-                
+
                 <MudTextField @bind-Value="_guildSettingsModel.LogoUrl" Label="Logo url" HelperText="Skal være et link" Immediate="@true"></MudTextField>
                 <MudTextField @bind-Value="_guildSettingsModel.BannerUrl" Label="Banner url" HelperText="Skal være et link" Immediate="@true"></MudTextField>
-                <MudSelect MultiSelection="true" 
-                           Label="Tags" 
+                <MudSelect MultiSelection="true"
+                           Label="Tags"
                            HelperText="Så Folk lettere kan finde din server"
                            @bind-SelectedValues="_guildSettingsModel.TagsEnumerable"
                            MultiSelectionTextFunc="list => GetTagsString(_guildSettingsModel)" Text="@GetTagsString(_guildSettingsModel)">
-                    @foreach (var tag in _tagServices.GetAll())
+                    @foreach (TagsMainModel tag in TagMongoService.GetAll())
                     {
-                        <MudSelectItem Value="tag.Id" >@tag.Name - @tag.Decs</MudSelectItem>
+                        <MudSelectItem Value="tag.Id">@tag.Name - @tag.Decs</MudSelectItem>
                     }
                 </MudSelect>
 
                 <MudTextField @bind-Value="_guildSettingsModel.Description" Label="Beskrivelse" HelperText="Beskriv dit fællesskab!" Immediate="@true" Lines="8" Variant="Variant.Outlined"></MudTextField>
                 <MudTextField @bind-Value="_guildSettingsModel.FacebookUrl" Label="FacebookPage" HelperText="Skal være et link" Immediate="@true"></MudTextField>
                 <MudTextField @bind-Value="_guildSettingsModel.Webpage" Label="Homepage/Hjemmeside" HelperText="Skal være et link" Immediate="@true"></MudTextField>
-                
+
 
                 <MudSwitch @bind-Checked="_guildSettingsModel.ForceNameChange" Color="Color.Success" Label="Skal vi tvinge alle til at bruge deres rigtige navn? Kan ikke fortrydes"></MudSwitch>
                 <MudSelect Label="Verified Rolle" HelperText="Skal folk få en rolle når de er verified? Indsæt rollens ID her!" @bind-Value="_guildSettingsModel.VerifiedRole"
                            Text="@(guild.Roles.FirstOrDefault(role => role.Id == _guildSettingsModel.VerifiedRole)?.Name ?? "")">
-                    @foreach (var socketRole in guild.Roles)
+                    @foreach (SocketRole socketRole in guild.Roles)
                     {
                         // We won't let people choose administrator roles as the verified role,
                         // for obvious security reasons.
@@ -75,44 +77,42 @@ else
     private Authenticator authenticator;
     private UserIdentity user;
     private SocketGuild guild;
-    private bool _loaded = false;
+    private bool _loaded;
     private GuildSettingsModel _guildSettingsModel;
-    private GuildSettingsService _guildSettingsService;
-    private readonly TagServices _tagServices = new TagServices();
-    
-    [Inject] private IDialogService DialogService { get; set; }
-    
-    
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+
     protected override async Task OnInitializedAsync()
     {
-        authenticator = ((Authenticator) AuthenticationStateProvider);
-        var authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity) authState.User.Identity;
+        authenticator = (Authenticator)AuthenticationStateProvider;
+        AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
+        user = (UserIdentity)authState.User.Identity;
         if (user == null)
         {
             return;
         }
         guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
-        _guildSettingsService = new GuildSettingsService();
-        _guildSettingsModel = _guildSettingsService.Get(guild);
+        _guildSettingsModel = GuildSettingsMongoService.Get(guild);
         _loaded = true;
     }
 
     private async void saveSettings()
     {
-        _guildSettingsService.Upsert(_guildSettingsModel);
+        GuildSettingsMongoService.Upsert(_guildSettingsModel);
         await DialogService.ShowMessageBox("Ændringer gemt", "Dine ændringer er blevet gemt. Der kan gå nogle timer før alle ændringer ses.", "Bekræft");
     }
 
     private async void discardSettings()
     {
-        _guildSettingsModel = _guildSettingsService.Get(guild);
-        await DialogService.ShowMessageBox("Ændringer slettet", "Dine ændringer er blevet slettet", "Bekræft");   
+        _guildSettingsModel = GuildSettingsMongoService.Get(guild);
+        await DialogService.ShowMessageBox("Ændringer slettet", "Dine ændringer er blevet slettet", "Bekræft");
     }
 
     private string GetTagsString(GuildSettingsModel model)
     {
-        return Util.ConcatListToString(model.GetTags().Select(tag => tag?.Name ?? "").ToList());
+        return Util.ConcatListToString(model.Tags.Select(t => TagMongoService.Get(t)).ToList().Select(tag => tag?.Name ?? "").ToList());
     }
-    
+
 }

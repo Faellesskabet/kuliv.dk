@@ -1,7 +1,3 @@
-@using Dikubot.Webapp.Authentication
-@using global::Discord.WebSocket
-@using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.Discord
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @if (_loaded)
@@ -16,8 +12,9 @@ else
         <Loading></Loading>
     </div>
 }
+
 @code {
-    
+
     bool _loaded;
 
     [Parameter]
@@ -29,5 +26,5 @@ else
         _loaded = true;
     }
 
-    
+
 }

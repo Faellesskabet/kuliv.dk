@@ -1,0 +1,38 @@
+﻿@using Dikubot.DataLayer.Database.Global.Tags
+@inject TagMongoService TagMongoService
+
+@foreach (TagsMainModel tag in TagsList)
+{
+    //Kan ikke gøres direkte :(
+    string style = "background-color: " + tag.Color + ";" + "color: " + tag.TextColor + ";";
+    <MudChip Style="@style" Size="Size.Small"> @tag.Name</MudChip>
+}
+
+@code {
+
+    [Parameter]
+    public List<TagsMainModel> TagsList { get; set; } = new();
+
+    [Parameter]
+    public HashSet<Guid> Tags { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (TagsList.Count == 0)
+        {
+            TagsList = Tags.Select(t => TagMongoService.Get(t)).ToList();
+        }
+        base.OnInitialized();
+    }
+
+    protected override void OnParametersSet()
+    {
+        TagsList = Tags.Select(t => TagMongoService.Get(t)).ToList();
+
+        base.OnParametersSet();
+    }
+
+
+
+
+}

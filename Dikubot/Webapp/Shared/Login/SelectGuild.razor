@@ -1,27 +1,10 @@
-@using Dikubot.Webapp.Authentication
-@using global::Discord
-@using global::Discord.WebSocket
 @using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.Session
-@using Dikubot.Discord
-@using Dikubot.Webapp.Pages
-@using Data.Discord
+@using Dikubot.DataLayer.Database.Global.Union
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime;
-@inject UserService _userService;
-
-@using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.Settings.Tags
-@using Microsoft.IdentityModel.Tokens
-@using Data.Discord
+@inject UserService UserService;
 @inject NavigationManager NavigationManager
-
-@using Dikubot.Extensions.search
-@using Dikubot.DataLayer.Database.Global.Settings.Tags
-@using Dikubot.DataLayer.Database.Global.GuildSettings;
-@using Dikubot.Webapp.Extensions.Discovery.Links
-@using System.Reflection
-@using Color = MudBlazor.Color
+@inject GuildSettingsMongoService GuildSettingsMongoService
 
 @if (!_loaded)
 {
@@ -30,8 +13,8 @@
 else
 {
     <div style="min-width: 70vw;">
-        <Searchbar Items="_models" Context="UnionModel">
-            <TemplateRow Context="unionModel" >
+        <Searchbar Items="Models" Context="UnionModel">
+            <TemplateRow Context="unionModel">
                 <MudItem xs="12" sm="6" md="4" lg="3">
                     <UnionWidget Union="unionModel" IsChangeGuild="true" ShowBanner="true"/>
                 </MudItem>
@@ -40,45 +23,43 @@ else
         <MudButton Color="@Color.Primary" FullWidth="@true" OnClick="@GotoAddGuild" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
     </div>
 }
-   
+
 @code {
+
     [Parameter]
-    public Login parent { get; set; }
+    public Login Parent { get; set; }
 
     private bool _loaded = false;
-    
-    [Parameter] public List<GuildWidgetDto> Guilds { get; set; }
-    
-    public GuildSettingsService _GuildSettingsService = new GuildSettingsService();
-    
-    public List<UnionModel> _models { get; set; }
+
+    [Parameter]
+    public List<GuildWidgetDto> Guilds { get; set; }
+
+    public List<UnionModel> Models { get; set; }
 
     protected override void OnInitialized()
     {
-        var userGuilds = _userService.GetUserGlobalModel().Guilds.Select(model => model.Id).ToHashSet();
-        
-        var list = _GuildSettingsService.Get()
-            .Where(model => model.IsPublic 
+        HashSet<ulong> userGuilds = UserService.GetGuilds().Select(model => model.Id).ToHashSet();
+
+        List<UnionModel> list = GuildSettingsMongoService.Get()
+            .Where(model => model.IsPublic
                             || model.ForceVerified ||
-                userGuilds.Contains(model.GuildId))
+                            userGuilds.Contains(model.GuildId))
             .OrderBy(model => userGuilds.Contains(model.GuildId))
             .ThenBy(model => model.Name)
             .Select(model => new UnionModel(model)).ToList();
 
 
-        _models = list;
+        Models = list;
 
         _loaded = true;
         base.OnInitialized();
     }
-    
-    
-   
-    
+
+
     private void GotoAddGuild()
     {
         NavigationManager.NavigateTo("/addguild");
     }
-    
-    
+
+
 }

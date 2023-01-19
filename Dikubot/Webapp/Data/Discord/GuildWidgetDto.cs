@@ -1,6 +1,6 @@
 using Dikubot.DataLayer.Database.Global.GuildSettings;
 
-namespace Data.Discord;
+namespace Dikubot.Webapp.Data.Discord;
 
 public class GuildWidgetDto
 {

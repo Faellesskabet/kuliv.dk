@@ -1,23 +1,20 @@
 using System;
 using System.Threading.Tasks;
-using Discord.Commands;
+using Discord.Interactions;
 
-namespace Dikubot.Discord.Command
+namespace Dikubot.Discord.Command;
+
+public class TequilaTuesday : InteractionModuleBase<SocketInteractionContext>
 {
-    public class TequilaTuesday : ModuleBase<SocketCommandContext>
+    [SlashCommand("ttt", "is today TTT?")]
+    public async Task TequilaTuesdayCommand()
     {
-        [Command("tequilatuesday")]
-        [Alias("ttt", "tequilatightstuesday", "tequilatightstirsdag", "tequilatuesday", "tequilatirsdag")]
-        [Summary("Er det TTT i dag?")]
-        public async Task TequilaTuesdayCommand()
+        if (DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
         {
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Tuesday)
-            {
-                await ReplyAsync("JA DET ER TTT I DAG!!!!");
-                return;
-            }
-
-            await ReplyAsync("Nej!!! :(");
+            await ReplyAsync("JA DET ER TTT I DAG!!!!");
+            return;
         }
+
+        await ReplyAsync("Nej!!! :(");
     }
 }

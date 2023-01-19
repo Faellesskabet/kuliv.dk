@@ -1,99 +1,95 @@
 @page "/addguild/{permissions}"
 @page "/addguild"
-
 @using Microsoft.AspNetCore.Http
-@using Microsoft.Graph
-@using Dikubot.Webapp.Authentication
 @using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Webapp.Authentication
 @inject NavigationManager _navigationManager
 @inject IHttpContextAccessor httpContextAccessor;
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@using Dikubot.Webapp.Authentication
-@using global::Discord.WebSocket
-@using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.Discord
-@using UserIdentity = Dikubot.Webapp.Authentication.UserIdentity
 @inject UserService _userService;
+@inject UserGlobalMongoService UserGlobalMongoService
 
 @if (!_loading)
 {
 @if (!string.IsNullOrWhiteSpace(error))
 {
     <h2>Error</h2>
-    <p>Fejlbesked:</p> <code>@error_description </code>
+    <p>Fejlbesked:</p>
+    <code>@error_description </code>
     <p> Prøv igen :D </p>
-}else if (!string.IsNullOrWhiteSpace(guild_id))
+}
+else if (!string.IsNullOrWhiteSpace(guild_id))
 {
     <h2>Succes!</h2>
     <p>Din server er ved at blive oprettet i vores system.</p>
     <p>Vent et øjeblik :D</p>
     <MudButton Color="Color.Primary" FullWidth="@true" OnClick="GoToAdminSetting" Style="margin-top: 15px;" Variant="Variant.Outlined">Gå til Settings</MudButton>
-       
 }
 
     <html>
-<h2>Botten er i åben Beta</h2>
+    <h2>Botten er i åben Beta</h2>
     Vær opmærksom på at der kan foregå ændringer, hvordan botten fungere.
 
     <h2>Inden du tilføjer din server</h2>
     For at din server skal komme på listen af servere, er det et krav at du burges vores bot på din server.
 
-Botten er lavet for at gøre det nemmere for dig og andre at håndtere en discord server.
-Når du tilføjer din server, vil den komme på vores liste med servere man kan joine.
+    Botten er lavet for at gøre det nemmere for dig og andre at håndtere en discord server.
+    Når du tilføjer din server, vil den komme på vores liste med servere man kan joine.
 
-<h3> GDPR </h3>
-Når du bruger vores service opbevare vi brugerne af din server i vores database. Det ink. bl.a deres userName, NickName og unikke DiscordId.
-Hvis du ikke ønsker at bruge vores service, fjerne du blot botten fra din server og vi fjerne automatisk alt data om din server fra vores database.
-Vi tager backup af vores database, og hvis din server er i vores backup, vil den blive fjernet næste gang der bliver taget backup.
+    <h3> GDPR </h3>
+    Når du bruger vores service opbevare vi brugerne af din server i vores database. Det ink. bl.a deres userName, NickName og unikke DiscordId.
+    Hvis du ikke ønsker at bruge vores service, fjerne du blot botten fra din server og vi fjerne automatisk alt data om din server fra vores database.
+    Vi tager backup af vores database, og hvis din server er i vores backup, vil den blive fjernet næste gang der bliver taget backup.
 
 
-<h2> Sådan tilføjer du din server:</h2>
+    <h2> Sådan tilføjer du din server:</h2>
 
-<MudButton Color="Color.Primary" FullWidth="@true" OnClick="AddGuildAction" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
-</html>
+    <MudButton Color="Color.Primary" FullWidth="@true" OnClick="AddGuildAction" Style="margin-top: 15px;" Variant="Variant.Outlined">Tilføj dit eget fælleskab til KULiv</MudButton>
+    </html>
 }
+
 @code
 {
     private bool _loading = true;
-    
+
     private string? code { get; set; } = "";
     private string? guild_id { get; set; } = "";
+
     [ParameterAttribute]
     public string permissions { get; set; } = "";
+
     private string error { get; set; } = "";
     private string error_description { get; set; } = "";
-    
+
     private Authenticator authenticator;
 
-    
+
     protected override async void OnInitialized()
     {
-
-        
         if (!_userService?.GetUserGlobalModel().Verified ?? true)
         {
-            _navigationManager.NavigateTo("/", forceLoad:true);
+            _navigationManager.NavigateTo("/", true);
             return;
         }
 
         if (_navigationManager.Uri.Contains("error"))
         {
-            var header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?')+1);
-            var Request = header.Split('&','=').ToList();
-            
-            error = Request[Request.FindIndex(x => x.Equals("error"))+1];
-            error_description = Request[Request.FindIndex(x => x.Equals("error"))+1];
+            string header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?') + 1);
+            List<string> Request = header.Split('&', '=').ToList();
+
+            error = Request[Request.FindIndex(x => x.Equals("error")) + 1];
+            error_description = Request[Request.FindIndex(x => x.Equals("error")) + 1];
         }
-        
-        if (_navigationManager.Uri.Contains("code")&&_navigationManager.Uri.Contains("permissions")&&_navigationManager.Uri.Contains("guild_id") )
+
+        if (_navigationManager.Uri.Contains("code") && _navigationManager.Uri.Contains("permissions") && _navigationManager.Uri.Contains("guild_id"))
         {
-            var header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?')+1);
-            var Request = header.Split('&','=').ToList();
-            
-            //error=access_denied&error_description=The+resource+owner+or+authorization+server+denied+the+request
-            permissions = Request[Request.FindIndex(x => x.Equals("permissions"))+1];
-            code = Request[Request.FindIndex(x => x.Equals("code"))+1];
-            guild_id = Request[Request.FindIndex(x => x.Equals("guild_id"))+1];
+            string header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?') + 1);
+            List<string> Request = header.Split('&', '=').ToList();
+
+    //error=access_denied&error_description=The+resource+owner+or+authorization+server+denied+the+request
+            permissions = Request[Request.FindIndex(x => x.Equals("permissions")) + 1];
+            code = Request[Request.FindIndex(x => x.Equals("code")) + 1];
+            guild_id = Request[Request.FindIndex(x => x.Equals("guild_id")) + 1];
         }
 
         _loading = false;
@@ -101,29 +97,28 @@ Vi tager backup af vores database, og hvis din server er i vores backup, vil den
 
     private async Task GoToAdminSetting()
     {
-        var authenticator = ((Authenticator) AuthenticationStateProvider);
-        
-        var user = _userService.GetUserGlobalModel();
+        Authenticator authenticator = (Authenticator)AuthenticationStateProvider;
+
+        UserGlobalModel user = _userService.GetUserGlobalModel();
         if (guild_id != null) user.SelectedGuild = Convert.ToUInt64(guild_id);
-        
-        new UserGlobalServices().Upsert(user);
+
+        UserGlobalMongoService.Upsert(user);
         await authenticator.UpdateSession();
-        
-        _navigationManager.NavigateTo("/admin/settings", forceLoad:true);
+
+        _navigationManager.NavigateTo("/admin/settings", true);
     }
-    
+
     private void AddGuildAction()
     {
-        var link = 
+        string link =
             "https://discord.com/api/oauth2/authorize?" +
             "client_id=" + Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID")
             + "&permissions=8" +
             "&scope=bot%20applications.commands" +
             "&response_type=code&" +
             "redirect_uri=" + _navigationManager.Uri;
-        
+
         _navigationManager.NavigateTo(link);
     }
 
 }
-

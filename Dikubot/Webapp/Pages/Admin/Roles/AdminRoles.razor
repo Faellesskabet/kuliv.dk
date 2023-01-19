@@ -1,0 +1,115 @@
+@page "/admin/roles"
+@using Microsoft.IdentityModel.Tokens
+@using Dikubot.DataLayer.Database.Guild
+@using Dikubot.DataLayer.Database.Guild.Models.JoinRole
+@using Dikubot.DataLayer.Database.Global.User
+@using global::Discord.WebSocket
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IGuildMongoFactory GuildMongoFactory
+@attribute [Authorize(Roles = Permissions.GuildAdmin)]
+
+
+<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<JoinRoleCategoryMainModel>>>(Reload))" @ref="_table"
+          Loading="@_loading">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Admin rolle kategorier</MudText>
+        <MudSpacer/>
+        <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+        </MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Navn</MudTh>
+        <MudTh>Beskrivelse</MudTh>
+        <MudTh>Størrelse</MudTh>
+        <MudTh>Indstillinger</MudTh>
+        <MudTh>Slet</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Navn">@context.Name</MudTd>
+        <MudTd DataLabel="Beskrivelse">@context.Decs</MudTd>
+        <MudTd DataLabel="Størrelse">@(context.TextRoles?.Count ?? 0)</MudTd>
+        <MudTd DataLabel="Indstillinger">
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/admin/roles/edit/{context.Id.ToString()}")>Rediger</MudButton>
+        </MudTd>
+        <MudTd DataLabel="Slet">
+            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>Kunne ikke finde nogen elementer</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <Loading></Loading>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager/>
+    </PagerContent>
+</MudTable>
+
+<div class="d-flex flex-wrap mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" Link="/admin/roles/create">Tilføj ny kategori</MudButton>
+</div>
+
+@code {
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    private MudTable<JoinRoleCategoryMainModel> _table;
+    private string _searchQuery = "";
+    private UserGlobalModel _userGlobalModel;
+    private SocketGuild _guild;
+    private JoinRoleMongoService _mongoService;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _userGlobalModel.GetSelectedGuild();
+        _mongoService = GuildMongoFactory.Get<JoinRoleMongoService>(_guild);
+        _loading = false;
+    }
+
+    private async Task<TableData<JoinRoleCategoryMainModel>> Reload(TableState state)
+    {
+        List<JoinRoleCategoryMainModel> items;
+        if (!_searchQuery.IsNullOrEmpty())
+        {
+            items = _mongoService.Get(model => model.Name.Contains(_searchQuery) || model.Decs.Contains(_searchQuery),
+                state.PageSize, state.Page);
+        }
+        else
+        {
+            items = _mongoService.Get(state.PageSize, state.Page);
+        }
+
+        return new TableData<JoinRoleCategoryMainModel> { Items = items, TotalItems = (int)_mongoService.EstimatedCount() };
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchQuery = text;
+        _table.ReloadServerData();
+    }
+
+    private async void DeleteCategory(JoinRoleCategoryMainModel joinRoleCategoryMainModel)
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
+        parameters.Add("ButtonText", "Slet");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _mongoService.Remove(joinRoleCategoryMainModel);
+        await _table.ReloadServerData();
+    }
+
+}

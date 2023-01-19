@@ -10,13 +10,33 @@ using MongoDB.Driver;
 
 namespace Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
 
-public abstract class MessageService : GuildServices<MessageModel>, IIndexed<MessageModel>
+public abstract class MessageMongoService : GuildMongoService<MessageModel>, IIndexed<MessageModel>
 {
-    public MessageService(string collection, SocketGuild guild) : base(collection, guild) { }
-        
+    private readonly IGuildMongoFactory _guildMongoFactory;
+    private readonly MessageListener _messageListener;
+
+    public MessageMongoService(Database database, IGuildMongoFactory guildMongoFactory, SocketGuild guild,
+        MessageListener messageListener) : base(
+        database, guild)
+    {
+        _guildMongoFactory = guildMongoFactory;
+        _messageListener = messageListener;
+    }
+
+    public IEnumerable<CreateIndexModel<MessageModel>> GetIndexes()
+    {
+        CreateIndexOptions options = new CreateIndexOptions { Unique = true };
+        return new List<CreateIndexModel<MessageModel>>
+        {
+            new(
+                Builders<MessageModel>.IndexKeys.Ascending(model => model.TimeStamp)
+                    .Ascending(model => model.MessageId), options)
+        };
+    }
+
     public MessageModel SocketToModel(SocketMessage textMessage)
     {
-        var messageModel = new MessageModel();
+        MessageModel messageModel = new MessageModel();
         messageModel.MessageId = textMessage.Id.ToString();
         messageModel.ChannelId = textMessage.Channel.Id.ToString();
         messageModel.TimeStamp = textMessage.Timestamp;
@@ -25,7 +45,7 @@ public abstract class MessageService : GuildServices<MessageModel>, IIndexed<Mes
 
     public MessageModel IMessageToModel(IMessage textMessage)
     {
-        var messageModel = new MessageModel();
+        MessageModel messageModel = new MessageModel();
         messageModel.MessageId = textMessage.Id.ToString();
         messageModel.ChannelId = textMessage.Channel.Id.ToString();
         messageModel.TimeStamp = textMessage.Timestamp;
@@ -34,48 +54,29 @@ public abstract class MessageService : GuildServices<MessageModel>, IIndexed<Mes
 
     public async void DownloadMessagesFromChannel(SocketTextChannel textChannel)
     {
-        if (textChannel is not SocketGuildChannel channel)
-        {
-            return;
-        }
+        if (textChannel is not SocketGuildChannel channel) return;
         SocketGuild guild = channel.Guild;
-        TextChannelServices textChannelServices = new TextChannelServices(guild);
-        TextChannelMainModel textChannelMainModel = 
-            textChannelServices.Get(model => model.DiscordId == channel.Id.ToString());
-        if (textChannelMainModel == null)
+        TextChannelMongoService textChannelMongoService = _guildMongoFactory.Get<TextChannelMongoService>(guild);
+        TextChannelMainModel textChannelMainModel =
+            textChannelMongoService.Get(model => model.DiscordId == channel.Id.ToString());
+        if (textChannelMainModel == null) return;
+
+        List<MessageModel> messages = new();
+        IAsyncEnumerable<IMessage> asyncEnumerator = textChannel.GetMessagesAsync(int.MaxValue).Flatten();
+        await foreach (IMessage message in asyncEnumerator.WithCancellation(default).ConfigureAwait(false))
         {
-            return;
-        }
-            
-        List<MessageModel> messages = new List<MessageModel>();
-        var asyncEnumerator = textChannel.GetMessagesAsync(Int32.MaxValue).Flatten();
-        await foreach (var message in asyncEnumerator.WithCancellation(default).ConfigureAwait(false))
-        {
-            if (Exists(model => model.MessageId == message.Id.ToString()))
-            {
-                continue;
-            }
-            MessageListener.ProcessMessage(message);
+            if (Exists(model => model.MessageId == message.Id.ToString())) continue;
+            _messageListener.ProcessMessage(message);
         }
     }
 
     public void DownloadAllMessages()
     {
-        TextChannelServices textChannelServices = new TextChannelServices(Guild);
-        List<TextChannelMainModel> channels = textChannelServices.GetAll(ChannelFilter());
-        foreach (var channel in channels)
-        {
-            DownloadMessagesFromChannel(Guild.GetTextChannel( Convert.ToUInt64(channel.DiscordId)));
-        }
+        TextChannelMongoService textChannelMongoService = _guildMongoFactory.Get<TextChannelMongoService>(Guild);
+        List<TextChannelMainModel> channels = textChannelMongoService.GetAll(ChannelFilter());
+        foreach (TextChannelMainModel channel in channels)
+            DownloadMessagesFromChannel(Guild.GetTextChannel(Convert.ToUInt64(channel.DiscordId)));
     }
 
     protected abstract Expression<Func<TextChannelMainModel, bool>> ChannelFilter();
-    public IEnumerable<CreateIndexModel<MessageModel>> GetIndexes()
-    {
-        var options = new CreateIndexOptions() { Unique = true };
-        return new List<CreateIndexModel<MessageModel>>
-        {
-            new CreateIndexModel<MessageModel>(Builders<MessageModel>.IndexKeys.Ascending(model => model.TimeStamp).Ascending(model => model.MessageId), options)
-        };
-    }
 }

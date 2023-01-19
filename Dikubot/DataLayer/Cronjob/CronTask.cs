@@ -1,29 +1,18 @@
 using System;
 using Cronos;
 
-namespace Dikubot.DataLayer.Cronjob
+namespace Dikubot.DataLayer.Cronjob;
+
+public abstract class CronTask
 {
-    public class CronTask
+    public double GetInterval()
     {
-        private CronExpression _cronExpression;
-        private Action _action;
-        public CronTask(CronExpression cronExpression, Action action)
-        {
-            _action = action;
-            _cronExpression = cronExpression;
-        }
-
-        public double GetInterval()
-        {
-            DateTime? nextOccurrence = _cronExpression.GetNextOccurrence(DateTime.UtcNow);
-            if (!nextOccurrence.HasValue)
-            {
-                return 0;
-            }
-            return (nextOccurrence.Value - DateTime.UtcNow).TotalMilliseconds;
-        }
-        public CronExpression CronExpression => _cronExpression;
-
-        public Action Action => _action;
+        DateTime? nextOccurrence = CronExpression().GetNextOccurrence(DateTime.UtcNow);
+        if (!nextOccurrence.HasValue) return 0;
+        return (nextOccurrence.Value - DateTime.UtcNow).TotalMilliseconds;
     }
+
+    protected abstract CronExpression CronExpression();
+
+    public abstract void RunTask();
 }
