@@ -1,0 +1,22 @@
+﻿@page "/discovery/events/{uuid}"
+@using Dikubot.DataLayer.Database.Global.Event
+@inject UserService _user
+@inject EventsMongoService EventsMongoService
+<h3>Events</h3>
+
+<EventWidget Model="Model"></EventWidget>
+
+@code {
+
+    [Parameter]
+    public string? uuid { get; set; }
+
+    private EventModel Model { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Model = Guid.TryParse(uuid, out Guid guid) ? EventsMongoService.Get(guid) : new EventModel();
+        base.OnInitialized();
+    }
+
+}

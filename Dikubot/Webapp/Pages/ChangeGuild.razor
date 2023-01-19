@@ -1,23 +1,25 @@
 @page "/changeguild"
-@using Dikubot.Webapp.Authentication
 @using Dikubot.DataLayer.Database.Global.User
-@using Dikubot.DataLayer.Database.Global.Session
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
 @inject UserService _userService;
+@inject UserGlobalMongoService UserGlobalMongoService
 
 <h3>Skifter fællesskab ...</h3>
 
 @code {
-    [CascadingParameter] 
+
+    [CascadingParameter]
     protected App App { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         UserGlobalModel userGlobalModel = _userService.GetUserGlobalModel();
         userGlobalModel.SelectedGuild = 0;
-        new UserGlobalServices().Upsert(userGlobalModel);
+        UserGlobalMongoService.Upsert(userGlobalModel);
         App.UserHasChange();
         NavigationManager.NavigateTo("/");
-        this.StateHasChanged();
+        StateHasChanged();
     }
+
 }

@@ -1,42 +1,19 @@
-
-@using global::Discord.WebSocket
-@using Dikubot.Discord.Command
-@using Dikubot.DataLayer.Logic.User
-@using Dikubot.DataLayer.Static
-@using Dikubot.Discord
-@using global::Discord
-@using Azure.Core
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.OAuth
+@using Microsoft.Extensions.Configuration
 @using Microsoft.AspNetCore.Http
+@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.Webapp.Authentication
+@using System.Security.Claims
+@using Dikubot.DataLayer.Database.Global.Session.DiscordAuthentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IConfiguration Configuration
-@inject IJSRuntime jsRuntime
-@using Microsoft.Net.Http
-@using Microsoft.AspNetCore.Mvc;
-@using Microsoft.Extensions.Options
-@using Newtonsoft.Json.Linq
-@using System.Net.Http.Headers
-@using System.Security.Claims
-@using global::Discord.Rest
-@using System.Configuration
-@using System.IO
-@using System.Net
-@using System.Text
-@using Dikubot.DataLayer.Database.Global.Session
-@using Dikubot.DataLayer.Database.Global.Session.DiscordAuthentication
-@using Dikubot.DataLayer.Database.Global.User
-@using Dikubot.Discord
-@using Dikubot.Webapp.Authentication
-@using Dikubot.Webapp.Pages
-@using Microsoft.Extensions.Configuration
-@using Color = MudBlazor.Color
+@inject IJSRuntime JsRuntime
 
 @inject NavigationManager Navigation;
-@inject IHttpContextAccessor httpContextAccessor;
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject UserGlobalMongoService UserGlobalMongoService;
 
-@if ((discordUser == null || !discordUser.HasClaim(claim => claim.Issuer == "Discord")) && !loading)
+@if ((_discordUser == null || !_discordUser.HasClaim(claim => claim.Issuer == "Discord")) && !_loading)
 {
     <MudCard>
         <MudCardHeader>
@@ -64,26 +41,30 @@
             </MudText>
         </MudCardContent>
         <MudCardActions>
-            <MudLink Href="/login"><MudButton Variant="Variant.Filled" Color="Color.Primary">
-                <Localization>
-                    <Danish>
-                        Login med Discord
-                    </Danish>
-                    <English>
-                        Login with Discord
-                    </English>
-                </Localization>
-            </MudButton></MudLink>
-            <MudLink><MudButton Variant="Variant.Text" Color="Color.Primary">
-                <Localization>
-                    <Danish>Skriv til support@kuliv.dk for hjælp</Danish>
-                    <English>Write to support@kuliv.dk for help</English>
-                </Localization>
-            </MudButton></MudLink>
+            <MudLink Href="/login">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">
+                    <Localization>
+                        <Danish>
+                            Login med Discord
+                        </Danish>
+                        <English>
+                            Login with Discord
+                        </English>
+                    </Localization>
+                </MudButton>
+            </MudLink>
+            <MudLink>
+                <MudButton Variant="Variant.Text" Color="Color.Primary">
+                    <Localization>
+                        <Danish>Skriv til support@kuliv.dk for hjælp</Danish>
+                        <English>Write to support@kuliv.dk for help</English>
+                    </Localization>
+                </MudButton>
+            </MudLink>
         </MudCardActions>
     </MudCard>
 }
-else if(!loading)
+else if (!_loading)
 {
     <MudCard>
         <MudCardHeader>
@@ -91,8 +72,8 @@ else if(!loading)
                 <MudAvatar Image="discordUser.GetAvatarUrl()" Size="Size.Large" Color="Color.Primary"></MudAvatar>
             </CardHeaderAvatar>
             <CardHeaderContent>
-                 <MudText Typo="Typo.h6">Er dette dig?</MudText>
-                <MudText Typo="Typo.body1">@httpContextAccessor.HttpContext.User.Identity.Name! </MudText>
+                <MudText Typo="Typo.h6">Er dette dig?</MudText>
+                <MudText Typo="Typo.body1">@HttpContextAccessor.HttpContext.User.Identity.Name! </MudText>
             </CardHeaderContent>
         </MudCardHeader>
         <MudCardActions>
@@ -106,28 +87,29 @@ else if(!loading)
 
 
 @code {
+
     [Parameter]
-    public Login parent { get; set; }
-    
+    public Login Parent { get; set; }
+
     [Parameter]
     public string AuthCode { get; set; }
 
-    private Authenticator authenticator;
-    private ClaimsPrincipal discordUser;
-    private string client_id, client_secret, redirect_url;
-    private bool loading;
+    private Authenticator _authenticator;
+    private ClaimsPrincipal _discordUser;
+    private string _clientId, _clientSecret, _redirectUrl;
+    private bool _loading;
     private DiscordAuthenticationModel _discordAuthenticationModel;
 
 
     protected override async Task OnInitializedAsync()
     {
-        discordUser = httpContextAccessor.HttpContext?.User;
+        _discordUser = HttpContextAccessor.HttpContext?.User;
     }
 
 
     private async Task RejectDiscord()
     {
-        discordUser = null;
+        _discordUser = null;
         await OnInitializedAsync();
         await InvokeAsync(() => { StateHasChanged(); });
         Navigation.NavigateTo("/Logout", true);
@@ -135,19 +117,17 @@ else if(!loading)
 
     private async Task ApproveDiscord()
     {
-        
-        UserGlobalServices userServices = new UserGlobalServices();
-        var id = ulong.Parse(discordUser.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value).ToString();
+        string id = ulong.Parse(_discordUser.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value).ToString();
 
-        if (!userServices.Exists(model => model.DiscordId == id))
+        if (!UserGlobalMongoService.Exists(model => model.DiscordId == id))
         {
-            UserGlobalModel userModel = userServices.Get(id);
-            userServices.Upsert(userModel);
+            UserGlobalModel userModel = UserGlobalMongoService.Get(id);
+            UserGlobalMongoService.Upsert(userModel);
         }
-        
-        await authenticator.UpdateSession();
-        parent.Update();
+
+        await _authenticator.UpdateSession();
+        Parent.Update();
     }
-    
+
 
 }
