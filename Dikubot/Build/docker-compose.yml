@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  dikubot:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:5001;http://+:5000
+    build:
+      context: ../
+      dockerfile: Build/Dockerfile
+    ports:
+      - "5001"
+      - "5000"
+  mongodb_container:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data_container:/data/db
+
+volumes:
+  mongodb_data_container:
