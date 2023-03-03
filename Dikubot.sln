@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dikubot", "Dikubot\Dikubot.csproj", "{906367BB-7625-4D4C-9F77-95BF6117A259}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WayfJwtConnector", "wayf-jwt-net\WayfJwtConnector\WayfJwtConnector.csproj", "{82D4B0B4-4487-4480-B157-7ECD0A45003A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{906367BB-7625-4D4C-9F77-95BF6117A259}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{906367BB-7625-4D4C-9F77-95BF6117A259}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{906367BB-7625-4D4C-9F77-95BF6117A259}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82D4B0B4-4487-4480-B157-7ECD0A45003A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82D4B0B4-4487-4480-B157-7ECD0A45003A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82D4B0B4-4487-4480-B157-7ECD0A45003A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82D4B0B4-4487-4480-B157-7ECD0A45003A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
