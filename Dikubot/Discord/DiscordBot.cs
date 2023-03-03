@@ -77,7 +77,7 @@ public class DiscordBot
         _discordSocketClient.ChannelCreated += _permissionListeners.ChannelCreated;
         _discordSocketClient.ChannelDestroyed += _permissionListeners.ChannelDestroyed;
         _discordSocketClient.ChannelUpdated += _permissionListeners.ChannelUpdated;
-        _discordSocketClient.UserVoiceStateUpdated += _expandableVoiceChatListener.VoiceChannelExpand;
+        //_discordSocketClient.UserVoiceStateUpdated += _expandableVoiceChatListener.VoiceChannelExpand;
         _discordSocketClient.UserJoined += _permissionListeners.UserJoined;
         _discordSocketClient.UserLeft += _permissionListeners.UserLeft;
         _discordSocketClient.GuildMemberUpdated += _permissionListeners.UserUpdated;
