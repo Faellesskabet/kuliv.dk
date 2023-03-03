@@ -40,6 +40,7 @@ using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
 using Syncfusion.Blazor;
 using Syncfusion.Licensing;
+using WayfJwtConnector;
 
 namespace Dikubot.Webapp;
 
@@ -145,7 +146,9 @@ public class Startup
         services.AddScoped<UserService>();
         services.AddScoped<BrowserService>();
         services.AddScoped<MetadataService>();
-
+        
+        services.AddWayf(Configuration.GetSection("Wayf"));
+        
         services.AddAuthentication(options =>
             {
                 ///CookieAuthenticationDefaults.AuthenticationScheme
