@@ -40,26 +40,19 @@ public class AccountController : ControllerBase
     {
         return RedirectToPage("/");
     }
-        [HttpGet("/login/wayf")]
-        [HttpPost("/login/wayf")]
-        public async Task<IActionResult> WayfLogin()
-        {
-            string url = await _wayfClient.RedirectUrl();
-            return Redirect(url);
-        }
     
-        [HttpPost("/wayf/login")]
-        public async Task<IActionResult> ValidateWayfLogin()
-        {
-            WayfClaims data = await _wayfClient.ValidateAsync(Request.Body);
-            return Ok(data);
-        }
-        
-            
-        [HttpPost("/wayf/ls")]
-        public async Task<IActionResult> ValidateWayf()
-        {
-            WayfClaims data = await _wayfClient.ValidateAsync(Request.Body);
-            return Ok(data);
-        }
+    [HttpGet("/login/wayf")]
+    [HttpPost("/login/wayf")] 
+    public async Task<IActionResult> WayfLogin()
+    {
+        string url = await _wayfClient.RedirectUrl();
+        return Redirect(url);
+    }
+    
+    [HttpPost("/wayf/login")]
+    public async Task<IActionResult> ValidateWayfLogin()
+    {
+        WayfClaims data = await _wayfClient.ValidateAsync(Request.Body);
+        return Ok(data);
+    }
 }
