@@ -75,4 +75,9 @@
         <_ContentIncludedByDefault Remove="Webapp\Extensions\Maps\MapWidget.razor" />
     </ItemGroup>
 
+
+    <ItemGroup>
+      <ProjectReference Include="..\wayf-jwt-net\WayfJwtConnector\WayfJwtConnector.csproj" />
+    </ItemGroup>
+
 </Project>

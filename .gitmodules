@@ -1,0 +1,3 @@
+[submodule "wayf-jwt-net"]
+	path = wayf-jwt-net
+	url = git@github.com:mhartvig/wayf-jwt-net.git
