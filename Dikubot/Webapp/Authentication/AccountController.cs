@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AspNet.Security.OAuth.Discord;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WayfJwtConnector;
 using WayfJwtConnector.Models;
@@ -14,9 +15,11 @@ public class AccountController : ControllerBase
 {
 
     private WayfClient _wayfClient;
-    public AccountController(WayfClient wayfClient)
+    private IHttpContextAccessor _httpContextAccessor;
+    public AccountController(WayfClient wayfClient, IHttpContextAccessor httpContextAccssor)
     {
         _wayfClient = wayfClient;
+        _httpContextAccessor = httpContextAccssor;
     }
     
     [HttpGet("/login")]
@@ -35,12 +38,6 @@ public class AccountController : ControllerBase
             CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
-    [HttpGet("/confirm_email/{uuid}")]
-    public RedirectToPageResult ConfirmEmail(Guid uuid)
-    {
-        return RedirectToPage("/");
-    }
-    
     [HttpGet("/login/wayf")]
     [HttpPost("/login/wayf")] 
     public async Task<IActionResult> WayfLogin()
