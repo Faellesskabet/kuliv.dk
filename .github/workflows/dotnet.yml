@@ -10,7 +10,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+      with:
+        submodules: 'true'
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
@@ -46,6 +47,7 @@ jobs:
           ssh-add ~/.ssh/id_ed25519
           cd /root/Discord-Botten/Dikubot
           git pull
+          git submodule update --init --recursive
           systemctl stop kuliv.service
           rm -rf ./bin/Release/net7.0
           dotnet publish --configuration Release
