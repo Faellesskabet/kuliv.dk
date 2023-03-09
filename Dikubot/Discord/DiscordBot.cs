@@ -13,7 +13,12 @@ namespace Dikubot.Discord;
 public class DiscordBot
 {
     /// <summary>
-    ///     DO NOT USE THIS!!! DO ABSOLUTELY NOT USE THIS
+    ///     DO NOT USE THIS!!! DO ABSOLUTELY NOT USE THIS!!!! DO NOT USE THIS
+    ///     YOUR PULL REQUESTS WILL NOT GET ACCEPTED IF YOU USE THIS
+    ///     I MEAN IT, PLEASE STOP USING IT
+    ///     I AM BEGGING YOU
+    ///     PLEASE
+    ///     ;n;
     /// </summary>
     [Obsolete] public static DiscordSocketClient ClientStatic;
 
@@ -27,15 +32,10 @@ public class DiscordBot
 
     public DiscordBot(DiscordSocketClient discordSocketClient, InteractionHandler interactionHandler,
         PermissionListeners permissionListeners,
-        CacheNewsMessagesTask cacheNewsMessagesTask,
         ExpandableVoiceChatListener expandableVoiceChatListener,
         GuildDownloadListeners guildDownloadListeners,
         MessageListener messageListener,
-        GreetingListener greetingListener,
-        Scheduler scheduler,
-        BackupDatabaseTask backupDatabaseTask,
-        ForceNameChangeTask forceNameChangeTask,
-        UpdateVerifiedTask updateVerifiedTask)
+        GreetingListener greetingListener)
     {
         _discordSocketClient = discordSocketClient;
         _interactionHandler = interactionHandler;
@@ -77,7 +77,10 @@ public class DiscordBot
         _discordSocketClient.ChannelCreated += _permissionListeners.ChannelCreated;
         _discordSocketClient.ChannelDestroyed += _permissionListeners.ChannelDestroyed;
         _discordSocketClient.ChannelUpdated += _permissionListeners.ChannelUpdated;
+        
+        //Expandable voicechats is broken, pls fix someone
         //_discordSocketClient.UserVoiceStateUpdated += _expandableVoiceChatListener.VoiceChannelExpand;
+        
         _discordSocketClient.UserJoined += _permissionListeners.UserJoined;
         _discordSocketClient.UserLeft += _permissionListeners.UserLeft;
         _discordSocketClient.GuildMemberUpdated += _permissionListeners.UserUpdated;
@@ -90,10 +93,10 @@ public class DiscordBot
         _discordSocketClient.MessageDeleted += _messageListener.OnMessageRemoved;
         _discordSocketClient.UserJoined += _greetingListener.UserJoined;
 
+        await _interactionHandler.InitializeAsync();
         await _discordSocketClient.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"));
         await _discordSocketClient.StartAsync();
-
-        await _interactionHandler.InitializeAsync();
+        
         // Keeps the thread running
         await Task.Delay(-1);
     }

@@ -148,10 +148,8 @@ public class Startup
         services.AddScoped<MetadataService>();
         
         services.AddWayf(Configuration.GetSection("Wayf"));
-        
         services.AddAuthentication(options =>
             {
-                ///CookieAuthenticationDefaults.AuthenticationScheme
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
