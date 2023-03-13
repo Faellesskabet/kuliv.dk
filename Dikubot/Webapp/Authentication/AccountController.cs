@@ -53,7 +53,7 @@ public class AccountController : ControllerBase
     public async Task<IActionResult> ValidateWayfLogin()
     {
         WayfClaims data = await _wayfClient.ValidateAsync(Request.Body);
-        SignIn(new ClaimsPrincipal(new ClaimsIdentity(new WayfIdentity(data))));
+        //SignIn(new ClaimsPrincipal(new ClaimsIdentity(new WayfIdentity(data))));
         return Redirect("/");
     }
 }
