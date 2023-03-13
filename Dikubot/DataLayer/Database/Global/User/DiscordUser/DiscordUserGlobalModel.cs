@@ -6,9 +6,9 @@ using Discord;
 using Discord.WebSocket;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dikubot.DataLayer.Database.Global.User;
+namespace Dikubot.DataLayer.Database.Global.DiscordUser;
 
-public class UserGlobalModel : MainModel
+public class DiscordUserGlobalModel : MainModel
 {
     private string _email;
 

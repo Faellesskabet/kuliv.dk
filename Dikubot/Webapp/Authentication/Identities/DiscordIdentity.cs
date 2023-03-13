@@ -5,7 +5,7 @@ using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Static;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
 
-namespace Dikubot.Webapp.Authentication;
+namespace Dikubot.Webapp.Authentication.Identities;
 
 public sealed class UserIdentity : ClaimsIdentity
 {
