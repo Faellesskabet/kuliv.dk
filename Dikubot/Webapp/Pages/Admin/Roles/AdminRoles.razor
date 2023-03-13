@@ -2,10 +2,10 @@
 @using Microsoft.IdentityModel.Tokens
 @using Dikubot.DataLayer.Database.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.JoinRole
-@using Dikubot.DataLayer.Database.Global.User
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Authentication
 @using Dikubot.Webapp.Shared.Dialog
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IGuildMongoFactory GuildMongoFactory
 @attribute [Authorize(Roles = Permissions.GuildAdmin)]
@@ -60,15 +60,15 @@
 
     private MudTable<JoinRoleCategoryMainModel> _table;
     private string _searchQuery = "";
-    private UserGlobalModel _userGlobalModel;
+    private DiscordUserGlobalModel _discordUserGlobalModel;
     private SocketGuild _guild;
     private JoinRoleMongoService _mongoService;
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
-        _guild = _userGlobalModel.GetSelectedGuild();
+        _discordUserGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _discordUserGlobalModel.GetSelectedGuild();
         _mongoService = GuildMongoFactory.Get<JoinRoleMongoService>(_guild);
         _loading = false;
     }

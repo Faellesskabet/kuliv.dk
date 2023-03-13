@@ -1,6 +1,6 @@
 using System;
 using Cronos;
-using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 
 namespace Dikubot.DataLayer.Cronjob.Cronjobs;
 
@@ -10,11 +10,11 @@ namespace Dikubot.DataLayer.Cronjob.Cronjobs;
 /// </summary>
 public class FixForbiddenDuplicatesTask : CronTask
 {
-    private readonly UserGlobalMongoService _userGlobalMongoService;
+    private readonly DiscordUserGlobalMongoService _discordUserGlobalMongoService;
 
-    public FixForbiddenDuplicatesTask(UserGlobalMongoService userGlobalMongoService)
+    public FixForbiddenDuplicatesTask(DiscordUserGlobalMongoService discordUserGlobalMongoService)
     {
-        _userGlobalMongoService = userGlobalMongoService;
+        _discordUserGlobalMongoService = discordUserGlobalMongoService;
     }
 
     // * * */1 * *
@@ -29,17 +29,17 @@ public class FixForbiddenDuplicatesTask : CronTask
     public override void RunTask()
     {
         Console.WriteLine("Removing legacy elements");
-        foreach (UserGlobalModel user in _userGlobalMongoService.GetAll())
+        foreach (DiscordUserGlobalModel user in _discordUserGlobalMongoService.GetAll())
         {
-            System.Collections.Generic.List<UserGlobalModel> duplicates =
-                _userGlobalMongoService.GetAll(model => model.DiscordId == user.DiscordId);
+            System.Collections.Generic.List<DiscordUserGlobalModel> duplicates =
+                _discordUserGlobalMongoService.GetAll(model => model.DiscordId == user.DiscordId);
             if (duplicates.Count <= 1) continue;
 
-            foreach (UserGlobalModel duplicate in duplicates)
+            foreach (DiscordUserGlobalModel duplicate in duplicates)
                 if (!duplicate.Verified)
                 {
                     Console.WriteLine("REMOVED ONE ELEMENT");
-                    _userGlobalMongoService.Remove(duplicate);
+                    _discordUserGlobalMongoService.Remove(duplicate);
                 }
         }
 

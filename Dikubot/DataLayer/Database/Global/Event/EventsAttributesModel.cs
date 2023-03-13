@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Dikubot.DataLayer.Database.Global.User;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 

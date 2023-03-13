@@ -102,7 +102,7 @@ public partial class PermissionsService
         // If the role is not set or does not exist, we return
         if (role == null) return;
 
-        if (!_userGlobalMongoService.Get(userGuildModel.DiscordId).Verified)
+        if (!_discordUserGlobalMongoService.Get(userGuildModel.DiscordId).Verified)
         {
             if (userGuildModel.HasRole(role.Id, _roleMongoService))
                 userGuildModel.RemoveRole(

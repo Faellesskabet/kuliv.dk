@@ -1,8 +1,8 @@
 @using Microsoft.Extensions.Configuration
 @using Microsoft.AspNetCore.Http
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Webapp.Authentication
 @using System.Security.Claims
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @using Dikubot.DataLayer.Database.Global.Session.DiscordAuthentication
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
@@ -11,7 +11,7 @@
 
 @inject NavigationManager Navigation;
 @inject IHttpContextAccessor HttpContextAccessor;
-@inject UserGlobalMongoService UserGlobalMongoService;
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService;
 
 @if ((_discordUser == null || !_discordUser.HasClaim(claim => claim.Issuer == "Discord")) && !_loading)
 {
@@ -119,10 +119,10 @@ else if (!_loading)
     {
         string id = ulong.Parse(_discordUser.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value).ToString();
 
-        if (!UserGlobalMongoService.Exists(model => model.DiscordId == id))
+        if (!DiscordUserGlobalMongoService.Exists(model => model.DiscordId == id))
         {
-            UserGlobalModel userModel = UserGlobalMongoService.Get(id);
-            UserGlobalMongoService.Upsert(userModel);
+            DiscordUserGlobalModel discordUserModel = DiscordUserGlobalMongoService.Get(id);
+            DiscordUserGlobalMongoService.Upsert(discordUserModel);
         }
 
         await _authenticator.UpdateSession();

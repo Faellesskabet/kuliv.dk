@@ -1,5 +1,5 @@
 ﻿using Data;
-using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 
 namespace Dikubot.Webapp.Data;
 
@@ -13,26 +13,26 @@ public class LocalizationService
 
     private readonly NotifyStateService _notifyStateService;
     private readonly UserService _user;
-    private readonly UserGlobalMongoService _userGlobalMongoService;
+    private readonly DiscordUserGlobalMongoService _discordUserGlobalMongoService;
 
     public LocalizationService(UserService user, NotifyStateService notifyStateService,
-        UserGlobalMongoService userGlobalMongoService)
+        DiscordUserGlobalMongoService discordUserGlobalMongoService)
     {
         _user = user;
         _notifyStateService = notifyStateService;
-        _userGlobalMongoService = userGlobalMongoService;
+        _discordUserGlobalMongoService = discordUserGlobalMongoService;
     }
 
     public void Change(Language language)
     {
-        UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
+        DiscordUserGlobalModel discordUserGlobalModel = _user.GetUserGlobalModel();
         if (language == Language.Danish)
-            userGlobalModel.CultureInfo = "da-DK";
+            discordUserGlobalModel.CultureInfo = "da-DK";
         else
-            userGlobalModel.CultureInfo = "en-US";
+            discordUserGlobalModel.CultureInfo = "en-US";
 
 
-        if (_user?.GetUserGlobalModel() is not null) _userGlobalMongoService.Upsert(userGlobalModel);
+        if (_user?.GetUserGlobalModel() is not null) _discordUserGlobalMongoService.Upsert(discordUserGlobalModel);
 
         _notifyStateService.NotifyUserChange(this);
     }

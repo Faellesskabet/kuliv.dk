@@ -1,4 +1,4 @@
-using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Permissions;
 
@@ -8,14 +8,14 @@ public partial class PermissionListeners
 {
     private readonly IGuildMongoFactory _guildMongoFactory;
     private readonly IPermissionServiceFactory _permissionServiceFactory;
-    private readonly UserGlobalMongoService _userGlobalMongoService;
+    private readonly DiscordUserGlobalMongoService _discordUserGlobalMongoService;
 
     public PermissionListeners(IGuildMongoFactory guildMongoFactory,
         IPermissionServiceFactory permissionServiceFactory,
-        UserGlobalMongoService userGlobalMongoService)
+        DiscordUserGlobalMongoService discordUserGlobalMongoService)
     {
         _guildMongoFactory = guildMongoFactory;
         _permissionServiceFactory = permissionServiceFactory;
-        _userGlobalMongoService = userGlobalMongoService;
+        _discordUserGlobalMongoService = discordUserGlobalMongoService;
     }
 }

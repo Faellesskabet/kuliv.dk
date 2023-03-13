@@ -1,15 +1,16 @@
 @page "/equipment"
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h3>Equipment</h3>
 
-<EquipmentWidget GuildId="@user.UserGlobalModel.SelectedGuild"> </EquipmentWidget>
+<EquipmentWidget GuildId="@_discord.DiscordUserGlobalModel.SelectedGuild"> </EquipmentWidget>
 
 
 @code{
-    private UserIdentity user;
+    private DiscordIdentity _discord;
     private Authenticator authenticator;
 
     protected override async Task OnInitializedAsync()
@@ -18,8 +19,8 @@
 
         authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity)authState.User.Identity;
-        if (user == null)
+        _discord = (DiscordIdentity)authState.User.Identity;
+        if (_discord == null)
         {
         }
     }

@@ -1,14 +1,15 @@
 @page "/profile"
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject UserGlobalMongoService UserGlobalMongoService
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService
 
 <h3>Profile</h3>
 @if (_loaded)
 {
-    <MudSwitch Label="Dark theme" @bind-Checked="@user.UserGlobalModel.DarkTheme"></MudSwitch>
-    <MudButton Color="Color.Success" OnClick="() => UserGlobalMongoService.Update(user.UserGlobalModel)">Gem ændringer</MudButton>
+    <MudSwitch Label="Dark theme" @bind-Checked="@_discord.DiscordUserGlobalModel.DarkTheme"></MudSwitch>
+    <MudButton Color="Color.Success" OnClick="() => DiscordUserGlobalMongoService.Update(_discord.DiscordUserGlobalModel)">Gem ændringer</MudButton>
 }
 else
 {
@@ -18,14 +19,14 @@ else
 
 @code {
     private Authenticator authenticator;
-    private UserIdentity user;
+    private DiscordIdentity _discord;
     private bool _loaded;
 
     protected override async Task OnInitializedAsync()
     {
         authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity)authState.User.Identity;
+        _discord = (DiscordIdentity)authState.User.Identity;
         _loaded = true;
     }
 

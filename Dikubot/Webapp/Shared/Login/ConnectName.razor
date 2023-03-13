@@ -1,11 +1,12 @@
 @using global::Discord.WebSocket
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Static
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject DiscordSocketClient DiscordSocketClient
-@inject UserGlobalMongoService UserGlobalMongoService
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService
 @inject GuildSettingsMongoService GuildSettingsMongoService
 
 <MudCard>
@@ -39,21 +40,21 @@
     public Login Parent { get; set; }
 
     private Authenticator _authenticator;
-    private UserIdentity _user;
+    private DiscordIdentity _discord;
     private string _name = "";
 
     protected override async Task OnInitializedAsync()
     {
         _authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await _authenticator.GetAuthenticationStateAsync();
-        _user = (UserIdentity)authState.User.Identity;
+        _discord = (DiscordIdentity)authState.User.Identity;
     }
 
     private async void ConfirmName()
     {
-        _user.UserGlobalModel.Name = _name;
-        UserGlobalMongoService.Upsert(_user.UserGlobalModel);
-        Util.UpdateUserNameOnAllForcedGuilds(DiscordSocketClient.GetUser(_user.UserGlobalModel.DiscordIdLong), GuildSettingsMongoService, UserGlobalMongoService);
+        _discord.DiscordUserGlobalModel.Name = _name;
+        DiscordUserGlobalMongoService.Upsert(_discord.DiscordUserGlobalModel);
+        Util.UpdateUserNameOnAllForcedGuilds(DiscordSocketClient.GetUser(_discord.DiscordUserGlobalModel.DiscordIdLong), GuildSettingsMongoService, DiscordUserGlobalMongoService);
         await _authenticator.UpdateSession();
         Parent.Update();
     }

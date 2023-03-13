@@ -1,10 +1,10 @@
-﻿@using Dikubot.DataLayer.Database.Global.User
-@using Dikubot.Discord
+﻿@using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject UserService _user;
-@inject UserGlobalMongoService UserGlobalMongoService
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService
 
 @if (IsMember)
 {
@@ -33,9 +33,9 @@ else
             return;
         }
 
-        UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
-        userGlobalModel.SelectedGuild = GuildID;
-        UserGlobalMongoService.Upsert(userGlobalModel);
+        DiscordUserGlobalModel discordUserGlobalModel = _user.GetUserGlobalModel();
+        discordUserGlobalModel.SelectedGuild = GuildID;
+        DiscordUserGlobalMongoService.Upsert(discordUserGlobalModel);
         await ((Authenticator)AuthenticationStateProvider).UpdateSession();
 
 
@@ -44,8 +44,8 @@ else
 
     private async Task Join()
     {
-        UserGlobalModel userModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
-        if (userModel == null)
+        DiscordUserGlobalModel discordUserModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        if (discordUserModel == null)
         {
             await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
@@ -65,7 +65,7 @@ else
         try
         {
             string accessToken = await _user.GetTokenAsync();
-            await DiscordBot.ClientStatic.GetGuild(GuildID).AddGuildUserAsync(userModel.DiscordIdLong, accessToken);
+            await DiscordBot.ClientStatic.GetGuild(GuildID).AddGuildUserAsync(discordUserModel.DiscordIdLong, accessToken);
         }
         catch (Exception e)
         {

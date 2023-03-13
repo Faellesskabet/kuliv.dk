@@ -1,6 +1,7 @@
 @page "/all/equipment"
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject DiscordSocketClient DiscordSocketClient
@@ -14,7 +15,7 @@
 
 
 @code{
-    private UserIdentity user;
+    private DiscordIdentity _discord;
     private Authenticator authenticator;
 
     private IReadOnlyCollection<SocketGuild> guilds;
@@ -25,12 +26,12 @@
 
         authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity)authState.User.Identity;
-        if (user == null)
+        _discord = (DiscordIdentity)authState.User.Identity;
+        if (_discord == null)
         {
             return;
         }
-        guilds = DiscordSocketClient.GetUser(user.DiscordIdLong)?.MutualGuilds ?? new List<SocketGuild>();
+        guilds = DiscordSocketClient.GetUser(_discord.DiscordIdLong)?.MutualGuilds ?? new List<SocketGuild>();
     }
 
 }

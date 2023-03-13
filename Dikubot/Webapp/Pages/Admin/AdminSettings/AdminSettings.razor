@@ -4,6 +4,7 @@
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
 @using global::Discord.WebSocket
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject GuildSettingsMongoService GuildSettingsMongoService
@@ -75,7 +76,7 @@ else
 
 @code {
     private Authenticator authenticator;
-    private UserIdentity user;
+    private DiscordIdentity _discord;
     private SocketGuild guild;
     private bool _loaded;
     private GuildSettingsModel _guildSettingsModel;
@@ -88,12 +89,12 @@ else
     {
         authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity)authState.User.Identity;
-        if (user == null)
+        _discord = (DiscordIdentity)authState.User.Identity;
+        if (_discord == null)
         {
             return;
         }
-        guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
+        guild = DiscordBot.ClientStatic.GetGuild(_discord.DiscordUserGlobalModel.SelectedGuild);
         _guildSettingsModel = GuildSettingsMongoService.Get(guild);
         _loaded = true;
     }

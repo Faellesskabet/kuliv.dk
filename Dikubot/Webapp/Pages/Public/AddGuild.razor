@@ -1,13 +1,13 @@
 @page "/addguild/{permissions}"
 @page "/addguild"
 @using Microsoft.AspNetCore.Http
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Webapp.Authentication
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject NavigationManager _navigationManager
 @inject IHttpContextAccessor httpContextAccessor;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _userService;
-@inject UserGlobalMongoService UserGlobalMongoService
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService
 
 @if (!_loading)
 {
@@ -99,10 +99,10 @@ else if (!string.IsNullOrWhiteSpace(guild_id))
     {
         Authenticator authenticator = (Authenticator)AuthenticationStateProvider;
 
-        UserGlobalModel user = _userService.GetUserGlobalModel();
-        if (guild_id != null) user.SelectedGuild = Convert.ToUInt64(guild_id);
+        DiscordUserGlobalModel discordUser = _userService.GetUserGlobalModel();
+        if (guild_id != null) discordUser.SelectedGuild = Convert.ToUInt64(guild_id);
 
-        UserGlobalMongoService.Upsert(user);
+        DiscordUserGlobalMongoService.Upsert(discordUser);
         await authenticator.UpdateSession();
 
         _navigationManager.NavigateTo("/admin/settings", true);

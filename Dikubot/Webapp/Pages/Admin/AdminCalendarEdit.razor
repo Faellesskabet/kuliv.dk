@@ -1,7 +1,7 @@
 ﻿@page "/admin/calendar/create"
 @page "/admin/calendar/edit/{uuid}"
 @using Dikubot.DataLayer.Database.Global.Calendar
-@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @using Dikubot.DataLayer.Database.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.Role
 @using Dikubot.DataLayer.Static
@@ -60,7 +60,7 @@ else
 
     private MudTable<CalendarModel> _table;
     private bool _loading = true;
-    private UserGlobalModel _userGlobalModel;
+    private DiscordUserGlobalModel _discordUserGlobalModel;
     private SocketGuild _guild;
     private CalendarModel _calendarModel;
     private RoleMongoService _roleMongoService;
@@ -68,8 +68,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
-        _guild = _userGlobalModel.GetSelectedGuild();
+        _discordUserGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _discordUserGlobalModel.GetSelectedGuild();
         _calendarModel = Guid.TryParse(uuid, out Guid guid) ? CalendarMongoService.Get(guid) : new CalendarModel();
         _roleMongoService = GuildMongoFactory.Get<RoleMongoService>(_guild);
         _roleMainModels = _roleMongoService.GetAll();
