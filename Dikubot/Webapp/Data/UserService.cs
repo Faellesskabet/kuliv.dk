@@ -2,8 +2,9 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.Webapp.Authentication;
+using Dikubot.Webapp.Authentication.Identities;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -20,14 +21,14 @@ public class UserService
         _discordSocketClient = discordSocketClient;
     }
 
-    private UserIdentity User => GetUserIdentity();
+    private DiscordIdentity Discord => GetUserIdentity();
 
-    public string Id => User?.DiscordId;
+    public string Id => Discord?.DiscordId;
 
-    public UserIdentity GetUserIdentity()
+    public DiscordIdentity GetUserIdentity()
     {
         AuthenticationState authState = _authenticator.GetAuthenticationStateAsync().Result;
-        return (UserIdentity)authState.User.Identity;
+        return (DiscordIdentity)authState.User.Identity;
     }
 
 
@@ -37,12 +38,12 @@ public class UserService
     /// </summary>
     public bool IsRegistered()
     {
-        return User?.UserGlobalModel != null;
+        return Discord?.DiscordUserGlobalModel != null;
     }
 
-    public UserGlobalModel GetUserGlobalModel()
+    public DiscordUserGlobalModel GetUserGlobalModel()
     {
-        return User?.UserGlobalModel ?? new UserGlobalModel();
+        return Discord?.DiscordUserGlobalModel ?? new DiscordUserGlobalModel();
     }
 
     /// <summary>
@@ -71,6 +72,6 @@ public class UserService
 
     public IEnumerable<Claim> Claims()
     {
-        return User?.Claims ?? new List<Claim>();
+        return Discord?.Claims ?? new List<Claim>();
     }
 }

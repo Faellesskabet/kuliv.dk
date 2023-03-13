@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.DataLayer.Database.Global.GuildSettings;
-using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.Discord;
 using Discord.WebSocket;
 using Microsoft.IdentityModel.Tokens;
@@ -226,16 +226,16 @@ public static class Util
 
     public static void UpdateUserNameOnAllForcedGuilds(SocketUser user,
         GuildSettingsMongoService guildSettingsMongoService,
-        UserGlobalMongoService userGlobalMongoService)
+        DiscordUserGlobalMongoService discordUserGlobalMongoService)
     {
         if (user == null) return;
-        UserGlobalModel userGlobalModel = userGlobalMongoService.Get(user);
+        DiscordUserGlobalModel discordUserGlobalModel = discordUserGlobalMongoService.Get(user);
         foreach (SocketGuild guild in user.MutualGuilds)
         {
             GuildSettingsModel guildSettingsModel = guildSettingsMongoService.Get(guild);
             if (!guildSettingsModel.ForceNameChange) continue;
 
-            UpdateDiscordName(guild.GetUser(user.Id), userGlobalModel.Name);
+            UpdateDiscordName(guild.GetUser(user.Id), discordUserGlobalModel.Name);
         }
     }
 

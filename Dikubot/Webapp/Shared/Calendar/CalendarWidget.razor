@@ -1,7 +1,7 @@
 ﻿@using Dikubot.DataLayer.Database.Global.Event
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.DataLayer.Database.Global.Calendar
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject UserService UserService;
 @inject EventsMongoService EventsMongoService
 
@@ -86,7 +86,7 @@ else
 
     private DateTime CurrentDate { get; set; } = DateTime.Today;
 
-    private UserGlobalModel User => UserService.GetUserGlobalModel();
+    private DiscordUserGlobalModel DiscordUser => UserService.GetUserGlobalModel();
 
     private void Callback(DateTime startDate)
     {
@@ -102,7 +102,7 @@ else
         InitialEvents = Events;
         if (!ReadOnly)
         {
-            ReadOnly = !User.Verified;
+            ReadOnly = !DiscordUser.Verified;
         }
         _loaded = true;
         
@@ -133,7 +133,7 @@ else
             {
                 foreach (EventModel eventData in args.AddedRecords)
                 {
-                    eventData.CreatedBy = User.Id;
+                    eventData.CreatedBy = DiscordUser.Id;
                     EventsMongoService.Upsert(eventData);
                 }
             }

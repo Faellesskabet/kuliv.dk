@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.DataLayer.Database.Guild.Models.User;
 using Dikubot.DataLayer.Permissions;
 using Discord;
@@ -35,11 +35,11 @@ public partial class PermissionListeners
             return;
 
         UserGuildMongoService userGuildMongoService = _guildMongoFactory.Get<UserGuildMongoService>(socketGuild);
-        UserGlobalModel userGlobalModel = _userGlobalMongoService.Get(socketUser);
-        if (userGlobalModel.SelectedGuild == socketGuild.Id)
+        DiscordUserGlobalModel discordUserGlobalModel = _discordUserGlobalMongoService.Get(socketUser);
+        if (discordUserGlobalModel.SelectedGuild == socketGuild.Id)
         {
-            userGlobalModel.SelectedGuild = 0;
-            _userGlobalMongoService.Upsert(userGlobalModel);
+            discordUserGlobalModel.SelectedGuild = 0;
+            _discordUserGlobalMongoService.Upsert(discordUserGlobalModel);
         }
 
         userGuildMongoService.Remove(model => Equals(model.DiscordId, socketUser.Id));

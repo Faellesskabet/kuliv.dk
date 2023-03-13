@@ -7,6 +7,7 @@ using Dikubot.DataLayer.Cronjob;
 using Dikubot.DataLayer.Cronjob.Cronjobs;
 using Dikubot.DataLayer.Database;
 using Dikubot.DataLayer.Database.Global.Calendar;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.DataLayer.Database.Global.Event;
 using Dikubot.DataLayer.Database.Global.GuildCalendars;
 using Dikubot.DataLayer.Database.Global.GuildSettings;
@@ -14,7 +15,6 @@ using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.Tags;
 using Dikubot.DataLayer.Database.Global.Union;
 using Dikubot.DataLayer.Database.Global.Union.Request;
-using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
 using Dikubot.DataLayer.Permissions;
@@ -78,7 +78,7 @@ public class Startup
         // DATABASE SERVICES
         services.AddSingleton<Database>();
         services.AddSingleton<IGuildMongoFactory, GuildMongoFactory>();
-        services.AddSingleton<UserGlobalMongoService>();
+        services.AddSingleton<DiscordUserGlobalMongoService>();
         services.AddSingleton<SessionMongoService>();
         services.AddSingleton<GuildSettingsMongoService>();
         services.AddSingleton<UnionMongoService>();

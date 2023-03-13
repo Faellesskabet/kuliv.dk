@@ -1,15 +1,16 @@
 @using Microsoft.IdentityModel.Tokens
 @using Microsoft.AspNetCore.Http
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Discord
 @using Dikubot.DataLayer.Database.Global.Tags
 @using Dikubot.DataLayer.Database.Global.GuildSettings
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor httpContextAccessor;
 @inject UserService _userService
-@inject UserGlobalMongoService UserGlobalMongoService
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService
 @inject TagMongoService TagMongoService
 
 <MudCard Elevation="25" Style="min-width: 420px; max-width: 420px; max-height: 340px; min-height: 340px;">
@@ -68,25 +69,25 @@
     {
         Authenticator authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity)authState.User.Identity;
-        UserGlobalModel userModel = user?.UserGlobalModel;
+        DiscordIdentity discord = (DiscordIdentity)authState.User.Identity;
+        DiscordUserGlobalModel discordUserModel = discord?.DiscordUserGlobalModel;
 
-        if (userModel == null)
+        if (discordUserModel == null)
         {
             await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
         }
 
-        userModel.SelectedGuild = Guild.GuildId;
-        UserGlobalMongoService.Upsert(user.UserGlobalModel);
+        discordUserModel.SelectedGuild = Guild.GuildId;
+        DiscordUserGlobalMongoService.Upsert(discord.DiscordUserGlobalModel);
         await authenticator.UpdateSession();
         NavigationManager.NavigateTo("/");
     }
 
     private async Task JoinGuild()
     {
-        UserGlobalModel userModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
-        if (userModel == null)
+        DiscordUserGlobalModel discordUserModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        if (discordUserModel == null)
         {
             await DialogService.ShowMessageBox("Fejl ???", "Der er sket en fejl. Prøv at clear dine cookies og refresh");
             return;
@@ -106,7 +107,7 @@
         try
         {
             string accessToken = await _userService.GetTokenAsync();
-            await DiscordBot.ClientStatic.GetGuild(Guild.GuildId).AddGuildUserAsync(userModel.DiscordIdLong, accessToken);
+            await DiscordBot.ClientStatic.GetGuild(Guild.GuildId).AddGuildUserAsync(discordUserModel.DiscordIdLong, accessToken);
         }
         catch (Exception e)
         {

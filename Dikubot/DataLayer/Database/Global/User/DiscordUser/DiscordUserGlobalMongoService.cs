@@ -5,7 +5,7 @@ using Discord;
 using Discord.WebSocket;
 using MongoDB.Driver;
 
-namespace Dikubot.DataLayer.Database.Global.DiscordUser;
+namespace Dikubot.DataLayer.Database.Global.User.DiscordUser;
 
 public class DiscordUserGlobalMongoService : GlobalMongoService<DiscordUserGlobalModel>, IIndexed<DiscordUserGlobalModel>
 {

@@ -1,6 +1,6 @@
 using System;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.DataLayer.Database.Global.Session.DiscordAuthentication;
-using Dikubot.DataLayer.Database.Global.User;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -8,11 +8,11 @@ namespace Dikubot.DataLayer.Database.Global.Session;
 
 public class SessionModel : MainModel
 {
-    public SessionModel(UserGlobalModel userMainModel) : this(userMainModel, DateTime.Now.AddDays(7))
+    public SessionModel(DiscordUserGlobalModel discordUserMainModel) : this(discordUserMainModel, DateTime.Now.AddDays(7))
     {
     }
 
-    public SessionModel(UserGlobalModel userMainModel, DateTime expires) : this(userMainModel.Id, expires)
+    public SessionModel(DiscordUserGlobalModel discordUserMainModel, DateTime expires) : this(discordUserMainModel.Id, expires)
     {
     }
 

@@ -2,9 +2,9 @@
 @page "/admin/event/edit/{uuid}"
 @using Dikubot.DataLayer.Database.Global.Event
 @using Dikubot.DataLayer.Database.Global.Tags
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild.Models.Calendar.Events
 @using Dikubot.DataLayer.Database.Global.Calendar
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Authentication
 @using Dikubot.Webapp.Shared.Dialog
@@ -48,15 +48,15 @@ else
 
     private MudTable<EventModel> _table;
     private bool _loading = true;
-    private UserGlobalModel _userGlobalModel;
+    private DiscordUserGlobalModel _discordUserGlobalModel;
     private SocketGuild _guild;
     private EventModel _model;
 
     protected override async Task OnInitializedAsync()
     {
-        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
-        _guild = _userGlobalModel.GetSelectedGuild();
-        _model = Guid.TryParse(uuid, out Guid guid) ? EventsMongoService.Get(guid) : new EventModel { CreatedBy = _userGlobalModel.Id };
+        _discordUserGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _discordUserGlobalModel.GetSelectedGuild();
+        _model = Guid.TryParse(uuid, out Guid guid) ? EventsMongoService.Get(guid) : new EventModel { CreatedBy = _discordUserGlobalModel.Id };
         _loading = false;
     }
 

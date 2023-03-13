@@ -1,7 +1,7 @@
 ﻿@page "/admin/calendar"
 @using Microsoft.IdentityModel.Tokens
 @using Dikubot.DataLayer.Database.Global.Calendar
-@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Authentication
 @using Dikubot.Webapp.Shared.Dialog
@@ -59,14 +59,14 @@
 
     private MudTable<CalendarModel> _table;
     private string _searchQuery = "";
-    private UserGlobalModel _userGlobalModel;
+    private DiscordUserGlobalModel _discordUserGlobalModel;
     private SocketGuild _guild;
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        _userGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
-        _guild = _userGlobalModel.GetSelectedGuild();
+        _discordUserGlobalModel = await ((Authenticator)AuthenticationStateProvider).GetUserGlobal();
+        _guild = _discordUserGlobalModel.GetSelectedGuild();
         _loading = false;
     }
 

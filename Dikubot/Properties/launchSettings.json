@@ -29,7 +29,7 @@
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DISCORD_BOT_TOKEN": "ODAxMTIyMzUwMDg2MzU2OTky.YAcFVA.dWHdLjpjSmFXI2NvhyPB6gReBSE",
+        "DISCORD_BOT_TOKEN": "ODAxMTIyMzUwMDg2MzU2OTky.GWoHPy.lFUbxIGyt4oTe93SzA-CIIs9KrtXLcM6-asr1M",
         "DIKU_DISCORD_ID": "786946524310929419",
         "SENDGRID_API_KEY": "ODQxNzUwODEzNTAzNTIwODY4.YJrTiA.LLhvvbFT3SE7doudRDwDJ8MJcUY",
         "SENDGRID_EMAIL": "noreply@kuliv.dk",

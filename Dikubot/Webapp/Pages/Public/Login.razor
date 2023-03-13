@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Http
 @using System.Net
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
 @inject IHttpContextAccessor _httpContextAccessor;
@@ -83,32 +84,32 @@
     private async Task<State> getState()
     {
         authState = await ((Authenticator)AuthenticationStateProvider).GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity)authState.User.Identity;
+        DiscordIdentity discord = (DiscordIdentity)authState.User.Identity;
 
-        if (user?.UserGlobalModel == null)
+        if (discord?.DiscordUserGlobalModel == null)
         {
             return State.ConnectDiscord;
         }
 
-        if (!user.UserGlobalModel.Verified)
+        if (!discord.DiscordUserGlobalModel.Verified)
         {
             return State.ConnectEmail;
         }
 
-        if (string.IsNullOrWhiteSpace(user.UserGlobalModel.Name))
+        if (string.IsNullOrWhiteSpace(discord.DiscordUserGlobalModel.Name))
         {
             return State.ConnectName;
         }
 
-        return user.UserGlobalModel.IsBanned ? State.NoAccess : State.SelectGuild;
+        return discord.DiscordUserGlobalModel.IsBanned ? State.NoAccess : State.SelectGuild;
     }
 
 
     public async void Update()
     {
         authState = await ((Authenticator)AuthenticationStateProvider).GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity)authState.User.Identity;
-        if (user != null && user.IsAuthenticated)
+        DiscordIdentity discord = (DiscordIdentity)authState.User.Identity;
+        if (discord != null && discord.IsAuthenticated)
         {
             NavigationManager.NavigateTo("/");
             return;

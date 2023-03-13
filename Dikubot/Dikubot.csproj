@@ -59,6 +59,7 @@
 
 
     <ItemGroup>
+        <Folder Include="DataLayer\Database\Global\Discord" />
         <Folder Include="Webapp\wwwroot\thumps" />
     </ItemGroup>
 

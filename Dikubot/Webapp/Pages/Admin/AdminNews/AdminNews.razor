@@ -4,6 +4,7 @@
 @using Dikubot.DataLayer.Static
 @using Dikubot.Discord
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Shared.Dialog
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -45,7 +46,7 @@ else
     private IDialogService DialogService { get; set; }
 
     private Authenticator authenticator;
-    private UserIdentity user;
+    private DiscordIdentity _discord;
     private SocketGuild _guild;
     private TextChannelMongoService _textChannelMongoService;
     private List<TextChannelMainModel> _textChannelMainModels;
@@ -63,13 +64,13 @@ else
     {
         authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity)authState.User.Identity;
-        if (user == null)
+        _discord = (DiscordIdentity)authState.User.Identity;
+        if (_discord == null)
         {
             return;
         }
 
-        _guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
+        _guild = DiscordBot.ClientStatic.GetGuild(_discord.DiscordUserGlobalModel.SelectedGuild);
         _textChannelMongoService = IGuildMongoFactory.Get<TextChannelMongoService>(_guild);
         _textChannelMainModels = _textChannelMongoService.GetAll();
         _selectedChannels = _textChannelMainModels.Where(model => model.IsNewsChannel.GetValueOrDefault());

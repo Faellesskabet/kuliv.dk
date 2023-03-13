@@ -1,17 +1,18 @@
 ﻿@using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Discord
 @using Dikubot.Extensions.EmojiSelector
 @using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Authentication.Identities
 @using global::Discord.WebSocket
 @using Dikubot.Webapp.Extensions.NavMenu
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
 @inject UserService User
 @inject NotifyStateService NotifyStateService
 @inject GuildSettingsMongoService GuildSettingsMongoService
-@inject UserGlobalMongoService UserGlobalMongoService
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService
 @inject LocalizationService LocalizationService
 
 
@@ -100,7 +101,7 @@
 
     bool open = true;
     private Authenticator authenticator;
-    private UserIdentity user;
+    private DiscordIdentity _discord;
     private SocketGuild guild;
 
     private bool _loaded;
@@ -154,13 +155,13 @@
     {
         authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await authenticator.GetAuthenticationStateAsync();
-        user = (UserIdentity)authState.User.Identity;
-        if (user == null)
+        _discord = (DiscordIdentity)authState.User.Identity;
+        if (_discord == null)
         {
             return;
         }
-        guild = DiscordBot.ClientStatic.GetGuild(user.UserGlobalModel.SelectedGuild);
-        Guild = GuildSettingsMongoService.Get(model => model.GuildId == user.UserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
+        guild = DiscordBot.ClientStatic.GetGuild(_discord.DiscordUserGlobalModel.SelectedGuild);
+        Guild = GuildSettingsMongoService.Get(model => model.GuildId == _discord.DiscordUserGlobalModel.SelectedGuild) ?? new GuildSettingsModel(guild);
     }
 
     private void UserChange(object? sender, EventArgs e)
@@ -184,9 +185,9 @@
         {
             return;
         }
-        UserGlobalModel userGlobalModel = User.GetUserGlobalModel();
-        userGlobalModel.SelectedGuild = _guildId;
-        UserGlobalMongoService.Upsert(userGlobalModel);
+        DiscordUserGlobalModel discordUserGlobalModel = User.GetUserGlobalModel();
+        discordUserGlobalModel.SelectedGuild = _guildId;
+        DiscordUserGlobalMongoService.Upsert(discordUserGlobalModel);
 
         App.UserHasChange();
 

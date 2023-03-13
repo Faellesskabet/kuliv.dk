@@ -1,9 +1,9 @@
 @page "/changeguild"
-@using Dikubot.DataLayer.Database.Global.User
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager;
 @inject UserService _userService;
-@inject UserGlobalMongoService UserGlobalMongoService
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService
 
 <h3>Skifter fællesskab ...</h3>
 
@@ -14,9 +14,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        UserGlobalModel userGlobalModel = _userService.GetUserGlobalModel();
-        userGlobalModel.SelectedGuild = 0;
-        UserGlobalMongoService.Upsert(userGlobalModel);
+        DiscordUserGlobalModel discordUserGlobalModel = _userService.GetUserGlobalModel();
+        discordUserGlobalModel.SelectedGuild = 0;
+        DiscordUserGlobalMongoService.Upsert(discordUserGlobalModel);
         App.UserHasChange();
         NavigationManager.NavigateTo("/");
         StateHasChanged();

@@ -1,5 +1,5 @@
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.DataLayer.Database.Global.GuildSettings;
-using Dikubot.DataLayer.Database.Global.User;
 using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.CategoryChannel;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel;
@@ -20,7 +20,7 @@ public partial class PermissionsService
 
     private readonly RoleMongoService _roleMongoService;
     private readonly TextChannelMongoService _textChannelMongoService;
-    private readonly UserGlobalMongoService _userGlobalMongoService;
+    private readonly DiscordUserGlobalMongoService _discordUserGlobalMongoService;
     private readonly UserGuildMongoService _userMongoService;
     private readonly VoiceChannelMongoService _voiceChannelMongoService;
 
@@ -31,7 +31,7 @@ public partial class PermissionsService
     private IGuildMongoFactory _guildMongoFactory;
 
     public PermissionsService(IGuildMongoFactory guildMongoFactory, GuildSettingsMongoService guildSettingsMongoService,
-        UserGlobalMongoService userGlobalMongoService, SocketGuild guild)
+        DiscordUserGlobalMongoService discordUserGlobalMongoService, SocketGuild guild)
     {
         this.guild = guild;
         _guildMongoFactory = guildMongoFactory;
@@ -42,7 +42,7 @@ public partial class PermissionsService
         _userMongoService = guildMongoFactory.Get<UserGuildMongoService>(guild);
         _guildMongoService = guildMongoFactory.Get<GuildMongoService>(guild);
         _guildSettingsMongoService = guildSettingsMongoService;
-        _userGlobalMongoService = userGlobalMongoService;
+        _discordUserGlobalMongoService = discordUserGlobalMongoService;
     }
 
     /// <Summary>Takes channels, roles and users information from discord and saves it in the database.</Summary>

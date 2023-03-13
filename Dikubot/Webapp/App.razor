@@ -1,6 +1,6 @@
 @using System.Reflection
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.Discord
 @using Microsoft.IdentityModel.Tokens
 @using Dikubot.Webapp.Shared.Layouts.Layout
@@ -9,7 +9,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService _user;
 @inject IJSRuntime JsRuntime;
-@inject UserGlobalMongoService UserGlobalMongoService
+@inject DiscordUserGlobalMongoService DiscordUserGlobalMongoService
 
 <MudThemeProvider @bind-IsDarkMode="@IsDarkMode" Theme="Theme"/>
 <MudDialogProvider/>
@@ -119,9 +119,9 @@
 
         if (_user.IsRegistered())
         {
-            UserGlobalModel user = _user.GetUserGlobalModel();
-            user.DarkTheme = IsDarkMode;
-            UserGlobalMongoService.Upsert(user);
+            DiscordUserGlobalModel discordUser = _user.GetUserGlobalModel();
+            discordUser.DarkTheme = IsDarkMode;
+            DiscordUserGlobalMongoService.Upsert(discordUser);
         }
 
         StateHasChanged();
@@ -129,19 +129,19 @@
 
     public void ChangeLanuage(LocalizationService.Language language)
     {
-        UserGlobalModel userGlobalModel = _user.GetUserGlobalModel();
+        DiscordUserGlobalModel discordUserGlobalModel = _user.GetUserGlobalModel();
         if (language == LocalizationService.Language.Danish)
         {
-            userGlobalModel.CultureInfo = "da-DK";
+            discordUserGlobalModel.CultureInfo = "da-DK";
         }
         else
         {
-            userGlobalModel.CultureInfo = "en-US";
+            discordUserGlobalModel.CultureInfo = "en-US";
         }
 
         if (_user?.GetUserGlobalModel() is not null)
         {
-            UserGlobalMongoService.Upsert(userGlobalModel);
+            DiscordUserGlobalMongoService.Upsert(discordUserGlobalModel);
         }
 
         StateHasChanged();

@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AspNet.Security.OAuth.Discord;
+using Dikubot.Webapp.Authentication.Identities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph;
 using WayfJwtConnector;
 using WayfJwtConnector.Models;
 
@@ -50,6 +53,7 @@ public class AccountController : ControllerBase
     public async Task<IActionResult> ValidateWayfLogin()
     {
         WayfClaims data = await _wayfClient.ValidateAsync(Request.Body);
-        return Ok(data);
+        SignIn(new ClaimsPrincipal(new ClaimsIdentity(new WayfIdentity(data))));
+        return Redirect("/");
     }
 }

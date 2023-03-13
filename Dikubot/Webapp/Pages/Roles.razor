@@ -1,7 +1,6 @@
 @page "/roles"
 @using Microsoft.IdentityModel.Tokens
 @using Dikubot.DataLayer.Database.Global.GuildSettings
-@using Dikubot.DataLayer.Database.Global.User
 @using Dikubot.DataLayer.Database.Guild
 @using Dikubot.DataLayer.Database.Guild.Models.JoinRole
 @using Dikubot.DataLayer.Database.Guild.Models.User
@@ -11,6 +10,8 @@
 @using Dikubot.Webapp.Authentication
 @using global::Discord.WebSocket
 @using Dikubot.Roles
+@using Dikubot.Webapp.Authentication.Identities
+@using Dikubot.DataLayer.Database.Global.User.DiscordUser
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject GuildSettingsMongoService GuildSettingsMongoService
 @inject IGuildMongoFactory GuildMongoFactory
@@ -46,10 +47,10 @@ else
 
 @code {
     private Authenticator _authenticator;
-    private UserIdentity _user;
+    private DiscordIdentity _discord;
     private SocketGuild _guild;
     private JoinRoleMongoService _joinRoleMongoService;
-    private UserGlobalModel _userGlobalModel;
+    private DiscordUserGlobalModel _discordUserGlobalModel;
     private List<JoinRoleCategoryMainModel> _categories;
     private GuildSettingsModel _guildSettingsModel;
     private UserGuildMongoService _userGuildMongoService;
@@ -61,17 +62,17 @@ else
     {
         _authenticator = (Authenticator)AuthenticationStateProvider;
         AuthenticationState authState = await _authenticator.GetAuthenticationStateAsync();
-        _user = (UserIdentity)authState.User.Identity;
-        if (_user == null)
+        _discord = (DiscordIdentity)authState.User.Identity;
+        if (_discord == null)
         {
             return;
         }
-        _userGlobalModel = _user.UserGlobalModel;
-        _guild = DiscordBot.ClientStatic.GetGuild(_userGlobalModel.SelectedGuild);
+        _discordUserGlobalModel = _discord.DiscordUserGlobalModel;
+        _guild = DiscordBot.ClientStatic.GetGuild(_discordUserGlobalModel.SelectedGuild);
         _joinRoleMongoService = GuildMongoFactory.Get<JoinRoleMongoService>(_guild);
         _guildSettingsModel = GuildSettingsMongoService.Get(_guild) ?? new GuildSettingsModel(_guild);
         _userGuildMongoService = GuildMongoFactory.Get<UserGuildMongoService>(_guild);
-        _userGuildModel = _userGuildMongoService.Get(_userGlobalModel.DiscordId);
+        _userGuildModel = _userGuildMongoService.Get(_discordUserGlobalModel.DiscordId);
         _permissionsService = PermissionServiceFactory.Get(_guild);
         _categories = _joinRoleMongoService.GetAll();
 

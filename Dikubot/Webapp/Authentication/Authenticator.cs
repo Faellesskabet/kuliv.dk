@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Dikubot.DataLayer.Database.Global.User;
+using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.Discord;
 using Dikubot.Webapp.Authentication.Discord.OAuth2;
+using Dikubot.Webapp.Authentication.Identities;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -15,25 +16,25 @@ namespace Dikubot.Webapp.Authentication;
 public class Authenticator : AuthenticationStateProvider
 {
     private readonly IHttpContextAccessor _httpContextAccssor;
-    private readonly UserGlobalMongoService _userGlobalMongoService;
+    private readonly DiscordUserGlobalMongoService _discordUserGlobalMongoService;
     private SocketGuild _guild;
 
     public Authenticator(IHttpContextAccessor httpContextAccssor,
-        UserGlobalMongoService userGlobalMongoService)
+        DiscordUserGlobalMongoService discordUserGlobalMongoService)
     {
         _httpContextAccssor = httpContextAccssor;
-        _userGlobalMongoService = userGlobalMongoService;
+        _discordUserGlobalMongoService = discordUserGlobalMongoService;
     }
 
     /// <summary>
     ///     Get the current UserGlobalModel
     /// </summary>
     /// <returns>Returns a nullable UserGlobalModel based on the current session</returns>
-    public async Task<UserGlobalModel> GetUserGlobal()
+    public async Task<DiscordUserGlobalModel> GetUserGlobal()
     {
         AuthenticationState authState = await GetAuthenticationStateAsync();
-        UserIdentity user = (UserIdentity)authState.User.Identity!;
-        return user?.UserGlobalModel;
+        DiscordIdentity discord = (DiscordIdentity)authState.User.Identity!;
+        return discord?.DiscordUserGlobalModel;
     }
 
     /// <summary>
@@ -59,9 +60,9 @@ public class Authenticator : AuthenticationStateProvider
         return await GetSocketGuild(await GetUserGlobal());
     }
 
-    private async Task<SocketGuild> GetSocketGuild(UserGlobalModel user)
+    private async Task<SocketGuild> GetSocketGuild(DiscordUserGlobalModel discordUser)
     {
-        return user == null ? null : DiscordBot.ClientStatic.GetGuild(user.SelectedGuild);
+        return discordUser == null ? null : DiscordBot.ClientStatic.GetGuild(discordUser.SelectedGuild);
     }
 
 
@@ -105,12 +106,12 @@ public class Authenticator : AuthenticationStateProvider
         DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
         if (discordUserClaim == null)
             //Returns an empty UserIdentity, meaning the user isn't authorized to do anything
-            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new UserIdentity())));
+            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new DiscordIdentity())));
 
         //Here we return a UserIdentity with our sessionModel. The system will then check the user connected to the session,
         //to see what authorisation step the user is at.
         return await Task.FromResult(
-            new AuthenticationState(new ClaimsPrincipal(new UserIdentity(discordUserClaim, _userGlobalMongoService))));
+            new AuthenticationState(new ClaimsPrincipal(new DiscordIdentity(discordUserClaim, _discordUserGlobalMongoService))));
     }
 
     /// <summary>
@@ -121,9 +122,9 @@ public class Authenticator : AuthenticationStateProvider
     public async Task UpdateSession()
     {
         DiscordUserClaim discordUserClaim = GetDiscordUserClaim();
-        UserIdentity userIdentity =
-            discordUserClaim == null ? new UserIdentity() : new UserIdentity(discordUserClaim, _userGlobalMongoService);
+        DiscordIdentity discordIdentity =
+            discordUserClaim == null ? new DiscordIdentity() : new DiscordIdentity(discordUserClaim, _discordUserGlobalMongoService);
         NotifyAuthenticationStateChanged(
-            Task.FromResult(new AuthenticationState(new ClaimsPrincipal(userIdentity))));
+            Task.FromResult(new AuthenticationState(new ClaimsPrincipal(discordIdentity))));
     }
 }
