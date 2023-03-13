@@ -5,40 +5,40 @@ using Discord;
 using Discord.WebSocket;
 using MongoDB.Driver;
 
-namespace Dikubot.DataLayer.Database.Global.User;
+namespace Dikubot.DataLayer.Database.Global.DiscordUser;
 
-public class UserGlobalMongoService : GlobalMongoService<UserGlobalModel>, IIndexed<UserGlobalModel>
+public class DiscordUserGlobalMongoService : GlobalMongoService<DiscordUserGlobalModel>, IIndexed<DiscordUserGlobalModel>
 {
-    public UserGlobalMongoService(Database database) : base(database)
+    public DiscordUserGlobalMongoService(Database database) : base(database)
     {
     }
 
-    public IEnumerable<CreateIndexModel<UserGlobalModel>> GetIndexes()
+    public IEnumerable<CreateIndexModel<DiscordUserGlobalModel>> GetIndexes()
     {
         CreateIndexOptions options = new CreateIndexOptions { Unique = true };
-        return new List<CreateIndexModel<UserGlobalModel>>
+        return new List<CreateIndexModel<DiscordUserGlobalModel>>
         {
-            new(Builders<UserGlobalModel>.IndexKeys.Ascending(model => model.DiscordId), options),
-            new(Builders<UserGlobalModel>.IndexKeys.Ascending(model => model.Email))
+            new(Builders<DiscordUserGlobalModel>.IndexKeys.Ascending(model => model.DiscordId), options),
+            new(Builders<DiscordUserGlobalModel>.IndexKeys.Ascending(model => model.Email))
         };
     }
 
-    public UserGlobalModel Get(SocketUser user)
+    public DiscordUserGlobalModel Get(SocketUser user)
     {
         return Get(user.Id.ToString());
     }
 
-    public UserGlobalModel Get(ulong discordId)
+    public DiscordUserGlobalModel Get(ulong discordId)
     {
         return Get(discordId.ToString());
     }
 
-    public UserGlobalModel Get(string discordId)
+    public DiscordUserGlobalModel Get(string discordId)
     {
-        UserGlobalModel mainModel = Get(inmodel => inmodel.DiscordId == discordId);
+        DiscordUserGlobalModel mainModel = Get(inmodel => inmodel.DiscordId == discordId);
         if (mainModel == null)
         {
-            mainModel = new UserGlobalModel();
+            mainModel = new DiscordUserGlobalModel();
             mainModel.DiscordId = discordId;
         }
 
@@ -61,7 +61,7 @@ public class UserGlobalMongoService : GlobalMongoService<UserGlobalModel>, IInde
         return Exists(model => model.Email == email);
     }
 
-    public UserGlobalModel GetFromEmail(string email)
+    public DiscordUserGlobalModel GetFromEmail(string email)
     {
         email = email.ToLower();
         return Get(model => model.Email == email);
@@ -78,7 +78,7 @@ public class UserGlobalMongoService : GlobalMongoService<UserGlobalModel>, IInde
     /// </Summary>
     /// <param name="mainModelIn">The Model one wishes to be inserted.</param>
     /// <return>A Model.</return>
-    public new UserGlobalModel Upsert(UserGlobalModel mainModelIn)
+    public new DiscordUserGlobalModel Upsert(DiscordUserGlobalModel mainModelIn)
     {
         bool idCollision = Exists(model => model.Id == mainModelIn.Id);
         bool discordIdCollision = Exists(model => model.DiscordId == mainModelIn.DiscordId);
