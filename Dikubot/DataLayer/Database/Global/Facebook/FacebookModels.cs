@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Dikubot.DataLayer.Database.Global.Facebook;
 
@@ -6,64 +7,83 @@ namespace Dikubot.DataLayer.Database.Global.Facebook;
 public class FacebookPage : MainModel
 {
     
-    public FBPages Item { get; set; }
+    public FBPage Item { get; set; }
 }
 
-public class FBrespons
+public class FBPageRespons
 {
-    public List<FBPages> data { get; set; }
+    [JsonPropertyName("data")]
+    public List<FBPage> Data { get; set; }
 }
     
-public class FBPages
+public class FBPage
 {
-    public string access_token { get; set; }
-    public string category { get; set; }
-    public string name { get; set; }
-    public string id { get; set; }
-    public List<FBCategory> category_list { get; set; }
+    [JsonPropertyName("access_token")]
+    public string AccessToken { get; set; }
+    [JsonPropertyName("category")]
+    public string Category { get; set; }
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+    [JsonPropertyName("category_list")]
+    public List<FBCategory> CategoryList { get; set; }
 }
     
 public class FBCategory
 {
-    public string id { get; set; }
-    public string name { get; set; }
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
 }
     
 public class FBAccessToken
 {
-    public string access_token { get; set; }
-    public string token_type { get; set; }
-    public int expires_in { get; set; }
+    [JsonPropertyName("access_token")]
+    public string AccessToken { get; set; }
+    [JsonPropertyName("token_type")]
+    public string TokenType { get; set; }
+    [JsonPropertyName("expires_in")]
+    public int ExpiresIn { get; set; }
 }
 
 public class FBEventRespons
-{
-    public List<FBEvent> data { get; set; }
+{[JsonPropertyName("data")]
+    public List<FBEvent> Data { get; set; }
 }
     
 public class FBEvent
-{
-    public string description { get; set; }
-    public string end_time { get; set; }
-    public string start_time { get; set; }
-    public string id { get; set; }
-    public string name { get; set; }
+{[JsonPropertyName("description")]
+    public string Description { get; set; }
+    [JsonPropertyName("end_time")]
+    public string EndTime { get; set; }
+    [JsonPropertyName("start_time")]
+    public string StartTime { get; set; }
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
 }
     
 public class FBPictureRespons
-{
-    public FBPicture data { get; set; }
+{[JsonPropertyName("data")]
+    public FBPicture Data { get; set; }
 }
     
 public class FBPicture
-{
-    public string url { get; set; }
-    public int height { get; set; }
-    public int width { get; set; }
-    public bool is_silhouette { get; set; }
+{[JsonPropertyName("url")]
+    public string Url { get; set; }
+    [JsonPropertyName("height")]
+    public int Height { get; set; }
+    [JsonPropertyName("width")]
+    public int Width { get; set; }
+    [JsonPropertyName("is_silhouette")]
+    public bool IsSilhouette { get; set; }
 }
     
 public class FBidRespons
 {
-    public string id { get; set; }
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
 }

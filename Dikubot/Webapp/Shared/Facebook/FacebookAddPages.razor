@@ -6,139 +6,138 @@
 @inject NavigationManager _navigationManager
 
 @attribute [AllowAnonymous]
-<h3>fb</h3>
 
-<MudButton OnClick="LoginFacebookAction" Variant="Variant.Outlined"> <MudIcon Icon="@Icons.Custom.Brands.Facebook"></MudIcon> Facebook Connect</MudButton>
+<MudText Typo="Typo.h3">Connect your Facebook Page to KULiv.dk </MudText>
 
-@ResponsFromFacebook
+@if (_fbPagesList.Count == 0)
+{
+    <MudText Typo="Typo.body1">
+        If you want to have you Facebook page events displayed at KULiv.dk, click the link.
+    </MudText>
+    <MudButton OnClick="ConnectFacebookAction" Variant="Variant.Outlined"> <MudIcon Icon="@Icons.Custom.Brands.Facebook"></MudIcon> Facebook Connect</MudButton>
+}
+else
+{
+    <MudText Typo="Typo.body1">
+        Success the following page(s) have now been add to KULiv.dk, we will now vertifify that the pages are for students and after vertification the events will be available at <MudLink Href="https://kuliv.dk/discovery/calendar"> https://kuliv.dk/discovery/calendar</MudLink> and <MudLink Href="https://kuliv.dk/discovery/events"> https://kuliv.dk/discovery/events</MudLink>.
+        If you do not want you pages at KULiv.dk contact support at support@kuliv.dk.
+    </MudText>
 
-<MudDataGrid Items="@FBresponsList">
-    <Columns>
-        <HierarchyColumn T="FBPages" />
-                <Column T="FBPages">
-                    <CellTemplate>
-                        <MudAvatar Image="@GetFBPicture(context.Item.id)"/>
+    <MudDataGrid Items="@_fbPagesList">
+        <Columns>
+            <HierarchyColumn T="FBPage" />
+            <Column T="FBPage" Field="Name" Title="Name">                    
+                <CellTemplate>
+                    <MudText Typo="Typo.h4">  <MudAvatar Image="@_FacebookPageService.GetFBPicture(context.Item.Id,HttpClient)"/>  @context.Item.Name</MudText> 
                     </CellTemplate>
                 </Column>
-        <Column T="FBPages" Field="name" Title="Name"/>
-    </Columns>
-     <ChildRowContent>
+        </Columns>
+        <ChildRowContent>
             <MudCard>
-                <MudDataGrid Items="@FBEvents(context.Item.id)">
+                <MudDataGrid Items="@_FacebookPageService.GetFBEvents(context.Item.Id,HttpClient)">
                     <Columns>
-                        <Column T="FBEvent" Field="name"  Title="Name" />
-                        <Column T="FBEvent" Field="start_time"  Title="Start tidspunkt" />
-                        <Column T="FBEvent" Field="end_time"  Title="Slut tidspunkt" />
-                        <Column T="FBEvent" Field="description"  Title="Description" />
+                        <Column T="FBEvent" Field="Name"  Title="Name" />
+                        <Column T="FBEvent" Field="StartTime"  Title="Start tidspunkt" />
+                        <Column T="FBEvent" Field="EndTime"  Title="Slut tidspunkt" />
+                        <Column T="FBEvent" Field="Description"  Title="Description" />
                     </Columns>
                 </MudDataGrid>
             </MudCard>
         </ChildRowContent>
-</MudDataGrid>
+    </MudDataGrid>
+
+}
+
 
 
 
 @code {
-    
     [Inject] private HttpClient HttpClient { get; set; }
-    private string? AuthCode { get; set; } = "";
-
-    private string ResponsFromFacebook { get; set; } = "";
     
-    private List<FBPages> FBresponsList = new List<FBPages>();
-
-    private List<FBEvent> FBEvents(string id)
-    {
-        var link2 = $"https://graph.facebook.com/v16.0/{id}/events?access_token={AuthCode}";
-        return HttpClient.GetFromJsonAsync<FBEventRespons>(link2).Result.data;
-    }
+    private List<FBPage> _fbPagesList = new List<FBPage>();
     
-    private string GetFBPicture(string id)
-    {
-        if (!string.IsNullOrWhiteSpace(AuthCode))
-        {
-            var link = $"https://graph.facebook.com/v16.0/{id}/picture?redirect=0&access_token={AuthCode}";
-            return HttpClient.GetFromJsonAsync<FBPictureRespons>(link).Result.data.url;
-
-    //return ;
-        }
-        return "";
-    }
-    
-
-    
-    
-    private void LoginFacebookAction()
+    private void ConnectFacebookAction()
     {
         string link =
             "https://www.facebook.com/v16.0/dialog/oauth?" +
-            "client_id=" + Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID") + //510045277999983
+            "client_id=" + Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID") +
             "&redirect_uri="+_navigationManager.BaseUri +"/FacebookAddPages" +
             "&auth_type=rerequest" +
             "&config_id=1372246313628981";
-            // Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID")
-        
+
         _navigationManager.NavigateTo(link);
     }
+    
 
-    protected override async void OnInitialized()
+    protected override void OnAfterRender(bool firstRender)
     {
-        if (_navigationManager.Uri.Contains("code"))
+        if (_navigationManager.Uri.Contains("code") && firstRender)
         {
-            string header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?') + 1);
-            List<string> Request = header.Split('&', '=').ToList();
-
-    //error=access_denied&error_description=The+resource+owner+or+authorization+server+denied+the+request
-
-            
-            var app_id = Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID");//"510045277999983";
-            var redirect_uri = _navigationManager.BaseUri+"/FacebookAddPages";
-            var app_secret= Environment.GetEnvironmentVariable("FACEBOOK_APP_SECRET");//"a273d3f3518a451d1378e678001acce3";
-            var code_parameter = Request[Request.FindIndex(x => x.Equals("code")) + 1];;
-            var graph_api_version= "v16.0";
-            
-            var link = $"https://graph.facebook.com/{graph_api_version}/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}=_";
-            
-            FBAccessToken fbAccessToken = HttpClient.GetFromJsonAsync<FBAccessToken>(link).Result;
-
-            AuthCode = fbAccessToken.access_token;
-            var link2 = $"https://graph.facebook.com/v16.0/me/accounts?access_token={AuthCode}";
-            
-            FBresponsList = HttpClient.GetFromJsonAsync<FBrespons>(link2).Result.data;
-
-            var link3 = $"https://graph.facebook.com/v16.0/oauth/access_token?grant_type=fb_exchange_token&" +
-                        $"client_id={app_id}&" +
-                        $"client_secret={app_secret}&" +
-                        $"fb_exchange_token={fbAccessToken.access_token}";
-           var respons3 = HttpClient.GetFromJsonAsync<FBAccessToken>(link3).Result;
-
-            var link4 = $"https://graph.facebook.com/me?fields=id&access_token={respons3.access_token}";
-            var app_scoped_user_id = HttpClient.GetFromJsonAsync<FBidRespons>(link4).Result.id;
-            
-            var link5 = $"https://graph.facebook.com/{graph_api_version}/{app_scoped_user_id}/" +
-                        $"accounts?access_token={respons3.access_token}";
-
-            var test5 = HttpClient.GetFromJsonAsync<FBrespons>(link5).Result.data;
-            
-            //ResponsFromFacebook = link5;
-
-            foreach (var item in test5)
+            var appId = Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID"); 
+            var redirectUri = _navigationManager.BaseUri + "FacebookAddPages";
+            var appSecret = Environment.GetEnvironmentVariable("FACEBOOK_APP_SECRET"); 
+            var graphApiVersion = "v16.0";
+            try
             {
-                FacebookPage model = new FacebookPage();
-                
-                if (_FacebookPageService.Exists(m => m.Item.id == item.id))
-                {
-                    model = _FacebookPageService.Get(m => m.Item.id == item.id);
-                }
-                model.Item = item;
-                _FacebookPageService.Upsert(model);
-            }
-            
-        }
-        
-    }
-    
-    
+                string header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?') + 1);
 
-    
+                
+                
+                var codeParameter = header.Remove(0, 5);
+
+    // Link to get the short lived User AccessToken
+                var shortlivedAccessTokenLink = $"https://graph.facebook.com/{graphApiVersion}/oauth/access_token?client_id={appId}&redirect_uri={redirectUri}&client_secret={appSecret}&code={codeParameter}";
+
+                FBAccessToken shortLivedAccessToken = HttpClient.GetFromJsonAsync<FBAccessToken>(shortlivedAccessTokenLink).Result;
+                
+                // Link to get the short lived User AccessToken
+                var getFacebookUsersPagesLink = $"https://graph.facebook.com/{graphApiVersion}/me/accounts?access_token={shortLivedAccessToken.AccessToken}";
+
+                _fbPagesList = HttpClient.GetFromJsonAsync<FBPageRespons>(getFacebookUsersPagesLink).Result.Data;
+
+                // Link to get the Long lived User AccessToken
+                var longLivedAccessTokenLink = $"https://graph.facebook.com/{graphApiVersion}/oauth/access_token?grant_type=fb_exchange_token&" +
+                            $"client_id={appId}&" +
+                            $"client_secret={appSecret}&" +
+                            $"fb_exchange_token={shortLivedAccessToken.AccessToken}";
+                var longLivedUserAccessToken = HttpClient.GetFromJsonAsync<FBAccessToken>(longLivedAccessTokenLink).Result;
+                
+                    
+                // Link to get the unique app User id
+                var userIdLink = $"https://graph.facebook.com/me?fields=id&access_token={longLivedUserAccessToken.AccessToken}";
+                var appScopedUserId = HttpClient.GetFromJsonAsync<FBidRespons>(userIdLink).Result.Id;
+
+                //Link to get Long Lived Page Access Token and page info
+                var longLivedPageAccessTokenLink = $"https://graph.facebook.com/{graphApiVersion}/{appScopedUserId}/" +
+                            $"accounts?access_token={longLivedUserAccessToken.AccessToken}";
+
+                var facebookPagesList = HttpClient.GetFromJsonAsync<FBPageRespons>(longLivedPageAccessTokenLink).Result.Data;
+                    
+                //Add Facebook page to the Databases with Long Lived Access Token
+                foreach (var facebookPageItem in facebookPagesList)
+                {
+                    FacebookPage facebookPage = new FacebookPage();
+
+                    if (_FacebookPageService.Exists(m => m.Item.Id == facebookPageItem.Id))
+                    {
+                        facebookPage = _FacebookPageService.Get(m => m.Item.Id == facebookPageItem.Id);
+                    }
+                    facebookPage.Item = facebookPageItem;
+                    _FacebookPageService.Upsert(facebookPage);
+            }
+            StateHasChanged();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            _navigationManager.NavigateTo(redirectUri,replace:true);
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+
+
+
 }
