@@ -109,7 +109,10 @@ public class Startup
         services.AddScoped<NotifyStateService>();
         services.AddScoped<LocalizationService>();
         services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
-
+        services.AddScoped<FacebookService>();
+        
+        
+        
         services.AddServerSideBlazor(options =>
         {
             options.DetailedErrors = true;

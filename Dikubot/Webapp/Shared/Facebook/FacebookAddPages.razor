@@ -4,6 +4,7 @@
 @using Dikubot.DataLayer.Database.Global.Facebook
 @inject FacebookPageService _FacebookPageService
 @inject NavigationManager _navigationManager
+@inject FacebookService _FacebookService
 
 @attribute [AllowAnonymous]
 
@@ -25,16 +26,16 @@ else
 
     <MudDataGrid Items="@_fbPagesList">
         <Columns>
-            <HierarchyColumn T="FBPage" />
-            <Column T="FBPage" Field="Name" Title="Name">                    
+            <HierarchyColumn T="FacebookPageModel" />
+            <Column T="FacebookPageModel" Field="Name" Title="Name">                    
                 <CellTemplate>
-                    <MudText Typo="Typo.h4">  <MudAvatar Image="@_FacebookPageService.GetFBPicture(context.Item.Id,HttpClient)"/>  @context.Item.Name</MudText> 
+                    <MudText Typo="Typo.h4">  <MudAvatar Image="@_FacebookService.GetFBPicture(context.Item.PageId)"/>  @context.Item.Name</MudText> 
                     </CellTemplate>
                 </Column>
         </Columns>
         <ChildRowContent>
             <MudCard>
-                <MudDataGrid Items="@_FacebookPageService.GetFBEvents(context.Item.Id,HttpClient)">
+                <MudDataGrid Items="@_FacebookService.GetFBEvents(context.Item.PageId)">
                     <Columns>
                         <Column T="FBEvent" Field="Name"  Title="Name" />
                         <Column T="FBEvent" Field="StartTime"  Title="Start tidspunkt" />
@@ -49,23 +50,15 @@ else
 }
 
 
-
-
 @code {
     [Inject] private HttpClient HttpClient { get; set; }
     
-    private List<FBPage> _fbPagesList = new List<FBPage>();
-    
+    private List<FacebookPageModel> _fbPagesList = new List<FacebookPageModel>();
+
     private void ConnectFacebookAction()
     {
-        string link =
-            "https://www.facebook.com/v16.0/dialog/oauth?" +
-            "client_id=" + Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID") +
-            "&redirect_uri="+_navigationManager.BaseUri +"/FacebookAddPages" +
-            "&auth_type=rerequest" +
-            "&config_id=1372246313628981";
-
-        _navigationManager.NavigateTo(link);
+        var redirectUri = _navigationManager.BaseUri + "FacebookAddPages";
+        _FacebookService.ConnectFacebookAction(redirectUri);
     }
     
 
@@ -73,69 +66,20 @@ else
     {
         if (_navigationManager.Uri.Contains("code") && firstRender)
         {
-            var appId = Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID"); 
             var redirectUri = _navigationManager.BaseUri + "FacebookAddPages";
-            var appSecret = Environment.GetEnvironmentVariable("FACEBOOK_APP_SECRET"); 
-            var graphApiVersion = "v16.0";
-            try
-            {
-                string header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?') + 1);
-
-                
-                
-                var codeParameter = header.Remove(0, 5);
-
-    // Link to get the short lived User AccessToken
-                var shortlivedAccessTokenLink = $"https://graph.facebook.com/{graphApiVersion}/oauth/access_token?client_id={appId}&redirect_uri={redirectUri}&client_secret={appSecret}&code={codeParameter}";
-
-                FBAccessToken shortLivedAccessToken = HttpClient.GetFromJsonAsync<FBAccessToken>(shortlivedAccessTokenLink).Result;
-                
-                // Link to get the short lived User AccessToken
-                var getFacebookUsersPagesLink = $"https://graph.facebook.com/{graphApiVersion}/me/accounts?access_token={shortLivedAccessToken.AccessToken}";
-
-                _fbPagesList = HttpClient.GetFromJsonAsync<FBPageRespons>(getFacebookUsersPagesLink).Result.Data;
-
-                // Link to get the Long lived User AccessToken
-                var longLivedAccessTokenLink = $"https://graph.facebook.com/{graphApiVersion}/oauth/access_token?grant_type=fb_exchange_token&" +
-                            $"client_id={appId}&" +
-                            $"client_secret={appSecret}&" +
-                            $"fb_exchange_token={shortLivedAccessToken.AccessToken}";
-                var longLivedUserAccessToken = HttpClient.GetFromJsonAsync<FBAccessToken>(longLivedAccessTokenLink).Result;
-                
-                    
-                // Link to get the unique app User id
-                var userIdLink = $"https://graph.facebook.com/me?fields=id&access_token={longLivedUserAccessToken.AccessToken}";
-                var appScopedUserId = HttpClient.GetFromJsonAsync<FBidRespons>(userIdLink).Result.Id;
-
-                //Link to get Long Lived Page Access Token and page info
-                var longLivedPageAccessTokenLink = $"https://graph.facebook.com/{graphApiVersion}/{appScopedUserId}/" +
-                            $"accounts?access_token={longLivedUserAccessToken.AccessToken}";
-
-                var facebookPagesList = HttpClient.GetFromJsonAsync<FBPageRespons>(longLivedPageAccessTokenLink).Result.Data;
-                    
-                //Add Facebook page to the Databases with Long Lived Access Token
-                foreach (var facebookPageItem in facebookPagesList)
-                {
-                    FacebookPage facebookPage = new FacebookPage();
-
-                    if (_FacebookPageService.Exists(m => m.Item.Id == facebookPageItem.Id))
-                    {
-                        facebookPage = _FacebookPageService.Get(m => m.Item.Id == facebookPageItem.Id);
-                    }
-                    facebookPage.Item = facebookPageItem;
-                    _FacebookPageService.Upsert(facebookPage);
-            }
-            StateHasChanged();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
             _navigationManager.NavigateTo(redirectUri,replace:true);
+            
+            string header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?') + 1);
+            var codeParameter = header.Remove(0, 5);
+
+            _fbPagesList = _FacebookService.AddLongLivedAccessTokenToDatabase(redirectUri, codeParameter);
+            StateHasChanged();
         }
         base.OnAfterRender(firstRender);
     }
+    
+    
+    
 
 
 
