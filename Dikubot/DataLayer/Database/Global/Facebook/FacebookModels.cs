@@ -4,18 +4,27 @@ using System.Text.Json.Serialization;
 namespace Dikubot.DataLayer.Database.Global.Facebook;
 
 
-public class FacebookPage : MainModel
+public class FacebookPageModel : MainModel
 {
+   
+    public string AccessToken { get; set; }
+    public string Category { get; set; }
+    public string Name { get; set; }
+    public string PageId { get; set; }
     
-    public FBPage Item { get; set; }
+    public List<FBCategory> CategoryList { get; set; }
+
+    public void FbPageConverter(FBPage item)
+    {
+        AccessToken = item.AccessToken;
+        Category = item.Category;
+        Name = item.Name;
+        PageId = item.Id;
+        CategoryList = item.CategoryList;
+    }
 }
 
-public class FBPageRespons
-{
-    [JsonPropertyName("data")]
-    public List<FBPage> Data { get; set; }
-}
-    
+
 public class FBPage
 {
     [JsonPropertyName("access_token")]
@@ -24,10 +33,20 @@ public class FBPage
     public string Category { get; set; }
     [JsonPropertyName("name")]
     public string Name { get; set; }
+    
     [JsonPropertyName("id")]
     public string Id { get; set; }
     [JsonPropertyName("category_list")]
     public List<FBCategory> CategoryList { get; set; }
+}
+
+
+
+
+public class FBRespons<Tmodel>
+{
+    [JsonPropertyName("data")]
+    public List<Tmodel> Data { get; set; }
 }
     
 public class FBCategory
@@ -48,10 +67,6 @@ public class FBAccessToken
     public int ExpiresIn { get; set; }
 }
 
-public class FBEventRespons
-{[JsonPropertyName("data")]
-    public List<FBEvent> Data { get; set; }
-}
     
 public class FBEvent
 {[JsonPropertyName("description")]
