@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using Dikubot.DataLayer.Database.Global.Facebook;
 using Microsoft.AspNetCore.Components;
+using Newtonsoft.Json;
 
 namespace Dikubot.Webapp.Data;
 
@@ -12,47 +13,68 @@ public class FacebookService
 {
 
     private string appId = Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID");
-    private string appSecret = Environment.GetEnvironmentVariable("FACEBOOK_APP_SECRET"); 
+    private string appSecret = Environment.GetEnvironmentVariable("FACEBOOK_APP_SECRET");
+    private string clientId = Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID");
     private string graphApiVersion = "v16.0";
     
     private FacebookPageService _facebookPageService { get; set; }
-    private HttpClient _httpClient { get; set; }
     private NavigationManager _navigationManager { get; set; }
+    private HttpClient _httpClient { get; set; }
+    private JsonService _jsonService { get; set; }
 
-    public FacebookService(HttpClient httpClient, FacebookPageService facebookPageService, NavigationManager navigationManager)
+    public FacebookService( HttpClient httpClient,
+                            FacebookPageService facebookPageService, 
+                            NavigationManager navigationManager,
+                            JsonService jsonService)
     {
         _httpClient = httpClient;
+        _jsonService = jsonService;
         _facebookPageService = facebookPageService;
         _navigationManager = navigationManager;
     }
     
     private Dictionary<string, List<FBEvent>> FBEventDic = new Dictionary<string, List<FBEvent>>();
 
-    public List<FBEvent> GetFBEvents(string id)
+    public List<FBEvent> GetFBEvents(string pageId)
     {
         
-        if (FBEventDic.ContainsKey(id))
+        if (FBEventDic.ContainsKey(pageId))
         {
-            return FBEventDic[id];
+            return FBEventDic[pageId];
         }
-        var accessToken = _facebookPageService.Get(m => m.PageId == id).AccessToken;
+        var accessToken = _facebookPageService.Get(m => m.PageId == pageId).AccessToken;
+
+        if (!string.IsNullOrWhiteSpace(accessToken))
+        {
+            var requestUri = $"https://graph.facebook.com/{graphApiVersion}/{pageId}/events?access_token={accessToken}";
+
+            FBRespons<FBEvent> result = (FBRespons<FBEvent>)_jsonService.GetJson<FBRespons<FBEvent>>(requestUri);
+
+            if (result != null)
+            {
+                FBEventDic.Add(pageId, result.Data);
+                return result.Data;
+            }
+        }
         
-        var requestUri = $"https://graph.facebook.com/{graphApiVersion}/{id}/events?access_token={accessToken}";
-        var result = _httpClient.GetFromJsonAsync<FBRespons<FBEvent>>(requestUri).Result.Data;
-        FBEventDic.Add(id, result);
-        return result;
+        return new List<FBEvent>();
     }
     
-    public string GetFBPicture(string id)
+    public string GetFBPicture(string pageId)
     {
         
-        var accessToken = _facebookPageService.Get(m => m.PageId == id)?.AccessToken;
+        var accessToken = _facebookPageService.Get(m => m.PageId == pageId)?.AccessToken;
         
         if (!string.IsNullOrWhiteSpace(accessToken))
         {
-            var link = $"https://graph.facebook.com/{graphApiVersion}/{id}/picture?redirect=0&access_token={accessToken}";
-            return _httpClient.GetFromJsonAsync<FBPictureRespons>(link).Result.Data.Url;
-            
+            var link = $"https://graph.facebook.com/{graphApiVersion}/{pageId}/picture?redirect=0&access_token={accessToken}";
+            var result = (FBPictureRespons)_jsonService.GetJson<FBPictureRespons>(link);
+
+            if (result != null)
+            {
+                return result.Data.Url;
+            }
+
         }
         return "";
     }
@@ -61,8 +83,8 @@ public class FacebookService
     {
         string link =
             $"https://www.facebook.com/{graphApiVersion}/dialog/oauth?" +
-            "client_id=" + Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID") +
-            "&redirect_uri="+redirectUri +
+            "client_id=" + clientId +
+            "&redirect_uri=" + redirectUri +
             "&auth_type=rerequest" +
             "&config_id=1372246313628981";
 
@@ -75,7 +97,7 @@ public class FacebookService
         return AddLongLivedAccessTokenToDatabase(GetLongLivedPageAccessToken(redirectUri, codeParameter));
     }
     
-    public List<FBPage> GetLongLivedPageAccessToken(string redirectUri, string codeParameter)
+     public List<FBPage> GetLongLivedPageAccessToken(string redirectUri, string codeParameter)
     {
         try
             {
@@ -118,6 +140,8 @@ public class FacebookService
                 throw;
             }
     }
+    
+    
 
     public List<FacebookPageModel> AddLongLivedAccessTokenToDatabase(List<FBPage> facebookPagesList)
     {
