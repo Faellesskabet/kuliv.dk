@@ -1,0 +1,53 @@
+﻿@page "/Op/Facebook/Pagest"
+@using Dikubot.DataLayer.Database.Global.Facebook
+@using System.Net.Http.Json
+@using Dikubot.Webapp.Authentication
+@inject FacebookPageService _FacebookPageService
+@inject FacebookService _FacebookService
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+
+
+
+<h3>FacebookPages</h3>
+
+  <MudDataGrid Items="@FacebookPagesList">
+          <Columns>
+              <HierarchyColumn T="FacebookPageModel" />
+              <Column T="FacebookPageModel" Field="Name" Title="Name">                    
+                  <CellTemplate>
+                      <MudText Typo="Typo.h4">  <MudAvatar Image="@_FacebookService.GetFBPicture(context.Item.PageId)"/>  @context.Item.Name</MudText> 
+                      </CellTemplate>
+                  </Column>
+          </Columns>
+          <ChildRowContent>
+              <MudCard>
+                  <MudDataGrid Items="@_FacebookService.GetFBEvents(context.Item.PageId)">
+                      <Columns>
+                          <Column T="FBEvent" Field="Name"  Title="Name" />
+                          <Column T="FBEvent" Field="StartTime"  Title="Start tidspunkt" />
+                          <Column T="FBEvent" Field="EndTime"  Title="Slut tidspunkt" />
+                          <Column T="FBEvent" Field="Description"  Title="Description" />
+                      </Columns>
+                  </MudDataGrid>
+              </MudCard>
+          </ChildRowContent>
+      </MudDataGrid>
+
+
+@code {
+    [Inject] private HttpClient HttpClient { get; set; }
+    
+    private List<FacebookPageModel> FacebookPagesList { get; set; }
+
+    
+    protected override void OnInitialized()
+    {
+        FacebookPagesList = _FacebookPageService.GetAll();
+        base.OnInitialized();
+
+        FacebookPageModel model = new FacebookPageModel();
+        
+    }
+
+
+}

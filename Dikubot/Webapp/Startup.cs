@@ -9,6 +9,7 @@ using Dikubot.DataLayer.Database;
 using Dikubot.DataLayer.Database.Global.Calendar;
 using Dikubot.DataLayer.Database.Global.User.DiscordUser;
 using Dikubot.DataLayer.Database.Global.Event;
+using Dikubot.DataLayer.Database.Global.Facebook;
 using Dikubot.DataLayer.Database.Global.GuildCalendars;
 using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.Session;
@@ -88,6 +89,8 @@ public class Startup
         services.AddSingleton<EventsMongoService>();
         services.AddSingleton<EventRequestMongoService>();
         services.AddSingleton<CalendarMongoService>();
+        services.AddSingleton<FacebookPageService>();
+        
 
         services.AddSingleton<IPermissionServiceFactory, PermissionServiceFactory>();
 
@@ -106,7 +109,10 @@ public class Startup
         services.AddScoped<NotifyStateService>();
         services.AddScoped<LocalizationService>();
         services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
-
+        services.AddScoped<FacebookService>();
+        
+        
+        
         services.AddServerSideBlazor(options =>
         {
             options.DetailedErrors = true;

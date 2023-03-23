@@ -1,0 +1,87 @@
+﻿@page "/FacebookAddPages"
+@using System.Net.Http.Json
+@using System.Threading
+@using Dikubot.DataLayer.Database.Global.Facebook
+@inject FacebookPageService _FacebookPageService
+@inject NavigationManager _navigationManager
+@inject FacebookService _FacebookService
+
+@attribute [AllowAnonymous]
+
+<MudText Typo="Typo.h3">Connect your Facebook Page to KULiv.dk </MudText>
+
+@if (_fbPagesList.Count == 0)
+{
+    <MudText Typo="Typo.body1">
+        If you want to have you Facebook page events displayed at KULiv.dk, click the link.
+    </MudText>
+    <MudButton OnClick="ConnectFacebookAction" Variant="Variant.Outlined"> <MudIcon Icon="@Icons.Custom.Brands.Facebook"></MudIcon> Facebook Connect</MudButton>
+}
+else
+{
+    <MudText Typo="Typo.body1">
+        Success the following page(s) have now been add to KULiv.dk, we will now vertifify that the pages are for students and after vertification the events will be available at <MudLink Href="https://kuliv.dk/discovery/calendar"> https://kuliv.dk/discovery/calendar</MudLink> and <MudLink Href="https://kuliv.dk/discovery/events"> https://kuliv.dk/discovery/events</MudLink>.
+        If you do not want you pages at KULiv.dk contact support at support@kuliv.dk.
+    </MudText>
+
+    <MudDataGrid Items="@_fbPagesList">
+        <Columns>
+            <HierarchyColumn T="FacebookPageModel" />
+            <Column T="FacebookPageModel" Field="Name" Title="Name">                    
+                <CellTemplate>
+                    <MudText Typo="Typo.h4">  <MudAvatar Image="@_FacebookService.GetFBPicture(context.Item.PageId)"/>  @context.Item.Name</MudText> 
+                    </CellTemplate>
+                </Column>
+        </Columns>
+        <ChildRowContent>
+            <MudCard>
+                <MudDataGrid Items="@_FacebookService.GetFBEvents(context.Item.PageId)">
+                    <Columns>
+                        <Column T="FBEvent" Field="Name"  Title="Name" />
+                        <Column T="FBEvent" Field="StartTime"  Title="Start tidspunkt" />
+                        <Column T="FBEvent" Field="EndTime"  Title="Slut tidspunkt" />
+                        <Column T="FBEvent" Field="Description"  Title="Description" />
+                    </Columns>
+                </MudDataGrid>
+            </MudCard>
+        </ChildRowContent>
+    </MudDataGrid>
+
+}
+
+
+@code {
+    [Inject] private HttpClient HttpClient { get; set; }
+    
+    private List<FacebookPageModel> _fbPagesList = new List<FacebookPageModel>();
+
+    private void ConnectFacebookAction()
+    {
+        var redirectUri = _navigationManager.BaseUri + "FacebookAddPages";
+        _FacebookService.ConnectFacebookAction(redirectUri);
+    }
+    
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (_navigationManager.Uri.Contains("code") && firstRender)
+        {
+            var redirectUri = _navigationManager.BaseUri + "FacebookAddPages";
+            _navigationManager.NavigateTo(redirectUri,replace:true);
+            
+            string header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?') + 1);
+            var codeParameter = header.Remove(0, 5);
+
+            _fbPagesList = _FacebookService.AddLongLivedAccessTokenToDatabase(redirectUri, codeParameter);
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+    
+    
+    
+
+
+
+
+}
