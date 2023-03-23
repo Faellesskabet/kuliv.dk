@@ -110,6 +110,7 @@ public class Startup
         services.AddScoped<LocalizationService>();
         services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
         services.AddScoped<FacebookService>();
+        services.AddScoped<JsonService>();
         
         
         
