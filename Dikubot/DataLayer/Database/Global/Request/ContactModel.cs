@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dikubot.DataLayer.Database.Global.Union.Request;
+namespace Dikubot.DataLayer.Database.Global.Request;
 
 public class ContactModel : MainModel
 {

@@ -1,7 +1,7 @@
 ﻿using Dikubot.DataLayer.Database;
 using Dikubot.DataLayer.Database.Global;
 using Dikubot.DataLayer.Database.Global.Event;
-using Dikubot.DataLayer.Database.Global.Union.Request;
+using Dikubot.DataLayer.Database.Global.Request;
 
 namespace Dikubot.Webapp.Extensions.Discovery.Links;
 

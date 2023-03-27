@@ -1,163 +1,24 @@
 ﻿@page "/op/union/request"
-@using Microsoft.IdentityModel.Tokens
-@using Dikubot.DataLayer.Database.Global.Union.Request
-@using Dikubot.DataLayer.Database.Global.Union
+@using Dikubot.Webapp.Shared.Request
 @using Dikubot.Webapp.Authentication
-@using Dikubot.Webapp.Shared.Dialog
-@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+@using Dikubot.DataLayer.Database.Global.Union
+
 @inject UnionRequestMongoService UnionRequestMongoService
 @inject UnionMongoService UnionMongoService
 
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
 
-<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<UnionModel>>>>(Reload))" @ref="_table"
-          Loading="@_loading">
-    <ToolBarContent>
-        <MudSelect T="RequestModel<UnionModel>.StatusEmun" Label="Status" MultiSelection="true" @bind-SelectedValues="options" OnClose="o => _table.ReloadServerData()">
-            <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.ongoing"></MudSelectItem>
-            <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.change"></MudSelectItem>
-            <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.approved"></MudSelectItem>
-            <MudSelectItem Value="RequestModel<UnionModel>.StatusEmun.denied"></MudSelectItem>
-        </MudSelect>
-
-        <MudSpacer/>
-        <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
-        </MudTextField>
-    </ToolBarContent>
-    <HeaderContent>
-        <MudTh>Status</MudTh>
+<OpRequstPageHandler TModel="UnionModel" 
+                     Link="Union" 
+                     NameOfTmodel="Unionen" 
+                     RequestMongoService="UnionRequestMongoService" 
+                     MongoService="UnionMongoService" >
+    <TemplateHeader>
         <MudTh>Contact Name</MudTh>
         <MudTh>Union title</MudTh>
-        <MudTh>Indstillinger</MudTh>
-        <MudTh>Slet</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Status">
-            @context.Status
-            <MudIconButton Icon="@Icons.Filled.AddCircleOutline" OnClick="() => Approve(context)" Color="Color.Success"></MudIconButton>
-            <MudIconButton Icon="@Icons.Filled.NotInterested" OnClick="() => Denied(context)" Color="Color.Error"></MudIconButton>
-        </MudTd>
+    </TemplateHeader>
+    <TemplateRow>
         <MudTd DataLabel="Navn">@context.Contact.Name</MudTd>
         <MudTd DataLabel="Beskrivelse">@context.RequestItem.Title</MudTd>
-        <MudTd DataLabel="Indstillinger">
-            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/Request/Union/edit/{context.Id.ToString()}")>Rediger</MudButton>
-        </MudTd>
-        <MudTd DataLabel="Slet">
-            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
-        </MudTd>
-    </RowTemplate>
-    <NoRecordsContent>
-        <MudText>Kunne ikke finde nogen elementer</MudText>
-    </NoRecordsContent>
-    <LoadingContent>
-        <Loading></Loading>
-    </LoadingContent>
-    <PagerContent>
-        <MudTablePager/>
-    </PagerContent>
-</MudTable>
-<div class="d-flex flex-wrap mt-4">
-    <MudButton Color="Color.Primary" Variant="Variant.Filled" Link="/Request/Union/create">Tilføj ny kategori</MudButton>
-</div>
-
-
-@code {
-
-
-    [Inject]
-    private IDialogService DialogService { get; set; }
-
-    private MudTable<RequestModel<UnionModel>> _table;
-    private string _searchQuery = "";
-    private bool _loading = true;
-
-
-    private IEnumerable<RequestModel<UnionModel>.StatusEmun> options { get; set; }
-        = new HashSet<RequestModel<UnionModel>.StatusEmun> { RequestModel<UnionModel>.StatusEmun.ongoing, RequestModel<UnionModel>.StatusEmun.change };
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        _loading = false;
-    }
-
-    private async Task<TableData<RequestModel<UnionModel>>> Reload(TableState state)
-    {
-        List<RequestModel<UnionModel>> items;
-        if (!_searchQuery.IsNullOrEmpty())
-        {
-            items = UnionRequestMongoService.Get(model => model.GetSearchContent().Contains(_searchQuery) && options.Contains(model.Status),
-                state.PageSize, state.Page);
-        }
-        else
-        {
-            items = UnionRequestMongoService.Get(model => options.Contains(model.Status), state.PageSize, state.Page);
-        }
-
-        return new TableData<RequestModel<UnionModel>> { Items = items, TotalItems = (int)UnionRequestMongoService.EstimatedCount() };
-    }
-
-    private void OnSearch(string text)
-    {
-        _searchQuery = text;
-        _table.ReloadServerData();
-    }
-
-    private async void DeleteCategory(RequestModel<UnionModel> joinRoleCategoryMainModel)
-    {
-        DialogParameters parameters = new DialogParameters();
-        parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
-        parameters.Add("ButtonText", "Slet");
-        parameters.Add("Color", Color.Error);
-        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
-
-        if (result.Cancelled)
-        {
-            return;
-        }
-
-        UnionRequestMongoService.Remove(joinRoleCategoryMainModel);
-        await _table.ReloadServerData();
-    }
-
-    private async void Approve(RequestModel<UnionModel> model)
-    {
-        DialogParameters parameters = new DialogParameters();
-        parameters.Add("ContentText", "Er du sikker på du vil godkende Unionen");
-        parameters.Add("ButtonText", "Approve");
-        parameters.Add("Color", Color.Success);
-        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
-
-        if (result.Cancelled)
-        {
-            return;
-        }
-
-        model.RequestItem = UnionMongoService.Upsert(model.RequestItem);
-        model.Status = RequestModel<UnionModel>.StatusEmun.approved;
-
-        UnionRequestMongoService.Upsert(model);
-
-        await _table.ReloadServerData();
-    }
-
-    private async void Denied(RequestModel<UnionModel> model)
-    {
-        DialogParameters parameters = new DialogParameters();
-        parameters.Add("ContentText", "Er du sikker på du ikke vil godkende Unionen");
-        parameters.Add("ButtonText", "Denied");
-        parameters.Add("Color", Color.Error);
-        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
-
-        if (result.Cancelled)
-        {
-            return;
-        }
-
-        model.Status = RequestModel<UnionModel>.StatusEmun.denied;
-        UnionRequestMongoService.Upsert(model);
-
-        await _table.ReloadServerData();
-    }
-
-}
+    </TemplateRow>
+</OpRequstPageHandler>

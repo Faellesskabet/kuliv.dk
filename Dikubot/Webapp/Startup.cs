@@ -15,7 +15,7 @@ using Dikubot.DataLayer.Database.Global.GuildSettings;
 using Dikubot.DataLayer.Database.Global.Session;
 using Dikubot.DataLayer.Database.Global.Tags;
 using Dikubot.DataLayer.Database.Global.Union;
-using Dikubot.DataLayer.Database.Global.Union.Request;
+using Dikubot.DataLayer.Database.Global.Request;
 using Dikubot.DataLayer.Database.Guild;
 using Dikubot.DataLayer.Database.Guild.Models.Channel.TextChannel.Messages;
 using Dikubot.DataLayer.Permissions;
