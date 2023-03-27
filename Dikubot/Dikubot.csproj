@@ -42,7 +42,7 @@
         <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.21.1" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.1" />
         <PackageReference Include="MongoDB.Driver" Version="2.19.0" />
-        <PackageReference Include="MudBlazor" Version="6.0.14" />
+        <PackageReference Include="MudBlazor" Version="6.2.0" />
         <PackageReference Include="Syncfusion.Blazor.Schedule" Version="19.4.0.56" />
         <PackageReference Include="SendGrid" Version="9.28.0" />
         <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
