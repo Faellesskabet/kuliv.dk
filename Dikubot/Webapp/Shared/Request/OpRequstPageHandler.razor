@@ -40,7 +40,7 @@
             <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/request/{@Link}/edit/{context.Id.ToString()}")>Rediger</MudButton>
         </MudTd>
         <MudTd DataLabel="Slet">
-            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteCategory(context)">Slet</MudButton>
+            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteModel(context)">Slet</MudButton>
         </MudTd>
     </RowTemplate>
     <NoRecordsContent>
@@ -67,7 +67,7 @@
     public string Link { get; set; } = "tmodel";
 
     [Parameter]
-    public string NameOfTmodel { get; set; } = "TModel";
+    public string NameOfTModel { get; set; } = "TModel";
     
     [Parameter] 
     public MongoService<TModel>  MongoService { get; set; }
@@ -119,7 +119,7 @@
         _table.ReloadServerData();
     }
 
-    private async void DeleteCategory(RequestModel<TModel> joinRoleCategoryMainModel)
+    private async void DeleteModel(RequestModel<TModel> Model)
     {
         DialogParameters parameters = new DialogParameters();
         parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
@@ -132,14 +132,14 @@
             return;
         }
 
-        RequestMongoService.Remove(joinRoleCategoryMainModel);
+        RequestMongoService.Remove(Model);
         await _table.ReloadServerData();
     }
 
     private async void Approve(RequestModel<TModel> model)
     {
         DialogParameters parameters = new DialogParameters();
-        parameters.Add("ContentText", $"Er du sikker på du vil godkende {NameOfTmodel}");
+        parameters.Add("ContentText", $"Er du sikker på du vil godkende {NameOfTModel}");
         parameters.Add("ButtonText", "Approve");
         parameters.Add("Color", Color.Success);
         DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
@@ -160,7 +160,7 @@
     private async void Denied(RequestModel<TModel> model)
     {
         DialogParameters parameters = new DialogParameters();
-        parameters.Add("ContentText", $"Er du sikker på du ikke vil godkende {NameOfTmodel}");
+        parameters.Add("ContentText", $"Er du sikker på du ikke vil godkende {NameOfTModel}");
         parameters.Add("ButtonText", "Denied");
         parameters.Add("Color", Color.Error);
         DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;

@@ -23,30 +23,35 @@ else
         Success the following page(s) have now been add to KULiv.dk, we will now vertifify that the pages are for students and after vertification the events will be available at <MudLink Href="https://kuliv.dk/discovery/calendar"> https://kuliv.dk/discovery/calendar</MudLink> and <MudLink Href="https://kuliv.dk/discovery/events"> https://kuliv.dk/discovery/events</MudLink>.
         If you do not want you pages at KULiv.dk contact support at support@kuliv.dk.
     </MudText>
-
-    <MudDataGrid Items="@_fbPagesList">
+    
+    <MudDataGrid Items="@_fbPagesList" EditMode="@DataGridEditMode.Cell">
         <Columns>
             <HierarchyColumn T="FacebookPageModel" />
-            <Column T="FacebookPageModel" Field="Name" Title="Name">                    
+            <TemplateColumn Title="Name">
                 <CellTemplate>
-                    <MudText Typo="Typo.h4">  <MudAvatar Image="@_FacebookService.GetFBPicture(context.Item.PageId)"/>  @context.Item.Name</MudText> 
-                    </CellTemplate>
-                </Column>
+                    <MudText Typo="Typo.h4">  
+                        <MudAvatar Image="@_FacebookService.GetFBPicture(context.Item.PageId)"/>  
+                        @context.Item.Name</MudText> 
+                </CellTemplate>
+            </TemplateColumn>
         </Columns>
         <ChildRowContent>
             <MudCard>
                 <MudDataGrid Items="@_FacebookService.GetFBEvents(context.Item.PageId)">
                     <Columns>
-                        <Column T="FBEvent" Field="Name"  Title="Name" />
-                        <Column T="FBEvent" Field="StartTime"  Title="Start tidspunkt" />
-                        <Column T="FBEvent" Field="EndTime"  Title="Slut tidspunkt" />
-                        <Column T="FBEvent" Field="Description"  Title="Description" />
+                        <PropertyColumn Property="x => x.Name" Title="Name"/>
+                        <PropertyColumn Property="x => x.StartTime" Title="Start tidspunkt"/>
+                        <PropertyColumn Property="x => x.EndTime" Title="Slut tidspunkt"/>
+                        <PropertyColumn Property="x => x.Description" Title="Description"/>
                     </Columns>
                 </MudDataGrid>
             </MudCard>
         </ChildRowContent>
+        <PagerContent>
+            <MudDataGridPager T="FacebookPageModel" />
+        </PagerContent>
     </MudDataGrid>
-
+    
 }
 
 
@@ -72,7 +77,7 @@ else
             string header = _navigationManager.Uri.Remove(0, _navigationManager.Uri.IndexOf('?') + 1);
             var codeParameter = header.Remove(0, 5);
 
-            _fbPagesList = _FacebookService.AddLongLivedAccessTokenToDatabase(redirectUri, codeParameter);
+            _fbPagesList = _FacebookService.AddLongLivedAccessTokenToRequestDatabase(redirectUri, codeParameter);
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);

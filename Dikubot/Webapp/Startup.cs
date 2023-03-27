@@ -90,6 +90,7 @@ public class Startup
         services.AddSingleton<EventRequestMongoService>();
         services.AddSingleton<CalendarMongoService>();
         services.AddSingleton<FacebookPageService>();
+        services.AddSingleton<FacebookRequestMongoService>();
         
 
         services.AddSingleton<IPermissionServiceFactory, PermissionServiceFactory>();

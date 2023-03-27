@@ -1,0 +1,38 @@
+﻿@page "/op/facebook/request"
+
+@using Dikubot.Webapp.Authentication
+@using Dikubot.DataLayer.Database.Global.Facebook
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+
+@inject FacebookPageService FacebookPageService
+@inject FacebookRequestMongoService FacebookRequestMongoService
+@inject FacebookService FacebookService
+
+@using Dikubot.Webapp.Shared.Request
+
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+
+<OpRequstPageHandler TModel="FacebookPageModel" 
+                     Link="facebook" 
+                     NameOfTModel="Facebook Page" 
+                     RequestMongoService="FacebookRequestMongoService" 
+                     MongoService="FacebookPageService" >
+    <TemplateHeader>
+        <MudTh>Contact Name</MudTh>
+        <MudTh>Facebook page Name</MudTh>
+        <MudTh>Page Id</MudTh>
+    </TemplateHeader>
+    <TemplateRow>
+        <MudTd DataLabel="Contact Name">
+            @context.Contact.Name
+        </MudTd>
+        <MudTd DataLabel="Facebook Page Name">
+            <MudAvatar Image="@FacebookService.GetFBPicture(context.RequestItem.PageId)"/>
+            @context.RequestItem.Name
+        </MudTd>
+        <MudTd DataLabel="Page Id">@context.RequestItem.PageId</MudTd>
+    </TemplateRow>
+</OpRequstPageHandler>
+
+
+
