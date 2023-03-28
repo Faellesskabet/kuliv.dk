@@ -1,0 +1,180 @@
+﻿@typeparam TModel where TModel : MainModel, new()
+@using Microsoft.IdentityModel.Tokens
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@using Dikubot.DataLayer.Database
+@using Dikubot.DataLayer.Database.Global.Request
+@namespace Dikubot.Webapp.Shared.Request
+
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+
+<MudTable Hover="@true" striped="@true" ServerData="@(new Func<TableState, Task<TableData<RequestModel<TModel>>>>(Reload))" @ref="_table"
+          Loading="@_loading">
+    <ToolBarContent>
+        <MudSelect T="RequestModel<TModel>.StatusEmun" Label="Status" MultiSelection="true" @bind-SelectedValues="options" OnClose="o => _table.ReloadServerData()">
+            <MudSelectItem Value="RequestModel<TModel>.StatusEmun.Ongoing"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<TModel>.StatusEmun.Change"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<TModel>.StatusEmun.Approved"></MudSelectItem>
+            <MudSelectItem Value="RequestModel<TModel>.StatusEmun.Denied"></MudSelectItem>
+        </MudSelect>
+
+        <MudSpacer/>
+        <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Søg" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+        </MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Status</MudTh>
+        @TemplateHeader
+        <MudTh>Indstillinger</MudTh>
+        <MudTh>Slet</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Status">
+            @context.Status
+            <MudIconButton Icon="@Icons.Filled.AddCircleOutline" OnClick="() => Approve(context)" Color="Color.Success"></MudIconButton>
+            <MudIconButton Icon="@Icons.Filled.NotInterested" OnClick="() => Denied(context)" Color="Color.Error"></MudIconButton>
+        </MudTd>
+        @TemplateRow(context)
+        <MudTd DataLabel="Indstillinger">
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Link=@($"/request/{@Link}/edit/{context.Id.ToString()}")>Rediger</MudButton>
+        </MudTd>
+        <MudTd DataLabel="Slet">
+            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteModel(context)">Slet</MudButton>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>Kunne ikke finde nogen elementer</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <Loading></Loading>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager/>
+    </PagerContent>
+</MudTable>
+<div class="d-flex flex-wrap mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" Link=@($"/request/{Link}/create")>Tilføj ny kategori</MudButton>
+</div>
+
+
+@code {
+    
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    [Parameter]
+    public string Link { get; set; } = "tmodel";
+
+    [Parameter]
+    public string NameOfTModel { get; set; } = "TModel";
+    
+    [Parameter] 
+    public MongoService<TModel>  MongoService { get; set; }
+    [Parameter] 
+    public MongoService<RequestModel<TModel>> RequestMongoService { get; set; }
+
+    [Parameter]
+    public RenderFragment<RequestModel<TModel>>? TemplateRow { get; set; }
+    [Parameter]
+    public RenderFragment? TemplateHeader { get; set; }
+    
+    
+    private MudTable<RequestModel<TModel>> _table { get; set; } = new MudTable<RequestModel<TModel>>();
+    
+    private string _searchQuery = "";
+    private bool _loading = true;
+
+    
+    
+    
+    private IEnumerable<RequestModel<TModel>.StatusEmun> options { get; set; }
+        = new HashSet<RequestModel<TModel>.StatusEmun> { RequestModel<TModel>.StatusEmun.Ongoing, RequestModel<TModel>.StatusEmun.Change };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = false;
+    }
+
+    private async Task<TableData<RequestModel<TModel>>> Reload(TableState state)
+    {
+        List<RequestModel<TModel>> items;
+        if (!_searchQuery.IsNullOrEmpty())
+        {
+            items = RequestMongoService.Get(model => model.GetSearchContent().Contains(_searchQuery) && options.Contains(model.Status),
+                state.PageSize, state.Page);
+        }
+        else
+        {
+            items = RequestMongoService.Get(model => options.Contains(model.Status), state.PageSize, state.Page);
+        }
+
+        return new TableData<RequestModel<TModel>> { Items = items, TotalItems = (int)RequestMongoService.EstimatedCount() };
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchQuery = text;
+        _table.ReloadServerData();
+    }
+
+    private async void DeleteModel(RequestModel<TModel> Model)
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
+        parameters.Add("ButtonText", "Slet");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        RequestMongoService.Remove(Model);
+        await _table.ReloadServerData();
+    }
+
+    private async void Approve(RequestModel<TModel> model)
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", $"Er du sikker på du vil godkende {NameOfTModel}");
+        parameters.Add("ButtonText", "Approve");
+        parameters.Add("Color", Color.Success);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+        
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        model.RequestItem = MongoService.Upsert(model.RequestItem);
+        model.Status = RequestModel<TModel>.StatusEmun.Approved;
+
+        RequestMongoService.Upsert(model);
+
+        await _table.ReloadServerData();
+    }
+
+    private async void Denied(RequestModel<TModel> model)
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", $"Er du sikker på du ikke vil godkende {NameOfTModel}");
+        parameters.Add("ButtonText", "Denied");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        model.Status = RequestModel<TModel>.StatusEmun.Denied;
+        RequestMongoService.Upsert(model);
+
+        await _table.ReloadServerData();
+    }
+
+}
+

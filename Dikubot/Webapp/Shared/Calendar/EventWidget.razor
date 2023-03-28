@@ -1,5 +1,5 @@
 ﻿@using Dikubot.DataLayer.Database.Global.Event
-@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.DataLayer.Database.Global.Request
 @using Dikubot.Webapp.Extensions.Discovery.Links
 @using Dikubot.Extensions.search
 @using System.Globalization
@@ -246,7 +246,7 @@ else if (Orientation == VariantStyle.ExpansionPanel)
     {
         RequestModel<EventModel> requestModel = new();
         requestModel.RequestItem = Model;
-        requestModel.Status = RequestModel<EventModel>.StatusEmun.change;
+        requestModel.Status = RequestModel<EventModel>.StatusEmun.Change;
         requestModel = EventRequestMongoService.Upsert(requestModel);
         NavigationManager.NavigateTo($"/Request/Event/edit/{requestModel.Id}");
     }

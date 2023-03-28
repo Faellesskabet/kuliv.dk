@@ -1,10 +1,10 @@
 ﻿@page "/request/union/create/{unionID}"
 @page "/request/union/create/"
 @page "/request/union/edit/{uuid}"
-@using Dikubot.DataLayer.Database.Global.Union.Request
+@using Dikubot.DataLayer.Database.Global.Request
 @using Dikubot.DataLayer.Database.Global.Union
 @using Dikubot.Webapp.Shared.Dialog
-@using Dikubot.Webapp.Extensions.Discovery.Request
+@using Dikubot.Webapp.Shared.Request
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
@@ -123,7 +123,7 @@ else
         }
         if (_user.GetUserGlobalModel().IsAdmin)
         {
-            _Request.Status = RequestModel<UnionModel>.StatusEmun.approved;
+            _Request.Status = RequestModel<UnionModel>.StatusEmun.Approved;
             UnionMongoService.Upsert(_Request.RequestItem);
         }
         _Request = UnionRequestMongoService.Upsert(_Request);
@@ -145,7 +145,7 @@ else
         }
         if (_user.GetUserGlobalModel().IsAdmin)
         {
-            _Request.Status = RequestModel<UnionModel>.StatusEmun.denied;
+            _Request.Status = RequestModel<UnionModel>.StatusEmun.Denied;
         }
         _Request = UnionRequestMongoService.Upsert(_Request);
 
@@ -156,8 +156,8 @@ else
     private async void MoveToNext()
     {
         RequestModel<UnionModel> next = UnionRequestMongoService.Get(model =>
-            model.Status == RequestModel<UnionModel>.StatusEmun.ongoing || model.Status
-            == RequestModel<UnionModel>.StatusEmun.change);
+            model.Status == RequestModel<UnionModel>.StatusEmun.Ongoing || model.Status
+            == RequestModel<UnionModel>.StatusEmun.Change);
 
         if (next != null)
         {

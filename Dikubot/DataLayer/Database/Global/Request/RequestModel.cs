@@ -1,13 +1,13 @@
-﻿namespace Dikubot.DataLayer.Database.Global.Union.Request;
+﻿namespace Dikubot.DataLayer.Database.Global.Request;
 
 public class RequestModel<TModel> : MainModel where TModel : MainModel, new()
 {
     public enum StatusEmun
     {
-        ongoing,
-        change,
-        denied,
-        approved
+        Ongoing,
+        Change,
+        Denied,
+        Approved
     }
 
 
@@ -24,5 +24,5 @@ public class RequestModel<TModel> : MainModel where TModel : MainModel, new()
     /// <summary>
     ///     The Requestet item status
     /// </summary>
-    public StatusEmun Status { get; set; } = StatusEmun.ongoing;
+    public StatusEmun Status { get; set; } = StatusEmun.Ongoing;
 }

@@ -1,0 +1,82 @@
+﻿@page "/op/facebook/pages"
+@using Dikubot.DataLayer.Database.Global.Facebook
+@using System.Net.Http.Json
+@using Dikubot.Webapp.Authentication
+@using Dikubot.Webapp.Shared.Dialog
+@inject FacebookPageService _FacebookPageService
+@inject FacebookService _FacebookService
+@attribute [Authorize(Roles = Permissions.GlobalAdmin)]
+
+<MudText Typo="Typo.h3"> Facebook Pages </MudText>
+
+<MudDataGrid Items="@FacebookPagesList" EditMode="@DataGridEditMode.Cell">
+    <Columns>
+        <HierarchyColumn T="FacebookPageModel" />
+        <TemplateColumn Title="Name">
+            <CellTemplate>
+                <MudText Typo="Typo.h4">  
+                    <MudAvatar Image="@_FacebookService.GetFBPicture(context.Item.PageId)"/>  
+                    @context.Item.Name</MudText> 
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Delete">
+            <CellTemplate>
+                            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="() => DeleteModel(context.Item)">Slet</MudButton>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <ChildRowContent>
+        <MudCard>
+            <MudDataGrid Items="@_FacebookService.GetFBEvents(context.Item.PageId)">
+                <Columns>
+                    <PropertyColumn Property="x => x.Name" Title="Name"/>
+                    <PropertyColumn Property="x => x.StartTime" Title="Start tidspunkt"/>
+                    <PropertyColumn Property="x => x.EndTime" Title="Slut tidspunkt"/>
+                    <PropertyColumn Property="x => x.Description" Title="Description"/>
+                </Columns>
+            </MudDataGrid>
+        </MudCard>
+    </ChildRowContent>
+    <PagerContent>
+        <MudDataGridPager T="FacebookPageModel" />
+    </PagerContent>
+</MudDataGrid>
+
+
+
+@code {
+    [Inject] private HttpClient HttpClient { get; set; }
+    
+    [Inject]
+    private IDialogService DialogService { get; set; }
+    
+    private List<FacebookPageModel> FacebookPagesList { get; set; }
+
+    
+    protected override void OnInitialized()
+    {
+        FacebookPagesList = _FacebookPageService.GetAll();
+        base.OnInitialized();
+
+        FacebookPageModel model = new FacebookPageModel();
+        
+    }
+    
+    
+    private async void DeleteModel(FacebookPageModel Model)
+    {
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("ContentText", "Er du sikker på du vil slette denne kategori?");
+        parameters.Add("ButtonText", "Slet");
+        parameters.Add("Color", Color.Error);
+        DialogResult result = await DialogService.Show<ConfirmDialog>("Slet", parameters).Result;
+
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        _FacebookPageService.Remove(Model);
+    }
+    
+}

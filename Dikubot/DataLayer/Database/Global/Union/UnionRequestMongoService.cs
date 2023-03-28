@@ -1,4 +1,6 @@
-﻿namespace Dikubot.DataLayer.Database.Global.Union.Request;
+﻿using Dikubot.DataLayer.Database.Global.Request;
+
+namespace Dikubot.DataLayer.Database.Global.Union;
 
 public class UnionRequestMongoService : GlobalMongoService<RequestModel<UnionModel>>
 {
