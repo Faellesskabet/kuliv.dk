@@ -1,0 +1,136 @@
+﻿@using System.IO
+@using Dikubot.Webapp.Shared.Emojis
+@using Newtonsoft.Json
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs
+@namespace Dikubot.Extensions.EmojiSelector
+@inject EmojiService _emojiService
+
+<input name="Emoji" @bind="@Value" hidden/>
+
+
+<MudIconButton @onclick="ClickHandler" Icon="@_emojiService.GetSvgValue(Value)"/> 
+
+<MudDialog @bind-IsVisible="dialogVisible"
+           Options="_dialogOptions"
+           ContentStyle="padding: 0"
+           Style="" >
+    <TitleContent>
+            <MudText Typo="Typo.h6">
+                Emoji Picker
+            </MudText>
+        </TitleContent>
+    <DialogContent>
+        
+        <MudTabs
+            Elevation="2"
+            Rounded="true"
+            Outlined="true"
+            MinimumTabWidth="36px"
+            HideSlider="true">
+            @foreach (var emojiList in _emojiService.EmojiLists)
+            {
+                <EmojiRender
+                    Emojis="emojiList.emojiList"
+                    Title="@emojiList.emojiList[0].unicode"
+                    @bind-Value="Value" @bind-Value:after="OnValueChanged">
+                </EmojiRender>
+            }
+        </MudTabs>
+    </DialogContent>
+    <DialogActions>
+            <MudButton Color="Color.Error" OnClick="() => dialogVisible = false">Close</MudButton>
+        </DialogActions>
+</MudDialog>
+
+
+@code {
+    
+    string rteObj;
+
+    private DialogOptions _dialogOptions = new() { FullScreen = false };
+    private RenderFragment childContent { get; set; }
+    
+    private float _iconCardHeight = 36; // single icon card height includin margins
+    
+    [Parameter]
+    public string Value { get; set; } = "🙂";
+
+    private string _emoji = "";
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    
+     
+    
+    protected override void OnInitialized()
+    {
+        _emojiService.GetSvgValue(Value);
+        base.OnInitialized();
+    }
+
+    private async Task OnValueChanged(ChangeEventArgs e)
+    {
+       // Value = e.Value.ToString();
+        await ValueChanged.InvokeAsync(Value);
+        dialogVisible = false;
+       // StateHasChanged();
+    }
+
+    int currentIndex { get; set; } = -1;
+    int currentTabIndex { get; set; }
+    string activeClass = "e-active";
+    private bool dialogVisible { get; set; }
+    private bool disableInsertBtn { get; set; } = true;
+    
+
+    private void OnIconIconClick(int index, int tabIndex)
+    {
+        disableInsertBtn = false;
+        currentIndex = index;
+        currentTabIndex = tabIndex;
+    }
+
+    private async Task ClickHandler()
+    {
+        dialogVisible = true;
+    /* await this.rteObj.SaveSelectionAsync(); */
+    }
+
+    private async Task OnInsert()
+    {
+        if (currentIndex > -1)
+        {
+            switch (currentTabIndex)
+            {
+                case 0:
+                    //Value = smileyList.Keys.ToList()[currentIndex];
+                    break;
+                case 1:
+                    //Value = animalsList.Keys.ToList()[currentIndex];
+                    break;
+            }
+            await ValueChanged.InvokeAsync(Value);
+            dialogVisible = false;
+            currentIndex = -1;
+        }
+
+        disableInsertBtn = true;
+    }
+
+    private void DialogOverlay()
+    {
+        dialogVisible = false;
+        currentIndex = -1;
+    }
+
+
+    
+
+
+
+
+
+}

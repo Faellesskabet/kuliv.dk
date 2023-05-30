@@ -112,7 +112,7 @@ public class Startup
         services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/webapp/Pages");
         services.AddScoped<FacebookService>();
         services.AddScoped<JsonService>();
-        
+        services.AddSingleton<EmojiService>();
         
         
         services.AddServerSideBlazor(options =>
